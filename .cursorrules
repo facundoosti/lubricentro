@@ -1,0 +1,284 @@
+# Cursor Rules - Sistema Lubricentro 🚗
+
+Soy un experto desarrollador full-stack especializado en el desarrollo de este sistema de gestión para lubricentro. Mi expertise incluye Rails 8.0.2, React, y arquitecturas API-first.
+
+## 🎯 Contexto del Proyecto
+
+**Sistema de Gestión Lubricentro**: Una aplicación web integral para digitalizar y optimizar las operaciones de un lubricentro, incluyendo gestión de clientes, vehículos, turnos, servicios y reportes básicos.
+
+### Stack Tecnológico Principal
+- **Backend**: Ruby on Rails 8.0.2 (API mode) + JWT + SQLite→PostgreSQL
+- **Frontend**: React 18 + Vite + Tailwind CSS + React Query
+- **Arquitectura**: API-First con SPA frontend
+- **Deploy**: Backend (Railway/Heroku) + Frontend (Netlify/Vercel)
+
+## 📚 Memory Bank - SIEMPRE LEE PRIMERO
+
+**CRÍTICO**: Antes de cualquier tarea, SIEMPRE lee todos los archivos del Memory Bank:
+
+```bash
+memory-bank/
+├── projectbrief.md      # ✅ Foundation - objetivos y alcance
+├── productContext.md    # ✅ Problema y solución
+├── systemPatterns.md    # ✅ Arquitectura y patrones
+├── techContext.md       # ✅ Stack y configuraciones  
+├── activeContext.md     # ✅ Estado actual y próximos pasos
+└── progress.md          # ✅ Lo que funciona y qué falta
+```
+
+El Memory Bank es mi única fuente de verdad sobre el proyecto. Si no está documentado ahí, no existe o no es correcto.
+
+## 🏗️ Patrones de Arquitectura
+
+### Backend Rails API Patterns
+```ruby
+# Estructura de Controllers
+app/controllers/
+├── application_controller.rb (JWT auth base)
+├── api/v1/
+    ├── customers_controller.rb
+    ├── vehicles_controller.rb
+    ├── appointments_controller.rb
+    ├── services_controller.rb
+    ├── products_controller.rb
+    └── service_records_controller.rb
+
+# Response Pattern (SIEMPRE usar)
+{
+  success: true,
+  data: { ... },
+  message: "Success message"
+}
+
+# Error Pattern
+{
+  success: false,
+  errors: ["Error details"],
+  message: "Error occurred"
+}
+```
+
+### Frontend React Patterns
+```javascript
+// Estructura de Componentes
+src/
+├── components/
+│   ├── layout/          # Layout, Navigation, Header
+│   ├── common/          # Button, Modal, Table, Form
+│   └── features/        # Por dominio: customers/, vehicles/, etc.
+├── hooks/               # Custom hooks reutilizables
+├── services/            # API calls con axios
+├── contexts/            # Estado global (solo auth)
+└── utils/               # Utilidades
+
+// Pattern: Container + View
+const CustomersContainer = () => {
+  // Lógica y estado
+  return <CustomersView {...props} />;
+};
+```
+
+## 💾 Modelo de Datos Core
+
+### Entidades Principales
+```ruby
+Customer (Cliente)
+├── nombre, telefono, email, direccion
+└── has_many :vehicles, :appointments, :service_records
+
+Vehicle (Vehículo)  
+├── marca, modelo, patente, año, customer_id
+└── belongs_to :customer
+
+Appointment (Turno)
+├── fecha_hora, estado, observaciones
+├── customer_id, vehicle_id
+└── belongs_to :customer, :vehicle
+
+Service (Servicio)
+├── nombre, descripcion, precio_base
+└── has_many :service_record_services
+
+Product (Producto)
+├── nombre, descripcion, precio_unitario, unidad
+└── has_many :service_record_products
+
+ServiceRecord (Atención)
+├── fecha, total, observaciones
+├── customer_id, vehicle_id
+└── belongs_to :customer, :vehicle
+    has_many :service_record_services, :service_record_products
+```
+
+## 🎨 UI/UX Guidelines
+
+### Tailwind Design System
+```javascript
+// Colors (usar consistentemente)
+primary: 'blue-600'     // Acciones principales
+secondary: 'gray-600'   // Elementos secundarios
+success: 'green-600'    // Estados exitosos
+danger: 'red-600'       // Errores y eliminaciones
+warning: 'yellow-600'   // Alertas
+
+// Spacing (mobile-first)
+xs: '0.5rem' sm: '1rem' md: '1.5rem' lg: '2rem'
+
+// Responsive: mobile → tablet (768px) → desktop (1024px)
+```
+
+### Componentes Reutilizables SIEMPRE
+- Button: Estados loading, disabled, variants
+- Modal: Confirmaciones y formularios
+- Table: Paginación, filtros, acciones
+- Form: Validación con react-hook-form
+
+## ⚡ Patrones de Desarrollo
+
+### Backend Development
+1. **Siempre usar migraciones**: `rails g model` nunca editar schema.rb
+2. **Validaciones en modelo**: `validates :nombre, presence: true`
+3. **Service Objects**: Para lógica compleja (ej: cálculo de totales)
+4. **Serializers**: `jsonapi-serializer` para responses consistentes
+5. **Testing**: RSpec + FactoryBot para cada endpoint
+
+### Frontend Development  
+1. **React Query**: Para cache de API, nunca fetch directo
+2. **React Hook Form**: Para todos los formularios
+3. **Context solo para auth**: Estado de servidor via React Query
+4. **Lazy loading**: Para rutas no críticas
+5. **Error boundaries**: Manejo robusto de errores
+
+### API Integration
+```javascript
+// Service Pattern (services/api.js)
+const api = axios.create({
+  baseURL: '/api/v1',
+  headers: { Authorization: `Bearer ${token}` }
+});
+
+// Hook Pattern
+const useCustomers = () => {
+  return useQuery('customers', () => api.get('/customers'));
+};
+```
+
+## 🔐 Security & Auth
+
+### JWT Authentication
+- Login → Backend genera JWT → Frontend guarda en localStorage
+- Todas las requests: `Authorization: Bearer <token>`
+- Backend valida token en ApplicationController
+- Frontend: AuthContext + protected routes
+
+## 📱 Responsive & Accessibility  
+
+### Mobile-First Design
+- Base styles: mobile (320px+)
+- Breakpoints: md:768px lg:1024px xl:1280px
+- Touch-friendly: min 44px tap targets
+- Loading states visibles en mobile
+
+### Accessibility Basics
+- Semantic HTML always
+- Alt text for images
+- Focus management in modals
+- ARIA labels where needed
+
+## 🧪 Testing Strategy
+
+### Backend Testing
+```ruby
+# Model specs
+describe Customer do
+  it { should validate_presence_of(:nombre) }
+  it { should have_many(:vehicles) }
+end
+
+# Controller specs
+describe Api::V1::CustomersController do
+  describe 'GET #index' do
+    it 'returns success response'
+  end
+end
+```
+
+### Frontend Testing
+```javascript
+// Component testing
+test('renders customer list', () => {
+  render(<CustomerList customers={mockCustomers} />);
+  expect(screen.getByText('Customers')).toBeInTheDocument();
+});
+```
+
+## 🚀 Development Workflow
+
+### Git Flow
+- `main`: Production
+- `develop`: Staging  
+- `feature/feature-name`: New features
+- `hotfix/issue-name`: Urgent fixes
+
+### Commands Frecuentes
+```bash
+# Backend
+cd backend && rails db:migrate && rails s
+rails console # debugging
+rspec # testing
+
+# Frontend  
+cd frontend && npm run dev
+npm run build # production build
+npm test # testing
+```
+
+## ⚠️ Critical Guidelines
+
+### NUNCA hacer:
+- ❌ Editar schema.rb directamente
+- ❌ Hardcodear URLs de API
+- ❌ Usar CSS custom sin justificación (prefer Tailwind)
+- ❌ Fetch directo sin React Query
+- ❌ Estado global innecesario
+- ❌ Componentes >300 líneas
+- ❌ Controllers sin validación de params
+
+### SIEMPRE hacer:
+- ✅ Leer Memory Bank antes de empezar
+- ✅ Usar patrones establecidos
+- ✅ Validar datos en backend Y frontend
+- ✅ Manejar estados de loading y error
+- ✅ Testing para nuevas funcionalidades
+- ✅ Documentar decisiones importantes
+- ✅ Mobile-first responsive design
+- ✅ Actualizar progress.md después de cambios
+
+## 🎯 Current Focus (Siempre verificar activeContext.md)
+
+**Estado Actual**: Fase 1 completada ✅ → Iniciando Fase 2 (Backend Setup)
+
+**Próximos pasos críticos**:
+1. Configurar Rails API mode + CORS
+2. Implementar JWT authentication  
+3. Crear modelos Customer, Vehicle, Service, Product
+4. Desarrollar API endpoints básicos CRUD
+5. Setup frontend React + Tailwind
+
+## 📊 Success Metrics
+
+### MVP Definition of Done
+- [ ] CRUD completo clientes/vehículos
+- [ ] Sistema de turnos funcional  
+- [ ] Registro de atenciones con cálculo automático
+- [ ] Reportes básicos
+- [ ] UI responsive y profesional
+- [ ] Deploy en producción funcionando
+
+---
+
+**Memory Bank Location**: `memory-bank/`
+**Last Updated**: Project initialization
+**Next Review**: End of Week 1 (post backend setup)
+
+> 🧠 **Remember**: Mi memoria se resetea entre sesiones. El Memory Bank es mi única conexión con el contexto del proyecto. SIEMPRE consultarlo primero. 

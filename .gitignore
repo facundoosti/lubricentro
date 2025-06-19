@@ -67,3 +67,45 @@ yarn-debug.log*
 /storage/*
 !/storage/.keep
 /public/uploads
+
+# Frontend specific (React + Vite)
+frontend/node_modules/
+frontend/dist/
+frontend/.env*
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# Backend specific (Rails)
+backend/log/*
+backend/tmp/*
+!backend/log/.keep
+!backend/tmp/.keep
+backend/.env*
+backend/config/master.key
+backend/storage/*
+!backend/storage/.keep
+
+# Database files
+*.sqlite3
+*.sqlite3-*
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor specific
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
