@@ -1,3 +1,22 @@
+# == Schema Information
+#
+# Table name: vehicles
+#
+#  id            :integer          not null, primary key
+#  brand         :string           not null
+#  model         :string           not null
+#  license_plate :string           not null
+#  year          :string           not null
+#  customer_id   :integer          not null
+#  created_at    :datetime         not null
+#  updated_at    :datetime         not null
+#
+# Indexes
+#
+#  index_vehicles_on_customer_id    (customer_id)
+#  index_vehicles_on_license_plate  (license_plate) UNIQUE
+#
+
 require 'rails_helper'
 
 RSpec.describe Vehicle, type: :model do

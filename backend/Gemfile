@@ -56,9 +56,15 @@ group :development, :test do
   # Load environment variables from .env file
   gem "dotenv-rails"
 
+  # Database documentation - automatically adds schema information to model files
+  gem "annotate"
+
   gem "rspec-rails"
   gem "factory_bot_rails"
   gem "faker"
   gem "shoulda-matchers"
   gem "database_cleaner-active_record"
+
+  # Code coverage
+  gem "simplecov", require: false
 end

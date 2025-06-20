@@ -163,7 +163,7 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
 
   describe 'PATCH /api/v1/vehicles/:id' do
     let(:vehicle) { create(:vehicle, customer: customer) }
-    let(:new_attributes) { { brand: 'Honda', model: 'Civic', year: '2021' } }
+    let(:new_attributes) { attributes_for(:vehicle, brand: 'Honda', model: 'Civic', year: '2021') }
 
     context 'with valid parameters' do
       before do

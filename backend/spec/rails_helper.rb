@@ -1,3 +1,21 @@
+require 'simplecov'
+SimpleCov.start 'rails' do
+  # Excluir directorios que no necesitamos en el reporte de cobertura
+  add_filter '/spec/'
+  add_filter '/config/'
+  add_filter '/vendor/'
+  add_filter '/db/'
+  add_filter '/app/channels/'
+  add_filter '/app/jobs/'
+  add_filter '/app/mailers/'
+
+  # Agrupar el código para un reporte más legible
+  add_group 'Models', 'app/models'
+  add_group 'Controllers', 'app/controllers'
+  add_group 'Serializers', 'app/serializers'
+  add_group 'Libraries', 'lib'
+end
+
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'

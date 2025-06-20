@@ -24,9 +24,9 @@ class ApplicationController < ActionController::API
     [ per_page, Pagy::DEFAULT[:max_items] ].min
   end
 
-  def render_json(data = {}, message: nil, status: :ok)
-    # Extract errors from data if present
-    errors = data.delete(:errors) if data.is_a?(Hash) && data.key?(:errors)
+  def render_json(data = {}, message: nil, errors: nil, status: :ok)
+    # Extract errors from data if present (fallback to parameter)
+    errors ||= data.delete(:errors) if data.is_a?(Hash) && data.key?(:errors)
 
     # Add pagination to data if available
     if defined?(@pagy) && @pagy

@@ -20,22 +20,14 @@ class Api::V1::VehiclesController < ApplicationController
 
     # Paginación con Pagy
     @pagy, @vehicles = pagy(@vehicles, items: safe_per_page(params[:per_page]))
-
-    render json: {
-      success: true,
-      data: {
-        vehicles: VehicleSerializer.render_as_hash(@vehicles),
-        pagination: pagy_metadata(@pagy)
-      }
-    }
+    @serializer = VehicleSerializer.render_as_hash(@vehicles, root: :vehicles)
+    render_json(@serializer)
   end
 
   # GET /api/v1/vehicles/:id
   def show
-    render json: {
-      success: true,
-      data: VehicleSerializer.render_as_hash(@vehicle, view: :with_customer)
-    }
+    @serializer = VehicleSerializer.render_as_hash(@vehicle, view: :with_customer)
+    render_json(@serializer)
   end
 
   # POST /api/v1/vehicles
@@ -43,34 +35,20 @@ class Api::V1::VehiclesController < ApplicationController
     @vehicle = Vehicle.new(vehicle_params)
 
     if @vehicle.save
-      render json: {
-        success: true,
-        data: VehicleSerializer.render_as_hash(@vehicle),
-        message: "Vehicle created successfully"
-      }, status: :created
+      @serializer = VehicleSerializer.render_as_hash(@vehicle)
+      render_json(@serializer, message: "Vehicle created successfully", status: :created)
     else
-      render json: {
-        success: false,
-        errors: @vehicle.errors.full_messages,
-        message: "Error creating vehicle"
-      }, status: :unprocessable_entity
+      render_json({ errors: @vehicle.errors.full_messages }, message: "Error creating vehicle", status: :unprocessable_entity)
     end
   end
 
   # PATCH/PUT /api/v1/vehicles/:id
   def update
     if @vehicle.update(vehicle_params)
-      render json: {
-        success: true,
-        data: VehicleSerializer.render_as_hash(@vehicle),
-        message: "Vehicle updated successfully"
-      }
+      @serializer = VehicleSerializer.render_as_hash(@vehicle)
+      render_json(@serializer, message: "Vehicle updated successfully")
     else
-      render json: {
-        success: false,
-        errors: @vehicle.errors.full_messages,
-        message: "Error updating vehicle"
-      }, status: :unprocessable_entity
+      render_json({ errors: @vehicle.errors.full_messages }, message: "Error updating vehicle", status: :unprocessable_entity)
     end
   end
 
@@ -78,19 +56,12 @@ class Api::V1::VehiclesController < ApplicationController
   def destroy
     # TODO: Verificar si tiene turnos o atenciones asociadas
     # if @vehicle.appointments.exists? || @vehicle.service_records.exists?
-    #   render json: {
-    #     success: false,
-    #     errors: ["Cannot delete vehicle with associated appointments or service records"],
-    #     message: "Error deleting vehicle"
-    #   }, status: :unprocessable_entity
+    #   render_json({ errors: ["Cannot delete vehicle with associated appointments or service records"] }, message: "Error deleting vehicle", status: :unprocessable_entity)
     #   return
     # end
 
     @vehicle.destroy
-    render json: {
-      success: true,
-      message: "Vehicle deleted successfully"
-    }
+    render_json({}, message: "Vehicle deleted successfully")
   end
 
   private
@@ -98,11 +69,7 @@ class Api::V1::VehiclesController < ApplicationController
   def set_vehicle
     @vehicle = Vehicle.includes(:customer).find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render json: {
-      success: false,
-      errors: [ "Vehicle not found" ],
-      message: "Vehicle not found"
-    }, status: :not_found
+    render_json({ errors: [ "Vehicle not found" ] }, message: "Vehicle not found", status: :not_found)
   end
 
   def vehicle_params

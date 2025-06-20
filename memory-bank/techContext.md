@@ -24,6 +24,9 @@ gem "jsonapi-serializer"
 gem "rspec-rails"
 gem "factory_bot_rails"
 gem "faker"
+gem "shoulda-matchers"
+gem "database_cleaner-active_record"
+gem "simplecov", require: false
 
 # Deployment
 gem "kamal"
@@ -31,6 +34,9 @@ gem "thruster"
 ```
 
 ### Frontend: React + Vite + Tailwind CSS
+
+- **Gestor de paquetes**: Se utiliza `npm` para gestionar las dependencias del frontend.
+- **Nota sobre Bun**: Se intentó migrar a `bun` pero se encontraron problemas con la instalación de dependencias nativas (`lightningcss`, `@rollup/rollup-darwin-x64`). Se revirtió a `npm` para garantizar la estabilidad del entorno de desarrollo.
 
 ```json
 {
@@ -164,11 +170,19 @@ production:
 }
 ```
 
-```ruby
+```sh
 # Procfile.dev
 web: cd backend && bin/rails server -p 3000
 frontend: cd frontend && npm run dev
 ```
+
+### Comandos Comunes (Frontend)
+
+- **Instalar dependencias**: `cd frontend && npm install`
+- **Iniciar desarrollo**: `cd frontend && npm run dev`
+- **Ejecutar tests**: `cd frontend && npm test`
+- **Añadir dependencia**: `cd frontend && npm install <package>`
+- **Añadir dependencia de desarrollo**: `cd frontend && npm install -D <package>`
 
 ### Testing Setup
 

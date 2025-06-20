@@ -1,3 +1,21 @@
+# == Schema Information
+#
+# Table name: customers
+#
+#  id         :integer          not null, primary key
+#  name       :string(100)      not null
+#  phone      :string(20)
+#  email      :string(100)
+#  address    :text
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#
+# Indexes
+#
+#  index_customers_on_email  (email) UNIQUE
+#  index_customers_on_name   (name)
+#
+
 FactoryBot.define do
   factory :customer do
     name { Faker::Name.name }
