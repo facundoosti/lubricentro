@@ -61,6 +61,36 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Tailwind v4 Test Banner */}
+      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 rounded-lg shadow-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold">🎉 Tailwind CSS v4.1.10</h2>
+            <p className="text-purple-100">¡Migración exitosa! El sistema está usando la última versión de Tailwind.</p>
+          </div>
+          <div className="flex space-x-2">
+            <span className="bg-white/20 px-3 py-1 rounded-full text-sm font-medium">v4.1.10</span>
+            <span className="bg-green-500/20 px-3 py-1 rounded-full text-sm font-medium">✅ Activo</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Test de clases básicas */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-red-500 text-white p-4 rounded-lg">
+          <h3 className="font-bold">Red Box</h3>
+          <p>Clase: bg-red-500</p>
+        </div>
+        <div className="bg-green-500 text-white p-4 rounded-lg">
+          <h3 className="font-bold">Green Box</h3>
+          <p>Clase: bg-green-500</p>
+        </div>
+        <div className="bg-blue-500 text-white p-4 rounded-lg">
+          <h3 className="font-bold">Blue Box</h3>
+          <p>Clase: bg-blue-500</p>
+        </div>
+      </div>
+
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
