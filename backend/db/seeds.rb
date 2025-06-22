@@ -327,6 +327,86 @@ customers.sample(2).each do |customer|
   )
 end
 
+# Crear clientes adicionales para testing
+additional_customers = [
+  {
+    name: "Roberto Silva",
+    email: "roberto.silva@email.com",
+    phone: "11-7777-8888",
+    address: "San Telmo 678, CABA"
+  },
+  {
+    name: "Laura Fernández",
+    email: "laura.fernandez@email.com",
+    phone: "11-3333-4444",
+    address: "Palermo 123, CABA"
+  },
+  {
+    name: "Diego Morales",
+    email: "diego.morales@email.com",
+    phone: "11-5555-6666",
+    address: "Recoleta 456, CABA"
+  },
+  {
+    name: "Carmen Ruiz",
+    email: "carmen.ruiz@email.com",
+    phone: "11-9999-0000",
+    address: "Belgrano 789, CABA"
+  },
+  {
+    name: "Fernando López",
+    email: "fernando.lopez@email.com",
+    phone: "11-1111-2222",
+    address: "Villa Crespo 321, CABA"
+  },
+  {
+    name: "Patricia Torres",
+    email: "patricia.torres@email.com",
+    phone: "11-4444-5555",
+    address: "San Telmo 654, CABA"
+  },
+  {
+    name: "Miguel Herrera",
+    email: "miguel.herrera@email.com",
+    phone: "11-6666-7777",
+    address: "Palermo 987, CABA"
+  },
+  {
+    name: "Isabel Vargas",
+    email: "isabel.vargas@email.com",
+    phone: "11-8888-9999",
+    address: "Recoleta 147, CABA"
+  },
+  {
+    name: "Carlos Mendoza",
+    email: "carlos.mendoza@email.com",
+    phone: "11-2222-3333",
+    address: "Belgrano 258, CABA"
+  },
+  {
+    name: "Ana Jiménez",
+    email: "ana.jimenez@email.com",
+    phone: "11-7777-8888",
+    address: "Villa Crespo 369, CABA"
+  }
+]
+
+puts "Creando #{additional_customers.length} clientes adicionales..."
+
+additional_customers.each do |customer_data|
+  customer = Customer.find_or_create_by(email: customer_data[:email]) do |c|
+    c.name = customer_data[:name]
+    c.phone = customer_data[:phone]
+    c.address = customer_data[:address]
+  end
+
+  if customer.persisted?
+    puts "✅ Cliente creado: #{customer.name}"
+  else
+    puts "❌ Error creando cliente: #{customer.name} - #{customer.errors.full_messages.join(', ')}"
+  end
+end
+
 # Estadísticas finales
 puts "\n✅ Seeds completados exitosamente!"
 puts "📊 Resumen de datos creados:"

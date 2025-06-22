@@ -1,0 +1,335 @@
+import React, { useState } from "react";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@ui/Table";
+import Badge from "@ui/Badge";
+import Button from "@ui/Button";
+import Pagination from "@ui/Pagination";
+import { 
+  Search, 
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Wrench,
+  DollarSign,
+  Clock
+} from "lucide-react";
+
+// Interface para los datos de servicio
+const Service = {
+  id: 1,
+  name: "Cambio de Aceite",
+  description: "Cambio completo de aceite y filtro",
+  base_price: 15000,
+  status: "active",
+};
+
+// Datos de ejemplo (después se conectarán con la API)
+const servicesData = [
+  {
+    id: 1,
+    name: "Cambio de Aceite",
+    description: "Cambio completo de aceite y filtro de motor",
+    base_price: 15000,
+    status: "active",
+  },
+  {
+    id: 2,
+    name: "Cambio de Filtro de Aire",
+    description: "Reemplazo del filtro de aire del motor",
+    base_price: 8000,
+    status: "active",
+  },
+  {
+    id: 3,
+    name: "Cambio de Bujías",
+    description: "Reemplazo completo de bujías",
+    base_price: 25000,
+    status: "active",
+  },
+  {
+    id: 4,
+    name: "Limpieza de Inyectores",
+    description: "Limpieza y calibración de inyectores",
+    base_price: 35000,
+    status: "inactive",
+  },
+  {
+    id: 5,
+    name: "Cambio de Líquido de Frenos",
+    description: "Reemplazo del líquido de frenos",
+    base_price: 12000,
+    status: "active",
+  },
+];
+
+const ServicesTable = ({ 
+  services = [], 
+  pagination = {},
+  onPageChange,
+  onSearch,
+  onEdit,
+  onDelete,
+  onView,
+  onCreate,
+  loading = false 
+}) => {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    onSearch(searchTerm);
+  };
+
+  const getServiceIcon = (name) => {
+    // Mapear tipos de servicios a colores específicos
+    const serviceColors = {
+      'aceite': 'bg-blue-100 text-blue-600',
+      'filtro': 'bg-green-100 text-green-600',
+      'frenos': 'bg-red-100 text-red-600',
+      'batería': 'bg-yellow-100 text-yellow-600',
+      'neumático': 'bg-purple-100 text-purple-600',
+      'lubricación': 'bg-indigo-100 text-indigo-600',
+      'diagnóstico': 'bg-cyan-100 text-cyan-600',
+      'limpieza': 'bg-orange-100 text-orange-600',
+      'reparación': 'bg-pink-100 text-pink-600',
+      'mantenimiento': 'bg-teal-100 text-teal-600',
+    };
+
+    // Buscar coincidencias en el nombre del servicio
+    const serviceName = name.toLowerCase();
+    let colorClass = 'bg-gray-100 text-gray-600'; // Default
+
+    for (const [type, color] of Object.entries(serviceColors)) {
+      if (serviceName.includes(type)) {
+        colorClass = color;
+        break;
+      }
+    }
+    
+    return (
+      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${colorClass}`}>
+        <Wrench className="w-5 h-5" />
+      </div>
+    );
+  };
+
+  const formatPrice = (price) => {
+    const numPrice = parseFloat(price);
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 2
+    }).format(numPrice);
+  };
+
+  const getStatusColor = () => {
+    // Por ahora, todos los servicios están activos
+    // En el futuro se puede agregar lógica basada en disponibilidad
+    return "success";
+  };
+
+  const getStatusText = () => {
+    return "Disponible";
+  };
+
+  const truncateDescription = (description, maxLength = 50) => {
+    if (!description) return "-";
+    return description.length > maxLength 
+      ? `${description.substring(0, maxLength)}...` 
+      : description;
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('es-AR', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header con búsqueda y botón crear */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex-1 max-w-md">
+          <form onSubmit={handleSearch} className="relative">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar servicios..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+              />
+            </div>
+          </form>
+        </div>
+        
+        <Button
+          onClick={onCreate}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          <Plus className="w-4 h-4" />
+          Nuevo Servicio
+        </Button>
+      </div>
+
+      {/* Tabla */}
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+        <div className="max-w-full overflow-x-auto">
+          <Table>
+            <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+              <TableRow>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                >
+                  Servicio
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                >
+                  Descripción
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                >
+                  Precio Base
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                >
+                  Estado
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                >
+                  Creado
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                >
+                  Acciones
+                </TableCell>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="px-5 py-8 text-center text-gray-500">
+                    Cargando servicios...
+                  </TableCell>
+                </TableRow>
+              ) : services.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="px-5 py-8 text-center text-gray-500">
+                    No se encontraron servicios
+                  </TableCell>
+                </TableRow>
+              ) : (
+                services.map((service) => (
+                  <TableRow key={service.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                    <TableCell className="px-5 py-4 sm:px-6 text-start">
+                      <div className="flex items-center gap-3">
+                        {getServiceIcon(service.name)}
+                        <div>
+                          <span className="block font-medium text-gray-800 text-sm dark:text-white/90">
+                            {service.name}
+                          </span>
+                          <span className="block text-gray-500 text-xs dark:text-gray-400">
+                            ID: {service.id}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    
+                    <TableCell className="px-4 py-3 text-start">
+                      <div className="text-gray-800 text-sm dark:text-white/90 max-w-xs">
+                        {truncateDescription(service.description)}
+                      </div>
+                    </TableCell>
+                    
+                    <TableCell className="px-4 py-3 text-start">
+                      <div className="flex items-center gap-1">
+                        <DollarSign className="w-4 h-4 text-green-600" />
+                        <span className="text-gray-800 text-sm dark:text-white/90 font-medium">
+                          {formatPrice(service.base_price)}
+                        </span>
+                      </div>
+                    </TableCell>
+                    
+                    <TableCell className="px-4 py-3 text-start">
+                      <Badge
+                        size="sm"
+                        color={getStatusColor()}
+                      >
+                        {getStatusText()}
+                      </Badge>
+                    </TableCell>
+                    
+                    <TableCell className="px-4 py-3 text-start">
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-gray-400" />
+                        <span className="text-gray-600 text-xs dark:text-gray-400">
+                          {formatDate(service.created_at)}
+                        </span>
+                      </div>
+                    </TableCell>
+                    
+                    <TableCell className="px-4 py-3 text-start">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => onView(service)}
+                          className="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                          title="Ver detalles"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => onEdit(service)}
+                          className="p-1 text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400"
+                          title="Editar"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => onDelete(service)}
+                          className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+
+      {/* Paginación */}
+      {pagination && pagination.total_pages > 1 && (
+        <div className="mt-6">
+          <Pagination
+            currentPage={pagination.current_page || 1}
+            totalPages={pagination.total_pages || 1}
+            totalItems={pagination.total_count || 0}
+            itemsPerPage={pagination.per_page || 10}
+            onPageChange={onPageChange}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ServicesTable; 

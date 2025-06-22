@@ -1,7 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { QueryProvider } from './contexts/QueryProvider';
-import Layout from './components/layout/Layout';
-import Dashboard from './pages/Dashboard';
+import { QueryProvider } from '@contexts/QueryProvider';
+import Layout from '@layout/Layout';
+import Dashboard from '@pages/Dashboard';
+import Services from '@pages/Services';
+import Customers from '@pages/Customers';
+import Vehicles from '@pages/Vehicles';
+import Products from '@pages/Products';
 
 function App() {
   console.log('App renderizado');
@@ -11,12 +15,13 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
-            <Route path="appointments" element={<div className="p-6 text-white">Turnos - En desarrollo</div>} />
-            <Route path="customers" element={<div className="p-6 text-white">Clientes - En desarrollo</div>} />
-            <Route path="vehicles" element={<div className="p-6 text-white">Vehículos - En desarrollo</div>} />
-            <Route path="services" element={<div className="p-6 text-white">Servicios - En desarrollo</div>} />
-            <Route path="products" element={<div className="p-6 text-white">Productos - En desarrollo</div>} />
-            <Route path="settings" element={<div className="p-6 text-white">Configuración - En desarrollo</div>} />
+            <Route path="appointments" element={<div className="p-6 text-black dark:text-white">Turnos - En desarrollo</div>} />
+            <Route path="service-records" element={<div className="p-6 text-black dark:text-white">Atenciones - En desarrollo</div>} />
+            <Route path="customers" element={<Customers />} />
+            <Route path="vehicles" element={<Vehicles />} />
+            <Route path="services" element={<Services />} />
+            <Route path="products" element={<Products />} />
+            <Route path="settings" element={<div className="p-6 text-black dark:text-white">Configuración - En desarrollo</div>} />
           </Route>
         </Routes>
       </Router>

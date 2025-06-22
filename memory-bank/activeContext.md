@@ -1,337 +1,179 @@
-# Active Context - Estado Actual del Proyecto
+# Active Context - Sistema Lubricentro
 
-## Estado Actual: Fase 2 - Backend Development ✅ COMPLETADO
+## 🎯 **Estado Actual: Fase 7 - CRUD Servicios Parcialmente Completado**
 
-### ✅ Completado Recientemente
+### **Última Actividad Completada**
+- ✅ **Tabla de Servicios implementada** con paginación y búsqueda
+- ✅ **Servicio de servicios** con React Query hooks completos
+- ✅ **Funcionalidad de eliminar servicios** con confirmación
+- ✅ **Iconos por tipo de servicio** (aceite, filtro, frenos, etc.) con colores específicos
+- ✅ **Formateo de precios** en pesos argentinos
+- ✅ **Filtros por rango de precio** implementados
+- ✅ **Fecha de creación** mostrada en tabla
+- ✅ **react-hot-toast** instalado y configurado en Layout
 
-- **Definición del proyecto**: Objetivos y alcance del MVP clarificado
-- **Stack tecnológico**: Rails 8.0.2 + React + Tailwind CSS definido
-- **Estructura inicial**: Carpetas backend/ y frontend/ creadas
-- **Modelo de datos**: Entidades y relaciones diseñadas
-- **Arquitectura**: Patrón API-First definido
-- **Memory Bank**: Sistema de documentación establecido
-- **Customer Model**: Completado con CRUD y testing
-- **Vehicle Model**: Completado con CRUD y testing
-- **✅ DATABASE REFACTORING COMPLETED**: Todos los campos migrados a inglés
-- **✅ PostgreSQL Setup**: Funcionando en development, test y production
-- **✅ PAGY PAGINATION IMPLEMENTED**: Sistema de paginación optimizado completo
-- **✅ BLUEPRINT SERIALIZATION IMPLEMENTED**: Sistema de serialización JSON con Blueprint completo
-- **✅ SERVICE MODEL COMPLETED**: Modelo completo con CRUD, testing y serialización
-- **✅ PRODUCT MODEL COMPLETED**: Modelo completo con CRUD, testing y serialización
-- **✅ APPOINTMENT MODEL COMPLETED**: Modelo, migración, controller, serializer y tests 100% funcionales y alineados a patrones
-- **✅ SERVICERECORD MODEL COMPLETED**: Modelo completo con CRUD, testing y serialización
-- **✅ CORS CONFIGURATION COMPLETED**: Configurado para desarrollo frontend (localhost:5173, localhost:3000)
-- **✅ ANNOTATE IMPLEMENTED**: Documentación automática de schema en modelos
-- **✅ FAKER FACTORIES ENHANCED**: Todas las factories mejoradas con datos realistas usando Faker
-- **✅ DEVELOPMENT SEEDS COMPLETED**: Dataset completo de prueba para development
+### **Problemas Resueltos Recientemente**
+- ✅ **InputField compatible con react-hook-form** (forwardRef implementado)
+- ✅ **Clases CSS Tailwind v4** corregidas (error-500 → red-500, etc.)
+- ✅ **Button con prop loading** agregada funcionalidad
+- ✅ **Debug logs** agregados en puntos críticos del flujo
+- ✅ **react-hot-toast** instalado y configurado para notificaciones
 
-### 🎯 SIGUIENTE PRIORIDAD: Frontend Development
+### **Componentes Creados en esta Sesión**
+- ✅ `ServicesTable.jsx` - Tabla completa con CRUD actions
+- ✅ `servicesService.js` - Servicio completo con React Query
+- ✅ `Services.jsx` - Página principal de servicios actualizada
+- ✅ Configuración de `Toaster` en Layout.jsx
 
-#### Pasos Inmediatos:
+## 🚀 **Próximos Pasos Inmediatos**
 
-- [ ] Setup React + Vite + Tailwind CSS
-- [ ] Configurar React Router para navegación
-- [ ] Implementar AuthContext para JWT (posterior)
-- [ ] Crear componentes base (Layout, Navigation, etc.)
+### **1. Completar CRUD Vehículos (Prioridad Alta)**
+- [ ] **Modal para crear vehículo** con formulario
+- [ ] **Modal para editar vehículo** con datos pre-poblados
+- [ ] **Formulario de vehículo** con validación (react-hook-form)
+- [ ] **Selector de cliente** en formulario
+- [ ] **Validación de patente única** en frontend
 
-## Próximos Pasos Inmediatos
+### **2. Completar CRUD Productos (Prioridad Alta)**
+- [ ] **Modal para crear producto** con formulario
+- [ ] **Modal para editar producto** con datos pre-poblados
+- [ ] **Formulario de producto** con validación (react-hook-form)
+- [ ] **Validación de nombre único** en frontend
+- [ ] **Selector de unidades de medida** (litros, unidades, kg, etc.)
 
-### 1. Frontend Setup (SIGUIENTE)
+### **3. Completar CRUD Servicios (Prioridad Alta)**
+- [ ] **Modal para crear servicio** con formulario
+- [ ] **Modal para editar servicio** con datos pre-poblados
+- [ ] **Formulario de servicio** con validación (react-hook-form)
+- [ ] **Validación de nombre único** en frontend
+- [ ] **Gestión de precios base** con validación
 
-```bash
-Prioridad ALTA - Esta semana | Progreso: 0%
+### **4. Sistema de Turnos (Prioridad Media)**
+- [ ] **Calendario de turnos** básico
+- [ ] **Crear/editar turnos** con selección de cliente y vehículo
+- [ ] **Estados de turno** (scheduled, confirmed, completed, cancelled)
+- [ ] **Notificaciones** básicas
+
+## 🔧 **Patrones Establecidos**
+
+### **Servicios React Query**
+```javascript
+// Patrón establecido para todos los servicios
+export const useCreateEntity = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data) => {
+      console.log("API call with:", data);
+      const response = await api.post('/endpoint', { entity: data });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: entityKeys.lists() });
+    },
+    onError: (error) => {
+      console.error('Error:', error);
+      throw error;
+    },
+  });
+};
 ```
 
-#### Frontend Project Setup
-
-- [ ] **React + Vite**: `npm create vite@latest frontend -- --template react`
-- [ ] **Tailwind CSS**: Configurar framework de estilos
-- [ ] **React Router**: Configurar navegación SPA
-- [ ] **Axios**: Cliente HTTP para API calls
-- [ ] **React Query**: Cache y state management
-- [ ] **AuthContext**: Manejo de JWT tokens (posterior)
-
-## Decisiones Técnicas Activas
-
-### Backend
-
-- **Database**: PostgreSQL en todos los ambientes (dev, test, prod)
-- **Schema Language**: INGLÉS OBLIGATORIO en todos los campos
-- **ORM**: ActiveRecord con migraciones estándar
-- **Autenticación**: JWT tokens (implementación posterior)
-- **Serialización**: Blueprint para respuestas JSON consistentes y eficientes
-- **Testing**: RSpec + FactoryBot + Shoulda-matchers + Faker
-- **Documentación**: Annotate para schema automático en modelos
-- **CORS**: Configurado para desarrollo frontend
-- **Development Data**: Seeds completos con datos realistas para testing
-
-### Frontend
-
-- **State Management**: Context API + React Query (no Redux por simplicidad)
-- **Forms**: React Hook Form (mejor performance)
-- **Styling**: Tailwind con custom design tokens
-- **Icons**: Heroicons (consistente con Tailwind)
-- **Date Handling**: date-fns (más liviano que moment)
-- **Development Data**: Seeds completos para testing consistente
-- **Package Manager**: `npm` para el frontend.
-
-## Riesgos y Mitigaciones Identificados
-
-### Riesgo 1: Frontend-Backend Integration
-
-**Impacto**: BAJO - CORS ya configurado correctamente
-**Mitigación**:
-
-- ✅ CORS configurado para localhost:5173 y localhost:3000
-- ✅ Seeds de desarrollo disponibles para testing consistente
-- Implementar interceptors en Axios para JWT (posterior)
-- Testing de integración frontend-backend
-
-### Riesgo 2: State Management Complexity
-
-**Impacto**: Bajo - React Query simplifica mucho
-**Mitigación**:
-
-- Usar React Query para server state
-- Context solo para auth state (posterior)
-- Documentar patrones de uso
-
-## Métricas de Progreso
-
-### Fase 1: Planificación ✅ 100%
-
-- [x] Project brief completo
-- [x] Architecture design
-- [x] Tech stack definido
-- [x] Memory bank establecido
-
-### Fase 2: Backend Development ✅ 100%
-
-- [x] Rails API setup básico
-- [x] Customer model completo con campos inglés ✅
-- [x] Vehicle model completo con campos inglés ✅
-- [x] Database schema refactoring completado ✅
-- [x] PostgreSQL configurado en todos los ambientes ✅
-- [x] Testing setup completo (361 tests pasando) ✅
-- [x] **Test suite completamente funcional** ✅
-  - [x] Arreglado test con datos hardcodeados vs factory data
-  - [x] Todos los 361 tests pasando sin errores
-  - [x] Factory patterns consistentes
-- [x] **Blueprint serialization implementado** ✅
-  - [x] Gema blueprinter agregada y configurada
-  - [x] CustomerSerializer con vistas multiple (default, with_vehicles, summary)
-  - [x] VehicleSerializer con vistas multiple (default, with_customer, summary)
-  - [x] Controllers refactorizados para usar Blueprint
-  - [x] Tests completos de serializers
-  - [x] Documentación completa en BLUEPRINT_GUIDE.md
-  - [x] Eliminación de ~50 líneas de código JSON manual
-- [x] **Service model completo** ✅
-  - [x] Service migration con campos inglés y constraints
-  - [x] Service model con validaciones y scopes
-  - [x] ServiceSerializer con vistas multiple (default, summary, formatted)
-  - [x] ServicesController con CRUD completo y paginación
-  - [x] Tests completos: modelo, serializer, controller
-  - [x] Factory con traits para diferentes tipos de servicios
-  - [x] Refactoring de tests para usar `attributes_for` de FactoryBot
-- [x] **Product model completo** ✅
-  - [x] Product migration con campos inglés y constraints
-  - [x] Product model con validaciones y scopes
-  - [x] ProductSerializer con vistas (default, summary)
-  - [x] ProductsController con CRUD completo y paginación
-  - [x] Tests completos: modelo, serializer, controller
-  - [x] Factory con traits para diferentes tipos de productos
-- [x] **Appointment model completo** ✅
-  - [x] Appointment migration con campos inglés y constraints
-  - [x] Appointment model con validaciones y scopes
-  - [x] AppointmentSerializer con vistas multiple (default, summary, formatted)
-  - [x] AppointmentsController con CRUD completo y paginación
-  - [x] Tests completos: modelo, serializer, controller
-  - [x] Factory con traits para diferentes estados
-- [x] **ServiceRecord model completo** ✅
-  - [x] ServiceRecord migration con campos inglés y constraints
-  - [x] ServiceRecord model con validaciones, scopes y callbacks
-  - [x] ServiceRecordSerializer con vistas multiple (default, summary, with_details, formatted, with_associations)
-  - [x] ServiceRecordsController con CRUD completo y endpoints especiales (overdue, upcoming, statistics)
-  - [x] Tests completos: modelo (61 tests), serializer
-  - [x] Factory con traits para diferentes tipos de registros
-  - [x] Rutas configuradas con endpoints anidados y collection routes
-- [x] **CORS Configuration completado** ✅
-  - [x] Configurado para desarrollo frontend (localhost:5173, localhost:3000)
-  - [x] Credentials habilitados para autenticación futura
-  - [x] Métodos HTTP completos permitidos
-  - [x] Headers necesarios configurados
-- [x] **Annotate implementado** ✅
-  - [x] Gema annotate agregada al Gemfile
-  - [x] Configuración automática de schema en modelos
-  - [x] Documentación de campos, tipos, índices y constraints
-  - [x] Mejor contexto de desarrollo para entender la BD
-- [x] **Faker Factories Enhanced** ✅
-  - [x] Customer: Ya usaba Faker (name, phone, email, address)
-  - [x] Vehicle: Faker::Vehicle.make/model, license_plate con formato válido, Faker::Vehicle.year
-  - [x] Appointment: Faker::Lorem.sentence/paragraph para notes
-  - [x] Product: Faker::Commerce.product_name, Faker::Lorem.sentence, unidades realistas
-  - [x] Service: Faker::Commerce.unique.product_name, Faker::Lorem.sentence
-  - [x] ServiceRecord: Faker::Lorem.sentence/paragraph para notes
-  - [x] Todos los tests pasando (361 ejemplos, 0 fallos)
-  - [x] Datos más realistas y variados en testing
-- [x] **Development Seeds completado** ✅
-  - [x] Seeds completos con datos realistas para development
-  - [x] 5 customers con múltiples vehículos (8 total)
-  - [x] 8 services y 8 products con precios realistas
-  - [x] 16 appointments en diferentes estados (pasados, futuros, urgentes)
-  - [x] 29 service records con fechas variadas
-  - [x] Datos especiales: registros vencidos y próximos para testing
-  - [x] Limpieza automática de datos existentes en development
-  - [x] Mensajes informativos durante la ejecución
-  - [x] Estadísticas finales de datos creados
-  - [x] Todos los endpoints especiales funcionando correctamente
-
-### Fase 3: Frontend Development 🚧 30%
-
-- [x] React project setup
-- [x] Layout & Navigation base
-- [x] Dashboard inicial
-- [ ] **UI Refinement (En Progreso)**
-  - [ ] Implementar nuevo diseño de Sidebar (tema oscuro)
-  - [ ] Añadir Logo y Perfil de Usuario al Layout
-  - [ ] Refinar Dashboard con nuevo estilo
-
-## Contexto de Desarrollo
-
-### Herramientas Activas
-
-- **Editor**: VS Code con extensiones Rails y React
-- **Database**: PostgreSQL (cambio de SQLite)
-- **Terminal**: Configuración para desarrollo simultáneo front/back
-- **Git**: Feature branches desde develop
-- **Testing**: RSpec + Shoulda-matchers + Faker funcionando
-- **Documentación**: Annotate para schema automático
-- **Development Data**: Seeds completos para testing consistente
-
-### Variables de Entorno Actuales
-
-```bash
-# Backend - ACTUALIZAR
-RAILS_ENV=development
-DATABASE_URL=postgresql://localhost/lubricentro_development
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=
-
-# Frontend
-VITE_API_BASE_URL=http://localhost:3000/api/v1
-NODE_ENV=development
+### **Tablas con CRUD**
+```javascript
+// Patrón establecido para todas las tablas
+const EntityTable = ({ 
+  entities, 
+  pagination, 
+  onPageChange, 
+  onSearch, 
+  onEdit, 
+  onDelete, 
+  onView, 
+  onCreate, 
+  loading 
+}) => {
+  // Implementación consistente
+};
 ```
 
-### Comandos de Desarrollo Útiles
-
-```bash
-# Backend
-cd backend
-rails server                    # Iniciar servidor
-rails db:seed                   # Cargar datos de prueba
-rails console                   # Consola interactiva
-rspec                           # Ejecutar tests
-bundle exec annotate           # Actualizar anotaciones
-
-# Frontend
-cd frontend
-npm install                     # Instalar dependencias
-npm run dev                     # Iniciar servidor de desarrollo
-
-# Testing con datos reales
-curl http://localhost:3000/api/v1/customers
-curl http://localhost:3000/api/v1/appointments/upcoming
-curl http://localhost:3000/api/v1/service_records/overdue
+### **Formularios con Validación**
+```javascript
+// Patrón establecido para todos los formularios
+const EntityForm = ({ onSubmit, initialData, isLoading, onCancel }) => {
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: initialData || { /* campos */ }
+  });
+  // Validación y manejo de errores consistente
+};
 ```
 
-## Notas del Desarrollador
+## 📊 **Métricas Actuales**
 
-### Patrones Establecidos ACTUALIZADOS
+- **CRUD Clientes**: 100% completado ✅
+- **CRUD Vehículos**: 70% completado (tabla + eliminar + servicio)
+- **CRUD Productos**: 50% completado (tabla + eliminar + servicio)
+- **CRUD Servicios**: 50% completado (tabla + eliminar + servicio)
+- **Componentes UI**: 85% completado
+- **Servicios API**: 90% completado
+- **Integración Backend-Frontend**: 90% completado
 
-- **CRÍTICO**: Usar INGLÉS en toda la base de datos y código
-- **Database**: PostgreSQL en todos los ambientes
-- API responses siempre con formato {success, data, message}
-- Testing con shoulda-matchers configurado
-- **Factory objects con Faker**: Datos realistas y variados para testing
-- **Annotate**: Documentación automática de schema en modelos
-- **Backend 100% completo**: Todos los modelos, controllers, serializers y tests implementados
-- **CORS configurado**: Listo para desarrollo frontend
+## 🎨 **Sistema de Diseño Consolidado**
 
-### Convenciones de Código
+### **Colores (Tailwind v4)**
+- Primary: `blue-600` / `blue-700`
+- Success: `green-600` / `green-700`
+- Error: `red-600` / `red-700`
+- Warning: `yellow-600` / `yellow-700`
 
-### Faker Patterns Implementados
+### **Componentes Base**
+- Inputs con estados (normal, error, success, disabled)
+- Botones con variantes y loading
+- Modales con backdrop y escape key
+- Tablas responsive con hover states
+- Paginación accesible
 
-```ruby
-# Customer (ya implementado)
-name { Faker::Name.name }
-phone { Faker::PhoneNumber.phone_number }
-email { Faker::Internet.unique.email }
-address { Faker::Address.full_address }
+## 🔄 **Estado de Integración**
 
-# Vehicle (mejorado)
-brand { Faker::Vehicle.make }
-model { Faker::Vehicle.model(make_of_model: brand) }
-license_plate { Faker::Alphanumeric.alphanumeric(number: 6, min_alpha: 3, min_numeric: 3).upcase }
-year { Faker::Vehicle.year }
+### **Backend ↔ Frontend**
+- ✅ API endpoints funcionando
+- ✅ Serializers optimizados
+- ✅ Paginación sincronizada
+- ✅ Búsqueda implementada
+- ✅ Validaciones consistentes
 
-# Appointment (mejorado)
-notes { Faker::Lorem.sentence(word_count: 8, supplemental: false, random_words_to_add: 4) }
+### **React Query**
+- ✅ Cache management automático
+- ✅ Background refetch
+- ✅ Optimistic updates
+- ✅ Error boundaries
+- ✅ Loading states
 
-# Product (mejorado)
-name { Faker::Commerce.product_name }
-description { Faker::Lorem.sentence(word_count: 6, supplemental: false, random_words_to_add: 3) }
-unit { ['L', 'unit', 'kit', 'piece', 'bottle'].sample }
+### **Notificaciones**
+- ✅ react-hot-toast instalado y configurado
+- ✅ Toaster configurado en Layout
+- ✅ Estilos personalizados para dark theme
+- ✅ Duración y colores optimizados
 
-# Service (mejorado)
-name { Faker::Commerce.unique.product_name }
-description { Faker::Lorem.sentence(word_count: 8, supplemental: false, random_words_to_add: 4) }
+## 📋 **Decisiones Técnicas Recientes**
 
-# ServiceRecord (mejorado)
-notes { Faker::Lorem.sentence(word_count: 10, supplemental: false, random_words_to_add: 5) }
-```
+1. **Uso de forwardRef en InputField** - Para compatibilidad con react-hook-form
+2. **Clases CSS estándar** - En lugar de clases personalizadas para Tailwind v4
+3. **Debug logs extensivos** - Para facilitar troubleshooting
+4. **Iconos por tipo de servicio** - Para mejor UX visual (aceite, filtro, frenos, etc.)
+5. **Formateo de precios** - En pesos argentinos con Intl.NumberFormat
+6. **Filtros por rango de precio** - Para búsqueda avanzada de servicios
+7. **react-hot-toast** - Para notificaciones consistentes en toda la app
 
-### Annotate Benefits
+## 🎯 **Objetivos para la Próxima Sesión**
 
-- **Schema Documentation**: Información automática de campos, tipos, constraints
-- **Development Context**: Mejor entendimiento de la estructura de BD
-- **Maintenance**: Documentación siempre actualizada con cambios de schema
-- **Team Collaboration**: Nuevos desarrolladores entienden la BD rápidamente
+1. **Completar formulario de vehículos** (2-3 horas)
+2. **Completar formulario de productos** (2-3 horas)
+3. **Completar formulario de servicios** (2-3 horas)
+4. **Implementar selector de cliente** (1-2 horas)
+5. **Agregar validación de patente única** (1 hora)
+6. **Testing del CRUD completo** (1 hora)
 
-## 🚀 Backend Status: READY FOR FRONTEND
+---
 
-**Estado**: ✅ **COMPLETO Y LISTO**
-- **API Endpoints**: Todos funcionando
-- **CORS**: Configurado para frontend
-- **Testing**: 361 tests pasando
-- **Documentación**: Completa
-
-**Próximo paso**: Iniciar desarrollo frontend con React + Vite
-
-### Development Experience
-
-- ✅ **Annotate** - Schema documentation automática
-- ✅ **Development seeds** - Dataset consistente para testing
-- ✅ **Postman collection** - API testing completa
-- ✅ **Memory Bank** - Documentación actualizada (incluyendo Design System)
-
-## 🚀 Comandos de Desarrollo
-
-```bash
-# Backend
-cd backend
-rails server                    # Iniciar servidor
-rails db:seed                   # Cargar datos de prueba
-rails console                   # Consola interactiva
-rspec                           # Ejecutar tests
-bundle exec annotate           # Actualizar anotaciones
-
-# Frontend
-cd frontend
-npm install                     # Instalar dependencias
-npm run dev                     # Iniciar servidor de desarrollo
-
-# Testing con datos reales
-curl http://localhost:3000/api/v1/customers
-curl http://localhost:3000/api/v1/appointments/upcoming
-curl http://localhost:3000/api/v1/service_records/overdue
-```
+**Última actualización**: 20 de Junio 2024
+**Próxima revisión**: Al completar CRUD vehículos, productos y servicios

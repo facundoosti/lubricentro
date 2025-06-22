@@ -1,286 +1,318 @@
-# Progress Tracker - Sistema Lubricentro
-
-## Overview del Proyecto
-
-| Aspecto             | Estado        | Completado | Notas                                          |
-| ------------------- | ------------- | ---------- | ---------------------------------------------- |
-| **Planificación**   | ✅ Completo   | 100%       | Documentación y arquitectura definida          |
-| **Backend Setup**   | ✅ Completo   | 100%       | Todos los modelos, controllers, serializers, tests, CORS y seeds implementados |
-| **Frontend Setup**  | 🚧 Pendiente  | 0%         | Carpeta vacía, necesita inicialización         |
-| **Database Design** | ✅ Completo   | 100%       | Todos los modelos implementados y testeados    |
-| **API Design**      | ✅ Completo   | 100%       | Todos los endpoints implementados y testeados  |
-| **UI/UX Design**    | 📋 Conceptual | 30%        | Flujos definidos, falta mockups                |
-
-## ✅ Lo que Está Funcionando
-
-### Documentación y Planificación
-
-- ✅ **Project Brief completo** - Objetivos claros establecidos
-- ✅ **Product Context definido** - Problema y solución clarificados
-- ✅ **System Patterns documentados** - Arquitectura y patrones establecidos
-- ✅ **Tech Context establecido** - Stack y herramientas definidas
-- ✅ **Memory Bank completo** - Sistema de documentación funcional
-
-### Estructura Base
-
-- ✅ **Repositorio organizado** - Separación backend/frontend clara
-- ✅ **Rails 8.0.2 inicializado** - Aplicación base generada
-- ✅ **Gemfile configurado** - Dependencias principales definidas
-- ✅ **Git setup** - Control de versiones funcionando
-
-### Backend - Fase 2 COMPLETADA ✅
-
-```bash
-Estado: ✅ Completado | Target: Semana 1-2 | Progreso: 100%
-```
-
-#### Core Setup (Completado)
-
-- ✅ **Rails API Mode**: Configurado application.rb para modo API
-- ✅ **CORS Setup**: Habilitado y configurado rack-cors para frontend
-- ✅ **JWT Auth**: Preparado para implementación posterior
-- ✅ **Database Config**: PostgreSQL configurado para todos los ambientes
-
-#### Modelos de Datos (Completado)
-
-- ✅ **Customer Model**: Creado con validaciones y testing completo
-- ✅ **Vehicle Model**: Creado con validaciones y testing completo
-- ✅ **Service Model**: Creado con validaciones y testing completo
-- ✅ **Product Model**: Creado con validaciones y testing completo
-- ✅ **Appointment Model**: CRUD, serializer y tests completos
-- ✅ **ServiceRecord Model**: CRUD, serializer y tests completos
-
-#### API Controllers (Completado)
-
-- ✅ **ApplicationController**: Base con autenticación JWT preparada
-- ✅ **Api::V1::CustomersController**: CRUD completo y testeado
-- ✅ **Api::V1::VehiclesController**: CRUD con filtro por customer
-- ✅ **Api::V1::ServicesController**: CRUD completo y testeado
-- ✅ **Api::V1::ProductsController**: CRUD completo y testeado
-- ✅ **Api::V1::AppointmentsController**: CRUD completo y testeado
-- ✅ **Api::V1::ServiceRecordsController**: CRUD completo con endpoints especiales
-
-#### Testing (Completado)
-
-- ✅ **361 tests pasando** - Cobertura del 98.11%
-- ✅ **Model specs** - Todos los modelos testeados
-- ✅ **Controller specs** - Todos los controllers testeados
-- ✅ **Serializer specs** - Todos los serializers testeados
-- ✅ **Factory patterns** - Factories con traits para todos los modelos
-- ✅ **Faker Integration** - Datos realistas y variados en testing
-- ✅ **Annotate Setup** - Documentación automática de schema
-
-#### CORS Configuration (Completado)
-
-- ✅ **Development origins**: localhost:5173, localhost:3000 configurados
-- ✅ **Credentials enabled**: Preparado para autenticación futura
-- ✅ **HTTP methods**: Todos los métodos necesarios permitidos
-- ✅ **Headers**: Configuración completa para desarrollo frontend
-
-#### Development Tools (Completado)
-
-- ✅ **Annotate**: Documentación automática de schema en modelos
-- ✅ **Faker Factories**: Todas las factories mejoradas con datos realistas
-- ✅ **Blueprint Serialization**: Sistema de serialización JSON optimizado
-- ✅ **Pagy Pagination**: Sistema de paginación eficiente
-- ✅ **Development Seeds**: Dataset completo de prueba para development
-
-#### Development Data (Completado)
-
-- ✅ **Seeds completos**: Dataset realista para testing y desarrollo
-- ✅ **5 customers**: Con múltiples vehículos (8 total)
-- ✅ **8 services**: Con precios realistas y descripciones
-- ✅ **8 products**: Con unidades y precios variados
-- ✅ **16 appointments**: En diferentes estados (pasados, futuros, urgentes)
-- ✅ **29 service records**: Con fechas variadas y datos especiales
-- ✅ **Datos especiales**: Registros vencidos y próximos para testing
-- ✅ **Limpieza automática**: Solo en development environment
-- ✅ **Mensajes informativos**: Feedback durante la ejecución
-- ✅ **Estadísticas finales**: Resumen de datos creados
-
-## 🚧 En Desarrollo (Próximas 2 Semanas)
-
-### Frontend - Fase 3 Iniciando
-
-```bash
-Estado: 🔴 No iniciado | Target: Semana 1-2 | Progreso: 0%
-```
-
-#### Project Setup (Semana 1)
-
-- [ ] **React + Vite**: `npm create vite@latest frontend -- --template react`
-- [ ] **Tailwind Setup**: Configurar CSS framework
-- [ ] **React Router**: Configurar navegación SPA
-- [ ] **Axios Setup**: Cliente HTTP para API
-- [ ] **React Query**: Cache y state de servidor
-
-#### Layout Base (Semana 1)
-
-- [ ] **Layout Component**: Estructura principal de página
-- [ ] **Navigation**: Menú principal responsive
-- [ ] **Header**: Con información de usuario
-- [ ] **Sidebar**: Navegación secundaria
-
-## 📋 Planificado (Próximas 4-6 Semanas)
-
-### Funcionalidades Core
-
-#### Gestión de Clientes (Semana 2)
-
-- [ ] **Lista de Clientes**: Tabla con paginación y búsqueda
-- [ ] **Formulario Cliente**: Crear/editar cliente
-- [ ] **Detalle Cliente**: Ver info + vehículos asociados
-- [ ] **Validaciones**: Frontend y backend
-
-#### Gestión de Vehículos (Semana 2-3)
-
-- [ ] **Lista de Vehículos**: Con filtro por cliente
-- [ ] **Formulario Vehículo**: Asociado a cliente
-- [ ] **Historial Vehículo**: Servicios realizados
-
-#### Sistema de Turnos (Semana 3-4)
-
-- [ ] **Calendar View**: Visualización de turnos
-- [ ] **Formulario Turno**: Agendar nuevo turno
-- [ ] **Estados de Turno**: Agendado, Confirmado, Completado, Cancelado
-- [ ] **Notificaciones**: Sistema básico de alerts
-
-#### Registro de Atenciones (Semana 4-5)
-
-- [ ] **Formulario Atención**: Servicios + productos
-- [ ] **Cálculo Automático**: Total de la atención
-- [ ] **Historial**: Lista de atenciones realizadas
-- [ ] **Resumen**: Vista imprimible
-
-### Funcionalidades Avanzadas
-
-#### Reportes Básicos (Semana 5-6)
-
-- [ ] **Dashboard**: Métricas principales
-- [ ] **Reporte Clientes**: Crecimiento en el tiempo
-- [ ] **Reporte Productos**: Más utilizados
-- [ ] **Reporte Ingresos**: Por período
-
-## ❌ Backlog (Post-MVP)
-
-### Funcionalidades Futuras
-
-- [ ] **Sistema de Inventario**: Control de stock productos
-- [ ] **Facturación**: Generación de facturas oficiales
-- [ ] **Notificaciones Push**: Recordatorio de turnos
-- [ ] **Multi-sucursal**: Gestión de múltiples ubicaciones
-- [ ] **Reportes Avanzados**: Analytics profundos
-- [ ] **App Móvil**: Cliente nativo iOS/Android
-- [ ] **Integración Contable**: Con sistemas externos
-- [ ] **Sistema de Usuarios**: Autenticación JWT completa
-
-### Mejoras Técnicas
-
-- [ ] **Performance**: Optimizaciones de queries
-- ✅ **Testing**: Cobertura > 98% (medida con SimpleCov)
-- [ ] **Monitoring**: Logs y métricas de producción
-- [ ] **CI/CD**: Pipeline automático
-- [ ] **Documentation**: API docs automática
-- [ ] **Security**: Audit y penetration testing
-
-## 🎯 Milestones Clave
-
-### Milestone 1: API Funcional ✅ COMPLETADO
-
-- ✅ Backend Rails configurado
-- ✅ Modelos principales creados
-- ✅ API endpoints básicos funcionando
-- ✅ CORS configurado para frontend
-- ✅ Autenticación JWT preparada (implementación posterior)
-- ✅ Testing completo con datos realistas (Faker)
-- ✅ Documentación automática de schema (Annotate)
-- ✅ Seeds de desarrollo completos para testing consistente
-
-### Milestone 2: Frontend Base (Fin Semana 2)
-
-- [ ] React app configurada
-- [ ] Layout y navegación funcional
-- [ ] Conexión con API establecida
-- [ ] CRUD de clientes funcionando
-
-### Milestone 3: MVP Core (Fin Semana 6)
-
-- [ ] Gestión completa clientes/vehículos
-- [ ] Sistema de turnos básico
-- [ ] Registro de atenciones funcional
-- [ ] Reportes básicos
-
-### Milestone 4: Production Ready (Fin Semana 8)
-
-- [ ] Testing completo
-- [ ] Deploy configurado
-- [ ] Documentación completa
-- [ ] Performance optimizada
-
-## 📊 Métricas de Calidad
-
-### Testing
-
-- ✅ **361 tests pasando** - 0 fallos
-- ✅ **Cobertura 98.11%** - SimpleCov report
-- ✅ **Factory patterns** - Datos consistentes
-- ✅ **Faker integration** - Datos realistas
-
-### API Performance
-
-- ✅ **Blueprint serialization** - Respuestas optimizadas
-- ✅ **Pagy pagination** - Paginación eficiente
-- ✅ **CORS configurado** - Frontend ready
-- ✅ **Endpoints especiales** - Funcionalidades avanzadas
-
-### Development Experience
-
-- ✅ **Annotate** - Schema documentation automática
-- ✅ **Development seeds** - Dataset consistente para testing
-- ✅ **Postman collection** - API testing completa
-- ✅ **Memory Bank** - Documentación actualizada
-
-## 🚀 Comandos de Desarrollo
-
-### Backend
-
-```bash
-cd backend
-rails server                    # Iniciar servidor
-rails db:seed                   # Cargar datos de prueba
-rails console                   # Consola interactiva
-rspec                           # Ejecutar tests
-bundle exec annotate           # Actualizar anotaciones
-```
-
-### Testing API
-
-```bash
-# Endpoints básicos
-curl http://localhost:3000/api/v1/customers
-curl http://localhost:3000/api/v1/vehicles
-curl http://localhost:3000/api/v1/services
-
-# Endpoints especiales
-curl http://localhost:3000/api/v1/appointments/upcoming
-curl http://localhost:3000/api/v1/service_records/overdue
-curl http://localhost:3000/api/v1/service_records/upcoming
-
-# Con paginación
-curl "http://localhost:3000/api/v1/customers?page=1&per_page=10"
-```
-
-### Datos de Prueba Disponibles
-
-- **5 customers** con múltiples vehículos
-- **8 vehicles** distribuidos entre customers
-- **8 services** con precios realistas
-- **8 products** con unidades variadas
-- **16 appointments** en diferentes estados
-- **29 service records** con fechas variadas
-- **Datos especiales**: registros vencidos y próximos
+# Progress Report - Sistema Lubricentro
+
+## 🎯 Estado Actual del Proyecto
+
+### ✅ **Fase 1: Setup y Configuración - COMPLETADA**
+- [x] Estructura del proyecto Rails 8.0.2 + React
+- [x] Configuración de CORS y API mode
+- [x] Base de datos SQLite → PostgreSQL
+- [x] Modelos principales (Customer, Vehicle, Service, Product, Appointment, ServiceRecord)
+- [x] Migraciones y seeds básicos
+- [x] Serializers con Blueprinter
+- [x] Frontend React + Vite + Tailwind CSS v4
+- [x] React Query para estado del servidor
+- [x] React Router para navegación
+- [x] Layout y navegación responsive
+
+### ✅ **Fase 2: Backend API - COMPLETADA**
+- [x] Controllers API con CRUD completo
+- [x] Paginación con Pagy
+- [x] Búsqueda y filtros
+- [x] Validaciones en modelos
+- [x] Manejo de errores consistente
+- [x] Serializers optimizados
+- [x] Tests básicos con RSpec
+
+### ✅ **Fase 3: Frontend Core - COMPLETADA**
+- [x] Componentes UI reutilizables
+- [x] Sistema de rutas
+- [x] Layout responsive
+- [x] Context para estado global
+- [x] Hooks personalizados
+- [x] Servicios API con React Query
+- [x] Manejo de errores y loading states
+
+### ✅ **Fase 4: CRUD Clientes - COMPLETADA**
+- [x] Tabla de clientes con paginación
+- [x] Búsqueda de clientes
+- [x] Modal para crear cliente
+- [x] Modal para editar cliente
+- [x] Modal de confirmación para eliminar
+- [x] Formulario con validación (react-hook-form)
+- [x] Servicio completo con React Query
+- [x] Cache invalidation automático
+- [x] Manejo de errores robusto
+- [x] UI responsive y accesible
+
+### ✅ **Fase 5: CRUD Vehículos - PARCIALMENTE COMPLETADA**
+- [x] Tabla de vehículos con paginación
+- [x] Búsqueda de vehículos (patente, marca, modelo)
+- [x] Iconos por marca de vehículo
+- [x] Servicio completo con React Query
+- [x] Funcionalidad de eliminar vehículo
+- [x] Integración con clientes (customer_name)
+- [x] UI consistente con el diseño del sistema
+- [ ] Modal para crear vehículo
+- [ ] Modal para editar vehículo
+- [ ] Formulario con validación
+- [ ] Selector de cliente
+- [ ] Validación de patente única
+
+### ✅ **Fase 6: CRUD Productos - PARCIALMENTE COMPLETADA**
+- [x] Tabla de productos con paginación
+- [x] Búsqueda de productos por nombre
+- [x] Iconos por tipo de producto (aceite, filtro, bujía, etc.)
+- [x] Formateo de precios en pesos argentinos
+- [x] Servicio completo con React Query
+- [x] Funcionalidad de eliminar producto
+- [x] Filtros por rango de precio
+- [x] UI consistente con el diseño del sistema
+- [ ] Modal para crear producto
+- [ ] Modal para editar producto
+- [ ] Formulario con validación
+- [ ] Validación de nombre único
+- [ ] Gestión de unidades de medida
+
+### ✅ **Fase 7: CRUD Servicios - PARCIALMENTE COMPLETADA**
+- [x] Tabla de servicios con paginación
+- [x] Búsqueda de servicios por nombre
+- [x] Iconos por tipo de servicio (aceite, filtro, frenos, etc.)
+- [x] Formateo de precios en pesos argentinos
+- [x] Servicio completo con React Query
+- [x] Funcionalidad de eliminar servicio
+- [x] Filtros por rango de precio
+- [x] UI consistente con el diseño del sistema
+- [ ] Modal para crear servicio
+- [ ] Modal para editar servicio
+- [ ] Formulario con validación
+- [ ] Validación de nombre único
+- [ ] Gestión de precios base
+
+## 🚀 **Componentes UI Creados**
+
+### **Formularios y Inputs**
+- ✅ `InputField.jsx` - Campo de entrada con validación
+- ✅ `TextArea.jsx` - Campo de texto multilínea
+- ✅ `Button.jsx` - Botón con estados loading y variantes
+- ✅ `CustomerForm.jsx` - Formulario de cliente con validación
+
+### **Modales y Overlays**
+- ✅ `Modal.jsx` - Modal reutilizable con backdrop
+- ✅ `ConfirmModal.jsx` - Modal de confirmación para acciones destructivas
+- ✅ `CustomerModal.jsx` - Modal para crear/editar clientes
+
+### **Tablas y Datos**
+- ✅ `Table.jsx` - Componente de tabla base
+- ✅ `Pagination.jsx` - Paginación reutilizable
+- ✅ `Badge.jsx` - Badges para estados
+- ✅ `CustomersTable.jsx` - Tabla de clientes con CRUD
+- ✅ `VehiclesTable.jsx` - Tabla de vehículos con CRUD
+- ✅ `ProductsTable.jsx` - Tabla de productos con CRUD
+- ✅ `ServicesTable.jsx` - Tabla de servicios con CRUD
+
+### **Layout y Navegación**
+- ✅ `Layout.jsx` - Layout principal con sidebar
+- ✅ `Sidebar.jsx` - Navegación lateral
+- ✅ `Header.jsx` - Header con breadcrumbs
+
+## 🔧 **Servicios API Implementados**
+
+### **Customers Service**
+- ✅ `useCustomers()` - Query con paginación y búsqueda
+- ✅ `useCustomer(id)` - Query para cliente individual
+- ✅ `useCreateCustomer()` - Mutation para crear
+- ✅ `useUpdateCustomer()` - Mutation para actualizar
+- ✅ `useDeleteCustomer()` - Mutation para eliminar
+- ✅ Cache invalidation automático
+- ✅ Manejo de errores centralizado
+
+### **Vehicles Service**
+- ✅ `useVehicles()` - Query con paginación y búsqueda
+- ✅ `useVehicle(id)` - Query para vehículo individual
+- ✅ `useCreateVehicle()` - Mutation para crear
+- ✅ `useUpdateVehicle()` - Mutation para actualizar
+- ✅ `useDeleteVehicle()` - Mutation para eliminar
+- ✅ Filtros por cliente y marca
+- ✅ Búsqueda por patente, marca, modelo
+
+### **Products Service**
+- ✅ `useProducts()` - Query con paginación y búsqueda
+- ✅ `useProduct(id)` - Query para producto individual
+- ✅ `useCreateProduct()` - Mutation para crear
+- ✅ `useUpdateProduct()` - Mutation para actualizar
+- ✅ `useDeleteProduct()` - Mutation para eliminar
+- ✅ Filtros por rango de precio
+- ✅ Búsqueda por nombre
+- ✅ Cache invalidation automático
+
+### **Services Service**
+- ✅ `useServices()` - Query con paginación y búsqueda
+- ✅ `useService(id)` - Query para servicio individual
+- ✅ `useCreateService()` - Mutation para crear
+- ✅ `useUpdateService()` - Mutation para actualizar
+- ✅ `useDeleteService()` - Mutation para eliminar
+- ✅ Filtros por rango de precio
+- ✅ Búsqueda por nombre
+- ✅ Cache invalidation automático
+
+## 📊 **Páginas Implementadas**
+
+### **Dashboard**
+- ✅ Métricas básicas
+- ✅ Gráficos de servicios mensuales
+- ✅ Estado actual del lubricentro
+
+### **Clientes**
+- ✅ Lista paginada con búsqueda
+- ✅ CRUD completo con modales
+- ✅ Validación de formularios
+- ✅ Estados de loading y error
+- ✅ Integración con vehículos (vehicles_count)
+
+### **Vehículos**
+- ✅ Lista paginada con búsqueda
+- ✅ Eliminación de vehículos
+- ✅ Iconos por marca
+- ✅ Integración con clientes
+- ✅ Estados de loading y error
+- [ ] Crear vehículo (modal placeholder)
+- [ ] Editar vehículo (modal placeholder)
+- [ ] Formulario con validación
+
+### **Productos**
+- ✅ Lista paginada con búsqueda
+- ✅ Eliminación de productos
+- ✅ Iconos por tipo de producto
+- ✅ Formateo de precios
+- ✅ Estados de loading y error
+- [ ] Crear producto (modal placeholder)
+- [ ] Editar producto (modal placeholder)
+- [ ] Formulario con validación
+
+### **Servicios**
+- ✅ Lista paginada con búsqueda
+- ✅ Eliminación de servicios
+- ✅ Iconos por tipo de servicio
+- ✅ Formateo de precios
+- ✅ Estados de loading y error
+- [ ] Crear servicio (modal placeholder)
+- [ ] Editar servicio (modal placeholder)
+- [ ] Formulario con validación
+
+## 🎨 **Sistema de Diseño**
+
+### **Colores (Tailwind v4)**
+- ✅ Primary: `blue-600` / `blue-700`
+- ✅ Success: `green-600` / `green-700`
+- ✅ Error: `red-600` / `red-700`
+- ✅ Warning: `yellow-600` / `yellow-700`
+- ✅ Gray scale completo
+
+### **Componentes Base**
+- ✅ Inputs con estados (normal, error, success, disabled)
+- ✅ Botones con variantes y loading
+- ✅ Modales con backdrop y escape key
+- ✅ Tablas responsive con hover states
+- ✅ Paginación accesible
+
+### **Patrones de UX**
+- ✅ Loading states en todas las acciones
+- ✅ Error handling con mensajes claros
+- ✅ Confirmaciones para acciones destructivas
+- ✅ Formularios con validación en tiempo real
+- ✅ Responsive design mobile-first
+
+## 🔄 **Estado de Integración**
+
+### **Backend ↔ Frontend**
+- ✅ API endpoints funcionando
+- ✅ Serializers optimizados
+- ✅ Paginación sincronizada
+- ✅ Búsqueda implementada
+- ✅ Validaciones consistentes
+
+### **React Query**
+- ✅ Cache management automático
+- ✅ Background refetch
+- ✅ Optimistic updates
+- ✅ Error boundaries
+- ✅ Loading states
+
+### **Routing**
+- ✅ Navegación funcional
+- ✅ Breadcrumbs dinámicos
+- ✅ Layout persistente
+- ✅ Rutas protegidas (preparado)
+
+## 📋 **Próximos Pasos (Prioridad Alta)**
+
+### **1. Completar CRUD Vehículos**
+- [ ] Modal para crear vehículo
+- [ ] Modal para editar vehículo
+- [ ] Formulario con validación
+- [ ] Selector de cliente
+- [ ] Validación de patente única
+
+### **2. Completar CRUD Productos**
+- [ ] Modal para crear producto
+- [ ] Modal para editar producto
+- [ ] Formulario con validación
+- [ ] Validación de nombre único
+- [ ] Selector de unidades de medida
+
+### **3. Completar CRUD Servicios**
+- [ ] Modal para crear servicio
+- [ ] Modal para editar servicio
+- [ ] Formulario con validación
+- [ ] Validación de nombre único
+- [ ] Gestión de precios base
+
+### **4. Sistema de Turnos**
+- [ ] Calendario de turnos
+- [ ] Crear/editar turnos
+- [ ] Estados de turno (scheduled, confirmed, completed, cancelled)
+- [ ] Notificaciones
+
+### **5. Registro de Atenciones**
+- [ ] Crear atención desde turno
+- [ ] Selección de servicios y productos
+- [ ] Cálculo automático de totales
+- [ ] Historial de atenciones
+
+## 🐛 **Problemas Conocidos**
+
+### **Resueltos**
+- ✅ InputField no compatible con react-hook-form → Solucionado con forwardRef
+- ✅ Clases CSS incompatibles con Tailwind v4 → Actualizadas a clases estándar
+- ✅ Button sin prop loading → Agregada funcionalidad
+- ✅ Debug insuficiente → Agregados logs en puntos críticos
+
+### **Pendientes**
+- [ ] Campo observaciones en clientes (requiere migración)
+- [ ] Validación de patente única en frontend
+- [ ] Optimización de queries con includes
+- [ ] Tests de frontend
+
+## 📈 **Métricas de Progreso**
+
+- **Backend**: 95% completado
+- **Frontend Core**: 90% completado
+- **CRUD Clientes**: 100% completado
+- **CRUD Vehículos**: 70% completado (tabla + eliminar + servicio)
+- **CRUD Productos**: 50% completado (tabla + eliminar + servicio)
+- **CRUD Servicios**: 50% completado (tabla + eliminar + servicio)
+- **UI/UX**: 85% completado
+- **Integración**: 90% completado
+
+## 🎯 **Objetivos Semana Próxima**
+
+1. **Completar CRUD Vehículos** (2 días)
+2. **Completar CRUD Productos** (2 días)
+3. **Completar CRUD Servicios** (2 días)
+4. **Sistema de Turnos básico** (3 días)
+5. **Testing y optimización** (1 día)
 
 ---
 
-**Última actualización**: Inicio del proyecto
-**Próxima revisión**: Final de Semana 1 (post backend setup)
+**Última actualización**: 20 de Junio 2024
+**Próxima revisión**: 27 de Junio 2024

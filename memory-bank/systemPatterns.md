@@ -1,5 +1,119 @@
 # System Patterns - Arquitectura Lubricentro
 
+## 🎨 REGLA CRÍTICA: Tailwind CSS First
+
+**⚠️ OBLIGATORIO: Todo el CSS debe usar Tailwind CSS y sus convenciones**
+
+### Principios Fundamentales
+
+1. **🚫 NUNCA escribir CSS personalizado** sin justificación técnica
+2. **✅ SIEMPRE usar clases de Tailwind** para estilos
+3. **🎯 Usar el sistema `@theme`** para definir colores y variables
+4. **📦 Evitar archivos CSS adicionales** - todo en `index.css` con `@theme`
+
+### Sistema de Colores (Tailwind v4)
+
+```css
+/* frontend/src/index.css - ÚNICO lugar para definir colores */
+@theme {
+  --color-gray-50: #f9fafb;    /* bg-gray-50 */
+  --color-gray-100: #f2f4f7;   /* bg-gray-100 */
+  --color-brand-500: #465fff;  /* bg-brand-500 */
+  --color-success-500: #12b76a; /* bg-success-500 */
+  --color-error-500: #f04438;   /* bg-error-500 */
+  --color-warning-500: #f79009; /* bg-warning-500 */
+}
+```
+
+### Patrones de Uso
+
+**✅ CORRECTO:**
+```jsx
+<div className="bg-gray-50 text-gray-800 p-4 rounded-lg shadow-theme-sm">
+  <h2 className="text-title-md font-semibold mb-2">Título</h2>
+  <p className="text-theme-sm text-gray-600">Contenido</p>
+</div>
+```
+
+**❌ INCORRECTO:**
+```jsx
+<div style={{ backgroundColor: '#f9fafb', padding: '1rem' }}>
+  <h2 style={{ fontSize: '36px', fontWeight: 'bold' }}>Título</h2>
+</div>
+```
+
+### Estructura de Archivos CSS
+
+```
+frontend/src/
+├── index.css          # ÚNICO archivo CSS con @theme
+├── components/        # Solo JSX con className
+├── pages/            # Solo JSX con className
+└── layout/           # Solo JSX con className
+```
+
+### Clases Tailwind Disponibles
+
+**Colores de Fondo:**
+- `bg-gray-50`, `bg-gray-100`, `bg-gray-200`... hasta `bg-gray-950`
+- `bg-brand-25`, `bg-brand-50`, `bg-brand-500`... hasta `bg-brand-950`
+- `bg-success-500`, `bg-error-500`, `bg-warning-500`
+- `bg-blue-light-50`, `bg-blue-light-500`... hasta `bg-blue-light-950`
+- `bg-orange-50`, `bg-orange-500`... hasta `bg-orange-950`
+- `bg-theme-pink-500`, `bg-theme-purple-500`
+
+**Colores de Texto:**
+- `text-gray-800`, `text-gray-600`, `text-gray-400`
+- `text-brand-500`, `text-success-500`, `text-error-500`
+- `text-blue-light-500`, `text-orange-500`
+- `text-theme-pink-500`, `text-theme-purple-500`
+
+**Tamaños de Texto:**
+- `text-title-2xl`, `text-title-xl`, `text-title-lg`, `text-title-md`
+- `text-theme-xl`, `text-theme-sm`, `text-theme-xs`
+- **Line-height automático** incluido en cada tamaño
+
+**Sombras:**
+- `shadow-theme-sm`, `shadow-theme-md`, `shadow-theme-lg`, `shadow-theme-xl`
+- `shadow-theme-xs`, `shadow-datepicker`, `shadow-focus-ring`
+- `shadow-slider-navigation`, `shadow-tooltip`
+- `drop-shadow-4xl`
+
+**Z-index:**
+- `z-1`, `z-9`, `z-99`, `z-999`, `z-9999`, `z-99999`, `z-999999`
+
+**Breakpoints Personalizados:**
+- `2xsm:375px`, `xsm:425px`, `3xl:2000px`
+- `sm:640px`, `md:768px`, `lg:1024px`, `xl:1280px`, `2xl:1536px`
+
+**Utilities Personalizadas:**
+- `menu-item`, `menu-item-active`, `menu-item-inactive`
+- `menu-item-icon`, `menu-item-icon-active`, `menu-item-icon-inactive`
+- `menu-item-arrow`, `menu-item-arrow-active`, `menu-item-arrow-inactive`
+- `menu-dropdown-item`, `menu-dropdown-item-active`, `menu-dropdown-item-inactive`
+- `menu-dropdown-badge`, `menu-dropdown-badge-active`, `menu-dropdown-badge-inactive`
+- `no-scrollbar`, `custom-scrollbar`
+
+**Dark Mode:**
+- `dark:bg-gray-900`, `dark:text-gray-300`
+- `dark:bg-brand-500/[0.12]`, `dark:text-brand-400`
+- Soporte completo para modo oscuro
+
+### Excepciones Permitidas
+
+**Solo se permite CSS personalizado para:**
+1. **Animaciones complejas** que Tailwind no cubre
+2. **Integración con librerías de terceros** (charts, datepickers)
+3. **Hacks específicos** para compatibilidad de navegadores
+
+**Ejemplo de excepción válida:**
+```css
+/* Solo para integración con librería externa */
+.apexcharts-tooltip {
+  @apply !bg-gray-900 !border-gray-800;
+}
+```
+
 ## ⚠️ Regla Crítica de Flujo de Trabajo
 
 **Para evitar errores, todos los comandos deben ejecutarse desde el directorio correcto.**
@@ -8,9 +122,9 @@
     -   `cd backend`
     -   `rails s`, `rails db:migrate`, `rspec`, etc.
 
--   **Comandos de Frontend (React/Bun)**: Deben ejecutarse desde el directorio `frontend/`.
+-   **Comandos de Frontend (React/NPM)**: Deben ejecutarse desde el directorio `frontend/`.
     -   `cd frontend`
-    -   `bun install`, `bun run dev`, `bun test`, etc.
+    -   `npm install`, `npm run dev`, `npm test`, etc.
 
 **Esta es una restricción fundamental de la arquitectura de monorepo que hemos adoptado.**
 
@@ -19,11 +133,190 @@
 **Patrón**: API-First con Frontend SPA separado
 
 ```
-Frontend (React + Tailwind)
+Frontend (React + Tailwind + TailAdmin Template)
         ↕ HTTP/JSON API
 Backend (Rails API + JWT) ✅ COMPLETADO
         ↕ ActiveRecord ORM
 Base de Datos (PostgreSQL) ✅ CONFIGURADO
+```
+
+## 🎨 Frontend Architecture Patterns
+
+### Template Base: TailAdmin React
+
+**Estructura de Referencia**:
+```
+frontend/template-analysis/     # Template original
+├── src/
+│   ├── components/            # Componentes UI base
+│   ├── layout/               # Layouts y navegación
+│   ├── pages/                # Páginas del dashboard
+│   ├── icons/                # Iconos SVG
+│   └── ...
+└── README.md                 # Documentación completa
+```
+
+**Nuestra Adaptación**:
+```
+frontend/src/                  # Nuestra implementación
+├── layout/                   # Layout adaptado del template
+│   ├── Layout.jsx           # Estructura principal
+│   ├── Header.jsx           # Header con controles
+│   └── Sidebar.jsx          # Navegación específica
+├── components/              # Componentes UI adaptados
+│   ├── common/              # Componentes reutilizables
+│   ├── ui/                  # Elementos de interfaz
+│   └── features/            # Componentes específicos
+├── pages/                   # Páginas del lubricentro
+├── contexts/                # Contextos React
+├── services/                # Servicios API
+└── utils/                   # Utilidades
+```
+
+### Patrones de Componentes
+
+**Container + View Pattern**:
+```javascript
+// Container: Lógica y estado
+const ServicesContainer = () => {
+  const { data: services, isLoading } = useServices();
+  return <ServicesView services={services} loading={isLoading} />;
+};
+
+// View: Presentación
+const ServicesView = ({ services, loading }) => {
+  return (
+    <div className="dark:bg-boxdark-2 dark:text-bodydark">
+      {/* UI Components */}
+    </div>
+  );
+};
+```
+
+**Layout Pattern**:
+```javascript
+// Layout principal con tema oscuro/claro
+const Layout = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  return (
+    <div className="dark:bg-boxdark-2 dark:text-bodydark">
+      <div className="flex h-screen overflow-hidden">
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+          <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+          <main>
+            <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+              <Outlet />
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+### Routing Patterns
+
+**React Router Setup**:
+```javascript
+// App.jsx - Rutas específicas del lubricentro
+<Routes>
+  <Route path="/" element={<Layout />}>
+    <Route index element={<Dashboard />} />
+    <Route path="services" element={<Services />} />
+    <Route path="customers" element={<Customers />} />
+    <Route path="vehicles" element={<Vehicles />} />
+    <Route path="appointments" element={<Appointments />} />
+    <Route path="products" element={<Products />} />
+    <Route path="settings" element={<Settings />} />
+  </Route>
+</Routes>
+```
+
+### State Management Patterns
+
+**React Query para Server State**:
+```javascript
+// services/api.js
+const api = axios.create({
+  baseURL: '/api/v1',
+  headers: { Authorization: `Bearer ${token}` }
+});
+
+// hooks/useServices.js
+const useServices = () => {
+  return useQuery('services', () => api.get('/services'));
+};
+
+const useCreateService = () => {
+  return useMutation((serviceData) => api.post('/services', serviceData));
+};
+```
+
+**Context solo para Auth**:
+```javascript
+// contexts/QueryProvider.jsx
+const QueryProvider = ({ children }) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { staleTime: 5 * 60 * 1000 }, // 5 minutos
+    },
+  });
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+      <ReactQueryDevtools />
+    </QueryClientProvider>
+  );
+};
+```
+
+### UI/UX Patterns
+
+**Tailwind Design System**:
+```javascript
+// Colores consistentes (del template)
+primary: 'blue-600'     // Acciones principales
+secondary: 'gray-600'   // Elementos secundarios
+success: 'green-600'    // Estados exitosos
+danger: 'red-600'       // Errores y eliminaciones
+warning: 'yellow-600'   // Alertas
+
+// Tema oscuro/claro
+dark:bg-boxdark-2 dark:text-bodydark  // Clases del template
+```
+
+**Componentes Reutilizables**:
+```javascript
+// Button con variantes
+<Button variant="primary" size="md" loading={isLoading}>
+  Guardar
+</Button>
+
+// Modal para confirmaciones
+<Modal isOpen={isOpen} onClose={onClose}>
+  <ModalContent>...</ModalContent>
+</Modal>
+
+// Table con paginación
+<Table data={data} columns={columns} pagination={pagination} />
+```
+
+### Form Patterns
+
+**React Hook Form + Yup**:
+```javascript
+const schema = yup.object({
+  name: yup.string().required('El nombre es requerido'),
+  price: yup.number().positive('El precio debe ser positivo'),
+});
+
+const { register, handleSubmit, formState: { errors } } = useForm({
+  resolver: yupResolver(schema)
+});
 ```
 
 ## Modelo de Datos ✅ IMPLEMENTADO
