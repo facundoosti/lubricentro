@@ -148,6 +148,34 @@ xs: '0.5rem' sm: '1rem' md: '1.5rem' lg: '2rem'
 3. **Context solo para auth**: Estado de servidor via React Query
 4. **Lazy loading**: Para rutas no críticas
 5. **Error boundaries**: Manejo robusto de errores
+6. **SIEMPRE usar alias de importación**: Nunca rutas relativas
+
+### Import Alias Rules (CRÍTICO)
+```javascript
+// ❌ NUNCA usar rutas relativas
+import Button from '../../ui/Button';
+import { useCustomers } from '../services/customersService';
+
+// ✅ SIEMPRE usar alias configurados
+import Button from '@ui/Button';
+import { useCustomers } from '@services/customersService';
+```
+
+### Alias Disponibles (vite.config.js)
+```javascript
+'@' → './src'
+'@components' → './src/components'
+'@ui' → './src/components/ui'
+'@common' → './src/components/common'
+'@layout' → './src/layout'
+'@pages' → './src/pages'
+'@hooks' → './src/hooks'
+'@services' → './src/services'
+'@utils' → './src/utils'
+'@contexts' → './src/contexts'
+'@icons' → './src/icons'
+'@assets' → './src/assets'
+```
 
 ### API Integration
 ```javascript
@@ -243,6 +271,7 @@ npm test # testing
 - ❌ Estado global innecesario
 - ❌ Componentes >300 líneas
 - ❌ Controllers sin validación de params
+- ❌ Usar rutas relativas en importaciones (SIEMPRE alias)
 
 ### SIEMPRE hacer:
 - ✅ Leer Memory Bank antes de empezar
@@ -253,6 +282,7 @@ npm test # testing
 - ✅ Documentar decisiones importantes
 - ✅ Mobile-first responsive design
 - ✅ Actualizar progress.md después de cambios
+- ✅ Usar alias de importación (@ui, @services, @components, etc.)
 
 ## 🎯 Current Focus (Siempre verificar activeContext.md)
 

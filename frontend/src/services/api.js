@@ -106,4 +106,5 @@ export const serviceRecordsAPI = {
   statistics: () => api.get('/service_records/statistics'),
 };
 
+export { api };
 export default api; 

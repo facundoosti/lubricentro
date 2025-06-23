@@ -1,12 +1,90 @@
-# React + Vite
+# Sistema Lubricentro - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend del Sistema de Gestión para Lubricentro desarrollado con React 18, Vite, Tailwind CSS y React Query.
 
-Currently, two official plugins are available:
+## 🚀 Tecnologías
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React 18** - Biblioteca de UI
+- **Vite** - Build tool y dev server
+- **Tailwind CSS v4** - Framework de CSS
+- **React Query** - Estado del servidor y cache
+- **React Router** - Navegación
+- **React Hook Form** - Formularios
+- **Lucide React** - Iconos
 
-## Expanding the ESLint configuration
+## 📁 Estructura del Proyecto
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```
+src/
+├── components/
+│   ├── ui/              # Componentes de UI reutilizables
+│   ├── common/          # Componentes comunes
+│   └── features/        # Componentes por dominio
+├── layout/              # Layout principal
+├── pages/               # Páginas de la aplicación
+├── services/            # Servicios de API
+├── contexts/            # Contextos de React
+├── hooks/               # Custom hooks
+├── utils/               # Utilidades
+└── icons/               # Iconos SVG
+```
+
+## 🚨 Reglas de Importación
+
+**CRÍTICO**: Siempre usa alias de importación en lugar de rutas relativas.
+
+```javascript
+// ❌ NO HACER
+import Button from '../../ui/Button';
+
+// ✅ HACER
+import Button from '@ui/Button';
+```
+
+Ver [IMPORT_RULES.md](./IMPORT_RULES.md) para más detalles.
+
+## 🛠️ Comandos
+
+```bash
+# Instalar dependencias
+npm install
+
+# Servidor de desarrollo
+npm run dev
+
+# Build de producción
+npm run build
+
+# Linting
+npm run lint
+
+# Preview de producción
+npm run preview
+```
+
+## 🔧 Configuración
+
+- **Alias de importación**: Configurados en `vite.config.js`
+- **ESLint**: Reglas personalizadas para detectar rutas relativas
+- **Tailwind**: Configuración personalizada en `tailwind.config.js`
+
+## 📚 Documentación
+
+- [Reglas de Importación](./IMPORT_RULES.md)
+- [Cursor Rules](../.cursorrules)
+- [Memory Bank](../memory-bank/)
+
+## 🎯 Características
+
+- ✅ CRUD completo de clientes
+- ✅ CRUD parcial de vehículos, productos, servicios
+- ✅ Tabla de atenciones con estados visuales
+- ✅ Dashboard con métricas
+- ✅ UI responsive y accesible
+- ✅ Sistema de notificaciones
+- ✅ Paginación y búsqueda
+- ✅ Manejo de errores robusto
+
+---
+
+**Desarrollado para Sistema Lubricentro** 🚗

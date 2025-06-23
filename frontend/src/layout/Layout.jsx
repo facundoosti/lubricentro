@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { SidebarProvider, useSidebar } from '../contexts/SidebarContext';
+import { SidebarProvider, useSidebar } from '@contexts/SidebarContext';
 import Header from '@layout/Header';
 import Sidebar from '@layout/Sidebar';
 

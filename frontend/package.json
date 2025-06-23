@@ -16,6 +16,7 @@
     "@tanstack/react-query-devtools": "^5.80.10",
     "apexcharts": "^4.7.0",
     "axios": "^1.10.0",
+    "date-fns": "^4.1.0",
     "lucide-react": "^0.518.0",
     "react": "^19.1.0",
     "react-apexcharts": "^1.7.0",

@@ -114,6 +114,242 @@ frontend/src/
 }
 ```
 
+## 📊 PATRÓN DE TABLAS ESTABLECIDO ✅
+
+**Referencia**: `CustomersTable.jsx` y `ServiceRecordsTable.jsx`
+
+### Estructura Obligatoria de Tablas
+
+```jsx
+const EntityTable = ({ 
+  entities = [], 
+  pagination = {},
+  onPageChange,
+  onSearch,
+  onEdit,
+  onDelete,
+  onView,
+  onCreate,
+  loading = false 
+}) => {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    onSearch(searchTerm);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header con búsqueda y botón crear - ESTRUCTURA FIJA */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex-1 max-w-md">
+          <form onSubmit={handleSearch} className="relative">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+              />
+            </div>
+          </form>
+        </div>
+        
+        <Button
+          onClick={onCreate}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          <Plus className="w-4 h-4" />
+          Nuevo Elemento
+        </Button>
+      </div>
+
+      {/* Tabla - ESTRUCTURA FIJA */}
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+        <div className="max-w-full overflow-x-auto">
+          <Table>
+            <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+              <TableRow>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                >
+                  Columna 1
+                </TableCell>
+                {/* Más columnas... */}
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                >
+                  Acciones
+                </TableCell>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={N} className="px-5 py-8 text-center text-gray-500">
+                    Cargando...
+                  </TableCell>
+                </TableRow>
+              ) : entities.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={N} className="px-5 py-8 text-center text-gray-500">
+                    No se encontraron elementos
+                  </TableCell>
+                </TableRow>
+              ) : (
+                entities.map((entity) => (
+                  <TableRow key={entity.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                    {/* Celdas con estructura consistente */}
+                    <TableCell className="px-5 py-4 sm:px-6 text-start">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                          {/* Icono o iniciales */}
+                        </div>
+                        <div>
+                          <span className="block font-medium text-gray-800 text-sm dark:text-white/90">
+                            {/* Texto principal */}
+                          </span>
+                          <span className="block text-gray-500 text-xs dark:text-gray-400">
+                            {/* Texto secundario */}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    
+                    {/* Columna de acciones - ESTRUCTURA FIJA */}
+                    <TableCell className="px-4 py-3 text-start">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => onView(entity)}
+                          className="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                          title="Ver detalles"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => onEdit(entity)}
+                          className="p-1 text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400"
+                          title="Editar"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => onDelete(entity)}
+                          className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+
+      {/* Paginación - ESTRUCTURA FIJA */}
+      {pagination && pagination.total_pages > 1 && (
+        <div className="mt-6">
+          <Pagination
+            currentPage={pagination.current_page || 1}
+            totalPages={pagination.total_pages || 1}
+            totalItems={pagination.total_count || 0}
+            itemsPerPage={pagination.per_page || 10}
+            onPageChange={onPageChange}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+### Reglas de Implementación de Tablas
+
+**✅ OBLIGATORIO:**
+1. **Estructura de props fija**: `entities`, `pagination`, `onPageChange`, `onSearch`, `onEdit`, `onDelete`, `onView`, `onCreate`, `loading`
+2. **Header consistente**: Búsqueda a la izquierda, botón crear a la derecha
+3. **Clases de tabla fijas**: Usar exactamente las mismas clases de Tailwind
+4. **Columna de acciones**: Siempre última, con los 3 botones (Ver, Editar, Eliminar)
+5. **Estados de loading y empty**: Manejar siempre con mensajes apropiados
+6. **Paginación**: Usar componente `Pagination` del template
+7. **Hover effects**: `hover:bg-gray-50 dark:hover:bg-gray-800/50`
+
+**🎨 Patrones de Celdas:**
+```jsx
+// Celda con avatar/iniciales
+<TableCell className="px-5 py-4 sm:px-6 text-start">
+  <div className="flex items-center gap-3">
+    <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+      <span className="text-blue-600 dark:text-blue-400 font-medium text-sm">
+        {getInitials(entity.name)}
+      </span>
+    </div>
+    <div>
+      <span className="block font-medium text-gray-800 text-sm dark:text-white/90">
+        {entity.name}
+      </span>
+      <span className="block text-gray-500 text-xs dark:text-gray-400">
+        ID: {entity.id}
+      </span>
+    </div>
+  </div>
+</TableCell>
+
+// Celda con badge
+<TableCell className="px-4 py-3 text-start">
+  <Badge size="sm" color={getStatusColor(entity)}>
+    {getStatusText(entity)}
+  </Badge>
+</TableCell>
+```
+
+**🔧 Funciones Helper Estándar:**
+```jsx
+// Para iniciales
+const getInitials = (name) => {
+  if (!name) return '--';
+  return name
+    .split(' ')
+    .map(word => word.charAt(0))
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+// Para estados
+const getStatusColor = (entity) => {
+  // Lógica específica por entidad
+  return "success"; // o "error", "warning"
+};
+
+const getStatusText = (entity) => {
+  // Texto específico por entidad
+  return "Estado";
+};
+```
+
+**📱 Responsive Design:**
+- **Mobile-first**: `flex-col sm:flex-row` en header
+- **Overflow**: `max-w-full overflow-x-auto` en contenedor de tabla
+- **Spacing**: `px-5 py-4 sm:px-6` en celdas
+
+**🎯 Ejemplos Implementados:**
+- ✅ `CustomersTable.jsx` - Patrón base establecido
+- ✅ `ServiceRecordsTable.jsx` - Siguiendo el patrón
+- 🚧 `VehiclesTable.jsx` - Pendiente de actualización
+- 🚧 `ServicesTable.jsx` - Pendiente de actualización
+- 🚧 `ProductsTable.jsx` - Pendiente de actualización
+
 ## ⚠️ Regla Crítica de Flujo de Trabajo
 
 **Para evitar errores, todos los comandos deben ejecutarse desde el directorio correcto.**

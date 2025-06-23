@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { useSidebar } from '../contexts/SidebarContext';
+import { useSidebar } from '@contexts/SidebarContext';
+import { Sparkles } from 'lucide-react';
 
 const Header = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
@@ -108,10 +109,23 @@ const Header = () => {
         
         <div className="flex items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none">
           <div className="flex items-center gap-2 2xsm:gap-3">
-            {/* Aquí irían los componentes de notificaciones y tema */}
-            <div className="text-gray-500 dark:text-gray-400">
-              Sistema Lubricentro
+            {/* Icono de funcionalidad en desarrollo */}
+            <div className="relative group">
+              <Sparkles className="size-5 text-blue-600 dark:text-blue-400" />
+              
+              {/* Tooltip */}
+              <div className="absolute right-0 top-full mt-2 px-3 py-2 text-xs text-white bg-blue-600 rounded-lg shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
+                <div className="relative">
+                  ✨ ¡Próximamente! Esta funcionalidad está en desarrollo y llegará muy pronto.
+                  <div className="absolute -top-1 right-3 w-2 h-2 bg-blue-600 transform rotate-45"></div>
+                </div>
+              </div>
             </div>
+            
+            {/* Texto del sistema separado */}
+            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              Sistema Lubricentro
+            </span>
           </div>
         </div>
       </div>

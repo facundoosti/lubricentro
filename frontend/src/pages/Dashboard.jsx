@@ -3,7 +3,7 @@ import MonthlyServicesChart from '@components/dashboard/MonthlyServicesChart';
 import MonthlyTarget from '@components/dashboard/MonthlyTarget';
 import RecentAppointments from '@components/dashboard/RecentAppointments';
 import PageMeta from '@common/PageMeta';
-import { useDashboardStats } from '../services/dashboardService';
+import { useDashboardStats } from '@services/dashboardService';
 
 export default function Dashboard() {
   const { data, isLoading, isError, error } = useDashboardStats();

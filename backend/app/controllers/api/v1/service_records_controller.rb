@@ -9,22 +9,26 @@ class Api::V1::ServiceRecordsController < ApplicationController
     @service_records = @service_records.by_customer(params[:customer_id]) if params[:customer_id].present?
     @service_records = @service_records.by_vehicle(params[:vehicle_id]) if params[:vehicle_id].present?
     @service_records = @service_records.by_date_range(params[:start_date], params[:end_date]) if params[:start_date].present? && params[:end_date].present?
+
+    # Búsqueda por cliente o vehículo
+    if params[:search].present?
+      @service_records = @service_records.joins(:customer, :vehicle)
+        .where("customers.nombre ILIKE ? OR vehicles.patente ILIKE ? OR vehicles.marca ILIKE ? OR vehicles.modelo ILIKE ?",
+               "%#{params[:search]}%", "%#{params[:search]}%", "%#{params[:search]}%", "%#{params[:search]}%")
+    end
+
     @service_records = @service_records.recent
 
-    render json: {
-      success: true,
-      data: ServiceRecordSerializer.render_as_hash(@service_records, view: :summary),
-      message: "Service records retrieved successfully"
-    }
+    # Paginación con Pagy
+    @pagy, @service_records = pagy(@service_records, items: safe_per_page(params[:per_page]))
+    @serializer = ServiceRecordSerializer.render_as_hash(@service_records, view: :with_associations, root: :service_records)
+    render_json(@serializer)
   end
 
   # GET /api/v1/service_records/:id
   def show
-    render json: {
-      success: true,
-      data: ServiceRecordSerializer.render_as_hash(@service_record, view: :with_details),
-      message: "Service record retrieved successfully"
-    }
+    @serializer = ServiceRecordSerializer.render_as_hash(@service_record, view: :with_details)
+    render_json(@serializer)
   end
 
   # POST /api/v1/service_records
@@ -32,44 +36,27 @@ class Api::V1::ServiceRecordsController < ApplicationController
     @service_record = ServiceRecord.new(service_record_params)
 
     if @service_record.save
-      render json: {
-        success: true,
-        data: ServiceRecordSerializer.render_as_hash(@service_record, view: :with_details),
-        message: "Service record created successfully"
-      }, status: :created
+      @serializer = ServiceRecordSerializer.render_as_hash(@service_record, view: :with_details)
+      render_json(@serializer, message: "Service record created successfully", status: :created)
     else
-      render json: {
-        success: false,
-        errors: @service_record.errors.full_messages,
-        message: "Failed to create service record"
-      }, status: :unprocessable_entity
+      render_json({ errors: @service_record.errors.full_messages }, message: "Failed to create service record", status: :unprocessable_entity)
     end
   end
 
   # PATCH/PUT /api/v1/service_records/:id
   def update
     if @service_record.update(service_record_params)
-      render json: {
-        success: true,
-        data: ServiceRecordSerializer.render_as_hash(@service_record, view: :with_details),
-        message: "Service record updated successfully"
-      }
+      @serializer = ServiceRecordSerializer.render_as_hash(@service_record, view: :with_details)
+      render_json(@serializer, message: "Service record updated successfully")
     else
-      render json: {
-        success: false,
-        errors: @service_record.errors.full_messages,
-        message: "Failed to update service record"
-      }, status: :unprocessable_entity
+      render_json({ errors: @service_record.errors.full_messages }, message: "Failed to update service record", status: :unprocessable_entity)
     end
   end
 
   # DELETE /api/v1/service_records/:id
   def destroy
     @service_record.destroy
-    render json: {
-      success: true,
-      message: "Service record deleted successfully"
-    }
+    render_json({}, message: "Service record deleted successfully")
   end
 
   # GET /api/v1/service_records/overdue
@@ -119,31 +106,19 @@ class Api::V1::ServiceRecordsController < ApplicationController
   def set_service_record
     @service_record = ServiceRecord.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render json: {
-      success: false,
-      errors: [ "Service record not found" ],
-      message: "Service record not found"
-    }, status: :not_found
+    render_json({ errors: [ "Service record not found" ] }, message: "Service record not found", status: :not_found)
   end
 
   def set_customer
     @customer = Customer.find(params[:customer_id]) if params[:customer_id].present?
   rescue ActiveRecord::RecordNotFound
-    render json: {
-      success: false,
-      errors: [ "Customer not found" ],
-      message: "Customer not found"
-    }, status: :not_found
+    render_json({ errors: [ "Customer not found" ] }, message: "Customer not found", status: :not_found)
   end
 
   def set_vehicle
     @vehicle = Vehicle.find(params[:vehicle_id]) if params[:vehicle_id].present?
   rescue ActiveRecord::RecordNotFound
-    render json: {
-      success: false,
-      errors: [ "Vehicle not found" ],
-      message: "Vehicle not found"
-    }, status: :not_found
+    render_json({ errors: [ "Vehicle not found" ] }, message: "Vehicle not found", status: :not_found)
   end
 
   def service_record_params

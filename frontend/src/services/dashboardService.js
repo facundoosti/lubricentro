@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import api from './api';
+import { api } from '@services/api';
 
 // Query keys para el dashboard
 export const dashboardKeys = {
