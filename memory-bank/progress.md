@@ -1,5 +1,15 @@
 # Progress Report - Sistema Lubricentro
 
+## 🧪 Backend Testing & Dashboard Metrics (Junio 2024)
+
+- [x] Refactor y robustez en tests de DashboardStatsService (alertas, crecimiento, retención)
+- [x] Integración total de asociaciones service_record_services y service_record_products en métricas y tests
+- [x] Seed y factories alineados con la lógica real del sistema
+- [x] Tests de backend en verde para métricas de dashboard
+- [x] Documentación de patrones de testeo para datos de fechas y asociaciones explícitas
+- [x] Limpieza de datos y uso de update_columns para fechas custom en tests
+- [x] Validación de retención y crecimiento con datos controlados
+
 ## 🎯 Estado Actual del Proyecto
 
 ### ✅ **Fase 1: Setup y Configuración - COMPLETADA**
@@ -22,6 +32,7 @@
 - [x] Manejo de errores consistente
 - [x] Serializers optimizados
 - [x] Tests básicos con RSpec
+- [x] Métricas de dashboard robustas y testeadas
 
 ### ✅ **Fase 3: Frontend Core - COMPLETADA**
 - [x] Componentes UI reutilizables
@@ -311,6 +322,10 @@
 3. **Completar CRUD Servicios** (2 días)
 4. **Sistema de Turnos básico** (3 días)
 5. **Testing y optimización** (1 día)
+
+## 🎯 **Acciones recomendadas**
+
+- Para verificar endpoints rápidamente, usar curl directamente a la ruta indicada en routes.rb.
 
 ---
 

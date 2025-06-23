@@ -16,6 +16,8 @@ puts "🌱 Iniciando seeds para Sistema Lubricentro..."
 # Limpiar datos existentes (solo en development)
 if Rails.env.development?
   puts "🧹 Limpiando datos existentes..."
+  ServiceRecordProduct.destroy_all
+  ServiceRecordService.destroy_all
   ServiceRecord.destroy_all
   Appointment.destroy_all
   Vehicle.destroy_all
@@ -267,29 +269,75 @@ customers.each do |customer|
     # Registros pasados
     rand(1..3).times do |i|
       service_date = (i + 1).months.ago.to_date
-      total_amount = rand(50.0..500.0).round(2)
 
-      ServiceRecord.create!(
+      # Crear service record
+      service_record = ServiceRecord.create!(
         service_date: service_date,
-        total_amount: total_amount,
+        total_amount: 0, # Se calculará automáticamente
         notes: Faker::Lorem.sentence(word_count: 10, supplemental: false, random_words_to_add: 5),
         mileage: rand(10000..150000),
         next_service_date: service_date + 6.months,
         customer: customer,
         vehicle: vehicle
       )
+
+      # Agregar servicios al registro
+      services_to_add = Service.all.sample(rand(1..3))
+      services_to_add.each do |service|
+        service_record.service_record_services.create!(
+          service: service,
+          quantity: rand(1..2),
+          unit_price: service.base_price
+        )
+      end
+
+      # Agregar productos al registro
+      products_to_add = Product.all.sample(rand(1..4))
+      products_to_add.each do |product|
+        service_record.service_record_products.create!(
+          product: product,
+          quantity: rand(1..3),
+          unit_price: product.unit_price
+        )
+      end
+
+      # Actualizar total
+      service_record.update_total_amount
     end
 
     # Registro reciente
-    ServiceRecord.create!(
+    service_record = ServiceRecord.create!(
       service_date: 2.weeks.ago.to_date,
-      total_amount: rand(100.0..300.0).round(2),
+      total_amount: 0, # Se calculará automáticamente
       notes: Faker::Lorem.sentence(word_count: 10, supplemental: false, random_words_to_add: 5),
       mileage: rand(50000..120000),
       next_service_date: 4.months.from_now.to_date,
       customer: customer,
       vehicle: vehicle
     )
+
+    # Agregar servicios al registro reciente
+    services_to_add = Service.all.sample(rand(1..2))
+    services_to_add.each do |service|
+      service_record.service_record_services.create!(
+        service: service,
+        quantity: rand(1..2),
+        unit_price: service.base_price
+      )
+    end
+
+    # Agregar productos al registro reciente
+    products_to_add = Product.all.sample(rand(1..3))
+    products_to_add.each do |product|
+      service_record.service_record_products.create!(
+        product: product,
+        quantity: rand(1..2),
+        unit_price: product.unit_price
+      )
+    end
+
+    # Actualizar total
+    service_record.update_total_amount
   end
 end
 
@@ -299,15 +347,34 @@ puts "⚠️ Creando registros vencidos para testing..."
 customers.sample(3).each do |customer|
   vehicle = customer.vehicles.sample
 
-  ServiceRecord.create!(
+  service_record = ServiceRecord.create!(
     service_date: 8.months.ago.to_date,
-    total_amount: rand(80.0..200.0).round(2),
+    total_amount: 0, # Se calculará automáticamente
     notes: "Servicio vencido - " + Faker::Lorem.sentence(word_count: 8, supplemental: false, random_words_to_add: 4),
     mileage: rand(80000..180000),
     next_service_date: 2.months.ago.to_date, # Vencido
     customer: customer,
     vehicle: vehicle
   )
+
+  # Agregar servicios y productos
+  Service.all.sample(rand(1..2)).each do |service|
+    service_record.service_record_services.create!(
+      service: service,
+      quantity: rand(1..2),
+      unit_price: service.base_price
+    )
+  end
+
+  Product.all.sample(rand(1..3)).each do |product|
+    service_record.service_record_products.create!(
+      product: product,
+      quantity: rand(1..2),
+      unit_price: product.unit_price
+    )
+  end
+
+  service_record.update_total_amount
 end
 
 # Crear algunos registros próximos para testing
@@ -316,15 +383,34 @@ puts "📋 Creando registros próximos para testing..."
 customers.sample(2).each do |customer|
   vehicle = customer.vehicles.sample
 
-  ServiceRecord.create!(
+  service_record = ServiceRecord.create!(
     service_date: 5.months.ago.to_date,
-    total_amount: rand(90.0..250.0).round(2),
+    total_amount: 0, # Se calculará automáticamente
     notes: "Servicio próximo - " + Faker::Lorem.sentence(word_count: 8, supplemental: false, random_words_to_add: 4),
     mileage: rand(60000..140000),
     next_service_date: 2.weeks.from_now.to_date, # Próximo
     customer: customer,
     vehicle: vehicle
   )
+
+  # Agregar servicios y productos
+  Service.all.sample(rand(1..3)).each do |service|
+    service_record.service_record_services.create!(
+      service: service,
+      quantity: rand(1..2),
+      unit_price: service.base_price
+    )
+  end
+
+  Product.all.sample(rand(1..4)).each do |product|
+    service_record.service_record_products.create!(
+      product: product,
+      quantity: rand(1..3),
+      unit_price: product.unit_price
+    )
+  end
+
+  service_record.update_total_amount
 end
 
 # Crear clientes adicionales para testing
@@ -416,11 +502,14 @@ puts "   🔧 Services: #{Service.count}"
 puts "   📦 Products: #{Product.count}"
 puts "   📅 Appointments: #{Appointment.count}"
 puts "   🔧 Service Records: #{ServiceRecord.count}"
+puts "   🔧 Service Record Services: #{ServiceRecordService.count}"
+puts "   📦 Service Record Products: #{ServiceRecordProduct.count}"
 
 puts "\n🎯 Datos de prueba disponibles:"
 puts "   • Usuarios con múltiples vehículos"
 puts "   • Turnos en diferentes estados (pasados, futuros, urgentes)"
-puts "   • Registros de servicio con fechas variadas"
+puts "   • Registros de servicio con servicios y productos específicos"
+puts "   • Cálculo automático de totales basado en servicios y productos"
 puts "   • Algunos registros vencidos para testing"
 puts "   • Algunos registros próximos para testing"
 

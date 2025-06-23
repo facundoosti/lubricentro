@@ -6,28 +6,28 @@ const LubricentroMetrics = ({ data }) => {
     {
       title: 'Clientes',
       value: data?.customers || 0,
-      change: data?.customersChange || 0,
+      change: data?.customers_change || 0,
       icon: GroupIcon,
       color: 'success'
     },
     {
       title: 'Vehículos',
       value: data?.vehicles || 0,
-      change: data?.vehiclesChange || 0,
+      change: data?.vehicles_change || 0,
       icon: BoxIconLine,
       color: 'success'
     },
     {
       title: 'Turnos Hoy',
-      value: data?.appointmentsToday || 0,
-      change: data?.appointmentsChange || 0,
+      value: data?.appointments_today || 0,
+      change: data?.appointments_change || 0,
       icon: CalendarIcon,
       color: 'warning'
     },
     {
       title: 'Ingresos Mes',
-      value: `$${data?.monthlyRevenue?.toLocaleString() || 0}`,
-      change: data?.revenueChange || 0,
+      value: `$${(data?.monthly_revenue || 0).toLocaleString()}`,
+      change: data?.revenue_change || 0,
       icon: DollarIcon,
       color: 'success'
     }

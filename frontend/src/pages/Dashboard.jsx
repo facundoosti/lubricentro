@@ -3,71 +3,10 @@ import MonthlyServicesChart from '@components/dashboard/MonthlyServicesChart';
 import MonthlyTarget from '@components/dashboard/MonthlyTarget';
 import RecentAppointments from '@components/dashboard/RecentAppointments';
 import PageMeta from '@common/PageMeta';
+import { useDashboardStats } from '../services/dashboardService';
 
 export default function Dashboard() {
-  // Mock data for now - later we'll connect to real API
-  const mockDashboardData = {
-    metrics: {
-      customers: 156,
-      customersChange: 12.5,
-      vehicles: 203,
-      vehiclesChange: 8.3,
-      appointmentsToday: 8,
-      appointmentsChange: -5.2,
-      monthlyRevenue: 45250,
-      revenueChange: 15.7
-    },
-    monthlyServices: [
-      { month: 'Ene', services: 45, revenue: 12500 },
-      { month: 'Feb', services: 52, revenue: 13800 },
-      { month: 'Mar', services: 48, revenue: 13200 },
-      { month: 'Abr', services: 61, revenue: 15800 },
-      { month: 'May', services: 55, revenue: 14500 },
-      { month: 'Jun', services: 67, revenue: 17200 },
-    ],
-    monthlyTarget: {
-      target: 50000,
-      current: 45250,
-      servicesCompleted: 67,
-      servicesTarget: 80
-    },
-    recentAppointments: [
-      {
-        id: 1,
-        customer: 'Juan Pérez',
-        vehicle: 'Toyota Corolla - ABC123',
-        service: 'Cambio de aceite',
-        time: '09:00',
-        status: 'confirmed'
-      },
-      {
-        id: 2,
-        customer: 'María García',
-        vehicle: 'Honda Civic - XYZ789',
-        service: 'Frenos',
-        time: '10:30',
-        status: 'pending'
-      },
-      {
-        id: 3,
-        customer: 'Carlos López',
-        vehicle: 'Ford Focus - DEF456',
-        service: 'Alineación',
-        time: '14:00',
-        status: 'confirmed'
-      }
-    ]
-  };
-
-  // TODO: Replace with real API call
-  // const { data: dashboardData, isLoading } = useQuery({
-  //   queryKey: ['dashboard'],
-  //   queryFn: () => api.get('/dashboard/stats'),
-  //   staleTime: 5 * 60 * 1000, // 5 minutes
-  // });
-
-  const dashboardData = mockDashboardData;
-  const isLoading = false;
+  const { data, isLoading, isError, error } = useDashboardStats();
 
   if (isLoading) {
     return (
@@ -76,6 +15,17 @@ export default function Dashboard() {
       </div>
     );
   }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-red-600">
+        <span className="font-bold text-lg">Error al cargar el dashboard</span>
+        <span className="text-sm">{error?.message || 'Ocurrió un error inesperado.'}</span>
+      </div>
+    );
+  }
+
+  const dashboardData = data?.data || {};
 
   return (
     <>
@@ -98,17 +48,17 @@ export default function Dashboard() {
           {/* Métricas principales */}
           <div className="col-span-12 space-y-6 xl:col-span-7">
             <LubricentroMetrics data={dashboardData.metrics} />
-            <MonthlyServicesChart data={dashboardData.monthlyServices} />
+            <MonthlyServicesChart data={dashboardData.trends?.monthly_services} />
           </div>
 
           {/* Objetivo mensual */}
           <div className="col-span-12 xl:col-span-5">
-            <MonthlyTarget data={dashboardData.monthlyTarget} />
+            <MonthlyTarget data={dashboardData.goals} />
           </div>
 
           {/* Turnos recientes */}
           <div className="col-span-12 xl:col-span-7">
-            <RecentAppointments data={dashboardData.recentAppointments} />
+            <RecentAppointments data={dashboardData.recent_activity?.today_appointments} />
           </div>
         </div>
       </div>

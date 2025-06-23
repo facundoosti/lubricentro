@@ -14,54 +14,6 @@ import {
   Clock
 } from "lucide-react";
 
-// Interface para los datos de servicio
-const Service = {
-  id: 1,
-  name: "Cambio de Aceite",
-  description: "Cambio completo de aceite y filtro",
-  base_price: 15000,
-  status: "active",
-};
-
-// Datos de ejemplo (después se conectarán con la API)
-const servicesData = [
-  {
-    id: 1,
-    name: "Cambio de Aceite",
-    description: "Cambio completo de aceite y filtro de motor",
-    base_price: 15000,
-    status: "active",
-  },
-  {
-    id: 2,
-    name: "Cambio de Filtro de Aire",
-    description: "Reemplazo del filtro de aire del motor",
-    base_price: 8000,
-    status: "active",
-  },
-  {
-    id: 3,
-    name: "Cambio de Bujías",
-    description: "Reemplazo completo de bujías",
-    base_price: 25000,
-    status: "active",
-  },
-  {
-    id: 4,
-    name: "Limpieza de Inyectores",
-    description: "Limpieza y calibración de inyectores",
-    base_price: 35000,
-    status: "inactive",
-  },
-  {
-    id: 5,
-    name: "Cambio de Líquido de Frenos",
-    description: "Reemplazo del líquido de frenos",
-    base_price: 12000,
-    status: "active",
-  },
-];
-
 const ServicesTable = ({ 
   services = [], 
   pagination = {},

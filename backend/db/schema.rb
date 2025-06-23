@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_20_180318) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_23_033030) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -52,6 +52,34 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_180318) do
     t.index ["unit_price"], name: "index_products_on_unit_price"
   end
 
+  create_table "service_record_products", force: :cascade do |t|
+    t.bigint "service_record_id", null: false
+    t.bigint "product_id", null: false
+    t.integer "quantity", default: 1, null: false
+    t.decimal "unit_price", precision: 10, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_service_record_products_on_product_id"
+    t.index ["quantity"], name: "index_service_record_products_on_quantity"
+    t.index ["service_record_id", "product_id"], name: "index_service_record_products_unique", unique: true
+    t.index ["service_record_id"], name: "index_service_record_products_on_service_record_id"
+    t.index ["unit_price"], name: "index_service_record_products_on_unit_price"
+  end
+
+  create_table "service_record_services", force: :cascade do |t|
+    t.bigint "service_record_id", null: false
+    t.bigint "service_id", null: false
+    t.integer "quantity", default: 1, null: false
+    t.decimal "unit_price", precision: 10, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["quantity"], name: "index_service_record_services_on_quantity"
+    t.index ["service_id"], name: "index_service_record_services_on_service_id"
+    t.index ["service_record_id", "service_id"], name: "index_service_record_services_unique", unique: true
+    t.index ["service_record_id"], name: "index_service_record_services_on_service_record_id"
+    t.index ["unit_price"], name: "index_service_record_services_on_unit_price"
+  end
+
   create_table "service_records", force: :cascade do |t|
     t.date "service_date"
     t.decimal "total_amount"
@@ -90,6 +118,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_180318) do
 
   add_foreign_key "appointments", "customers"
   add_foreign_key "appointments", "vehicles"
+  add_foreign_key "service_record_products", "products"
+  add_foreign_key "service_record_products", "service_records"
+  add_foreign_key "service_record_services", "service_records"
+  add_foreign_key "service_record_services", "services"
   add_foreign_key "service_records", "customers"
   add_foreign_key "service_records", "vehicles"
   add_foreign_key "vehicles", "customers"

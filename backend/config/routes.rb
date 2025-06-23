@@ -5,6 +5,9 @@ Rails.application.routes.draw do
   # API routes
   namespace :api do
     namespace :v1 do
+      # Dashboard route
+      get "dashboard/stats", to: "dashboard#stats"
+
       resources :customers do
         # Nested routes for customer's vehicles
         resources :vehicles, only: [ :index ]

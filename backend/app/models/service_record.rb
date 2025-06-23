@@ -23,6 +23,12 @@ class ServiceRecord < ApplicationRecord
   belongs_to :customer
   belongs_to :vehicle
 
+  # Relaciones con servicios y productos
+  has_many :service_record_services, dependent: :destroy
+  has_many :service_record_products, dependent: :destroy
+  has_many :services, through: :service_record_services
+  has_many :products, through: :service_record_products
+
   # Validaciones
   validates :service_date, presence: true
   validates :total_amount, presence: true, numericality: { greater_than_or_equal_to: 0 }
@@ -64,6 +70,16 @@ class ServiceRecord < ApplicationRecord
   def days_until_next_service
     return nil unless next_service_date.present?
     (next_service_date - Date.current).to_i
+  end
+
+  def calculate_total_from_items
+    services_total = service_record_services.sum(&:total_price)
+    products_total = service_record_products.sum(&:total_price)
+    services_total + products_total
+  end
+
+  def update_total_amount
+    self.total_amount = calculate_total_from_items
   end
 
   private

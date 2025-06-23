@@ -18,8 +18,8 @@
 
 class Product < ApplicationRecord
   # Relaciones
-  # has_many :service_record_products, dependent: :destroy
-  # has_many :service_records, through: :service_record_products
+  has_many :service_record_products, dependent: :destroy
+  has_many :service_records, through: :service_record_products
 
   # Validaciones
   validates :name, presence: true, length: { maximum: 100 }, uniqueness: { case_sensitive: false }

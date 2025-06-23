@@ -1,16 +1,15 @@
 import { DollarIcon } from '@icons/index.jsx';
 
 const MonthlyTarget = ({ data }) => {
-  const targetData = data || {
-    target: 50000,
-    current: 35000,
-    percentage: 70,
-    servicesCompleted: 45,
-    servicesTarget: 60
-  };
-
-  const revenuePercentage = Math.round((targetData.current / targetData.target) * 100);
-  const servicesPercentage = Math.round((targetData.servicesCompleted / targetData.servicesTarget) * 100);
+  const targetData = data || {};
+  const revenuePercentage = Math.round(targetData.revenue_percentage || 0);
+  const servicesPercentage = Math.round(targetData.services_percentage || 0);
+  
+  // Valores con fallbacks para evitar errores
+  const revenueCurrent = targetData.revenue_current || 0;
+  const revenueTarget = targetData.revenue_target || 0;
+  const servicesCurrent = targetData.services_current || 0;
+  const servicesTarget = targetData.services_target || 0;
 
   return (
     <div className="p-4 bg-white rounded-lg shadow-md dark:bg-boxdark h-full">
@@ -26,7 +25,7 @@ const MonthlyTarget = ({ data }) => {
             </span>
           </div>
           <span className="text-sm font-bold text-gray-800 dark:text-white">
-            ${targetData.current.toLocaleString()} / ${targetData.target.toLocaleString()}
+            ${revenueCurrent.toLocaleString()} / ${revenueTarget.toLocaleString()}
           </span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
@@ -40,7 +39,7 @@ const MonthlyTarget = ({ data }) => {
             {revenuePercentage}% completado
           </span>
           <span className="text-xs text-gray-500 dark:text-gray-400">
-            ${(targetData.target - targetData.current).toLocaleString()} restante
+            ${(revenueTarget - revenueCurrent).toLocaleString()} restante
           </span>
         </div>
       </div>
@@ -52,7 +51,7 @@ const MonthlyTarget = ({ data }) => {
             Servicios
           </span>
           <span className="text-sm font-bold text-gray-800 dark:text-white">
-            {targetData.servicesCompleted} / {targetData.servicesTarget}
+            {servicesCurrent} / {servicesTarget}
           </span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
@@ -66,7 +65,7 @@ const MonthlyTarget = ({ data }) => {
             {servicesPercentage}% completado
           </span>
           <span className="text-xs text-gray-500 dark:text-gray-400">
-            {targetData.servicesTarget - targetData.servicesCompleted} restantes
+            {servicesTarget - servicesCurrent} restantes
           </span>
         </div>
       </div>

@@ -1,5 +1,13 @@
 # Active Context - Sistema Lubricentro
 
+## 🚦 Backend: Métricas y Testing Dashboard (Junio 2024)
+
+- [x] Refactor y robustez de tests de métricas de dashboard (alertas, crecimiento, retención)
+- [x] Integración total de asociaciones service_record_services y service_record_products en backend y tests
+- [x] Seed y factories alineados con la lógica real del sistema
+- [x] Tests de backend en verde para métricas de dashboard
+- [x] Patrones de testeo para fechas y asociaciones explícitas documentados
+
 ## 🎯 **Estado Actual: Fase 7 - CRUD Servicios Parcialmente Completado**
 
 ### **Última Actividad Completada**

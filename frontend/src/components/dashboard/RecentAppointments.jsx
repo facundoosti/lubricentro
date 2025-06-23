@@ -2,7 +2,7 @@ import { CalendarIcon, ClockIcon, UserIcon } from '@icons/index.jsx';
 import { Clock, CheckCircle, AlertCircle } from 'lucide-react';
 
 const RecentAppointments = ({ data }) => {
-  const appointments = data || [
+  const appointments = Array.isArray(data) ? data : [
     {
       id: 1,
       customer: 'Juan Pérez',
@@ -51,37 +51,43 @@ const RecentAppointments = ({ data }) => {
     <div className="p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
       <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Turnos Recientes</h2>
       <div className="space-y-4">
-        {appointments.map((appointment) => (
-          <div key={appointment.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg dark:border-gray-700">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg dark:bg-blue-900">
-                <CalendarIcon className="text-blue-600 size-5 dark:text-blue-400" />
+        {appointments.length === 0 ? (
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            No hay turnos programados para hoy
+          </div>
+        ) : (
+          appointments.map((appointment) => (
+            <div key={appointment.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg dark:border-gray-700">
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg dark:bg-blue-900">
+                  <CalendarIcon className="text-blue-600 size-5 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800 dark:text-white">
+                    {appointment.customer}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {appointment.vehicle}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">
+                    {appointment.service}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="font-medium text-gray-800 dark:text-white">
-                  {appointment.customer}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {appointment.vehicle}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-500">
-                  {appointment.service}
-                </p>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="flex items-center space-x-2">
-                <ClockIcon className="text-gray-400 size-4" />
-                <span className="text-sm font-medium text-gray-800 dark:text-white">
-                  {appointment.time}
+              <div className="text-right">
+                <div className="flex items-center space-x-2">
+                  <ClockIcon className="text-gray-400 size-4" />
+                  <span className="text-sm font-medium text-gray-800 dark:text-white">
+                    {appointment.time}
+                  </span>
+                </div>
+                <span className={`inline-block px-2 py-1 text-xs rounded-full ${getStatusColor(appointment.status)}`}>
+                  {getStatusText(appointment.status)}
                 </span>
               </div>
-              <span className={`inline-block px-2 py-1 text-xs rounded-full ${getStatusColor(appointment.status)}`}>
-                {getStatusText(appointment.status)}
-              </span>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
