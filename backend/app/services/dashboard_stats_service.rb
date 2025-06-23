@@ -67,10 +67,10 @@ class DashboardStatsService
 
     # Productos más utilizados (para identificar stock necesario)
     top_products = ServiceRecordProduct.joins(:product)
-                                      .group("products.name")
-                                      .sum(:quantity)
-                                      .sort_by { |_, quantity| -quantity }
-                                      .first(3)
+      .group("products.name")
+      .sum(:quantity)
+      .sort_by { |_, quantity| -quantity }
+      .first(3)
 
     # Servicios vencidos reales
     overdue_services = ServiceRecord.where("next_service_date < ?", Date.current).count
@@ -86,8 +86,8 @@ class DashboardStatsService
 
     # Servicios próximos a vencer
     upcoming_services = ServiceRecord.where("next_service_date BETWEEN ? AND ?",
-                                           Date.current,
-                                           Date.current + 1.week).count
+      Date.current,
+      Date.current + 1.week).count
     if upcoming_services > 0
       alerts << { type: "info", message: "#{upcoming_services} servicios próximos a vencer", count: upcoming_services }
     end
@@ -104,10 +104,10 @@ class DashboardStatsService
   def self.get_recent_activity
     {
       today_appointments: Appointment.where(scheduled_at: Date.current.all_day)
-                                   .includes(:customer, :vehicle)
-                                   .order(:scheduled_at)
-                                   .limit(5)
-                                   .map do |appointment|
+        .includes(:customer, :vehicle)
+        .order(:scheduled_at)
+        .limit(5)
+        .map do |appointment|
         {
           id: appointment.id,
           customer: appointment.customer.name,
@@ -118,9 +118,9 @@ class DashboardStatsService
         }
       end,
       recent_services: ServiceRecord.includes(:customer, :vehicle, :service_record_services, :service_record_products)
-                                  .order(created_at: :desc)
-                                  .limit(5)
-                                  .map do |service|
+        .order(created_at: :desc)
+        .limit(5)
+        .map do |service|
         {
           id: service.id,
           customer: service.customer.name,
@@ -196,9 +196,9 @@ class DashboardStatsService
     return 0 if total_customers == 0
 
     repeat_customers = Customer.joins(:service_records)
-                              .group("customers.id")
-                              .having("COUNT(service_records.id) > 1")
-                              .count.keys.count
+      .group("customers.id")
+      .having("COUNT(service_records.id) > 1")
+      .count.keys.count
 
     (repeat_customers.to_f / total_customers * 100).round(1)
   end
@@ -218,11 +218,11 @@ class DashboardStatsService
       services_count = ServiceRecord.where(created_at: month.all_month).count
       revenue = ServiceRecord.where(created_at: month.all_month).sum(:total_amount)
       services_performed = ServiceRecordService.joins(:service_record)
-                                              .where(service_records: { created_at: month.all_month })
-                                              .sum(:quantity)
+        .where(service_records: { created_at: month.all_month })
+        .sum(:quantity)
       products_used = ServiceRecordProduct.joins(:service_record)
-                                         .where(service_records: { created_at: month.all_month })
-                                         .sum(:quantity)
+        .where(service_records: { created_at: month.all_month })
+        .sum(:quantity)
 
       {
         month: month.strftime("%b"),
@@ -236,29 +236,29 @@ class DashboardStatsService
 
   def self.calculate_services_by_type
     ServiceRecordService.joins(:service)
-                        .group("services.name")
-                        .sum(:quantity)
-                        .map { |name, count| { name: name, count: count } }
-                        .sort_by { |service| -service[:count] }
-                        .first(10)
+      .group("services.name")
+      .sum(:quantity)
+      .map { |name, count| { name: name, count: count } }
+      .sort_by { |service| -service[:count] }
+      .first(10)
   end
 
   def self.calculate_revenue_by_service_type
     ServiceRecordService.joins(:service)
-                        .group("services.name")
-                        .sum("service_record_services.quantity * service_record_services.unit_price")
-                        .map { |name, revenue| { name: name, revenue: revenue } }
-                        .sort_by { |service| -service[:revenue] }
-                        .first(10)
+      .group("services.name")
+      .sum("service_record_services.quantity * service_record_services.unit_price")
+      .map { |name, revenue| { name: name, revenue: revenue } }
+      .sort_by { |service| -service[:revenue] }
+      .first(10)
   end
 
   def self.calculate_revenue_by_product_type
     ServiceRecordProduct.joins(:product)
-                        .group("products.name")
-                        .sum("service_record_products.quantity * service_record_products.unit_price")
-                        .map { |name, revenue| { name: name, revenue: revenue } }
-                        .sort_by { |product| -product[:revenue] }
-                        .first(10)
+      .group("products.name")
+      .sum("service_record_products.quantity * service_record_products.unit_price")
+      .map { |name, revenue| { name: name, revenue: revenue } }
+      .sort_by { |product| -product[:revenue] }
+      .first(10)
   end
 
   def self.calculate_service_product_ratio
@@ -276,9 +276,9 @@ class DashboardStatsService
 
   def self.get_top_service
     top_service = ServiceRecordService.joins(:service)
-                                     .group("services.name")
-                                     .sum(:quantity)
-                                     .max_by { |_, quantity| quantity }
+      .group("services.name")
+      .sum(:quantity)
+      .max_by { |_, quantity| quantity }
 
     return { name: "N/A", count: 0 } unless top_service
 
@@ -287,9 +287,9 @@ class DashboardStatsService
 
   def self.get_top_product
     top_product = ServiceRecordProduct.joins(:product)
-                                     .group("products.name")
-                                     .sum(:quantity)
-                                     .max_by { |_, quantity| quantity }
+      .group("products.name")
+      .sum(:quantity)
+      .max_by { |_, quantity| quantity }
 
     return { name: "N/A", count: 0 } unless top_product
 
@@ -304,9 +304,9 @@ class DashboardStatsService
 
       new_customers = Customer.where(created_at: week_start..week_end).count
       repeat_customers = Customer.joins(:service_records)
-                                .where(service_records: { created_at: week_start..week_end })
-                                .where.not(id: Customer.where(created_at: week_start..week_end).select(:id))
-                                .distinct.count
+        .where(service_records: { created_at: week_start..week_end })
+        .where.not(id: Customer.where(created_at: week_start..week_end).select(:id))
+        .distinct.count
 
       {
         week: week_start.strftime("%d/%m"),
