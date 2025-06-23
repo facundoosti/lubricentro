@@ -291,3 +291,185 @@ layer(base);
   para evitar conflictos con el sistema de diseño de Tailwind del template.
   Los componentes ahora traen sus propios estilos.
 */
+
+/* FullCalendar Styles */
+.custom-calendar {
+  padding: 1rem;
+}
+
+.fc {
+  font-family: var(--font-outfit);
+}
+
+.fc-toolbar {
+  margin-bottom: 1rem !important;
+}
+
+.fc-toolbar-title {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  color: var(--color-gray-900) !important;
+}
+
+.dark .fc-toolbar-title {
+  color: var(--color-white) !important;
+}
+
+.fc-button {
+  background-color: var(--color-brand-500) !important;
+  border-color: var(--color-brand-500) !important;
+  color: white !important;
+  font-weight: 500 !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.5rem !important;
+  transition: all 0.2s !important;
+}
+
+.fc-button:hover {
+  background-color: var(--color-brand-600) !important;
+  border-color: var(--color-brand-600) !important;
+}
+
+.fc-button:focus {
+  box-shadow: 0 0 0 3px rgba(70, 95, 255, 0.1) !important;
+}
+
+.fc-button-primary:not(:disabled).fc-button-active,
+.fc-button-primary:not(:disabled):active {
+  background-color: var(--color-brand-700) !important;
+  border-color: var(--color-brand-700) !important;
+}
+
+.fc-daygrid-day {
+  background-color: white !important;
+}
+
+.dark .fc-daygrid-day {
+  background-color: var(--color-gray-900) !important;
+}
+
+.fc-daygrid-day-number {
+  color: var(--color-gray-700) !important;
+  font-weight: 500 !important;
+}
+
+.dark .fc-daygrid-day-number {
+  color: var(--color-gray-300) !important;
+}
+
+.fc-daygrid-day.fc-day-today {
+  background-color: var(--color-brand-25) !important;
+}
+
+.dark .fc-daygrid-day.fc-day-today {
+  background-color: rgba(70, 95, 255, 0.1) !important;
+}
+
+.fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  background-color: var(--color-brand-500) !important;
+  color: white !important;
+  border-radius: 50% !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.fc-col-header-cell {
+  background-color: var(--color-gray-50) !important;
+  border-color: var(--color-gray-200) !important;
+}
+
+.dark .fc-col-header-cell {
+  background-color: var(--color-gray-800) !important;
+  border-color: var(--color-gray-700) !important;
+}
+
+.fc-col-header-cell-cushion {
+  color: var(--color-gray-700) !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+}
+
+.dark .fc-col-header-cell-cushion {
+  color: var(--color-gray-300) !important;
+}
+
+.fc-event {
+  border: none !important;
+  border-radius: 0.375rem !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+}
+
+.fc-event:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+.fc-event-main {
+  padding: 0.25rem 0.5rem !important;
+}
+
+.fc-event-time {
+  font-weight: 600 !important;
+  margin-bottom: 0.125rem !important;
+}
+
+.fc-event-title {
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+}
+
+/* Status colors for appointments */
+.fc-bg-scheduled {
+  background-color: var(--color-blue-light-500) !important;
+}
+
+.fc-bg-confirmed {
+  background-color: var(--color-success-500) !important;
+}
+
+.fc-bg-completed {
+  background-color: var(--color-gray-500) !important;
+}
+
+.fc-bg-cancelled {
+  background-color: var(--color-error-500) !important;
+}
+
+/* Time grid styles */
+.fc-timegrid-slot {
+  border-color: var(--color-gray-200) !important;
+}
+
+.dark .fc-timegrid-slot {
+  border-color: var(--color-gray-700) !important;
+}
+
+.fc-timegrid-slot-label {
+  color: var(--color-gray-600) !important;
+  font-size: 0.75rem !important;
+}
+
+.dark .fc-timegrid-slot-label {
+  color: var(--color-gray-400) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .fc-toolbar {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+  
+  .fc-toolbar-chunk {
+    display: flex !important;
+    justify-content: center !important;
+  }
+  
+  .fc-toolbar-title {
+    font-size: 1.25rem !important;
+  }
+}

@@ -212,7 +212,7 @@ const Sidebar = () => {
             <img
               src="/taller.svg"
               alt="Logo Lubricentro"
-              className="h-12 w-auto"
+              className="w-auto"
             />
           ) : (
             <img

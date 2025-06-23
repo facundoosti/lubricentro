@@ -7,6 +7,7 @@ import Customers from '@pages/Customers';
 import Vehicles from '@pages/Vehicles';
 import Products from '@pages/Products';
 import ServiceRecords from '@pages/ServiceRecords';
+import Appointments from '@pages/Appointments';
 
 function App() {
   console.log('App renderizado');
@@ -16,7 +17,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
-            <Route path="appointments" element={<div className="p-6 text-black dark:text-white">Turnos - En desarrollo</div>} />
+            <Route path="appointments" element={<Appointments />} />
             <Route path="service-records" element={<ServiceRecords />} />
             <Route path="customers" element={<Customers />} />
             <Route path="vehicles" element={<Vehicles />} />

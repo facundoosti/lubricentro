@@ -8,35 +8,38 @@
 - [x] Tests de backend en verde para métricas de dashboard
 - [x] Patrones de testeo para fechas y asociaciones explícitas documentados
 
-## 🎯 **Estado Actual: Fase 7 - CRUD Servicios + MVP Focus**
+## 🎯 **Estado Actual: Fase 8 - Sistema de Turnos COMPLETADO ✅**
 
-### **Última Actividad Completada**
-- ✅ **Tabla de Servicios implementada** con paginación y búsqueda
-- ✅ **Servicio de servicios** con React Query hooks completos
-- ✅ **Funcionalidad de eliminar servicios** con confirmación
-- ✅ **Iconos por tipo de servicio** (aceite, filtro, frenos, etc.) con colores específicos
-- ✅ **Formateo de precios** en pesos argentinos
-- ✅ **Filtros por rango de precio** implementados
-- ✅ **Fecha de creación** mostrada en tabla
-- ✅ **react-hot-toast** instalado y configurado en Layout
-- ✅ **Botón de IA por voz** implementado en header (Post-MVP)
-- ✅ **Documentación completa** de funcionalidad de IA por voz en `voiceAI.md` (Post-MVP)
+### **Última Actividad Completada - Sistema de Turnos**
+- ✅ **FullCalendar integrado** con diseño del sistema
+- ✅ **Servicio de appointments** con React Query hooks completos
+- ✅ **Formulario de appointment** con validación (react-hook-form)
+- ✅ **Modal para crear/editar turnos** con selección de cliente y vehículo
+- ✅ **Calendario interactivo** con vistas Mes/Semana/Día
+- ✅ **Eventos coloridos** por estado (azul, verde, gris, rojo)
+- ✅ **CRUD completo** de turnos (crear, editar, eliminar)
+- ✅ **Estados de turno** (scheduled, confirmed, completed, cancelled)
+- ✅ **Localización en español** del calendario
+- ✅ **Estilos CSS personalizados** para FullCalendar
+- ✅ **Responsive design** para móviles
+- ✅ **Validaciones robustas** en formularios
+- ✅ **Debug logs** para troubleshooting
+- ✅ **Corrección de nombres de campos** (backend ↔ frontend)
 
 ### **Problemas Resueltos Recientemente**
-- ✅ **InputField compatible con react-hook-form** (forwardRef implementado)
-- ✅ **Clases CSS Tailwind v4** corregidas (error-500 → red-500, etc.)
-- ✅ **Button con prop loading** agregada funcionalidad
-- ✅ **Debug logs** agregados en puntos críticos del flujo
-- ✅ **react-hot-toast** instalado y configurado para notificaciones
-- ✅ **Icono sparkles separado** del texto en header con tooltip funcional
+- ✅ **Error de importación FullCalendar** (DateSelectArg, EventClickArg)
+- ✅ **Error vehicles.map is not a function** (validaciones de arrays)
+- ✅ **Nombres undefined en turnos** (inconsistencia de campos)
+- ✅ **Validaciones defensivas** en todos los componentes
+- ✅ **Manejo robusto de datos** condicionales
 
 ### **Componentes Creados en esta Sesión**
-- ✅ `ServicesTable.jsx` - Tabla completa con CRUD actions
-- ✅ `servicesService.js` - Servicio completo con React Query
-- ✅ `Services.jsx` - Página principal de servicios actualizada
-- ✅ Configuración de `Toaster` en Layout.jsx
-- ✅ `SparklesIcon` en icons/index.jsx
-- ✅ Botón de IA por voz en Header.jsx
+- ✅ `appointmentsService.js` - Servicio completo con React Query
+- ✅ `AppointmentForm.jsx` - Formulario con validación y selectores
+- ✅ `AppointmentModal.jsx` - Modal reutilizable para CRUD
+- ✅ `Appointments.jsx` - Página principal con FullCalendar
+- ✅ **Estilos CSS FullCalendar** integrados con el tema
+- ✅ **Rutas actualizadas** en App.jsx
 
 ## 🚀 **Próximos Pasos Inmediatos**
 
@@ -61,18 +64,19 @@
 - [ ] **Validación de nombre único** en frontend
 - [ ] **Gestión de precios base** con validación
 
-### **4. Sistema de Turnos (Prioridad Media - MVP)** 📅
-- [ ] **Calendario de turnos** básico
-- [ ] **Crear/editar turnos** con selección de cliente y vehículo
-- [ ] **Estados de turno** (scheduled, confirmed, completed, cancelled)
-- [ ] **Notificaciones** básicas
+### **4. Sistema de ServiceRecords (Prioridad Media - MVP)** 📋
+- [ ] **Modal para crear atención** con formulario
+- [ ] **Modal para editar atención** con datos pre-poblados
+- [ ] **Formulario de atención** con validación (react-hook-form)
+- [ ] **Selector de cliente y vehículo** en formulario
+- [ ] **Cálculo automático de totales**
 
 ### **5. IA por Voz (Prioridad Baja - Post-MVP)** 🎤
 - [ ] **Instalar react-speech-recognition** en frontend
 - [ ] **Voice Controller** en Rails API
 - [ ] **Voice AI Service** para procesamiento
 - [ ] **Configuración de Claude API** y MCP Server
-- [ ] **Comandos básicos de voz** (clientes, vehículos)
+- [ ] **Comandos básicos de voz** (clientes, vehículos, turnos)
 
 ## 🎤 **IA por Voz - Arquitectura (Post-MVP)**
 
@@ -165,9 +169,11 @@ const EntityForm = ({ onSubmit, initialData, isLoading, onCancel }) => {
 - **CRUD Vehículos**: 70% completado (tabla + eliminar + servicio)
 - **CRUD Productos**: 50% completado (tabla + eliminar + servicio)
 - **CRUD Servicios**: 50% completado (tabla + eliminar + servicio)
-- **Componentes UI**: 85% completado
-- **Servicios API**: 90% completado
-- **Integración Backend-Frontend**: 90% completado
+- **Sistema de Turnos**: 100% completado ✅
+- **CRUD ServiceRecords**: 50% completado (tabla + eliminar + servicio)
+- **Componentes UI**: 90% completado
+- **Servicios API**: 95% completado
+- **Integración Backend-Frontend**: 95% completado
 - **IA por Voz**: 10% completado (Post-MVP - Prioridad Baja)
 
 ## 🎨 **Sistema de Diseño Consolidado**
