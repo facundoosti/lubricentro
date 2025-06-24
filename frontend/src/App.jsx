@@ -4,6 +4,7 @@ import Layout from '@layout/Layout';
 import Dashboard from '@pages/Dashboard';
 import Services from '@pages/Services';
 import Customers from '@pages/Customers';
+import CustomerProfile from '@pages/CustomerProfile';
 import Vehicles from '@pages/Vehicles';
 import Products from '@pages/Products';
 import ServiceRecords from '@pages/ServiceRecords';
@@ -20,6 +21,7 @@ function App() {
             <Route path="appointments" element={<Appointments />} />
             <Route path="service-records" element={<ServiceRecords />} />
             <Route path="customers" element={<Customers />} />
+            <Route path="customers/:id" element={<CustomerProfile />} />
             <Route path="vehicles" element={<Vehicles />} />
             <Route path="services" element={<Services />} />
             <Route path="products" element={<Products />} />

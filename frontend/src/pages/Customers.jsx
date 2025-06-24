@@ -35,6 +35,14 @@ const Customers = () => {
   const customers = customersData?.data?.customers || [];
   const pagination = customersData?.data?.pagination || {};
 
+  // Debug logs para paginación
+  console.log("Customers - customersData:", customersData);
+  console.log("Customers - pagination object:", pagination);
+  console.log("Customers - pagination.total_pages:", pagination.total_pages);
+  console.log("Customers - pagination.current_page:", pagination.current_page);
+  console.log("Customers - pagination.total_count:", pagination.total_count);
+  console.log("Customers - pagination.per_page:", pagination.per_page);
+
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -57,11 +65,6 @@ const Customers = () => {
   const handleDelete = (customer) => {
     setSelectedCustomer(customer);
     setIsDeleteModalOpen(true);
-  };
-
-  const handleView = (customer) => {
-    console.log("Ver cliente:", customer);
-    alert(`Ver detalles de: ${customer.name} - En desarrollo`);
   };
 
   // Handlers para formularios
@@ -159,7 +162,6 @@ const Customers = () => {
         onSearch={handleSearch}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        onView={handleView}
         onCreate={handleCreate}
         loading={isLoading || deleteCustomerMutation.isPending}
       />

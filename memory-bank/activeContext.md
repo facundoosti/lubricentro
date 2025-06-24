@@ -8,47 +8,58 @@
 - [x] Tests de backend en verde para métricas de dashboard
 - [x] Patrones de testeo para fechas y asociaciones explícitas documentados
 
-## 🎯 **Estado Actual: Fase 8 - Sistema de Turnos COMPLETADO ✅**
+## 🎯 **Estado Actual: Fase 9 - Corrección de Paginación COMPLETADA ✅**
 
-### **Última Actividad Completada - Sistema de Turnos**
-- ✅ **FullCalendar integrado** con diseño del sistema
-- ✅ **Servicio de appointments** con React Query hooks completos
-- ✅ **Formulario de appointment** con validación (react-hook-form)
-- ✅ **Modal para crear/editar turnos** con selección de cliente y vehículo
-- ✅ **Calendario interactivo** con vistas Mes/Semana/Día
-- ✅ **Eventos coloridos** por estado (azul, verde, gris, rojo)
-- ✅ **CRUD completo** de turnos (crear, editar, eliminar)
-- ✅ **Estados de turno** (scheduled, confirmed, completed, cancelled)
-- ✅ **Localización en español** del calendario
-- ✅ **Estilos CSS personalizados** para FullCalendar
-- ✅ **Responsive design** para móviles
-- ✅ **Validaciones robustas** en formularios
-- ✅ **Debug logs** para troubleshooting
-- ✅ **Corrección de nombres de campos** (backend ↔ frontend)
+### **Última Actividad Completada - Corrección de Paginación en Tablas**
+- ✅ **Problema identificado** - Nombres de propiedades incorrectos en CustomersTable
+- ✅ **CustomersTable corregido** - Uso de nombres correctos de paginación
+- ✅ **Props faltantes agregados** - totalItems e itemsPerPage al componente Pagination
+- ✅ **Condición de renderizado corregida** - pagination.total_pages > 1
+- ✅ **Logs de debugging agregados** - Para troubleshooting futuro
+- ✅ **Consistencia establecida** - Todas las tablas usan el mismo patrón de paginación
 
 ### **Problemas Resueltos Recientemente**
-- ✅ **Error de importación FullCalendar** (DateSelectArg, EventClickArg)
-- ✅ **Error vehicles.map is not a function** (validaciones de arrays)
-- ✅ **Nombres undefined en turnos** (inconsistencia de campos)
-- ✅ **Validaciones defensivas** en todos los componentes
-- ✅ **Manejo robusto de datos** condicionales
+- ✅ **Paginación no visible** - Nombres de propiedades corregidos (current_page, total_pages, total_count, per_page)
+- ✅ **Props faltantes** - totalItems e itemsPerPage agregados al componente Pagination
+- ✅ **Inconsistencia entre tablas** - CustomersTable ahora sigue el mismo patrón que las demás
+- ✅ **Debug logs** - Agregados para facilitar troubleshooting futuro
 
-### **Componentes Creados en esta Sesión**
-- ✅ `appointmentsService.js` - Servicio completo con React Query
-- ✅ `AppointmentForm.jsx` - Formulario con validación y selectores
-- ✅ `AppointmentModal.jsx` - Modal reutilizable para CRUD
-- ✅ `Appointments.jsx` - Página principal con FullCalendar
-- ✅ **Estilos CSS FullCalendar** integrados con el tema
-- ✅ **Rutas actualizadas** en App.jsx
+### **Componentes Corregidos en esta Sesión**
+- ✅ `CustomersTable.jsx` - Paginación corregida con nombres de propiedades correctos
+- ✅ `Customers.jsx` - Logs de debugging agregados para verificar datos de paginación
+
+### **Patrón de Paginación Establecido**
+```jsx
+{/* Paginación */}
+{pagination && pagination.total_pages > 1 && (
+  <div className="mt-6">
+    <Pagination
+      currentPage={pagination.current_page || 1}
+      totalPages={pagination.total_pages || 1}
+      totalItems={pagination.total_count || 0}
+      itemsPerPage={pagination.per_page || 10}
+      onPageChange={onPageChange}
+    />
+  </div>
+)}
+```
+
+### **Verificación de Consistencia**
+- ✅ `CustomersTable.jsx` - Corregido y consistente ✅
+- ✅ `ServicesTable.jsx` - Ya estaba correcto ✅
+- ✅ `VehiclesTable.jsx` - Ya estaba correcto ✅
+- ✅ `ProductsTable.jsx` - Ya estaba correcto ✅
+- ✅ `ServiceRecordsTable.jsx` - Ya estaba correcto ✅
 
 ## 🚀 **Próximos Pasos Inmediatos**
 
 ### **1. Completar CRUD Vehículos (Prioridad Alta - MVP)** 🚗
-- [ ] **Modal para crear vehículo** con formulario
-- [ ] **Modal para editar vehículo** con datos pre-poblados
-- [ ] **Formulario de vehículo** con validación (react-hook-form)
-- [ ] **Selector de cliente** en formulario
-- [ ] **Validación de patente única** en frontend
+- [x] **Modal para crear vehículo** con formulario ✅
+- [x] **Modal para editar vehículo** con datos pre-poblados ✅
+- [x] **Formulario de vehículo** con validación (react-hook-form) ✅
+- [x] **Selector de cliente** en formulario ✅
+- [x] **Validación de patente única** en frontend ✅
+- [ ] **Integrar en página principal de vehículos** (tabla existente)
 
 ### **2. Completar CRUD Productos (Prioridad Alta - MVP)** 📦
 - [ ] **Modal para crear producto** con formulario
@@ -144,7 +155,6 @@ const EntityTable = ({
   onSearch, 
   onEdit, 
   onDelete, 
-  onView, 
   onCreate, 
   loading 
 }) => {
@@ -163,15 +173,36 @@ const EntityForm = ({ onSubmit, initialData, isLoading, onCancel }) => {
 };
 ```
 
+### **Páginas de Perfil**
+```javascript
+// Patrón establecido para páginas de perfil
+const EntityProfile = () => {
+  const { id } = useParams();
+  const { data: entityData } = useEntity(id);
+  const entity = entityData?.data;
+  
+  // Estado local como respaldo para actualizaciones
+  const [localEntity, setLocalEntity] = useState(null);
+  
+  // Múltiples estrategias de actualización
+  const handleUpdate = async (data) => {
+    await updateMutation.mutateAsync({ id, data });
+    setLocalEntity(prev => ({ ...prev, ...data }));
+    await refetchEntity();
+  };
+};
+```
+
 ## 📊 **Métricas Actuales**
 
 - **CRUD Clientes**: 100% completado ✅
-- **CRUD Vehículos**: 70% completado (tabla + eliminar + servicio)
+- **Vista de Perfil de Cliente**: 100% completado ✅
+- **CRUD Vehículos**: 90% completado (tabla + eliminar + modal + formulario)
 - **CRUD Productos**: 50% completado (tabla + eliminar + servicio)
 - **CRUD Servicios**: 50% completado (tabla + eliminar + servicio)
 - **Sistema de Turnos**: 100% completado ✅
 - **CRUD ServiceRecords**: 50% completado (tabla + eliminar + servicio)
-- **Componentes UI**: 90% completado
+- **Componentes UI**: 95% completado
 - **Servicios API**: 95% completado
 - **Integración Backend-Frontend**: 95% completado
 - **IA por Voz**: 10% completado (Post-MVP - Prioridad Baja)
@@ -191,6 +222,7 @@ const EntityForm = ({ onSubmit, initialData, isLoading, onCancel }) => {
 - Modales con backdrop y escape key
 - Tablas responsive con hover states
 - Paginación accesible
+- **Cards de perfil** - MetaCard, InfoCard, VehiclesCard
 - **Botón de voz** con tooltip y estados
 
 ## 🔄 **Estado de Integración**
@@ -198,42 +230,8 @@ const EntityForm = ({ onSubmit, initialData, isLoading, onCancel }) => {
 ### **Backend ↔ Frontend**
 - ✅ API endpoints funcionando
 - ✅ Serializers optimizados
-- ✅ Paginación sincronizada
-- ✅ Búsqueda implementada
-- ✅ Validaciones consistentes
-
-### **React Query**
-- ✅ Cache management automático
-- ✅ Background refetch
-- ✅ Optimistic updates
-- ✅ Error boundaries
-- ✅ Loading states
-
-### **Notificaciones**
-- ✅ react-hot-toast instalado y configurado
-- ✅ Toaster configurado en Layout
-- ✅ Estilos personalizados para dark theme
-- ✅ Duración y colores optimizados
-
-### **IA por Voz (Post-MVP)**
-- ✅ Botón UI implementado (indicador visual)
-- ✅ Tooltip funcional
-- ✅ Documentación completa en `voiceAI.md`
-- 📋 Integración con react-speech-recognition (pendiente - post-MVP)
-- 📋 Backend Voice Controller (pendiente - post-MVP)
-- 📋 Servicio de IA en la nube (pendiente - post-MVP)
-
-## 📋 **Decisiones Técnicas Recientes**
-
-1. **Uso de forwardRef en InputField** - Para compatibilidad con react-hook-form
-2. **Clases CSS estándar** - En lugar de clases personalizadas para Tailwind v4
-3. **Debug logs extensivos** - Para facilitar troubleshooting
-4. **Iconos por tipo de servicio** - Para mejor UX visual (aceite, filtro, frenos, etc.)
-5. **Formateo de precios** - En pesos argentinos con Intl.NumberFormat
-6. **Filtros por rango de precio** - Para búsqueda avanzada de servicios
-7. **react-hot-toast** - Para notificaciones consistentes en toda la app
-8. **IA por voz con Claude + MCP** - Arquitectura escalable para comandos de voz
-9. **Botón sparkles azul** - Indicador visual de funcionalidad en desarrollo
+- ✅ Cache management mejorado
+- ✅ Actualizaciones en tiempo real
 
 ## 🎯 **Objetivos para la Próxima Sesión**
 

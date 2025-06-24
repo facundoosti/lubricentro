@@ -54,7 +54,7 @@ export const useCustomer = (id) => {
       return response.data;
     },
     enabled: !!id,
-    staleTime: 10 * 60 * 1000, // 10 minutos
+    staleTime: 0, // Siempre considerar los datos como stale para forzar refetch
   });
 };
 
@@ -102,10 +102,16 @@ export const useUpdateCustomer = () => {
       return response.data;
     },
     onSuccess: (data, variables) => {
+      console.log("useUpdateCustomer - onSuccess called with:", data);
+      console.log("useUpdateCustomer - variables:", variables);
+      
       // Invalidar y refetch la lista de customers
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
       
-      // Actualizar el customer específico en el cache
+      // Forzar refetch del customer específico
+      queryClient.refetchQueries({ queryKey: customerKeys.detail(variables.id) });
+      
+      // También actualizar el cache directamente como respaldo
       queryClient.setQueryData(
         customerKeys.detail(variables.id),
         data

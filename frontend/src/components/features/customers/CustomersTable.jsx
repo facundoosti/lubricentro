@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@ui/Table";
 import Badge from "@ui/Badge";
 import Button from "@ui/Button";
@@ -18,11 +19,19 @@ const CustomersTable = ({
   onSearch,
   onEdit,
   onDelete,
-  onView,
   onCreate,
   loading = false 
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+
+  // Debug logs para paginación
+  console.log("CustomersTable - pagination prop:", pagination);
+  console.log("CustomersTable - pagination.total_pages:", pagination.total_pages);
+  console.log("CustomersTable - pagination.current_page:", pagination.current_page);
+  console.log("CustomersTable - pagination.total_count:", pagination.total_count);
+  console.log("CustomersTable - pagination.per_page:", pagination.per_page);
+  console.log("CustomersTable - should show pagination:", pagination && pagination.total_pages > 1);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -38,14 +47,8 @@ const CustomersTable = ({
       .slice(0, 2);
   };
 
-  const getStatusColor = (customer) => {
-    if (customer.vehicles_count > 0) return "success";
-    return "warning";
-  };
-
-  const getStatusText = (customer) => {
-    if (customer.vehicles_count > 0) return "Con vehículos";
-    return "Sin vehículos";
+  const handleViewCustomer = (customer) => {
+    navigate(`/customers/${customer.id}`);
   };
 
   return (
@@ -104,12 +107,6 @@ const CustomersTable = ({
                   isHeader
                   className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
                 >
-                  Estado
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
-                >
                   Acciones
                 </TableCell>
               </TableRow>
@@ -118,13 +115,13 @@ const CustomersTable = ({
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="px-5 py-8 text-center text-gray-500">
+                  <TableCell colSpan={4} className="px-5 py-8 text-center text-gray-500">
                     Cargando clientes...
                   </TableCell>
                 </TableRow>
               ) : customers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="px-5 py-8 text-center text-gray-500">
+                  <TableCell colSpan={4} className="px-5 py-8 text-center text-gray-500">
                     No se encontraron clientes
                   </TableCell>
                 </TableRow>
@@ -176,18 +173,9 @@ const CustomersTable = ({
                     </TableCell>
                     
                     <TableCell className="px-4 py-3 text-start">
-                      <Badge
-                        size="sm"
-                        color={getStatusColor(customer)}
-                      >
-                        {getStatusText(customer)}
-                      </Badge>
-                    </TableCell>
-                    
-                    <TableCell className="px-4 py-3 text-start">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => onView(customer)}
+                          onClick={() => handleViewCustomer(customer)}
                           className="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
                           title="Ver detalles"
                         >
