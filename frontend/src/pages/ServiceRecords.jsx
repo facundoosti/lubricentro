@@ -1,55 +1,67 @@
-import { useState } from 'react';
-import { toast } from 'react-hot-toast';
-import ServiceRecordsTable from '@components/features/service-records/ServiceRecordsTable';
-import { 
-  useServiceRecords, 
-  useDeleteServiceRecord 
-} from '@services/serviceRecordsService';
+import React, { useState } from "react";
+import ServiceRecordsTable from "@components/features/service-records/ServiceRecordsTable";
+import { useServiceRecords, useDeleteServiceRecord } from "@services/serviceRecordsService";
+import { useNotificationService } from "@services/notificationService";
 
 const ServiceRecords = () => {
-  const [filters, setFilters] = useState({
-    page: 1,
-    per_page: 10,
-    search: '',
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [perPage] = useState(10);
+
+  // Servicio de notificaciones
+  const notification = useNotificationService();
+
+  // Query para obtener atenciones con paginación y búsqueda
+  const {
+    data,
+    isLoading,
+    error
+  } = useServiceRecords({
+    page: currentPage,
+    per_page: perPage,
+    search: searchTerm,
   });
 
-  const { data, isLoading, error } = useServiceRecords(filters);
-  const deleteMutation = useDeleteServiceRecord();
+  // Mutation para eliminar atenciones
+  const deleteServiceRecordMutation = useDeleteServiceRecord();
 
-  const handlePageChange = (newPage) => {
-    setFilters(prev => ({ ...prev, page: newPage }));
+  const records = data?.data?.service_records || [];
+  const pagination = data?.data?.pagination;
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
-  const handleSearch = (searchTerm) => {
-    setFilters(prev => ({ ...prev, search: searchTerm, page: 1 }));
+  const handleSearch = (term) => {
+    setSearchTerm(term);
+    setCurrentPage(1); // Reset a la primera página al buscar
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await deleteMutation.mutateAsync(id);
-      toast.success('Atención eliminada correctamente');
-    } catch (error) {
-      console.error('Error deleting service record:', error);
-      toast.error('Error al eliminar la atención');
+  const handleDelete = async (record) => {
+    if (confirm(`¿Estás seguro de que quieres eliminar la atención del ${record.service_date}?`)) {
+      try {
+        await deleteServiceRecordMutation.mutateAsync(record.id);
+        notification.showServiceRecordSuccess('DELETED');
+      } catch (error) {
+        console.error("Error al eliminar la atención:", error);
+        notification.showServiceRecordError('ERROR_DELETE', error.response?.data?.message || error.message);
+      }
     }
   };
 
   const handleEdit = (record) => {
-    // TODO: Implementar modal de edición
-    console.log('Edit record:', record);
-    toast.info('Funcionalidad de edición en desarrollo');
+    console.log("Editar atención:", record);
+    notification.showInfo('Funcionalidad de edición en desarrollo');
   };
 
   const handleView = (record) => {
-    // TODO: Implementar vista detallada
-    console.log('View record:', record);
-    toast.info('Funcionalidad de vista detallada en desarrollo');
+    console.log("Ver atención:", record);
+    notification.showInfo('Funcionalidad de vista detallada en desarrollo');
   };
 
   const handleCreate = () => {
-    // TODO: Implementar modal de creación
-    console.log('Create new record');
-    toast.info('Funcionalidad de creación en desarrollo');
+    console.log("Crear nueva atención");
+    notification.showInfo('Funcionalidad de creación en desarrollo');
   };
 
   if (error) {
@@ -67,9 +79,6 @@ const ServiceRecords = () => {
     );
   }
 
-  const serviceRecords = data?.data?.service_records || [];
-  const pagination = data?.data?.pagination;
-
   return (
     <div className="space-y-6">
       <div>
@@ -82,7 +91,7 @@ const ServiceRecords = () => {
       </div>
 
       <ServiceRecordsTable
-        serviceRecords={serviceRecords}
+        serviceRecords={records}
         pagination={pagination}
         onPageChange={handlePageChange}
         onSearch={handleSearch}
@@ -90,7 +99,7 @@ const ServiceRecords = () => {
         onDelete={handleDelete}
         onView={handleView}
         onCreate={handleCreate}
-        loading={isLoading || deleteMutation.isPending}
+        loading={isLoading || deleteServiceRecordMutation.isPending}
       />
     </div>
   );

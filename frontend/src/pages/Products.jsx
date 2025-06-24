@@ -1,74 +1,69 @@
 import React, { useState } from "react";
-import { toast } from "react-hot-toast";
 import ProductsTable from "@components/features/products/ProductsTable";
-import ConfirmModal from "@ui/ConfirmModal";
 import { useProducts, useDeleteProduct } from "@services/productsService";
+import { useNotificationService } from "@services/notificationService";
 
 const Products = () => {
-  const [filters, setFilters] = useState({
-    page: 1,
-    per_page: 10,
-    search: "",
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [perPage] = useState(10);
+
+  // Servicio de notificaciones
+  const notification = useNotificationService();
+
+  // Query para obtener productos con paginación y búsqueda
+  const {
+    data: productsData,
+    isLoading,
+    error
+  } = useProducts({
+    page: currentPage,
+    per_page: perPage,
+    search: searchTerm,
   });
 
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  // Hooks de React Query
-  const { data, isLoading, error } = useProducts(filters);
+  // Mutation para eliminar productos
   const deleteProductMutation = useDeleteProduct();
 
-  // Extraer datos de la respuesta
-  const products = data?.data?.products || [];
-  const pagination = data?.data?.pagination || {};
+  const products = productsData?.data?.products || [];
+  const pagination = productsData?.data?.pagination || {};
 
-  // Handlers
   const handlePageChange = (page) => {
-    setFilters(prev => ({ ...prev, page }));
+    setCurrentPage(page);
   };
 
-  const handleSearch = (searchTerm) => {
-    setFilters(prev => ({ ...prev, search: searchTerm, page: 1 }));
+  const handleSearch = (term) => {
+    setSearchTerm(term);
+    setCurrentPage(1); // Reset a la primera página al buscar
   };
 
   const handleCreate = () => {
-    // TODO: Implementar modal de creación
-    toast.success("Funcionalidad de creación en desarrollo");
+    console.log("Crear nuevo producto");
+    notification.showInfo("Función de creación en desarrollo");
   };
 
   const handleEdit = (product) => {
-    // TODO: Implementar modal de edición
-    toast.success(`Editar producto: ${product.name}`);
+    console.log("Editar producto:", product);
+    notification.showInfo(`Editar producto: ${product.name}`);
   };
 
   const handleView = (product) => {
-    // TODO: Implementar modal de vista
-    toast.success(`Ver producto: ${product.name}`);
+    console.log("Ver producto:", product);
+    notification.showInfo(`Ver producto: ${product.name}`);
   };
 
-  const handleDelete = (product) => {
-    setSelectedProduct(product);
-    setShowDeleteModal(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!selectedProduct) return;
-
-    try {
-      await deleteProductMutation.mutateAsync(selectedProduct.id);
-      toast.success("Producto eliminado exitosamente");
-      setShowDeleteModal(false);
-      setSelectedProduct(null);
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      const errorMessage = error.response?.data?.message || "Error al eliminar el producto";
-      toast.error(errorMessage);
+  const handleDelete = async (product) => {
+    if (confirm(`¿Estás seguro de que quieres eliminar el producto ${product.name}?`)) {
+      try {
+        await deleteProductMutation.mutateAsync(product.id);
+        notification.showProductSuccess('DELETED');
+        // La invalidación del cache se maneja automáticamente en el servicio
+      } catch (error) {
+        console.error("Error al eliminar producto:", error);
+        const errorMessage = error.response?.data?.message || error.message || "Error desconocido";
+        notification.showProductError('ERROR_DELETE', errorMessage);
+      }
     }
-  };
-
-  const cancelDelete = () => {
-    setShowDeleteModal(false);
-    setSelectedProduct(null);
   };
 
   // Manejo de errores
@@ -107,19 +102,6 @@ const Products = () => {
         onView={handleView}
         onCreate={handleCreate}
         loading={isLoading}
-      />
-
-      {/* Modal de confirmación de eliminación */}
-      <ConfirmModal
-        isOpen={showDeleteModal}
-        onClose={cancelDelete}
-        onConfirm={confirmDelete}
-        title="Eliminar Producto"
-        message={`¿Estás seguro de que quieres eliminar el producto "${selectedProduct?.name}"? Esta acción no se puede deshacer.`}
-        confirmText="Eliminar"
-        cancelText="Cancelar"
-        confirmColor="danger"
-        loading={deleteProductMutation.isPending}
       />
     </div>
   );

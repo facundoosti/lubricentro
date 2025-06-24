@@ -3,6 +3,7 @@ import CustomersTable from "@components/features/customers/CustomersTable";
 import CustomerModal from "@components/features/customers/CustomerModal";
 import ConfirmModal from "@components/ui/ConfirmModal";
 import { useCustomers, useDeleteCustomer, useCreateCustomer, useUpdateCustomer } from "@services/customersService";
+import { useNotificationService } from "@services/notificationService";
 
 const Customers = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,6 +15,9 @@ const Customers = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+
+  // Servicio de notificaciones
+  const notification = useNotificationService();
 
   // Query para obtener clientes con paginación y búsqueda
   const {
@@ -75,9 +79,10 @@ const Customers = () => {
       await createCustomerMutation.mutateAsync(data);
       console.log("Customers - createCustomerMutation.mutateAsync completed successfully");
       setIsCreateModalOpen(false);
+      notification.showCustomerSuccess('CREATED');
     } catch (error) {
       console.error("Error al crear cliente:", error);
-      alert(`Error al crear cliente: ${error.response?.data?.message || error.message}`);
+      notification.showCustomerError('ERROR_CREATE', error.response?.data?.message || error.message);
     }
   };
 
@@ -90,9 +95,10 @@ const Customers = () => {
       });
       setIsEditModalOpen(false);
       setSelectedCustomer(null);
+      notification.showCustomerSuccess('UPDATED');
     } catch (error) {
       console.error("Error al actualizar cliente:", error);
-      alert(`Error al actualizar cliente: ${error.response?.data?.message || error.message}`);
+      notification.showCustomerError('ERROR_UPDATE', error.response?.data?.message || error.message);
     }
   };
 
@@ -101,9 +107,10 @@ const Customers = () => {
       await deleteCustomerMutation.mutateAsync(selectedCustomer.id);
       setIsDeleteModalOpen(false);
       setSelectedCustomer(null);
+      notification.showCustomerSuccess('DELETED');
     } catch (error) {
       console.error("Error al eliminar cliente:", error);
-      alert(`Error al eliminar cliente: ${error.response?.data?.message || error.message}`);
+      notification.showCustomerError('ERROR_DELETE', error.response?.data?.message || error.message);
     }
   };
 

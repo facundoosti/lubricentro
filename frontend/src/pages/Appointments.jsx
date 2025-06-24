@@ -1,28 +1,36 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { toast } from 'react-hot-toast';
-import { useAppointments, useCreateAppointment, useUpdateAppointment, useDeleteAppointment } from '@services/appointmentsService';
+import PageMeta from '@components/common/PageMeta';
 import AppointmentModal from '@components/features/appointments/AppointmentModal';
 import ConfirmModal from '@ui/ConfirmModal';
-import PageMeta from '@components/common/PageMeta';
+import { 
+  useAppointments, 
+  useCreateAppointment, 
+  useUpdateAppointment, 
+  useDeleteAppointment 
+} from '@services/appointmentsService';
+import { useNotificationService } from "@services/notificationService";
 
 const Appointments = () => {
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const calendarRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState(null);
-  const calendarRef = useRef(null);
 
-  // React Query hooks
+  // Servicio de notificaciones
+  const notification = useNotificationService();
+
+  // Queries y mutations
   const { data: appointmentsData, error } = useAppointments();
   const createAppointmentMutation = useCreateAppointment();
   const updateAppointmentMutation = useUpdateAppointment();
   const deleteAppointmentMutation = useDeleteAppointment();
 
-  const appointments = appointmentsData?.data || [];
+  const appointments = appointmentsData?.data?.appointments || [];
 
   // Debug logs
   console.log('Appointments - appointmentsData:', appointmentsData);
@@ -80,17 +88,17 @@ const Appointments = () => {
           id: selectedAppointment.id,
           data: data
         });
-        toast.success('Turno actualizado correctamente');
+        notification.showAppointmentSuccess('UPDATED');
       } else {
         // Create new appointment
         await createAppointmentMutation.mutateAsync(data);
-        toast.success('Turno creado correctamente');
+        notification.showAppointmentSuccess('CREATED');
       }
       setIsModalOpen(false);
       setSelectedAppointment(null);
     } catch (error) {
       console.error('Error saving appointment:', error);
-      toast.error('Error al guardar el turno');
+      notification.showAppointmentError('ERROR_CREATE', error.response?.data?.message || error.message);
     }
   };
 
@@ -100,12 +108,12 @@ const Appointments = () => {
 
     try {
       await deleteAppointmentMutation.mutateAsync(appointmentToDelete.id);
-      toast.success('Turno eliminado correctamente');
+      notification.showAppointmentSuccess('DELETED');
       setIsDeleteModalOpen(false);
       setAppointmentToDelete(null);
     } catch (error) {
       console.error('Error deleting appointment:', error);
-      toast.error('Error al eliminar el turno');
+      notification.showAppointmentError('ERROR_DELETE', error.response?.data?.message || error.message);
     }
   };
 

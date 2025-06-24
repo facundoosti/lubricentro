@@ -1,74 +1,69 @@
 import React, { useState } from "react";
-import { toast } from "react-hot-toast";
 import ServicesTable from "@components/features/services/ServicesTable";
-import ConfirmModal from "@ui/ConfirmModal";
 import { useServices, useDeleteService } from "@services/servicesService";
+import { useNotificationService } from "@services/notificationService";
 
 const Services = () => {
-  const [filters, setFilters] = useState({
-    page: 1,
-    per_page: 10,
-    search: "",
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [perPage] = useState(10);
+
+  // Servicio de notificaciones
+  const notification = useNotificationService();
+
+  // Query para obtener servicios con paginación y búsqueda
+  const {
+    data: servicesData,
+    isLoading,
+    error
+  } = useServices({
+    page: currentPage,
+    per_page: perPage,
+    search: searchTerm,
   });
 
-  const [selectedService, setSelectedService] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  // Hooks de React Query
-  const { data, isLoading, error } = useServices(filters);
+  // Mutation para eliminar servicios
   const deleteServiceMutation = useDeleteService();
 
-  // Extraer datos de la respuesta
-  const services = data?.data?.services || [];
-  const pagination = data?.data?.pagination || {};
+  const services = servicesData?.data?.services || [];
+  const pagination = servicesData?.data?.pagination || {};
 
-  // Handlers
   const handlePageChange = (page) => {
-    setFilters(prev => ({ ...prev, page }));
+    setCurrentPage(page);
   };
 
-  const handleSearch = (searchTerm) => {
-    setFilters(prev => ({ ...prev, search: searchTerm, page: 1 }));
+  const handleSearch = (term) => {
+    setSearchTerm(term);
+    setCurrentPage(1); // Reset a la primera página al buscar
   };
 
   const handleCreate = () => {
-    // TODO: Implementar modal de creación
-    toast.success("Funcionalidad de creación en desarrollo");
+    console.log("Crear nuevo servicio");
+    notification.showInfo("Función de creación en desarrollo");
   };
 
   const handleEdit = (service) => {
-    // TODO: Implementar modal de edición
-    toast.success(`Editar servicio: ${service.name}`);
+    console.log("Editar servicio:", service);
+    notification.showInfo(`Editar servicio: ${service.name}`);
   };
 
   const handleView = (service) => {
-    // TODO: Implementar modal de vista
-    toast.success(`Ver servicio: ${service.name}`);
+    console.log("Ver servicio:", service);
+    notification.showInfo(`Ver servicio: ${service.name}`);
   };
 
-  const handleDelete = (service) => {
-    setSelectedService(service);
-    setShowDeleteModal(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!selectedService) return;
-
-    try {
-      await deleteServiceMutation.mutateAsync(selectedService.id);
-      toast.success("Servicio eliminado exitosamente");
-      setShowDeleteModal(false);
-      setSelectedService(null);
-    } catch (error) {
-      console.error("Error deleting service:", error);
-      const errorMessage = error.response?.data?.message || "Error al eliminar el servicio";
-      toast.error(errorMessage);
+  const handleDelete = async (service) => {
+    if (confirm(`¿Estás seguro de que quieres eliminar el servicio ${service.name}?`)) {
+      try {
+        await deleteServiceMutation.mutateAsync(service.id);
+        notification.showServiceSuccess('DELETED');
+        // La invalidación del cache se maneja automáticamente en el servicio
+      } catch (error) {
+        console.error("Error al eliminar servicio:", error);
+        const errorMessage = error.response?.data?.message || error.message || "Error desconocido";
+        notification.showServiceError('ERROR_DELETE', errorMessage);
+      }
     }
-  };
-
-  const cancelDelete = () => {
-    setShowDeleteModal(false);
-    setSelectedService(null);
   };
 
   // Manejo de errores
@@ -107,19 +102,6 @@ const Services = () => {
         onView={handleView}
         onCreate={handleCreate}
         loading={isLoading}
-      />
-
-      {/* Modal de confirmación de eliminación */}
-      <ConfirmModal
-        isOpen={showDeleteModal}
-        onClose={cancelDelete}
-        onConfirm={confirmDelete}
-        title="Eliminar Servicio"
-        message={`¿Estás seguro de que quieres eliminar el servicio "${selectedService?.name}"? Esta acción no se puede deshacer.`}
-        confirmText="Eliminar"
-        cancelText="Cancelar"
-        confirmColor="danger"
-        loading={deleteServiceMutation.isPending}
       />
     </div>
   );

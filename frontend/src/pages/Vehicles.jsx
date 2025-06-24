@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import VehiclesTable from "@components/features/vehicles/VehiclesTable";
 import { useVehicles, useDeleteVehicle } from "@services/vehiclesService";
+import { useNotificationService } from "@services/notificationService";
 
 const Vehicles = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [perPage] = useState(10);
+
+  // Servicio de notificaciones
+  const notification = useNotificationService();
 
   // Query para obtener vehículos con paginación y búsqueda
   const {
@@ -36,29 +40,30 @@ const Vehicles = () => {
 
   const handleCreate = () => {
     console.log("Crear nuevo vehículo");
-    alert("Función de crear vehículo - En desarrollo");
+    notification.showInfo("Función de crear vehículo - En desarrollo");
   };
 
   const handleEdit = (vehicle) => {
     console.log("Editar vehículo:", vehicle);
-    alert(`Editar vehículo: ${vehicle.brand} ${vehicle.model} - En desarrollo`);
+    notification.showInfo(`Editar vehículo: ${vehicle.brand} ${vehicle.model} - En desarrollo`);
   };
 
   const handleDelete = async (vehicle) => {
     if (confirm(`¿Estás seguro de que quieres eliminar el vehículo ${vehicle.brand} ${vehicle.model}?`)) {
       try {
         await deleteVehicleMutation.mutateAsync(vehicle.id);
+        notification.showVehicleSuccess('DELETED');
         // La invalidación del cache se maneja automáticamente en el servicio
       } catch (error) {
         console.error("Error al eliminar vehículo:", error);
-        alert(`Error al eliminar vehículo: ${error.response?.data?.message || error.message}`);
+        notification.showVehicleError('ERROR_DELETE', error.response?.data?.message || error.message);
       }
     }
   };
 
   const handleView = (vehicle) => {
     console.log("Ver vehículo:", vehicle);
-    alert(`Ver detalles de: ${vehicle.brand} ${vehicle.model} - En desarrollo`);
+    notification.showInfo(`Ver detalles de: ${vehicle.brand} ${vehicle.model} - En desarrollo`);
   };
 
   // Manejo de errores
