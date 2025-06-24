@@ -226,7 +226,7 @@ vehicles = Vehicle.all
   appointment = Appointment.new(
     scheduled_at: i.days.ago,
     status: "completed",
-    notes: Faker::Lorem.sentence(word_count: 8, supplemental: false, random_words_to_add: 4),
+    notes: "una descripcion para la nota",
     customer: customer,
     vehicle: vehicle
   )
@@ -241,7 +241,7 @@ end
   Appointment.create!(
     scheduled_at: (i + 1).days.from_now,
     status: [ "scheduled", "confirmed" ].sample,
-    notes: Faker::Lorem.sentence(word_count: 8, supplemental: false, random_words_to_add: 4),
+    notes: "una descripcion para la nota",
     customer: customer,
     vehicle: vehicle
   )
@@ -255,7 +255,7 @@ end
   Appointment.create!(
     scheduled_at: (i + 1).hours.from_now,
     status: "scheduled",
-    notes: "URGENTE - " + Faker::Lorem.sentence(word_count: 6, supplemental: false, random_words_to_add: 3),
+    notes: "URGENTE - " + "una descripcion para la nota",
     customer: customer,
     vehicle: vehicle
   )
@@ -274,7 +274,7 @@ customers.each do |customer|
       service_record = ServiceRecord.create!(
         service_date: service_date,
         total_amount: 0, # Se calculará automáticamente
-        notes: Faker::Lorem.sentence(word_count: 10, supplemental: false, random_words_to_add: 5),
+        notes: "una descripcion para la nota",
         mileage: rand(10000..150000),
         next_service_date: service_date + 6.months,
         customer: customer,
@@ -309,7 +309,7 @@ customers.each do |customer|
     service_record = ServiceRecord.create!(
       service_date: 2.weeks.ago.to_date,
       total_amount: 0, # Se calculará automáticamente
-      notes: Faker::Lorem.sentence(word_count: 10, supplemental: false, random_words_to_add: 5),
+      notes: "una descripcion para la nota",
       mileage: rand(50000..120000),
       next_service_date: 4.months.from_now.to_date,
       customer: customer,
@@ -350,7 +350,7 @@ customers.sample(3).each do |customer|
   service_record = ServiceRecord.create!(
     service_date: 8.months.ago.to_date,
     total_amount: 0, # Se calculará automáticamente
-    notes: "Servicio vencido - " + Faker::Lorem.sentence(word_count: 8, supplemental: false, random_words_to_add: 4),
+    notes: "Servicio vencido - " + "una descripcion para la nota",
     mileage: rand(80000..180000),
     next_service_date: 2.months.ago.to_date, # Vencido
     customer: customer,
@@ -386,7 +386,7 @@ customers.sample(2).each do |customer|
   service_record = ServiceRecord.create!(
     service_date: 5.months.ago.to_date,
     total_amount: 0, # Se calculará automáticamente
-    notes: "Servicio próximo - " + Faker::Lorem.sentence(word_count: 8, supplemental: false, random_words_to_add: 4),
+    notes: "Servicio próximo - " + "una descripcion para la nota",
     mileage: rand(60000..140000),
     next_service_date: 2.weeks.from_now.to_date, # Próximo
     customer: customer,
