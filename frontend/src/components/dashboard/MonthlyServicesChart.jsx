@@ -1,5 +1,4 @@
 import { ServiceIcon } from '@icons/index.jsx';
-import { Bar } from 'react-chartjs-2';
 
 const MonthlyServicesChart = ({ data }) => {
   const chartData = Array.isArray(data) ? data : [
