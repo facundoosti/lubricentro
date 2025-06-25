@@ -13,7 +13,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install packages
-RUN npm install
+RUN npm ci
 
 # Copy local code to the container image.
 COPY . ./
@@ -35,6 +35,12 @@ RUN caddy fmt Caddyfile --overwrite
 
 # Copy files to the container image.
 COPY --from=build /app/dist ./dist
+
+# Debug: mostrar archivos en /app/dist
+RUN echo "Archivos en /app/dist:" && ls -l ./dist
+
+# Debug: mostrar valor de $PORT en runtime (esto solo funcionará si $PORT está seteado en build, pero ayuda a debuggear)
+RUN echo "Valor de $PORT en build: $PORT"
 
 # Use Caddy to run/serve the app
 CMD ["caddy", "run", "--config", "Caddyfile", "--adapter", "caddyfile"]
