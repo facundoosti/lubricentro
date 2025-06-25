@@ -15,11 +15,7 @@
 }
 
 # site block, listens on the $PORT environment variable, automatically assigned by railway
-<<<<<<< HEAD
 :{$PORT} {
-=======
-:{$PORT:3001} {
->>>>>>> 3f9c81c1291bb0b1906c3594a59ffc37150e577d
     # access logs
     log {
         format json # set access log format to json mode
