@@ -6,6 +6,7 @@
 	# runtime logs
 	log {
 		format json # set runtime log format to json mode 
+		output stdout
 	}
 	# server options
 	servers {
@@ -18,10 +19,13 @@
 	# access logs
 	log {
 		format json # set access log format to json mode
+		output stdout
 	}
 
 	# health check for railway
-	rewrite /health /*
+	handle /health {
+		respond "OK" 200
+	}
 
 	# serve from the 'dist' folder (Vite builds into the 'dist' folder)
 	root * dist

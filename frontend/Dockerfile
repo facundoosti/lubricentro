@@ -22,7 +22,7 @@ COPY . ./
 RUN npm run build
 
 # Use the Caddy image
-FROM caddy
+FROM caddy:2-alpine
 
 # Create and change to the app directory.
 WORKDIR /app
@@ -30,11 +30,15 @@ WORKDIR /app
 # Copy Caddyfile to the container image.
 COPY Caddyfile ./
 
-# Copy local code to the container image.
-RUN caddy fmt Caddyfile --overwrite
-
 # Copy files to the container image.
 COPY --from=build /app/dist ./dist
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-3000}/health || exit 1
 
 # Use Caddy to run/serve the app
 CMD ["caddy", "run", "--config", "Caddyfile", "--adapter", "caddyfile"]
