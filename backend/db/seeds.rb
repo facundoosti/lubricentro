@@ -493,6 +493,21 @@ additional_customers.each do |customer_data|
   end
 end
 
+# Crear usuario admin
+User.find_or_create_by!(email: 'facundoosti@gmail.com') do |user|
+  user.name = 'Facundo Osti'
+  user.password = 'lubri123'
+  user.password_confirmation = 'lubri123'
+end
+puts 'Usuario admin creado: facundoosti@gmail.com'
+
+# Crear Doorkeeper application para desarrollo
+Doorkeeper::Application.find_or_create_by!(name: 'Lubricentro Web App') do |app|
+  app.redirect_uri = 'urn:ietf:wg:oauth:2.0:oob'
+  app.scopes = 'read write'
+end
+puts 'Doorkeeper application creada para desarrollo.'
+
 # Estadísticas finales
 puts "\n✅ Seeds completados exitosamente!"
 puts "📊 Resumen de datos creados:"

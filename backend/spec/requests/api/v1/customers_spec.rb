@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe "Api::V1::Customers", type: :request do
+  include ApiHelper
+  let(:user) { create(:user) }
   let(:valid_attributes) { attributes_for(:customer) }
   let(:invalid_attributes) { attributes_for(:customer, name: '', phone: '', email: 'invalid_email', address: '') }
 
@@ -8,7 +10,7 @@ RSpec.describe "Api::V1::Customers", type: :request do
     context 'with basic response' do
       before do
         create_list(:customer, 3)
-        get '/api/v1/customers'
+        get '/api/v1/customers', headers: auth_headers(user)
       end
 
       it 'returns successful response' do
@@ -31,7 +33,7 @@ RSpec.describe "Api::V1::Customers", type: :request do
       let!(:customers) { create_list(:customer, 25) }
 
       context 'with default parameters' do
-        before { get '/api/v1/customers' }
+        before { get '/api/v1/customers', headers: auth_headers(user) }
 
         it 'returns paginated results' do
           data = json_response[:data]
@@ -51,7 +53,7 @@ RSpec.describe "Api::V1::Customers", type: :request do
       end
 
       context 'with custom per_page' do
-        before { get '/api/v1/customers', params: { per_page: 10 } }
+        before { get '/api/v1/customers', params: { per_page: 10 }, headers: auth_headers(user) }
 
         it 'respects per_page parameter' do
           data = json_response[:data]
@@ -62,7 +64,7 @@ RSpec.describe "Api::V1::Customers", type: :request do
       end
 
       context 'with page parameter' do
-        before { get '/api/v1/customers', params: { page: 2, per_page: 10 } }
+        before { get '/api/v1/customers', params: { page: 2, per_page: 10 }, headers: auth_headers(user) }
 
         it 'returns correct page' do
           data = json_response[:data]
@@ -74,7 +76,7 @@ RSpec.describe "Api::V1::Customers", type: :request do
       end
 
       context 'when requesting page beyond total' do
-        before { get '/api/v1/customers', params: { page: 10, per_page: 10 } }
+        before { get '/api/v1/customers', params: { page: 10, per_page: 10 }, headers: auth_headers(user) }
 
         it 'returns successful response even with invalid page' do
           expect(response).to have_http_status(:ok)
@@ -89,7 +91,7 @@ RSpec.describe "Api::V1::Customers", type: :request do
       end
 
       context 'with per_page exceeding max_items' do
-        before { get '/api/v1/customers', params: { per_page: 150 } }
+        before { get '/api/v1/customers', params: { per_page: 150 }, headers: auth_headers(user) }
 
         it 'limits to max_items (100)' do
           data = json_response[:data]
@@ -103,7 +105,7 @@ RSpec.describe "Api::V1::Customers", type: :request do
       let!(:other_customers) { create_list(:customer, 3) }
 
       before do
-        get '/api/v1/customers', params: { search: 'Jane' }
+        get '/api/v1/customers', params: { search: 'Jane' }, headers: auth_headers(user)
       end
 
       it 'filters customers by name' do
@@ -117,13 +119,21 @@ RSpec.describe "Api::V1::Customers", type: :request do
         expect(pagination[:total_count]).to eq(1)
       end
     end
+
+    context 'without authentication' do
+      before { get '/api/v1/customers' }
+
+      it 'returns unauthorized' do
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
   end
 
   describe 'GET /api/v1/customers/:id' do
     let(:customer) { create(:customer_with_vehicles) }
 
     before do
-      get "/api/v1/customers/#{customer.id}"
+      get "/api/v1/customers/#{customer.id}", headers: auth_headers(user)
     end
 
     it 'returns successful response' do
@@ -139,7 +149,7 @@ RSpec.describe "Api::V1::Customers", type: :request do
 
     context 'when customer not found' do
       before do
-        get '/api/v1/customers/999999'
+        get '/api/v1/customers/999999', headers: auth_headers(user)
       end
 
       it 'returns not found error' do
@@ -154,12 +164,12 @@ RSpec.describe "Api::V1::Customers", type: :request do
     context 'with valid parameters' do
       it 'creates a new Customer' do
         expect {
-          post '/api/v1/customers', params: { customer: valid_attributes }
+          post '/api/v1/customers', params: { customer: valid_attributes }, headers: auth_headers(user)
         }.to change(Customer, :count).by(1)
       end
 
       it 'returns success response' do
-        post '/api/v1/customers', params: { customer: valid_attributes }
+        post '/api/v1/customers', params: { customer: valid_attributes }, headers: auth_headers(user)
 
         expect(response).to have_http_status(:created)
         expect(json_response[:success]).to be true
@@ -171,16 +181,23 @@ RSpec.describe "Api::V1::Customers", type: :request do
     context 'with invalid parameters' do
       it 'does not create a new Customer' do
         expect {
-          post '/api/v1/customers', params: { customer: invalid_attributes }
+          post '/api/v1/customers', params: { customer: invalid_attributes }, headers: auth_headers(user)
         }.not_to change(Customer, :count)
       end
 
       it 'returns error response' do
-        post '/api/v1/customers', params: { customer: invalid_attributes }
+        post '/api/v1/customers', params: { customer: invalid_attributes }, headers: auth_headers(user)
 
         expect(response).to have_http_status(:unprocessable_entity)
         expect(json_response[:success]).to be false
         expect(json_response[:errors]).to be_present
+      end
+    end
+
+    context 'without authentication' do
+      it 'returns unauthorized' do
+        post '/api/v1/customers', params: { customer: valid_attributes }
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
@@ -191,7 +208,7 @@ RSpec.describe "Api::V1::Customers", type: :request do
 
     context 'with valid parameters' do
       before do
-        patch "/api/v1/customers/#{customer.id}", params: { customer: new_attributes }
+        patch "/api/v1/customers/#{customer.id}", params: { customer: new_attributes }, headers: auth_headers(user)
       end
 
       it 'updates the customer' do
@@ -209,7 +226,7 @@ RSpec.describe "Api::V1::Customers", type: :request do
 
     context 'with invalid parameters' do
       before do
-        patch "/api/v1/customers/#{customer.id}", params: { customer: invalid_attributes }
+        patch "/api/v1/customers/#{customer.id}", params: { customer: invalid_attributes }, headers: auth_headers(user)
       end
 
       it 'returns error response' do
@@ -225,12 +242,12 @@ RSpec.describe "Api::V1::Customers", type: :request do
     context 'when customer has no vehicles' do
       it 'destroys the customer' do
         expect {
-          delete "/api/v1/customers/#{customer.id}"
+          delete "/api/v1/customers/#{customer.id}", headers: auth_headers(user)
         }.to change(Customer, :count).by(-1)
       end
 
       it 'returns success response' do
-        delete "/api/v1/customers/#{customer.id}"
+        delete "/api/v1/customers/#{customer.id}", headers: auth_headers(user)
 
         expect(response).to have_http_status(:ok)
         expect(json_response[:success]).to be true
@@ -243,12 +260,12 @@ RSpec.describe "Api::V1::Customers", type: :request do
 
       it 'does not destroy the customer' do
         expect {
-          delete "/api/v1/customers/#{customer_with_vehicles.id}"
+          delete "/api/v1/customers/#{customer_with_vehicles.id}", headers: auth_headers(user)
         }.not_to change(Customer, :count)
       end
 
       it 'returns error response' do
-        delete "/api/v1/customers/#{customer_with_vehicles.id}"
+        delete "/api/v1/customers/#{customer_with_vehicles.id}", headers: auth_headers(user)
 
         expect(response).to have_http_status(:unprocessable_entity)
         expect(json_response[:success]).to be false
@@ -258,7 +275,7 @@ RSpec.describe "Api::V1::Customers", type: :request do
 
     context 'when customer not found' do
       before do
-        delete '/api/v1/customers/999999'
+        delete '/api/v1/customers/999999', headers: auth_headers(user)
       end
 
       it 'returns not found error' do

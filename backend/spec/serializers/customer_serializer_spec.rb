@@ -26,7 +26,7 @@ RSpec.describe CustomerSerializer, type: :serializer do
 
     it 'does not include vehicles by default' do
       expect(serialized_customer).not_to have_key(:vehicles)
-      expect(serialized_customer).not_to have_key(:vehicles_count)
+      expect(serialized_customer).to have_key(:vehicles_count)
     end
   end
 

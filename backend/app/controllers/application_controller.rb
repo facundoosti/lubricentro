@@ -2,6 +2,9 @@ class ApplicationController < ActionController::API
   # Include Pagy backend functionality
   include Pagy::Backend
 
+  # Doorkeeper authentication
+  before_action :doorkeeper_authorize!
+
   private
 
   # Custom pagy metadata for API responses
@@ -47,5 +50,10 @@ class ApplicationController < ActionController::API
     response_body[:errors] = errors if errors.present?
 
     render json: response_body, status: status
+  end
+
+  # Current user from Doorkeeper
+  def current_user
+    @current_user ||= User.find(doorkeeper_token.resource_owner_id) if doorkeeper_token
   end
 end

@@ -4,11 +4,18 @@ module ApiHelper
   end
 
   def auth_headers(user = nil)
-    # TODO: Implement when JWT is ready
-    # user ||= create(:user)
-    # token = JwtService.encode(user_id: user.id)
-    # { 'Authorization' => "Bearer #{token}" }
-    {}
+    user ||= create(:user)
+
+    # Crear token usando Doorkeeper
+    application = Doorkeeper::Application.first || create(:oauth_application)
+    access_token = Doorkeeper::AccessToken.create!(
+      resource_owner_id: user.id,
+      application_id: application.id,
+      expires_in: Doorkeeper.configuration.access_token_expires_in,
+      scopes: Doorkeeper.configuration.default_scopes
+    )
+
+    { 'Authorization' => "Bearer #{access_token.token}" }
   end
 
   def api_success_response(data, message = nil)

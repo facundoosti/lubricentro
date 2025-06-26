@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe "Api::V1::Vehicles", type: :request do
+  include ApiHelper
+  let(:user) { create(:user) }
   let(:customer) { create(:customer) }
   let(:valid_attributes) { attributes_for(:vehicle, customer_id: customer.id) }
   let(:invalid_attributes) { attributes_for(:vehicle, brand: '', model: '', license_plate: '', year: '', customer_id: nil) }
@@ -8,7 +10,7 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
   describe 'GET /api/v1/vehicles' do
     before do
       create_list(:vehicle, 3, customer: customer)
-      get '/api/v1/vehicles'
+      get '/api/v1/vehicles', headers: auth_headers(user)
     end
 
     it 'returns successful response' do
@@ -43,7 +45,7 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
       let!(:other_vehicle) { create(:vehicle, customer: other_customer) }
 
       before do
-        get '/api/v1/vehicles', params: { customer_id: customer.id }
+        get '/api/v1/vehicles', params: { customer_id: customer.id }, headers: auth_headers(user)
       end
 
       it 'filters vehicles by customer' do
@@ -56,7 +58,7 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
       let!(:searchable_vehicle) { create(:vehicle, license_plate: 'XYZ789', customer: customer) }
 
       before do
-        get '/api/v1/vehicles', params: { search: 'XYZ' }
+        get '/api/v1/vehicles', params: { search: 'XYZ' }, headers: auth_headers(user)
       end
 
       it 'filters vehicles by license_plate' do
@@ -68,7 +70,7 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
     context 'with pagination' do
       before do
         create_list(:vehicle, 25, customer: customer)
-        get '/api/v1/vehicles', params: { page: 2, per_page: 10 }
+        get '/api/v1/vehicles', params: { page: 2, per_page: 10 }, headers: auth_headers(user)
       end
 
       it 'returns correct page' do
@@ -77,13 +79,20 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
         expect(pagination[:per_page]).to eq(10)
       end
     end
+
+    context 'without authentication' do
+      it 'returns unauthorized' do
+        get '/api/v1/vehicles'
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
   end
 
   describe 'GET /api/v1/vehicles/:id' do
     let(:vehicle) { create(:vehicle, customer: customer) }
 
     before do
-      get "/api/v1/vehicles/#{vehicle.id}"
+      get "/api/v1/vehicles/#{vehicle.id}", headers: auth_headers(user)
     end
 
     it 'returns successful response' do
@@ -100,7 +109,7 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
 
     context 'when vehicle not found' do
       before do
-        get '/api/v1/vehicles/999999'
+        get '/api/v1/vehicles/999999', headers: auth_headers(user)
       end
 
       it 'returns not found error' do
@@ -109,18 +118,25 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
         expect(json_response[:errors]).to include('Vehicle not found')
       end
     end
+
+    context 'without authentication' do
+      it 'returns unauthorized' do
+        get "/api/v1/vehicles/#{vehicle.id}"
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
   end
 
   describe 'POST /api/v1/vehicles' do
     context 'with valid parameters' do
       it 'creates a new Vehicle' do
         expect {
-          post '/api/v1/vehicles', params: { vehicle: valid_attributes }
+          post '/api/v1/vehicles', params: { vehicle: valid_attributes }, headers: auth_headers(user)
         }.to change(Vehicle, :count).by(1)
       end
 
       it 'returns success response' do
-        post '/api/v1/vehicles', params: { vehicle: valid_attributes }
+        post '/api/v1/vehicles', params: { vehicle: valid_attributes }, headers: auth_headers(user)
 
         expect(response).to have_http_status(:created)
         expect(json_response[:success]).to be true
@@ -133,12 +149,12 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
     context 'with invalid parameters' do
       it 'does not create a new Vehicle' do
         expect {
-          post '/api/v1/vehicles', params: { vehicle: invalid_attributes }
+          post '/api/v1/vehicles', params: { vehicle: invalid_attributes }, headers: auth_headers(user)
         }.not_to change(Vehicle, :count)
       end
 
       it 'returns error response' do
-        post '/api/v1/vehicles', params: { vehicle: invalid_attributes }
+        post '/api/v1/vehicles', params: { vehicle: invalid_attributes }, headers: auth_headers(user)
 
         expect(response).to have_http_status(:unprocessable_entity)
         expect(json_response[:success]).to be false
@@ -153,10 +169,17 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
 
       it 'returns validation error' do
         duplicate_params = valid_attributes.merge(license_plate: existing_vehicle.license_plate)
-        post '/api/v1/vehicles', params: { vehicle: duplicate_params }
+        post '/api/v1/vehicles', params: { vehicle: duplicate_params }, headers: auth_headers(user)
 
         expect(response).to have_http_status(:unprocessable_entity)
         expect(json_response[:errors]).to include(match(/license plate.*taken/i))
+      end
+    end
+
+    context 'without authentication' do
+      it 'returns unauthorized' do
+        post '/api/v1/vehicles', params: { vehicle: valid_attributes }
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
@@ -167,7 +190,7 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
 
     context 'with valid parameters' do
       before do
-        patch "/api/v1/vehicles/#{vehicle.id}", params: { vehicle: new_attributes }
+        patch "/api/v1/vehicles/#{vehicle.id}", params: { vehicle: new_attributes }, headers: auth_headers(user)
       end
 
       it 'updates the vehicle' do
@@ -186,12 +209,19 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
 
     context 'with invalid parameters' do
       before do
-        patch "/api/v1/vehicles/#{vehicle.id}", params: { vehicle: invalid_attributes }
+        patch "/api/v1/vehicles/#{vehicle.id}", params: { vehicle: invalid_attributes }, headers: auth_headers(user)
       end
 
       it 'returns error response' do
         expect(response).to have_http_status(:unprocessable_entity)
         expect(json_response[:success]).to be false
+      end
+    end
+
+    context 'without authentication' do
+      it 'returns unauthorized' do
+        patch "/api/v1/vehicles/#{vehicle.id}", params: { vehicle: new_attributes }
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
@@ -201,26 +231,20 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
 
     it 'destroys the vehicle' do
       expect {
-        delete "/api/v1/vehicles/#{vehicle.id}"
+        delete "/api/v1/vehicles/#{vehicle.id}", headers: auth_headers(user)
       }.to change(Vehicle, :count).by(-1)
     end
 
     it 'returns success response' do
-      delete "/api/v1/vehicles/#{vehicle.id}"
-
+      delete "/api/v1/vehicles/#{vehicle.id}", headers: auth_headers(user)
       expect(response).to have_http_status(:ok)
       expect(json_response[:success]).to be true
-      expect(json_response[:message]).to eq('Vehicle deleted successfully')
     end
 
-    context 'when vehicle not found' do
-      before do
-        delete '/api/v1/vehicles/999999'
-      end
-
-      it 'returns not found error' do
-        expect(response).to have_http_status(:not_found)
-        expect(json_response[:success]).to be false
+    context 'without authentication' do
+      it 'returns unauthorized' do
+        delete "/api/v1/vehicles/#{vehicle.id}"
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end

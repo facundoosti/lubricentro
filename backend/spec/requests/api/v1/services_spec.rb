@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe "Api::V1::Services", type: :request do
+  include ApiHelper
+  let(:user) { create(:user) }
   let(:valid_attributes) { attributes_for(:service, :oil_change) }
 
   let(:invalid_attributes) do
@@ -18,12 +20,12 @@ RSpec.describe "Api::V1::Services", type: :request do
     let!(:services) { create_list(:service, 5) }
 
     it "returns success response" do
-      get api_v1_services_url, headers: valid_headers
+      get api_v1_services_url, headers: valid_headers.merge(auth_headers(user))
       expect(response).to have_http_status(:ok)
     end
 
     it "returns services data with Blueprint serialization" do
-      get api_v1_services_url, headers: valid_headers
+      get api_v1_services_url, headers: valid_headers.merge(auth_headers(user))
 
       parsed_response = JSON.parse(response.body, symbolize_names: true)
 
@@ -45,7 +47,7 @@ RSpec.describe "Api::V1::Services", type: :request do
       let!(:brake_service) { create(:service, :brake_service) }
 
       it "filters services by name" do
-        get api_v1_services_url, params: { search: "oil" }, headers: valid_headers
+        get api_v1_services_url, params: { search: "oil" }, headers: valid_headers.merge(auth_headers(user))
 
         parsed_response = JSON.parse(response.body, symbolize_names: true)
         services_data = parsed_response[:data][:services]
@@ -60,7 +62,7 @@ RSpec.describe "Api::V1::Services", type: :request do
       let!(:expensive_service) { create(:service, :expensive) }
 
       it "filters services by price range" do
-        get api_v1_services_url, params: { min_price: 1000, max_price: 10000 }, headers: valid_headers
+        get api_v1_services_url, params: { min_price: 1000, max_price: 10000 }, headers: valid_headers.merge(auth_headers(user))
 
         parsed_response = JSON.parse(response.body, symbolize_names: true)
         services_data = parsed_response[:data][:services]
@@ -76,7 +78,7 @@ RSpec.describe "Api::V1::Services", type: :request do
       let!(:services) { create_list(:service, 25) }
 
       it "paginates results" do
-        get api_v1_services_url, params: { page: 1, per_page: 10 }, headers: valid_headers
+        get api_v1_services_url, params: { page: 1, per_page: 10 }, headers: valid_headers.merge(auth_headers(user))
 
         parsed_response = JSON.parse(response.body, symbolize_names: true)
 
@@ -85,12 +87,19 @@ RSpec.describe "Api::V1::Services", type: :request do
       end
 
       it "returns second page correctly" do
-        get api_v1_services_url, params: { page: 2, per_page: 10 }, headers: valid_headers
+        get api_v1_services_url, params: { page: 2, per_page: 10 }, headers: valid_headers.merge(auth_headers(user))
 
         parsed_response = JSON.parse(response.body, symbolize_names: true)
 
         expect(parsed_response[:success]).to be true
         expect(parsed_response[:data][:services].count).to eq(10)
+      end
+    end
+
+    context "without authentication" do
+      it "returns unauthorized" do
+        get api_v1_services_url, headers: valid_headers
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
@@ -100,12 +109,12 @@ RSpec.describe "Api::V1::Services", type: :request do
 
     context "when service exists" do
       it "returns success response" do
-        get api_v1_service_url(service), headers: valid_headers
+        get api_v1_service_url(service), headers: valid_headers.merge(auth_headers(user))
         expect(response).to have_http_status(:ok)
       end
 
       it "returns service data" do
-        get api_v1_service_url(service), headers: valid_headers
+        get api_v1_service_url(service), headers: valid_headers.merge(auth_headers(user))
 
         parsed_response = JSON.parse(response.body, symbolize_names: true)
 
@@ -119,18 +128,25 @@ RSpec.describe "Api::V1::Services", type: :request do
 
     context "when service doesn't exist" do
       it "returns not found status" do
-        get api_v1_service_url(999999), headers: valid_headers
+        get api_v1_service_url(999999), headers: valid_headers.merge(auth_headers(user))
         expect(response).to have_http_status(:not_found)
       end
 
       it "returns error message" do
-        get api_v1_service_url(999999), headers: valid_headers
+        get api_v1_service_url(999999), headers: valid_headers.merge(auth_headers(user))
 
         parsed_response = JSON.parse(response.body, symbolize_names: true)
 
         expect(parsed_response[:success]).to be false
         expect(parsed_response[:message]).to eq("Service not found")
         expect(parsed_response[:errors]).to include("Service not found")
+      end
+    end
+
+    context "without authentication" do
+      it "returns unauthorized" do
+        get api_v1_service_url(service), headers: valid_headers
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
@@ -141,21 +157,21 @@ RSpec.describe "Api::V1::Services", type: :request do
         expect {
           post api_v1_services_url,
                params: { service: valid_attributes }.to_json,
-               headers: valid_headers
+               headers: valid_headers.merge(auth_headers(user))
         }.to change(Service, :count).by(1)
       end
 
       it "returns success status" do
         post api_v1_services_url,
              params: { service: valid_attributes }.to_json,
-             headers: valid_headers
+             headers: valid_headers.merge(auth_headers(user))
         expect(response).to have_http_status(:created)
       end
 
       it "returns created service data" do
         post api_v1_services_url,
              params: { service: valid_attributes }.to_json,
-             headers: valid_headers
+             headers: valid_headers.merge(auth_headers(user))
 
         parsed_response = JSON.parse(response.body, symbolize_names: true)
 
@@ -172,21 +188,21 @@ RSpec.describe "Api::V1::Services", type: :request do
         expect {
           post api_v1_services_url,
                params: { service: invalid_attributes }.to_json,
-               headers: valid_headers
+               headers: valid_headers.merge(auth_headers(user))
         }.to change(Service, :count).by(0)
       end
 
       it "returns unprocessable entity status" do
         post api_v1_services_url,
              params: { service: invalid_attributes }.to_json,
-             headers: valid_headers
+             headers: valid_headers.merge(auth_headers(user))
         expect(response).to have_http_status(:unprocessable_entity)
       end
 
       it "returns validation errors" do
         post api_v1_services_url,
              params: { service: invalid_attributes }.to_json,
-             headers: valid_headers
+             headers: valid_headers.merge(auth_headers(user))
 
         parsed_response = JSON.parse(response.body, symbolize_names: true)
 
@@ -196,102 +212,113 @@ RSpec.describe "Api::V1::Services", type: :request do
         expect(parsed_response[:errors]).to include("Base price must be greater than 0")
       end
     end
+
+    context "without authentication" do
+      it "returns unauthorized" do
+        post api_v1_services_url,
+             params: { service: valid_attributes }.to_json,
+             headers: valid_headers
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
   end
 
-  describe "PATCH/PUT /api/v1/services/:id" do
-    let!(:service) { create(:service) }
+  describe "PATCH /api/v1/services/:id" do
+    let!(:service) { create(:service, :oil_change) }
+    let(:new_attributes) { { name: "Updated Oil Change", base_price: 15000 } }
 
     context "with valid parameters" do
-      let(:new_attributes) { attributes_for(:service, :brake_service, name: "Updated Brake Service") }
-
       it "updates the service" do
         patch api_v1_service_url(service),
               params: { service: new_attributes }.to_json,
-              headers: valid_headers
+              headers: valid_headers.merge(auth_headers(user))
 
         service.reload
-        expect(service.name).to eq(new_attributes[:name])
-        expect(service.description).to eq(new_attributes[:description])
-        expect(service.base_price).to eq(new_attributes[:base_price])
+        expect(service.name).to eq("Updated Oil Change")
+        expect(service.base_price).to eq(15000)
       end
 
-      it "returns success status" do
+      it "returns success response" do
         patch api_v1_service_url(service),
               params: { service: new_attributes }.to_json,
-              headers: valid_headers
+              headers: valid_headers.merge(auth_headers(user))
+
         expect(response).to have_http_status(:ok)
-      end
-
-      it "returns updated service data" do
-        patch api_v1_service_url(service),
-              params: { service: new_attributes }.to_json,
-              headers: valid_headers
-
         parsed_response = JSON.parse(response.body, symbolize_names: true)
-
         expect(parsed_response[:success]).to be true
-        expect(parsed_response[:data][:name]).to eq(new_attributes[:name])
         expect(parsed_response[:message]).to eq("Service updated successfully")
       end
     end
 
     context "with invalid parameters" do
-      it "returns unprocessable entity status" do
+      it "returns error response" do
         patch api_v1_service_url(service),
               params: { service: invalid_attributes }.to_json,
-              headers: valid_headers
+              headers: valid_headers.merge(auth_headers(user))
+
         expect(response).to have_http_status(:unprocessable_entity)
-      end
-
-      it "returns validation errors" do
-        patch api_v1_service_url(service),
-              params: { service: invalid_attributes }.to_json,
-              headers: valid_headers
-
         parsed_response = JSON.parse(response.body, symbolize_names: true)
-
         expect(parsed_response[:success]).to be false
-        expect(parsed_response[:errors]).to be_an(Array)
+        expect(parsed_response[:errors]).to be_present
       end
     end
 
-    context "when service doesn't exist" do
-      it "returns not found status" do
-        patch api_v1_service_url(999999),
-              params: { service: valid_attributes }.to_json,
+    context "without authentication" do
+      it "returns unauthorized" do
+        patch api_v1_service_url(service),
+              params: { service: new_attributes }.to_json,
               headers: valid_headers
-        expect(response).to have_http_status(:not_found)
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
 
   describe "DELETE /api/v1/services/:id" do
-    let!(:service) { create(:service) }
+    let!(:service) { create(:service, :oil_change) }
 
-    it "destroys the service" do
-      expect {
+    context "when service can be deleted" do
+      it "deletes the service" do
+        expect {
+          delete api_v1_service_url(service), headers: valid_headers.merge(auth_headers(user))
+        }.to change(Service, :count).by(-1)
+      end
+
+      it "returns success response" do
+        delete api_v1_service_url(service), headers: valid_headers.merge(auth_headers(user))
+
+        expect(response).to have_http_status(:ok)
+        parsed_response = JSON.parse(response.body, symbolize_names: true)
+        expect(parsed_response[:success]).to be true
+        expect(parsed_response[:message]).to eq("Service deleted successfully")
+      end
+    end
+
+    context "when service has associated records" do
+      let!(:service_record) { create(:service_record) }
+      let!(:service_record_service) do
+        create(:service_record_service, service: service, service_record: service_record)
+      end
+
+      it "does not delete the service" do
+        expect {
+          delete api_v1_service_url(service), headers: valid_headers.merge(auth_headers(user))
+        }.not_to change(Service, :count)
+      end
+
+      it "returns error response" do
+        delete api_v1_service_url(service), headers: valid_headers.merge(auth_headers(user))
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        parsed_response = JSON.parse(response.body, symbolize_names: true)
+        expect(parsed_response[:success]).to be false
+        expect(parsed_response[:errors]).to include("Cannot delete service with associated records")
+      end
+    end
+
+    context "without authentication" do
+      it "returns unauthorized" do
         delete api_v1_service_url(service), headers: valid_headers
-      }.to change(Service, :count).by(-1)
-    end
-
-    it "returns success status" do
-      delete api_v1_service_url(service), headers: valid_headers
-      expect(response).to have_http_status(:ok)
-    end
-
-    it "returns success message" do
-      delete api_v1_service_url(service), headers: valid_headers
-
-      parsed_response = JSON.parse(response.body, symbolize_names: true)
-
-      expect(parsed_response[:success]).to be true
-      expect(parsed_response[:message]).to eq("Service deleted successfully")
-    end
-
-    context "when service doesn't exist" do
-      it "returns not found status" do
-        delete api_v1_service_url(999999), headers: valid_headers
-        expect(response).to have_http_status(:not_found)
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end

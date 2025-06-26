@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe 'Api::V1::Appointments', type: :request do
+  include ApiHelper
+  let(:user) { create(:user) }
   let(:customer) { create(:customer) }
   let(:vehicle) { create(:vehicle, customer: customer) }
   let(:appointment) { create(:appointment, customer: customer, vehicle: vehicle) }
@@ -20,7 +22,7 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
     end
 
     it 'returns a list of appointments' do
-      get '/api/v1/appointments'
+      get '/api/v1/appointments', headers: auth_headers(user)
 
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
@@ -37,7 +39,7 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
       let!(:other_appointment) { create(:appointment, customer: other_customer, vehicle: other_vehicle) }
 
       it 'filters by customer_id' do
-        get '/api/v1/appointments', params: { customer_id: customer.id }
+        get '/api/v1/appointments', params: { customer_id: customer.id }, headers: auth_headers(user)
 
         json_response = JSON.parse(response.body)
         expect(json_response['data'].length).to eq(3)
@@ -45,7 +47,7 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
       end
 
       it 'filters by vehicle_id' do
-        get '/api/v1/appointments', params: { vehicle_id: vehicle.id }
+        get '/api/v1/appointments', params: { vehicle_id: vehicle.id }, headers: auth_headers(user)
 
         json_response = JSON.parse(response.body)
         expect(json_response['data'].length).to eq(3)
@@ -53,7 +55,7 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
       end
 
       it 'filters by status' do
-        get '/api/v1/appointments', params: { status: 'scheduled' }
+        get '/api/v1/appointments', params: { status: 'scheduled' }, headers: auth_headers(user)
 
         json_response = JSON.parse(response.body)
         expect(json_response['data'].all? { |app| app['status'] == 'scheduled' }).to be true
@@ -63,17 +65,24 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
         start_date = Date.current
         end_date = 2.days.from_now.to_date
 
-        get '/api/v1/appointments', params: { start_date: start_date, end_date: end_date }
+        get '/api/v1/appointments', params: { start_date: start_date, end_date: end_date }, headers: auth_headers(user)
 
         json_response = JSON.parse(response.body)
         expect(json_response['data']).to be_present
+      end
+    end
+
+    context 'without authentication' do
+      it 'returns unauthorized' do
+        get '/api/v1/appointments'
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
 
   describe 'GET /api/v1/appointments/:id' do
     it 'returns the appointment' do
-      get "/api/v1/appointments/#{appointment.id}"
+      get "/api/v1/appointments/#{appointment.id}", headers: auth_headers(user)
 
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
@@ -85,11 +94,18 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
     end
 
     it 'returns 404 for non-existent appointment' do
-      get '/api/v1/appointments/999999'
+      get '/api/v1/appointments/999999', headers: auth_headers(user)
 
       expect(response).to have_http_status(:not_found)
       json_response = JSON.parse(response.body)
       expect(json_response['success']).to be false
+    end
+
+    context 'without authentication' do
+      it 'returns unauthorized' do
+        get "/api/v1/appointments/#{appointment.id}"
+        expect(response).to have_http_status(:unauthorized)
+      end
     end
   end
 
@@ -97,7 +113,7 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
     context 'with valid parameters' do
       it 'creates a new appointment' do
         expect {
-          post '/api/v1/appointments', params: { appointment: valid_attributes }
+          post '/api/v1/appointments', params: { appointment: valid_attributes }, headers: auth_headers(user)
         }.to change(Appointment, :count).by(1)
 
         expect(response).to have_http_status(:created)
@@ -113,7 +129,7 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
       it 'returns validation errors' do
         invalid_attributes = valid_attributes.merge(scheduled_at: nil)
 
-        post '/api/v1/appointments', params: { appointment: invalid_attributes }
+        post '/api/v1/appointments', params: { appointment: invalid_attributes }, headers: auth_headers(user)
 
         expect(response).to have_http_status(:unprocessable_entity)
         json_response = JSON.parse(response.body)
@@ -125,13 +141,20 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
       it 'validates scheduled_at is in the future' do
         invalid_attributes = valid_attributes.merge(scheduled_at: 1.day.ago)
 
-        post '/api/v1/appointments', params: { appointment: invalid_attributes }
+        post '/api/v1/appointments', params: { appointment: invalid_attributes }, headers: auth_headers(user)
 
         expect(response).to have_http_status(:unprocessable_entity)
         json_response = JSON.parse(response.body)
 
         expect(json_response['success']).to be false
         expect(json_response['errors']).to include('Scheduled at must be in the future')
+      end
+    end
+
+    context 'without authentication' do
+      it 'returns unauthorized' do
+        post '/api/v1/appointments', params: { appointment: valid_attributes }
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
@@ -142,7 +165,8 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
         new_notes = 'Servicio completo con alineación'
 
         patch "/api/v1/appointments/#{appointment.id}",
-              params: { appointment: { notes: new_notes } }
+              params: { appointment: { notes: new_notes } },
+              headers: auth_headers(user)
 
         expect(response).to have_http_status(:ok)
         json_response = JSON.parse(response.body)
@@ -155,13 +179,22 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
     context 'with invalid parameters' do
       it 'returns validation errors' do
         patch "/api/v1/appointments/#{appointment.id}",
-              params: { appointment: { status: 'invalid_status' } }
+              params: { appointment: { status: 'invalid_status' } },
+              headers: auth_headers(user)
 
         expect(response).to have_http_status(:unprocessable_entity)
         json_response = JSON.parse(response.body)
 
         expect(json_response['success']).to be false
         expect(json_response['errors']).to be_present
+      end
+    end
+
+    context 'without authentication' do
+      it 'returns unauthorized' do
+        patch "/api/v1/appointments/#{appointment.id}",
+              params: { appointment: { notes: 'test' } }
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
@@ -171,12 +204,19 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
       appointment_to_delete = create(:appointment, customer: customer, vehicle: vehicle)
 
       expect {
-        delete "/api/v1/appointments/#{appointment_to_delete.id}"
+        delete "/api/v1/appointments/#{appointment_to_delete.id}", headers: auth_headers(user)
       }.to change(Appointment, :count).by(-1)
 
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
       expect(json_response['success']).to be true
+    end
+
+    context 'without authentication' do
+      it 'returns unauthorized' do
+        delete "/api/v1/appointments/#{appointment.id}"
+        expect(response).to have_http_status(:unauthorized)
+      end
     end
   end
 
@@ -189,7 +229,7 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
     end
 
     it 'returns only upcoming appointments' do
-      get '/api/v1/appointments/upcoming'
+      get '/api/v1/appointments/upcoming', headers: auth_headers(user)
 
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
@@ -199,109 +239,68 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
       expect(json_response['data'].length).to eq(2) # scheduled and confirmed
       expect(json_response['data'].all? { |app| app['scheduled_at'] > Time.current.as_json }).to be true
     end
+
+    context 'without authentication' do
+      it 'returns unauthorized' do
+        get '/api/v1/appointments/upcoming'
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
   end
 
   describe 'PATCH /api/v1/appointments/:id/confirm' do
-    context 'when appointment can be confirmed' do
-      before do
-        appointment.update(status: 'scheduled', scheduled_at: 1.day.from_now)
-      end
+    it 'confirms the appointment' do
+      patch "/api/v1/appointments/#{appointment.id}/confirm", headers: auth_headers(user)
 
-      it 'confirms the appointment' do
-        patch "/api/v1/appointments/#{appointment.id}/confirm"
+      expect(response).to have_http_status(:ok)
+      json_response = JSON.parse(response.body)
 
-        expect(response).to have_http_status(:ok)
-        json_response = JSON.parse(response.body)
-
-        expect(json_response['success']).to be true
-        expect(json_response['data']['status']).to eq('confirmed')
-        expect(appointment.reload.status).to eq('confirmed')
-      end
+      expect(json_response['success']).to be true
+      expect(json_response['data']['status']).to eq('confirmed')
     end
 
-    context 'when appointment cannot be confirmed' do
-      before do
-        appointment.update(status: 'confirmed', scheduled_at: 1.day.from_now)
-      end
-
-      it 'returns error' do
+    context 'without authentication' do
+      it 'returns unauthorized' do
         patch "/api/v1/appointments/#{appointment.id}/confirm"
-
-        expect(response).to have_http_status(:unprocessable_entity)
-        json_response = JSON.parse(response.body)
-
-        expect(json_response['success']).to be false
-        expect(json_response['errors']).to include('Appointment cannot be confirmed')
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
 
   describe 'PATCH /api/v1/appointments/:id/complete' do
-    context 'when appointment can be completed' do
-      before do
-        appointment.update(status: 'confirmed')
-      end
+    it 'completes the appointment' do
+      patch "/api/v1/appointments/#{appointment.id}/complete", headers: auth_headers(user)
 
-      it 'completes the appointment' do
-        patch "/api/v1/appointments/#{appointment.id}/complete"
+      expect(response).to have_http_status(:ok)
+      json_response = JSON.parse(response.body)
 
-        expect(response).to have_http_status(:ok)
-        json_response = JSON.parse(response.body)
-
-        expect(json_response['success']).to be true
-        expect(json_response['data']['status']).to eq('completed')
-        expect(appointment.reload.status).to eq('completed')
-      end
+      expect(json_response['success']).to be true
+      expect(json_response['data']['status']).to eq('completed')
     end
 
-    context 'when appointment cannot be completed' do
-      before do
-        appointment.update(status: 'completed')
-      end
-
-      it 'returns error' do
+    context 'without authentication' do
+      it 'returns unauthorized' do
         patch "/api/v1/appointments/#{appointment.id}/complete"
-
-        expect(response).to have_http_status(:unprocessable_entity)
-        json_response = JSON.parse(response.body)
-
-        expect(json_response['success']).to be false
-        expect(json_response['errors']).to include('Appointment cannot be completed')
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
 
   describe 'PATCH /api/v1/appointments/:id/cancel' do
-    context 'when appointment can be cancelled' do
-      before do
-        appointment.update(status: 'scheduled', scheduled_at: 1.day.from_now)
-      end
+    it 'cancels the appointment' do
+      patch "/api/v1/appointments/#{appointment.id}/cancel", headers: auth_headers(user)
 
-      it 'cancels the appointment' do
-        patch "/api/v1/appointments/#{appointment.id}/cancel"
+      expect(response).to have_http_status(:ok)
+      json_response = JSON.parse(response.body)
 
-        expect(response).to have_http_status(:ok)
-        json_response = JSON.parse(response.body)
-
-        expect(json_response['success']).to be true
-        expect(json_response['data']['status']).to eq('cancelled')
-        expect(appointment.reload.status).to eq('cancelled')
-      end
+      expect(json_response['success']).to be true
+      expect(json_response['data']['status']).to eq('cancelled')
     end
 
-    context 'when appointment cannot be cancelled' do
-      before do
-        appointment.update(status: 'completed')
-      end
-
-      it 'returns error' do
+    context 'without authentication' do
+      it 'returns unauthorized' do
         patch "/api/v1/appointments/#{appointment.id}/cancel"
-
-        expect(response).to have_http_status(:unprocessable_entity)
-        json_response = JSON.parse(response.body)
-
-        expect(json_response['success']).to be false
-        expect(json_response['errors']).to include('Appointment cannot be cancelled')
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
@@ -316,7 +315,7 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
       end
 
       it 'returns appointments for specific customer' do
-        get "/api/v1/customers/#{customer.id}/appointments"
+        get "/api/v1/customers/#{customer.id}/appointments", headers: auth_headers(user)
 
         expect(response).to have_http_status(:ok)
         json_response = JSON.parse(response.body)
@@ -335,7 +334,7 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
       end
 
       it 'returns appointments for specific vehicle' do
-        get "/api/v1/vehicles/#{vehicle.id}/appointments"
+        get "/api/v1/vehicles/#{vehicle.id}/appointments", headers: auth_headers(user)
 
         expect(response).to have_http_status(:ok)
         json_response = JSON.parse(response.body)

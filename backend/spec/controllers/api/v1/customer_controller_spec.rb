@@ -1,12 +1,15 @@
 require 'rails_helper'
 
 RSpec.describe Api::V1::CustomersController, type: :controller do
+  include ApiHelper
+  let(:user) { create(:user) }
   let(:valid_attributes) { attributes_for(:customer) }
   let(:invalid_attributes) { attributes_for(:customer, name: '') }
 
   describe 'GET #index' do
     before do
       create_list(:customer, 3)
+      request.headers.merge!(auth_headers(user))
       get :index
     end
 
@@ -36,6 +39,7 @@ RSpec.describe Api::V1::CustomersController, type: :controller do
       let!(:searchable_customer) { create(:customer, name: 'María González') }
 
       before do
+        request.headers.merge!(auth_headers(user))
         get :index, params: { search: 'María' }
       end
 
@@ -48,6 +52,7 @@ RSpec.describe Api::V1::CustomersController, type: :controller do
     context 'with pagination' do
       before do
         create_list(:customer, 25)
+        request.headers.merge!(auth_headers(user))
         get :index, params: { page: 2, per_page: 10 }
       end
 
@@ -64,6 +69,7 @@ RSpec.describe Api::V1::CustomersController, type: :controller do
     let!(:vehicle) { create(:vehicle, customer: customer) }
 
     before do
+      request.headers.merge!(auth_headers(user))
       get :show, params: { id: customer.id }
     end
 
@@ -80,6 +86,7 @@ RSpec.describe Api::V1::CustomersController, type: :controller do
 
     context 'when customer not found' do
       before do
+        request.headers.merge!(auth_headers(user))
         get :show, params: { id: 999999 }
       end
 
@@ -95,11 +102,13 @@ RSpec.describe Api::V1::CustomersController, type: :controller do
     context 'with valid parameters' do
       it 'creates a new Customer' do
         expect {
+          request.headers.merge!(auth_headers(user))
           post :create, params: { customer: valid_attributes }
         }.to change(Customer, :count).by(1)
       end
 
       it 'returns success response' do
+        request.headers.merge!(auth_headers(user))
         post :create, params: { customer: valid_attributes }
 
         expect(response).to have_http_status(:created)
@@ -112,11 +121,13 @@ RSpec.describe Api::V1::CustomersController, type: :controller do
     context 'with invalid parameters' do
       it 'does not create a new Customer' do
         expect {
+          request.headers.merge!(auth_headers(user))
           post :create, params: { customer: invalid_attributes }
         }.not_to change(Customer, :count)
       end
 
       it 'returns error response' do
+        request.headers.merge!(auth_headers(user))
         post :create, params: { customer: invalid_attributes }
 
         expect(response).to have_http_status(:unprocessable_entity)
@@ -132,6 +143,7 @@ RSpec.describe Api::V1::CustomersController, type: :controller do
 
       it 'returns validation error' do
         duplicate_params = valid_attributes.merge(email: existing_customer.email)
+        request.headers.merge!(auth_headers(user))
         post :create, params: { customer: duplicate_params }
 
         expect(response).to have_http_status(:unprocessable_entity)
@@ -146,6 +158,7 @@ RSpec.describe Api::V1::CustomersController, type: :controller do
 
     context 'with valid parameters' do
       before do
+        request.headers.merge!(auth_headers(user))
         patch :update, params: { id: customer.id, customer: new_attributes }
       end
 
@@ -164,6 +177,7 @@ RSpec.describe Api::V1::CustomersController, type: :controller do
 
     context 'with invalid parameters' do
       before do
+        request.headers.merge!(auth_headers(user))
         patch :update, params: { id: customer.id, customer: invalid_attributes }
       end
 
@@ -180,11 +194,13 @@ RSpec.describe Api::V1::CustomersController, type: :controller do
 
       it 'destroys the customer' do
         expect {
+          request.headers.merge!(auth_headers(user))
           delete :destroy, params: { id: customer.id }
         }.to change(Customer, :count).by(-1)
       end
 
       it 'returns success response' do
+        request.headers.merge!(auth_headers(user))
         delete :destroy, params: { id: customer.id }
 
         expect(response).to have_http_status(:ok)
@@ -198,12 +214,14 @@ RSpec.describe Api::V1::CustomersController, type: :controller do
       let!(:vehicle) { create(:vehicle, customer: customer) }
 
       it 'does not destroy the customer' do
+        request.headers.merge!(auth_headers(user))
         expect {
           delete :destroy, params: { id: customer.id }
         }.not_to change(Customer, :count)
       end
 
       it 'returns error response' do
+        request.headers.merge!(auth_headers(user))
         delete :destroy, params: { id: customer.id }
 
         expect(response).to have_http_status(:unprocessable_entity)

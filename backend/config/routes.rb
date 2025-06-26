@@ -1,10 +1,15 @@
 Rails.application.routes.draw do
+  devise_for :users
+  use_doorkeeper
   # Health check route
   get "up" => "rails/health#show", as: :rails_health_check
 
   # API routes
   namespace :api do
     namespace :v1 do
+      # Auth routes
+      post "auth/register", to: "auth#register"
+
       # Dashboard route
       get "dashboard/stats", to: "dashboard#stats"
 
