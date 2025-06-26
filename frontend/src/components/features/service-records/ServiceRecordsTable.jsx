@@ -244,7 +244,6 @@ const ServiceRecordsTable = ({
                     
                     <TableCell className="px-4 py-3 text-start">
                       <div className="flex items-center gap-2">
-                        <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
                         <span className="font-medium text-gray-800 text-sm dark:text-white/90">
                           {formatCurrency(record.total_amount)}
                         </span>

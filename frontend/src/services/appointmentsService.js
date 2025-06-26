@@ -79,10 +79,31 @@ const appointmentsApi = {
 
 // React Query hooks
 export const useAppointments = (filters = {}) => {
+  // Por defecto, solicitar hasta 140 items para el calendario
+  const defaultFilters = {
+    per_page: 140,
+    ...filters
+  };
+
+  return useQuery({
+    queryKey: appointmentKeys.list(defaultFilters),
+    queryFn: () => appointmentsApi.getAppointments(defaultFilters),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+export const useAppointmentsByMonth = (year, month) => {
+  const filters = {
+    per_page: 140,
+    year,
+    month
+  };
+
   return useQuery({
     queryKey: appointmentKeys.list(filters),
     queryFn: () => appointmentsApi.getAppointments(filters),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!year && !!month,
   });
 };
 

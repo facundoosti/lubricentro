@@ -210,7 +210,6 @@ const ServicesTable = ({
                     
                     <TableCell className="px-4 py-3 text-start">
                       <div className="flex items-center gap-1">
-                        <DollarSign className="w-4 h-4 text-green-600" />
                         <span className="text-gray-800 text-sm dark:text-white/90 font-medium">
                           {formatPrice(service.base_price)}
                         </span>

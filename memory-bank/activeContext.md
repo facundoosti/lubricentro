@@ -8,6 +8,223 @@
 - [x] Tests de backend en verde para métricas de dashboard
 - [x] Patrones de testeo para fechas y asociaciones explícitas documentados
 
+## 🎯 **Estado Actual: Fase 13 - Corrección de Doble Signo de Dólar COMPLETADA ✅**
+
+### **Última Actividad Completada - Corrección de Formateo de Moneda**
+- ✅ **Problema identificado** - Doble signo de dólar en columnas de precio/total
+- ✅ **Causa identificada** - Ícono DollarSign + formateo de moneda con Intl.NumberFormat
+- ✅ **Archivos corregidos** - ServiceRecordsTable, ProductsTable, ServicesTable
+- ✅ **Íconos removidos** - DollarSign de columnas de precio para evitar duplicación
+- ✅ **Formateo mantenido** - Funciones formatCurrency y formatPrice conservadas
+- ✅ **Verificación realizada** - No hay otros casos de doble símbolo de moneda
+
+### **Problema Resuelto - Doble Signo de Dólar**
+**Síntoma**: Las columnas de precio/total mostraban doble signo de dólar ($$)
+**Causa**: Combinación de ícono `DollarSign` + formateo de moneda con `Intl.NumberFormat`
+**Solución**: Removido el ícono `DollarSign` de las columnas de precio
+**Archivos afectados**: 
+- `ServiceRecordsTable.jsx` - Columna "Total"
+- `ProductsTable.jsx` - Columna "Precio" 
+- `ServicesTable.jsx` - Columna "Precio Base"
+
+### **Cambios Implementados**
+
+#### **ServiceRecordsTable.jsx**
+```jsx
+// ANTES
+<div className="flex items-center gap-2">
+  <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
+  <span className="font-medium text-gray-800 text-sm dark:text-white/90">
+    {formatCurrency(record.total_amount)}
+  </span>
+</div>
+
+// DESPUÉS
+<div className="flex items-center gap-2">
+  <span className="font-medium text-gray-800 text-sm dark:text-white/90">
+    {formatCurrency(record.total_amount)}
+  </span>
+</div>
+```
+
+#### **ProductsTable.jsx**
+```jsx
+// ANTES
+<div className="flex items-center gap-1">
+  <DollarSign className="w-4 h-4 text-green-600" />
+  <span className="text-gray-800 text-sm dark:text-white/90 font-medium">
+    {formatPrice(product.unit_price)}
+  </span>
+</div>
+
+// DESPUÉS
+<div className="flex items-center gap-1">
+  <span className="text-gray-800 text-sm dark:text-white/90 font-medium">
+    {formatPrice(product.unit_price)}
+  </span>
+</div>
+```
+
+#### **ServicesTable.jsx**
+```jsx
+// ANTES
+<div className="flex items-center gap-1">
+  <DollarSign className="w-4 h-4 text-green-600" />
+  <span className="text-gray-800 text-sm dark:text-white/90 font-medium">
+    {formatPrice(service.base_price)}
+  </span>
+</div>
+
+// DESPUÉS
+<div className="flex items-center gap-1">
+  <span className="text-gray-800 text-sm dark:text-white/90 font-medium">
+    {formatPrice(service.base_price)}
+  </span>
+</div>
+```
+
+### **Funciones de Formateo Conservadas**
+- ✅ **formatCurrency** - ServiceRecordsTable (ARS sin decimales)
+- ✅ **formatPrice** - ProductsTable y ServicesTable (ARS con 2 decimales)
+- ✅ **Formateo consistente** - Todas usan `Intl.NumberFormat` con locale 'es-AR'
+
+### **Casos Verificados Sin Problema**
+- ✅ **LubricentroMetrics.jsx** - Uso manual de `$` para ingresos (correcto)
+- ✅ **MonthlyTarget.jsx** - Uso manual de `$` para objetivos (correcto)
+- ✅ **Dashboard** - No hay formateo de moneda que cause duplicación
+
+### **Resultado Final**
+- ✅ **Sin doble signo de dólar** - Todas las columnas de precio muestran formato correcto
+- ✅ **Formato consistente** - ARS con símbolo de moneda incluido automáticamente
+- ✅ **Diseño limpio** - Sin íconos redundantes en columnas de precio
+- ✅ **Funcionalidad mantenida** - Todas las funciones de formateo siguen funcionando
+
+## 🎯 **Estado Actual: Fase 12 - Filtro por Mes y Límite de Items COMPLETADA ✅**
+
+### **Última Actividad Completada - Optimización de Endpoint de Turnos**
+- ✅ **Límite de items aumentado** - De 20 a 140 items por defecto
+- ✅ **Filtro por mes implementado** - Por defecto filtra por mes actual
+- ✅ **Navegación por meses** - Frontend actualiza datos al cambiar de mes
+- ✅ **Hook especializado creado** - `useAppointmentsByMonth` para filtrado por mes
+- ✅ **Backend optimizado** - Controlador maneja filtros por fecha automáticamente
+- ✅ **Pruebas realizadas** - Verificación de funcionamiento con curl y Node.js
+
+### **Cambios Implementados**
+
+#### **Backend - AppointmentsController**
+```ruby
+# Filtro por rango de fechas mejorado
+if params[:start_date].present? && params[:end_date].present?
+  @appointments = @appointments.by_date_range(
+    Date.parse(params[:start_date]),
+    Date.parse(params[:end_date])
+  )
+elsif params[:month].present? && params[:year].present?
+  # Filtro por mes y año específicos
+  start_date = Date.new(params[:year].to_i, params[:month].to_i, 1)
+  end_date = start_date.end_of_month
+  @appointments = @appointments.by_date_range(start_date, end_date)
+else
+  # Por defecto: mes actual
+  start_date = Date.current.beginning_of_month
+  end_date = Date.current.end_of_month
+  @appointments = @appointments.by_date_range(start_date, end_date)
+end
+
+# Paginación - máximo 140 items
+per_page = [params[:per_page]&.to_i || 140, 140].min
+@pagy, @appointments = pagy(@appointments, items: per_page)
+```
+
+#### **Frontend - AppointmentsService**
+```javascript
+// Hook por defecto con 140 items
+export const useAppointments = (filters = {}) => {
+  const defaultFilters = {
+    per_page: 140,
+    ...filters
+  };
+  // ...
+};
+
+// Hook especializado para filtro por mes
+export const useAppointmentsByMonth = (year, month) => {
+  const filters = {
+    per_page: 140,
+    year,
+    month
+  };
+  // ...
+};
+```
+
+#### **Frontend - Appointments.jsx**
+```javascript
+// Estado para fecha actual del calendario
+const [currentDate, setCurrentDate] = useState(new Date());
+
+// Hook con filtro por mes
+const { data: appointmentsData } = useAppointmentsByMonth(currentYear, currentMonth);
+
+// Manejo de navegación del calendario
+const handleDatesSet = (dateInfo) => {
+  setCurrentDate(dateInfo.start);
+};
+```
+
+### **Funcionalidades Implementadas**
+- ✅ **Límite de 140 items** - Suficiente para mostrar un mes completo de turnos
+- ✅ **Filtro automático por mes** - Por defecto muestra turnos del mes actual
+- ✅ **Navegación por meses** - Al cambiar de mes en el calendario, se actualizan los datos
+- ✅ **Filtros opcionales** - Se mantienen los filtros por cliente, vehículo y estado
+- ✅ **Rangos de fecha personalizados** - Soporte para start_date y end_date específicos
+- ✅ **Optimización de rendimiento** - Solo carga los turnos del mes visible
+
+### **Casos de Uso Soportados**
+1. **Mes actual** - Sin parámetros, filtra automáticamente por mes actual
+2. **Mes específico** - Con parámetros `year` y `month`
+3. **Rango personalizado** - Con parámetros `start_date` y `end_date`
+4. **Filtros combinados** - Mes + cliente + vehículo + estado
+
+### **Pruebas Realizadas**
+- ✅ **API sin parámetros** - Devuelve turnos del mes actual (15 turnos en junio 2025)
+- ✅ **API con mes específico** - Filtra correctamente por mes (1 turno en julio 2025)
+- ✅ **Límite de 140 items** - Paginación configurada correctamente
+- ✅ **Frontend con navegación** - Cambio de mes actualiza datos automáticamente
+
+## 🎯 **Estado Actual: Fase 11 - Corrección de Turnos en Calendario COMPLETADA ✅**
+
+### **Última Actividad Completada - Corrección de Visualización de Turnos**
+- ✅ **Problema identificado** - Estructura de datos incorrecta en frontend
+- ✅ **API funcionando correctamente** - Backend devuelve 16 turnos correctamente
+- ✅ **Estructura de datos corregida** - Frontend ahora usa `data` en lugar de `data.appointments`
+- ✅ **Logs de debug agregados** - Para facilitar troubleshooting futuro
+- ✅ **Scripts de prueba creados** - Para verificar conexión API y datos de BD
+- ✅ **Calendario funcionando** - Turnos ahora se muestran correctamente en FullCalendar
+
+### **Problema Resuelto - Turnos No Visibles en Calendario**
+**Síntoma**: Los turnos no aparecían en el calendario de la sección de turnos
+**Causa**: El frontend buscaba `appointmentsData?.data?.appointments` pero la API devuelve `appointmentsData?.data`
+**Solución**: Corregida la estructura de datos en `Appointments.jsx`
+**Verificación**: 
+- ✅ 16 turnos presentes en base de datos
+- ✅ API devuelve datos correctamente (curl test)
+- ✅ Frontend conecta correctamente (Node.js test)
+- ✅ Calendario muestra turnos con colores por estado
+
+### **Datos de Turnos Verificados**
+- **Total turnos**: 16
+- **Estados**: scheduled (8), confirmed (4), completed (4)
+- **Fechas**: Desde 19/06/2025 hasta 01/07/2025
+- **Clientes**: 4 clientes diferentes
+- **Vehículos**: 6 vehículos diferentes
+
+### **Colores de Estado en Calendario**
+- 🔵 **Scheduled**: Azul (bg-blue-500)
+- 🟢 **Confirmed**: Verde (bg-green-500)
+- ⚫ **Completed**: Gris (bg-gray-500)
+- 🔴 **Cancelled**: Rojo (bg-red-500)
+
 ## 🎯 **Estado Actual: Fase 10 - Sistema de Toast COMPLETADO ✅**
 
 ### **Última Actividad Completada - Sistema de Notificaciones Toast**

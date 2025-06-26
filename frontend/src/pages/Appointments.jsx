@@ -7,7 +7,7 @@ import PageMeta from '@components/common/PageMeta';
 import AppointmentModal from '@components/features/appointments/AppointmentModal';
 import ConfirmModal from '@ui/ConfirmModal';
 import { 
-  useAppointments, 
+  useAppointmentsByMonth,
   useCreateAppointment, 
   useUpdateAppointment, 
   useDeleteAppointment 
@@ -20,27 +20,25 @@ const Appointments = () => {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   // Servicio de notificaciones
   const notification = useNotificationService();
 
+  // Obtener año y mes actual
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1; // getMonth() devuelve 0-11
+
   // Queries y mutations
-  const { data: appointmentsData, error } = useAppointments();
+  const { data: appointmentsData, error, isLoading, isError } = useAppointmentsByMonth(currentYear, currentMonth);
   const createAppointmentMutation = useCreateAppointment();
   const updateAppointmentMutation = useUpdateAppointment();
   const deleteAppointmentMutation = useDeleteAppointment();
 
-  const appointments = appointmentsData?.data?.appointments || [];
-
-  // Debug logs
-  console.log('Appointments - appointmentsData:', appointmentsData);
-  console.log('Appointments - appointments:', appointments);
+  const appointments = appointmentsData?.data || [];
 
   // Convert appointments to FullCalendar events
   const calendarEvents = appointments.map(appointment => {
-    // Debug individual appointment
-    console.log('Appointments - individual appointment:', appointment);
-    
     // Build title safely
     const customerName = appointment?.customer?.name || 'Cliente no especificado';
     const vehicleInfo = appointment?.vehicle 
@@ -48,8 +46,6 @@ const Appointments = () => {
       : 'Vehículo no especificado';
     
     const title = `${customerName} - ${vehicleInfo}`;
-    
-    console.log('Appointments - built title:', title);
     
     return {
       id: appointment.id.toString(),
@@ -77,6 +73,11 @@ const Appointments = () => {
     const appointment = clickInfo.event.extendedProps.appointment;
     setSelectedAppointment(appointment);
     setIsModalOpen(true);
+  };
+
+  // Handle calendar navigation (prev/next month)
+  const handleDatesSet = (dateInfo) => {
+    setCurrentDate(dateInfo.start);
   };
 
   // Handle form submission
@@ -147,6 +148,28 @@ const Appointments = () => {
       <div className="p-6">
         <div className="text-center">
           <p className="text-red-600">Error al cargar los turnos: {error.message}</p>
+          <p className="text-gray-500 mt-2">Detalles del error: {JSON.stringify(error)}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <div className="text-center">
+          <p className="text-blue-600">Cargando turnos...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-6">
+        <div className="text-center">
+          <p className="text-red-600">Error en la consulta de turnos</p>
+          <p className="text-gray-500 mt-2">Estado: {JSON.stringify({ isLoading, isError, error })}</p>
         </div>
       </div>
     );
@@ -195,6 +218,7 @@ const Appointments = () => {
               }}
               dayHeaderFormat={{ weekday: 'long' }}
               titleFormat={{ year: 'numeric', month: 'long' }}
+              datesSet={handleDatesSet}
             />
           </div>
         </div>

@@ -16,13 +16,24 @@ class Api::V1::AppointmentsController < ApplicationController
         Date.parse(params[:start_date]),
         Date.parse(params[:end_date])
       )
+    elsif params[:month].present? && params[:year].present?
+      # Filtro por mes y año específicos
+      start_date = Date.new(params[:year].to_i, params[:month].to_i, 1)
+      end_date = start_date.end_of_month
+      @appointments = @appointments.by_date_range(start_date, end_date)
+    else
+      # Por defecto: mes actual
+      start_date = Date.current.beginning_of_month
+      end_date = Date.current.end_of_month
+      @appointments = @appointments.by_date_range(start_date, end_date)
     end
 
     # Ordenamiento
     @appointments = @appointments.order(scheduled_at: :asc)
 
-    # Paginación
-    @pagy, @appointments = pagy(@appointments, items: params[:per_page] || 20)
+    # Paginación - máximo 140 items
+    per_page = [ params[:per_page]&.to_i || 140, 140 ].min
+    @pagy, @appointments = pagy(@appointments, items: per_page)
 
     render json: {
       success: true,
