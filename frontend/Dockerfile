@@ -1,6 +1,6 @@
 # Use the Node alpine official image
 # https://hub.docker.com/_/node
-FROM node:20.19.3-slim AS build
+FROM node:22-alpine AS build
 
 # Set config
 ENV NPM_CONFIG_UPDATE_NOTIFIER=false
@@ -35,12 +35,6 @@ RUN caddy fmt Caddyfile --overwrite
 
 # Copy files to the container image.
 COPY --from=build /app/dist ./dist
-
-# Debug: mostrar archivos en /app/dist
-RUN echo "Archivos en /app/dist:" && ls -l ./dist
-
-# Debug: mostrar valor de $PORT en runtime (esto solo funcionará si $PORT está seteado en build, pero ayuda a debuggear)
-RUN echo "Valor de $PORT en build: $PORT"
 
 # Use Caddy to run/serve the app
 CMD ["caddy", "run", "--config", "Caddyfile", "--adapter", "caddyfile"]
