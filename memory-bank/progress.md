@@ -1,5 +1,42 @@
 # Progress - Sistema Lubricentro
 
+## 🎯 **Estado Actual: Fase 17 - Corrección de Búsqueda de Clientes y Campos en Inglés COMPLETADA ✅**
+
+### **Problema Resuelto - CustomerSearchInput y Campos en Inglés**
+- ✅ **Problema identificado** - Campos en español en serializer y CustomerSearchInput no se prellenaba al editar
+- ✅ **Causa identificada** - Inconsistencia entre campos en español e inglés, falta de paso correcto de customer_id
+- ✅ **Campos corregidos** - CustomerSerializer ahora usa `name` y `phone` consistentemente
+- ✅ **CustomerSearchInput corregido** - Manejo correcto del customer_id al editar vehículos
+- ✅ **VehicleModal actualizado** - Ahora acepta y pasa customerId al VehicleForm
+- ✅ **CustomerProfile corregido** - Pasa customerId cuando edita vehículos
+
+### **Archivos Corregidos**
+- ✅ **CustomerSerializer** - Campos en inglés: `name`, `phone`, `email`, `address`
+- ✅ **CustomerSearchInput.jsx** - Usa campos en inglés y maneja correctamente el prellenado
+- ✅ **VehicleForm.jsx** - Siempre muestra campo de cliente, permite cambiar cliente al editar
+- ✅ **VehicleModal.jsx** - Acepta customerId prop y lo pasa al VehicleForm
+- ✅ **CustomerProfile.jsx** - Pasa customerId cuando edita vehículos
+
+### **Funcionalidades Implementadas**
+- ✅ **Campos en inglés consistentes** - `customer.name`, `customer.phone`, `customer.email`
+- ✅ **Prellenado al editar** - CustomerSearchInput se prellena con datos del cliente al editar vehículo
+- ✅ **Loading states** - Muestra "Cargando cliente..." mientras obtiene datos
+- ✅ **Validación mejorada** - Solo hace consulta si customer_id es válido
+- ✅ **UX mejorada** - Permite cambiar cliente al editar vehículo
+
+### **Flujo Corregido**
+```javascript
+// CustomerProfile → VehicleModal → VehicleForm → CustomerSearchInput
+<VehicleModal
+  vehicle={selectedVehicle}        // ✅ Vehículo con customer_id
+  customerId={displayCustomer.id}  // ✅ ID del cliente actual
+/>
+
+// CustomerSearchInput ahora maneja correctamente:
+const { data: customerData } = useCustomer(value); // ✅ Obtiene cliente por ID
+setDisplayValue(`${customer.name} - ${customer.email || customer.phone}`); // ✅ Campos en inglés
+```
+
 ## 🎯 **Estado Actual: Fase 16 - MVP PARCIALMENTE COMPLETADO 🚧**
 
 ### **📊 Métricas de Calidad (Junio 2025)**
@@ -151,7 +188,7 @@ JWT_SECRET=your-secret-key
 - ✅ **Autenticación de usuarios**: Frontend y backend completamente integrados
 
 ### **Criterios de Éxito del MVP - PARCIALMENTE COMPLETADOS ✅**
-- ✅ **Registrar y gestionar clientes y vehículos** (clientes completo, vehículos parcial)
+- ✅ **Registrar y gestionar clientes y vehículos** (ambos completos con búsqueda funcional)
 - ✅ **Agendar turnos y visualizarlos**
 - 🚧 **Registrar atención completa con productos/servicios** (solo eliminar, faltan crear/editar)
 - ✅ **Calcular automáticamente el costo total**
@@ -250,7 +287,7 @@ JWT_SECRET=your-secret-key
 - ✅ **CORS**: Configurado para integración frontend
 - ✅ **Error Handling**: Consistente en todos los endpoints
 
-### **Frontend (85% 🚧)**
+### **Frontend (90% 🚧)**
 - ✅ **Componentes UI**: Base sólida establecida
 - ✅ **Patrón de tablas**: Establecido y documentado
 - ✅ **Servicios API**: React Query funcionando
@@ -260,8 +297,11 @@ JWT_SECRET=your-secret-key
 - ✅ **Formateo de moneda**: Corregido y consistente
 - ✅ **Filtros de turnos**: Implementados y funcionando
 - ✅ **Autenticación**: Completamente integrada con backend
+- ✅ **CustomerSearchInput**: Corregido con campos en inglés y prellenado funcional
+- ✅ **VehicleForm**: Corregido para manejar customer_id correctamente
+- ✅ **Campos en inglés**: Consistencia establecida en toda la aplicación
 - 🚧 **Formularios CRUD**: Solo Customers y Appointments completos
-- 🚧 **Modales CRUD**: Faltan modales para Vehicles, Services, Products, ServiceRecords
+- 🚧 **Modales CRUD**: Faltan modales para Services, Products, ServiceRecords
 
 ### **Integración (100% ✅)**
 - ✅ **API endpoints funcionando**
@@ -356,9 +396,9 @@ JWT_SECRET=your-secret-key
 
 ## 🎯 **MVP PARCIALMENTE COMPLETADO 🚧**
 
-### **Funcionalidades MVP 70% Completadas**
+### **Funcionalidades MVP 75% Completadas**
 - ✅ **Gestión de Clientes**: CRUD completo y funcional
-- 🚧 **Gestión de Vehículos**: CRUD parcial (solo eliminar, faltan crear/editar)
+- ✅ **Gestión de Vehículos**: CRUD completo con búsqueda de clientes funcional
 - ✅ **Sistema de Turnos**: CRUD completo con calendario
 - 🚧 **Catálogo de Productos**: CRUD parcial (solo eliminar, faltan crear/editar)
 - 🚧 **Catálogo de Servicios**: CRUD parcial (solo eliminar, faltan crear/editar)
@@ -367,7 +407,7 @@ JWT_SECRET=your-secret-key
 - ✅ **Autenticación de usuarios**: Frontend y backend completamente integrados
 
 ### **Criterios de Éxito del MVP - PARCIALMENTE COMPLETADOS ✅**
-- ✅ **Registrar y gestionar clientes y vehículos** (clientes completo, vehículos parcial)
+- ✅ **Registrar y gestionar clientes y vehículos** (ambos completos con búsqueda funcional)
 - ✅ **Agendar turnos y visualizarlos**
 - 🚧 **Registrar atención completa con productos/servicios** (solo eliminar, faltan crear/editar)
 - ✅ **Calcular automáticamente el costo total**
@@ -376,5 +416,5 @@ JWT_SECRET=your-secret-key
 
 ## 🔄 **Última Actualización**
 **Fecha**: Junio 2025
-**Estado**: MVP PARCIALMENTE COMPLETADO - Integración frontend-backend funcional, faltan modales CRUD
+**Estado**: MVP PARCIALMENTE COMPLETADO - Gestión de vehículos corregida, faltan modales CRUD para Services, Products, ServiceRecords
 **Próxima revisión**: Después de implementar modales y formularios faltantes 
