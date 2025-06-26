@@ -1,31 +1,30 @@
 import React from 'react';
 import Modal from '@ui/Modal';
-import VehicleForm from '@components/features/vehicles/VehicleForm';
-import { useCreateVehicle, useUpdateVehicle } from '@services/vehiclesService';
+import ProductForm from '@components/features/products/ProductForm';
+import { useCreateProduct, useUpdateProduct } from '@services/productsService';
 import { useToast } from '@hooks/useToast';
 
-const VehicleModal = ({ 
+const ProductModal = ({ 
   isOpen, 
   onClose, 
-  vehicle = null, 
-  customerId = null,
+  product = null, 
   onSuccess 
 }) => {
   const { showSuccess, showError } = useToast();
-  const createVehicle = useCreateVehicle();
-  const updateVehicle = useUpdateVehicle();
+  const createProduct = useCreateProduct();
+  const updateProduct = useUpdateProduct();
 
-  const isEditing = !!vehicle;
-  const title = isEditing ? 'Editar Vehículo' : 'Nuevo Vehículo';
+  const isEditing = !!product;
+  const title = isEditing ? 'Editar Producto' : 'Nuevo Producto';
 
   const handleSubmit = async (data) => {
     try {
       if (isEditing) {
-        await updateVehicle.mutateAsync({ id: vehicle.id, vehicleData: data });
-        showSuccess('Vehículo actualizado exitosamente');
+        await updateProduct.mutateAsync({ id: product.id, productData: data });
+        showSuccess('Producto actualizado exitosamente');
       } else {
-        await createVehicle.mutateAsync(data);
-        showSuccess('Vehículo creado exitosamente');
+        await createProduct.mutateAsync(data);
+        showSuccess('Producto creado exitosamente');
       }
       
       onClose();
@@ -33,9 +32,9 @@ const VehicleModal = ({
         onSuccess();
       }
     } catch (error) {
-      console.error('Error saving vehicle:', error);
+      console.error('Error saving product:', error);
       
-      let errorMessage = 'Error al guardar el vehículo';
+      let errorMessage = 'Error al guardar el producto';
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.response?.data?.errors) {
@@ -51,7 +50,7 @@ const VehicleModal = ({
     onClose();
   };
 
-  const isLoading = createVehicle.isLoading || updateVehicle.isLoading;
+  const isLoading = createProduct.isLoading || updateProduct.isLoading;
 
   return (
     <Modal
@@ -60,9 +59,8 @@ const VehicleModal = ({
       title={title}
       size="lg"
     >
-      <VehicleForm
-        vehicle={vehicle}
-        customerId={customerId}
+      <ProductForm
+        product={product}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         loading={isLoading}
@@ -71,4 +69,4 @@ const VehicleModal = ({
   );
 };
 
-export default VehicleModal; 
+export default ProductModal; 

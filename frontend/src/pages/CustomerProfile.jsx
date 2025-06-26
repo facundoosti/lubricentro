@@ -292,7 +292,8 @@ const CustomerProfile = () => {
         isOpen={isEditVehicleModalOpen}
         onClose={closeEditVehicleModal}
         onSubmit={handleEditVehicleSubmit}
-        initialData={selectedVehicle}
+        vehicle={selectedVehicle}
+        customerId={displayCustomer.id}
         isLoading={updateVehicleMutation.isPending}
       />
     </div>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import ProductsTable from "@components/features/products/ProductsTable";
+import ProductModal from "@components/features/products/ProductModal";
 import { useProducts, useDeleteProduct } from "@services/productsService";
 import { useNotificationService } from "@services/notificationService";
 
@@ -7,6 +8,8 @@ const Products = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [perPage] = useState(10);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   // Servicio de notificaciones
   const notification = useNotificationService();
@@ -38,13 +41,13 @@ const Products = () => {
   };
 
   const handleCreate = () => {
-    console.log("Crear nuevo producto");
-    notification.showInfo("Función de creación en desarrollo");
+    setSelectedProduct(null);
+    setIsModalOpen(true);
   };
 
   const handleEdit = (product) => {
-    console.log("Editar producto:", product);
-    notification.showInfo(`Editar producto: ${product.name}`);
+    setSelectedProduct(product);
+    setIsModalOpen(true);
   };
 
   const handleView = (product) => {
@@ -64,6 +67,16 @@ const Products = () => {
         notification.showProductError('ERROR_DELETE', errorMessage);
       }
     }
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedProduct(null);
+  };
+
+  const handleModalSuccess = () => {
+    // El modal ya maneja el cierre y las notificaciones
+    // Aquí podríamos agregar lógica adicional si es necesario
   };
 
   // Manejo de errores
@@ -102,6 +115,14 @@ const Products = () => {
         onView={handleView}
         onCreate={handleCreate}
         loading={isLoading}
+      />
+
+      {/* Modal para crear/editar productos */}
+      <ProductModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        product={selectedProduct}
+        onSuccess={handleModalSuccess}
       />
     </div>
   );

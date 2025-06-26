@@ -34,7 +34,11 @@ class Customer < ApplicationRecord
 
   # Scopes útiles
   scope :with_email, -> { where.not(email: [ nil, "" ]) }
-  scope :by_name, ->(name) { where("name LIKE ?", "%#{name}%") }
+  scope :by_name, ->(name) { where("name ILIKE ?", "%#{name}%") }
+  scope :by_email, ->(email) { where("email ILIKE ?", "%#{email}%") }
+  scope :by_search, ->(term) {
+    where("name ILIKE ? OR email ILIKE ?", "%#{term}%", "%#{term}%")
+  }
 
   # Métodos helper
   def display_name

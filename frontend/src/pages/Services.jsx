@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import ServicesTable from "@components/features/services/ServicesTable";
+import ServiceModal from "@components/features/services/ServiceModal";
 import { useServices, useDeleteService } from "@services/servicesService";
 import { useNotificationService } from "@services/notificationService";
 
@@ -7,6 +8,8 @@ const Services = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [perPage] = useState(10);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState(null);
 
   // Servicio de notificaciones
   const notification = useNotificationService();
@@ -38,13 +41,13 @@ const Services = () => {
   };
 
   const handleCreate = () => {
-    console.log("Crear nuevo servicio");
-    notification.showInfo("Función de creación en desarrollo");
+    setSelectedService(null);
+    setIsModalOpen(true);
   };
 
   const handleEdit = (service) => {
-    console.log("Editar servicio:", service);
-    notification.showInfo(`Editar servicio: ${service.name}`);
+    setSelectedService(service);
+    setIsModalOpen(true);
   };
 
   const handleView = (service) => {
@@ -64,6 +67,16 @@ const Services = () => {
         notification.showServiceError('ERROR_DELETE', errorMessage);
       }
     }
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedService(null);
+  };
+
+  const handleModalSuccess = () => {
+    // El modal ya maneja el cierre y las notificaciones
+    // Aquí podríamos agregar lógica adicional si es necesario
   };
 
   // Manejo de errores
@@ -102,6 +115,14 @@ const Services = () => {
         onView={handleView}
         onCreate={handleCreate}
         loading={isLoading}
+      />
+
+      {/* Modal para crear/editar servicios */}
+      <ServiceModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        service={selectedService}
+        onSuccess={handleModalSuccess}
       />
     </div>
   );

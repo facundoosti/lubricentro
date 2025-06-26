@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import VehiclesTable from "@components/features/vehicles/VehiclesTable";
+import VehicleModal from "@components/features/vehicles/VehicleModal";
 import { useVehicles, useDeleteVehicle } from "@services/vehiclesService";
 import { useNotificationService } from "@services/notificationService";
 
@@ -7,6 +8,8 @@ const Vehicles = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [perPage] = useState(10);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
 
   // Servicio de notificaciones
   const notification = useNotificationService();
@@ -39,13 +42,13 @@ const Vehicles = () => {
   };
 
   const handleCreate = () => {
-    console.log("Crear nuevo vehículo");
-    notification.showInfo("Función de crear vehículo - En desarrollo");
+    setSelectedVehicle(null);
+    setIsModalOpen(true);
   };
 
   const handleEdit = (vehicle) => {
-    console.log("Editar vehículo:", vehicle);
-    notification.showInfo(`Editar vehículo: ${vehicle.brand} ${vehicle.model} - En desarrollo`);
+    setSelectedVehicle(vehicle);
+    setIsModalOpen(true);
   };
 
   const handleDelete = async (vehicle) => {
@@ -64,6 +67,16 @@ const Vehicles = () => {
   const handleView = (vehicle) => {
     console.log("Ver vehículo:", vehicle);
     notification.showInfo(`Ver detalles de: ${vehicle.brand} ${vehicle.model} - En desarrollo`);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedVehicle(null);
+  };
+
+  const handleModalSuccess = () => {
+    // El modal ya maneja el cierre y las notificaciones
+    // Aquí podríamos agregar lógica adicional si es necesario
   };
 
   // Manejo de errores
@@ -109,6 +122,14 @@ const Vehicles = () => {
         onView={handleView}
         onCreate={handleCreate}
         loading={isLoading || deleteVehicleMutation.isPending}
+      />
+
+      {/* Modal para crear/editar vehículos */}
+      <VehicleModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        vehicle={selectedVehicle}
+        onSuccess={handleModalSuccess}
       />
     </div>
   );

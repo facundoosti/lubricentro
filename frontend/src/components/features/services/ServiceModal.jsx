@@ -1,31 +1,30 @@
 import React from 'react';
 import Modal from '@ui/Modal';
-import VehicleForm from '@components/features/vehicles/VehicleForm';
-import { useCreateVehicle, useUpdateVehicle } from '@services/vehiclesService';
+import ServiceForm from '@components/features/services/ServiceForm';
+import { useCreateService, useUpdateService } from '@services/servicesService';
 import { useToast } from '@hooks/useToast';
 
-const VehicleModal = ({ 
+const ServiceModal = ({ 
   isOpen, 
   onClose, 
-  vehicle = null, 
-  customerId = null,
+  service = null, 
   onSuccess 
 }) => {
   const { showSuccess, showError } = useToast();
-  const createVehicle = useCreateVehicle();
-  const updateVehicle = useUpdateVehicle();
+  const createService = useCreateService();
+  const updateService = useUpdateService();
 
-  const isEditing = !!vehicle;
-  const title = isEditing ? 'Editar Vehículo' : 'Nuevo Vehículo';
+  const isEditing = !!service;
+  const title = isEditing ? 'Editar Servicio' : 'Nuevo Servicio';
 
   const handleSubmit = async (data) => {
     try {
       if (isEditing) {
-        await updateVehicle.mutateAsync({ id: vehicle.id, vehicleData: data });
-        showSuccess('Vehículo actualizado exitosamente');
+        await updateService.mutateAsync({ id: service.id, serviceData: data });
+        showSuccess('Servicio actualizado exitosamente');
       } else {
-        await createVehicle.mutateAsync(data);
-        showSuccess('Vehículo creado exitosamente');
+        await createService.mutateAsync(data);
+        showSuccess('Servicio creado exitosamente');
       }
       
       onClose();
@@ -33,9 +32,9 @@ const VehicleModal = ({
         onSuccess();
       }
     } catch (error) {
-      console.error('Error saving vehicle:', error);
+      console.error('Error saving service:', error);
       
-      let errorMessage = 'Error al guardar el vehículo';
+      let errorMessage = 'Error al guardar el servicio';
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.response?.data?.errors) {
@@ -51,7 +50,7 @@ const VehicleModal = ({
     onClose();
   };
 
-  const isLoading = createVehicle.isLoading || updateVehicle.isLoading;
+  const isLoading = createService.isLoading || updateService.isLoading;
 
   return (
     <Modal
@@ -60,9 +59,8 @@ const VehicleModal = ({
       title={title}
       size="lg"
     >
-      <VehicleForm
-        vehicle={vehicle}
-        customerId={customerId}
+      <ServiceForm
+        service={service}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         loading={isLoading}
@@ -71,4 +69,4 @@ const VehicleModal = ({
   );
 };
 
-export default VehicleModal; 
+export default ServiceModal; 

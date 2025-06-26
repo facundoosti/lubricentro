@@ -4,7 +4,7 @@ class Api::V1::CustomersController < ApplicationController
   # GET /api/v1/customers
   def index
     @customers = Customer.all
-    @customers = @customers.by_name(params[:search]) if params[:search].present?
+    @customers = @customers.by_search(params[:search]) if params[:search].present?
 
     # Paginación con Pagy
     @pagy, @customers = pagy(@customers, items: safe_per_page(params[:per_page]))
