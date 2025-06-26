@@ -10,8 +10,10 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
     # Development origins
     origins "http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173", "http://127.0.0.1:3000"
 
-    # Production origins (actualizar con tu dominio real)
-    # origins "https://tu-dominio-frontend.com", "https://tu-dominio-backend.com"
+    # Railway production origins
+    origins "https://lubricentro-production.up.railway.app",
+            "https://*.up.railway.app",
+            "https://lubricentro-frontend.up.railway.app"
 
     resource "*",
       headers: :any,

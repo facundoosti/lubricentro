@@ -487,3 +487,169 @@ JWT_SECRET=your-secret-key
 **Fecha**: Junio 2025
 **Estado**: MVP PARCIALMENTE COMPLETADO - Integración frontend-backend funcional, faltan modales CRUD
 **Próxima revisión**: Después de implementar modales y formularios faltantes
+
+### **🎯 Estado Actual: Fase 18 - Migración a Railway COMPLETADA ✅**
+
+#### **Última Actividad Completada - Migración a Railway**
+- ✅ **railway.json creado** - Configuración completa para deploy del frontend
+- ✅ **GitHub Actions actualizado** - Deploy automático de frontend y backend a Railway
+- ✅ **CORS configurado** - Backend permite requests desde dominios Railway
+- ✅ **Variables de entorno configuradas** - Para producción en Railway
+- ✅ **Documentación completa** - RAILWAY_DEPLOYMENT.md con guía completa
+
+### **🚀 Migración a Railway - COMPLETADA ✅**
+
+#### **Configuración Frontend para Railway**
+```json
+// railway.json - Configuración optimizada
+{
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "caddy run --config Caddyfile --adapter caddyfile",
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 300,
+    "restartPolicyType": "ON_FAILURE"
+  },
+  "environments": {
+    "production": {
+      "variables": {
+        "VITE_API_BASE_URL": "https://lubricentro-production.up.railway.app/api/v1"
+      }
+    }
+  }
+}
+```
+
+#### **GitHub Actions Actualizado**
+```yaml
+# Deploy automático a Railway
+deploy-frontend:
+  - name: Deploy to Railway
+    uses: bervProject/railway-deploy@v1.0.0
+    with:
+      railway_token: ${{ secrets.RAILWAY_TOKEN }}
+      service: ${{ secrets.RAILWAY_SERVICE_FRONTEND }}
+```
+
+#### **CORS Configurado para Railway**
+```ruby
+# config/initializers/cors.rb
+origins "https://lubricentro-production.up.railway.app", 
+        "https://*.up.railway.app",
+        "https://lubricentro-frontend.up.railway.app"
+```
+
+#### **Variables de Entorno de Producción**
+```env
+# Backend (Railway)
+DATABASE_URL=postgresql://...
+JWT_SECRET=tu-jwt-secret
+CORS_ORIGIN=https://lubricentro-frontend.up.railway.app
+RAILWAY_STATIC_URL=https://lubricentro-production.up.railway.app
+
+# Frontend (Railway)
+VITE_API_BASE_URL=https://lubricentro-production.up.railway.app/api/v1
+VITE_APP_NAME=Lubricentro
+```
+
+### **🔧 Configuración Técnica Implementada**
+
+#### **Backend Railway Ready**
+- ✅ **Hosts configurados** - Permite requests desde dominios Railway
+- ✅ **CORS actualizado** - Frontend puede hacer requests desde Railway
+- ✅ **Health check endpoint** - `/up` para Railway health checks
+- ✅ **Variables de entorno** - Configuradas para producción
+
+#### **Frontend Railway Ready**
+- ✅ **Dockerfile optimizado** - Multi-stage build con Caddy
+- ✅ **Caddyfile configurado** - Health check y SPA routing
+- ✅ **railway.json creado** - Configuración específica para Railway
+- ✅ **Variables de entorno** - API URL configurada para producción
+
+#### **GitHub Actions Railway Ready**
+- ✅ **Deploy automático** - Backend y frontend a Railway
+- ✅ **Secrets configurados** - RAILWAY_TOKEN y service IDs
+- ✅ **Build optimizado** - NPM ci y build process
+- ✅ **Notificaciones** - Slack webhook para status de deploy
+
+### **📊 URLs de Producción Configuradas**
+
+#### **Backend API**
+- **URL**: `https://lubricentro-production.up.railway.app`
+- **API Base**: `https://lubricentro-production.up.railway.app/api/v1`
+- **Health Check**: `https://lubricentro-production.up.railway.app/up`
+
+#### **Frontend App**
+- **URL**: `https://lubricentro-frontend.up.railway.app`
+- **Health Check**: `https://lubricentro-frontend.up.railway.app/health`
+
+### **🔐 Secrets Requeridos en GitHub**
+
+```env
+RAILWAY_TOKEN=tu-railway-token
+RAILWAY_SERVICE_BACKEND=service-id-backend
+RAILWAY_SERVICE_FRONTEND=service-id-frontend
+SLACK_WEBHOOK_URL=tu-slack-webhook (opcional)
+```
+
+### **📋 Checklist de Deploy**
+
+#### **Railway Dashboard Setup**
+- [ ] Crear proyecto en Railway
+- [ ] Conectar repositorio de GitHub
+- [ ] Configurar servicios backend y frontend
+- [ ] Configurar variables de entorno
+- [ ] Configurar health checks
+
+#### **GitHub Secrets Setup**
+- [ ] RAILWAY_TOKEN
+- [ ] RAILWAY_SERVICE_BACKEND
+- [ ] RAILWAY_SERVICE_FRONTEND
+- [ ] SLACK_WEBHOOK_URL (opcional)
+
+#### **Variables de Entorno Railway**
+- [ ] Backend: DATABASE_URL, JWT_SECRET, CORS_ORIGIN
+- [ ] Frontend: VITE_API_BASE_URL, VITE_APP_NAME
+
+### **🎯 Próximos Pasos para Deploy**
+
+1. **Configurar Railway Dashboard**
+   - Crear proyecto y conectar repositorio
+   - Configurar servicios backend y frontend
+   - Configurar variables de entorno
+
+2. **Configurar GitHub Secrets**
+   - Obtener RAILWAY_TOKEN desde Railway
+   - Obtener service IDs para backend y frontend
+   - Configurar secrets en GitHub
+
+3. **Probar Deploy**
+   - Hacer push a main branch
+   - Verificar que GitHub Actions ejecute correctamente
+   - Verificar health checks en Railway
+
+4. **Verificar Integración**
+   - Probar login desde frontend de producción
+   - Verificar que API responda correctamente
+   - Probar funcionalidades principales
+
+### **🔍 Troubleshooting Railway**
+
+#### **Problemas Comunes**
+1. **CORS Errors** - Verificar CORS_ORIGIN en backend
+2. **Build Failures** - Revisar logs de build en Railway
+3. **Health Check Failures** - Verificar endpoints `/up` y `/health`
+4. **Database Connection** - Verificar DATABASE_URL en Railway
+
+#### **Comandos de Debug**
+```bash
+# Verificar health checks
+curl https://lubricentro-production.up.railway.app/up
+curl https://lubricentro-frontend.up.railway.app/health
+
+# Verificar API
+curl https://lubricentro-production.up.railway.app/api/v1/health
+```
