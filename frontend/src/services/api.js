@@ -18,11 +18,13 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     console.log("API Request:", config.method?.toUpperCase(), config.url, config.data);
-    // Agregar token de autenticación si existe (posterior)
+    
+    // Agregar token de autenticación si existe
     const token = localStorage.getItem('authToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
     return config;
   },
   (error) => {
@@ -39,11 +41,24 @@ api.interceptors.response.use(
   },
   (error) => {
     console.error("API Response Error:", error.response?.status, error.response?.data);
-    // Manejar errores de autenticación (posterior)
+    
+    // Manejar errores de autenticación
     if (error.response?.status === 401) {
+      console.log("Token expirado o inválido, redirigiendo a login...");
       localStorage.removeItem('authToken');
-      // Redirigir a login (posterior)
+      localStorage.removeItem('user');
+      
+      // Redirigir a login si no estamos ya ahí
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
+    
+    // Manejar errores de servidor
+    if (error.response?.status >= 500) {
+      console.error("Error del servidor:", error.response.data);
+    }
+    
     return Promise.reject(error);
   }
 );

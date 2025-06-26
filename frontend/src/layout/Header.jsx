@@ -1,10 +1,15 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSidebar } from '@contexts/SidebarContext';
-import { Sparkles } from 'lucide-react';
+import { useAuth } from '@contexts/AuthContext';
+import { Sparkles, LogOut, User } from 'lucide-react';
 
 const Header = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const inputRef = useRef(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleToggle = () => {
     if (window.innerWidth >= 1024) {
@@ -12,6 +17,11 @@ const Header = () => {
     } else {
       toggleMobileSidebar();
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   useEffect(() => {
@@ -28,6 +38,20 @@ const Header = () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
+
+  // Cerrar menú de usuario al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showUserMenu && !event.target.closest('.user-menu')) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserMenu]);
 
   return (
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
@@ -126,6 +150,41 @@ const Header = () => {
             <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
               Sistema Lubricentro
             </span>
+          </div>
+
+          {/* Usuario y logout */}
+          <div className="flex items-center gap-3">
+            {/* Información del usuario */}
+            <div className="relative user-menu">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                <User className="w-4 h-4" />
+                <span>{user?.email || 'Usuario'}</span>
+              </button>
+
+              {/* Menú desplegable */}
+              {showUserMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700 z-50">
+                  <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {user?.email || 'Usuario'}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Administrador
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Cerrar sesión
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

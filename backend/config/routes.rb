@@ -9,6 +9,8 @@ Rails.application.routes.draw do
     namespace :v1 do
       # Auth routes
       post "auth/register", to: "auth#register"
+      post "auth/login", to: "auth#login"
+      get "auth/verify", to: "auth#verify"
 
       # Dashboard route
       get "dashboard/stats", to: "dashboard#stats"
