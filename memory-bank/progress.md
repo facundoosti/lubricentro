@@ -137,7 +137,7 @@ const ProtectedRoute = ({ children }) => {
 
 #### **Variables de Entorno Frontend**
 ```env
-API_BASE_URL=http://localhost:3000
+VITE_API_BASE_URL=http://localhost:3000
 VITE_APP_NAME=Lubricentro
 ```
 
