@@ -38,7 +38,7 @@ SMTP_PORT=587
 #### **Frontend (Railway)**
 ```env
 # API Configuration
-VITE_API_BASE_URL=https://lubricentro-production.up.railway.app/api/v1
+VITE_API_BASE_URL=https://lubricentro-production.up.railway.app
 
 # App Configuration
 VITE_APP_NAME=Lubricentro
@@ -83,7 +83,7 @@ RAILS_ENV=production
 
 **Frontend Variables:**
 ```env
-VITE_API_BASE_URL=https://lubricentro-production.up.railway.app/api/v1
+VITE_API_BASE_URL=https://lubricentro-production.up.railway.app
 VITE_APP_NAME=Lubricentro
 NODE_ENV=production
 ```

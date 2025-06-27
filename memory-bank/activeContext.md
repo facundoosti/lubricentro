@@ -174,7 +174,7 @@ const ProtectedRoute = ({ children }) => {
 
 #### **Variables de Entorno Frontend**
 ```env
-VITE_API_BASE_URL=http://localhost:3000/api/v1
+VITE_API_BASE_URL=http://localhost:3000
 VITE_APP_NAME=Lubricentro
 ```
 
@@ -516,7 +516,7 @@ JWT_SECRET=your-secret-key
   "environments": {
     "production": {
       "variables": {
-        "VITE_API_BASE_URL": "https://lubricentro-production.up.railway.app/api/v1"
+        "VITE_API_BASE_URL": "https://lubricentro-production.up.railway.app"
       }
     }
   }
@@ -551,7 +551,7 @@ CORS_ORIGIN=https://lubricentro-frontend.up.railway.app
 RAILWAY_STATIC_URL=https://lubricentro-production.up.railway.app
 
 # Frontend (Railway)
-VITE_API_BASE_URL=https://lubricentro-production.up.railway.app/api/v1
+VITE_API_BASE_URL=https://lubricentro-production.up.railway.app
 VITE_APP_NAME=Lubricentro
 ```
 
