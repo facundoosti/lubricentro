@@ -8,12 +8,13 @@
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
     # Development origins
-    origins "http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173", "http://127.0.0.1:3000"
-
-    # Railway production origins
-    origins "https://lubricentro-production.up.railway.app",
+    origins "http://localhost:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1:3000",
+            "https://lubricentro-production.up.railway.app",
             "https://*.up.railway.app",
-            "https://lubricentro-frontend.up.railway.app"
+            "https://lubricentro-app.up.railway.app"
 
     resource "*",
       headers: :any,

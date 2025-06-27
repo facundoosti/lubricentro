@@ -15,6 +15,7 @@
 }
 
 # site block, listens on the $PORT environment variable, automatically assigned by railway
+# fallback to port 3000 if $PORT is not set
 :{$PORT:3000} {
 	# access logs
 	log {
