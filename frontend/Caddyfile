@@ -1,42 +1,17 @@
-# global options
-{
-	admin off # theres no need for the admin api in railway's environment
-	persist_config off # storage isn't persistent anyway
-	auto_https off # railway handles https for us, this would cause issues if left enabled
-	# runtime logs
-	log {
-		format json # set runtime log format to json mode 
-		output stdout
-	}
-	# server options
-	servers {
-		trusted_proxies static private_ranges 100.0.0.0/8 # trust railway's proxy
-	}
-}
+# Simple Caddyfile for Railway deployment
+# This version is more compatible with Railway's environment
 
-# site block, listens on the $PORT environment variable, automatically assigned by railway
-# fallback to port 3000 if $PORT is not set
+# Listen on the port provided by Railway
 :{$PORT:3000} {
-	# access logs
-	log {
-		format json # set access log format to json mode
-		output stdout
-	}
-
-	# health check for railway
+	# Health check endpoint
 	handle /health {
 		respond "OK" 200
 	}
 
-	# serve from the 'dist' folder (Vite builds into the 'dist' folder)
+	# Serve static files from dist directory
 	root * dist
-
-	# enable gzipping responses
-	encode gzip
-
-	# serve files from 'dist'
 	file_server
 
-	# if path doesn't exist, redirect it to 'index.html' for client side routing
+	# Handle client-side routing
 	try_files {path} /index.html
-}
+} 

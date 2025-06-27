@@ -1,40 +1,39 @@
-# Use the Node alpine official image
-# https://hub.docker.com/_/node
+# Railway-optimized Dockerfile for React app
 FROM node:20.19.3-slim AS build
 
-# Set config
-ENV NPM_CONFIG_UPDATE_NOTIFIER=false
-ENV NPM_CONFIG_FUND=false
-
-# Create and change to the app directory.
+# Set working directory
 WORKDIR /app
 
-# Copy the files to the container image
+# Copy package files
 COPY package*.json ./
 
-# Install packages
-RUN npm ci
+# Install dependencies
+RUN npm ci --only=production
 
-# Copy local code to the container image.
-COPY . ./
+# Copy source code
+COPY . .
 
-# Build the app.
+# Build the application
 RUN npm run build
 
-# Use the Caddy image
+# Production stage
 FROM caddy:2-alpine
 
-# Create and change to the app directory.
+# Set working directory
 WORKDIR /app
 
-# Copy Caddyfile to the container image.
-COPY Caddyfile ./
-
-# Copy files to the container image.
+# Copy built files
 COPY --from=build /app/dist ./dist
 
-# Expose port for Railway
+# Copy Caddyfile
+COPY Caddyfile.simple ./Caddyfile
+
+# Expose port
 EXPOSE 3000
 
-# Use Caddy to run/serve the app
-CMD ["caddy", "run", "--config", "Caddyfile", "--adapter", "caddyfile"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+
+# Start Caddy
+CMD ["caddy", "run", "--config", "Caddyfile", "--adapter", "caddyfile"] 
