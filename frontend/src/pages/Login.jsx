@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@contexts/AuthContext';
+import { useNotificationService } from '@services/notificationService';
 import Button from '@ui/Button';
 import { Eye, EyeOff } from 'lucide-react';
 
@@ -9,21 +10,21 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   
   const { login } = useAuth();
   const navigate = useNavigate();
+  const notification = useNotificationService();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     try {
       await login(email, password);
+      notification.showAuthSuccess('LOGIN_SUCCESS');
       navigate('/dashboard');
     } catch (error) {
-      setError(error.response?.data?.message || 'Error al iniciar sesión');
+      notification.showAuthError('LOGIN_ERROR', error.response?.data?.message || error.message);
     } finally {
       setLoading(false);
     }
@@ -50,12 +51,6 @@ const Login = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-                {error}
-              </div>
-            )}
-
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email

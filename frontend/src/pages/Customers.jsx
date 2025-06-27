@@ -4,6 +4,7 @@ import CustomerModal from "@components/features/customers/CustomerModal";
 import ConfirmModal from "@components/ui/ConfirmModal";
 import { useCustomers, useDeleteCustomer, useCreateCustomer, useUpdateCustomer } from "@services/customersService";
 import { useNotificationService } from "@services/notificationService";
+import { useModalError } from "@hooks/useModalError";
 
 const Customers = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,6 +19,17 @@ const Customers = () => {
 
   // Servicio de notificaciones
   const notification = useNotificationService();
+
+  // Hooks para manejo de errores en modales
+  const { handleError: handleCreateError } = useModalError(() => setIsCreateModalOpen(false));
+  const { handleError: handleEditError } = useModalError(() => {
+    setIsEditModalOpen(false);
+    setSelectedCustomer(null);
+  });
+  const { handleError: handleDeleteError } = useModalError(() => {
+    setIsDeleteModalOpen(false);
+    setSelectedCustomer(null);
+  });
 
   // Query para obtener clientes con paginación y búsqueda
   const {
@@ -81,8 +93,7 @@ const Customers = () => {
       setIsCreateModalOpen(false);
       notification.showCustomerSuccess('CREATED');
     } catch (error) {
-      console.error("Error al crear cliente:", error);
-      notification.showCustomerError('ERROR_CREATE', error.response?.data?.message || error.message);
+      handleCreateError(error, 'Error al crear el cliente');
     }
   };
 
@@ -97,8 +108,7 @@ const Customers = () => {
       setSelectedCustomer(null);
       notification.showCustomerSuccess('UPDATED');
     } catch (error) {
-      console.error("Error al actualizar cliente:", error);
-      notification.showCustomerError('ERROR_UPDATE', error.response?.data?.message || error.message);
+      handleEditError(error, 'Error al actualizar el cliente');
     }
   };
 
@@ -109,8 +119,7 @@ const Customers = () => {
       setSelectedCustomer(null);
       notification.showCustomerSuccess('DELETED');
     } catch (error) {
-      console.error("Error al eliminar cliente:", error);
-      notification.showCustomerError('ERROR_DELETE', error.response?.data?.message || error.message);
+      handleDeleteError(error, 'Error al eliminar el cliente');
     }
   };
 
@@ -199,8 +208,7 @@ const Customers = () => {
         message={`¿Estás seguro de que quieres eliminar a ${selectedCustomer?.name}? Esta acción no se puede deshacer.`}
         confirmText="Eliminar"
         cancelText="Cancelar"
-        variant="danger"
-        isLoading={deleteCustomerMutation.isPending}
+        loading={deleteCustomerMutation.isPending}
       />
     </div>
   );

@@ -51,9 +51,6 @@ export const NOTIFICATION_MESSAGES = {
     CREATED: 'Turno creado exitosamente',
     UPDATED: 'Turno actualizado exitosamente',
     DELETED: 'Turno eliminado exitosamente',
-    CONFIRMED: 'Turno confirmado exitosamente',
-    COMPLETED: 'Turno completado exitosamente',
-    CANCELLED: 'Turno cancelado exitosamente',
     ERROR_CREATE: 'Error al crear el turno',
     ERROR_UPDATE: 'Error al actualizar el turno',
     ERROR_DELETE: 'Error al eliminar el turno',
@@ -62,25 +59,31 @@ export const NOTIFICATION_MESSAGES = {
   
   // Atenciones
   SERVICE_RECORD: {
-    CREATED: 'Atención creada exitosamente',
+    CREATED: 'Atención registrada exitosamente',
     UPDATED: 'Atención actualizada exitosamente',
     DELETED: 'Atención eliminada exitosamente',
-    ERROR_CREATE: 'Error al crear la atención',
+    ERROR_CREATE: 'Error al registrar la atención',
     ERROR_UPDATE: 'Error al actualizar la atención',
     ERROR_DELETE: 'Error al eliminar la atención',
     ERROR_LOAD: 'Error al cargar las atenciones',
   },
   
-  // Generales
-  GENERAL: {
-    LOADING: 'Cargando...',
-    SAVING: 'Guardando...',
-    DELETING: 'Eliminando...',
-    ERROR_NETWORK: 'Error de conexión. Verifica tu internet.',
-    ERROR_UNKNOWN: 'Ocurrió un error inesperado',
-    SUCCESS_OPERATION: 'Operación completada exitosamente',
-    WARNING_OPERATION: 'Operación completada con advertencias',
+  // Autenticación
+  AUTH: {
+    LOGIN_SUCCESS: 'Inicio de sesión exitoso',
+    LOGOUT_SUCCESS: 'Sesión cerrada exitosamente',
+    LOGIN_ERROR: 'Error en el inicio de sesión',
+    TOKEN_EXPIRED: 'Sesión expirada, por favor inicia sesión nuevamente',
   },
+  
+  // General
+  GENERAL: {
+    NETWORK_ERROR: 'Error de conexión, verifica tu internet',
+    UNKNOWN_ERROR: 'Ocurrió un error inesperado',
+    SAVE_SUCCESS: 'Guardado exitosamente',
+    DELETE_SUCCESS: 'Eliminado exitosamente',
+    UPDATE_SUCCESS: 'Actualizado exitosamente',
+  }
 };
 
 // Hook personalizado para usar el servicio de notificaciones
@@ -182,32 +185,29 @@ export const useNotificationService = () => {
     return showError(message);
   };
 
-  // Función para manejar errores de API de manera consistente
-  const handleApiError = (error, defaultMessage = 'Error de operación') => {
-    console.error('API Error:', error);
-    
-    let message = defaultMessage;
-    
-    if (error.response?.data?.message) {
-      message = error.response.data.message;
-    } else if (error.response?.data?.errors) {
-      // Si hay múltiples errores, mostrar el primero
-      const errors = error.response.data.errors;
-      if (Array.isArray(errors)) {
-        message = errors[0];
-      } else if (typeof errors === 'object') {
-        const firstError = Object.values(errors)[0];
-        message = Array.isArray(firstError) ? firstError[0] : firstError;
-      }
-    } else if (error.message) {
-      message = error.message;
-    }
-    
+  const showAuthSuccess = (action) => {
+    const message = NOTIFICATION_MESSAGES.AUTH[action];
+    return showSuccess(message);
+  };
+
+  const showAuthError = (action, error = null) => {
+    const baseMessage = NOTIFICATION_MESSAGES.AUTH[action];
+    const message = error ? `${baseMessage}: ${error}` : baseMessage;
+    return showError(message);
+  };
+
+  const showGeneralSuccess = (action) => {
+    const message = NOTIFICATION_MESSAGES.GENERAL[action];
+    return showSuccess(message);
+  };
+
+  const showGeneralError = (action, error = null) => {
+    const baseMessage = NOTIFICATION_MESSAGES.GENERAL[action];
+    const message = error ? `${baseMessage}: ${error}` : baseMessage;
     return showError(message);
   };
 
   return {
-    // Funciones básicas
     showSuccess,
     showError,
     showInfo,
@@ -215,8 +215,6 @@ export const useNotificationService = () => {
     showLoading,
     dismiss,
     dismissAll,
-    
-    // Funciones específicas por entidad
     showCustomerSuccess,
     showCustomerError,
     showVehicleSuccess,
@@ -229,11 +227,9 @@ export const useNotificationService = () => {
     showAppointmentError,
     showServiceRecordSuccess,
     showServiceRecordError,
-    
-    // Función para manejar errores de API
-    handleApiError,
-    
-    // Mensajes predefinidos
-    messages: NOTIFICATION_MESSAGES,
+    showAuthSuccess,
+    showAuthError,
+    showGeneralSuccess,
+    showGeneralError,
   };
 }; 

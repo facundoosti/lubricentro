@@ -45,17 +45,12 @@ export const AuthProvider = ({ children }) => {
 
   // Login
   const login = async (email, password) => {
-    try {
-      setLoading(true);
-      const response = await authAPI.login(email, password);
-      setUser(response.data.user);
-      setIsAuthenticated(true);
-      return response;
-    } catch (error) {
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true);
+    const response = await authAPI.login(email, password);
+    setUser(response.data.user);
+    setIsAuthenticated(true);
+    setLoading(false);
+    return response;
   };
 
   // Logout

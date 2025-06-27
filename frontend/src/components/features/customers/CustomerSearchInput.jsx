@@ -27,9 +27,16 @@ const CustomerSearchInput = ({
   // Query para obtener un cliente específico (cuando se edita)
   // Solo hacer la consulta si value es válido (no vacío, no null, no undefined)
   const isValidCustomerId = value && value !== '' && value !== null && value !== undefined;
-  const { data: customerData, isLoading: isLoadingCustomer } = useCustomer(value);
+  const { data: customerData, isLoading: isLoadingCustomer, error: customerError } = useCustomer(value);
 
   const customers = customersData?.data?.customers || [];
+
+  // Debug logs
+  console.log('CustomerSearchInput - value:', value);
+  console.log('CustomerSearchInput - isValidCustomerId:', isValidCustomerId);
+  console.log('CustomerSearchInput - customerData:', customerData);
+  console.log('CustomerSearchInput - customerError:', customerError);
+  console.log('CustomerSearchInput - isLoadingCustomer:', isLoadingCustomer);
 
   // Debounce function
   const debounceSearch = useCallback((term) => {
@@ -44,15 +51,24 @@ const CustomerSearchInput = ({
 
   // Efecto para manejar el valor inicial (cuando se edita)
   useEffect(() => {
+    console.log('CustomerSearchInput - useEffect triggered');
+    console.log('CustomerSearchInput - customerData?.data?.customer:', customerData?.data?.customer);
+    
     if (isValidCustomerId && customerData?.data?.customer) {
       const customer = customerData.data.customer;
+      console.log('CustomerSearchInput - Setting customer:', customer);
       setSelectedCustomer(customer);
       setDisplayValue(`${customer.name} - ${customer.email || customer.phone || 'Sin contacto'}`);
     } else if (!isValidCustomerId) {
+      console.log('CustomerSearchInput - Clearing customer (no valid ID)');
+      setSelectedCustomer(null);
+      setDisplayValue('');
+    } else if (isValidCustomerId && !isLoadingCustomer && !customerData?.data?.customer) {
+      console.log('CustomerSearchInput - Valid ID but no customer data found');
       setSelectedCustomer(null);
       setDisplayValue('');
     }
-  }, [value, customerData, isValidCustomerId]);
+  }, [value, customerData, isValidCustomerId, isLoadingCustomer]);
 
   // Efecto para cerrar el dropdown cuando se hace clic fuera
   useEffect(() => {

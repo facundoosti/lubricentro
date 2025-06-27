@@ -80,7 +80,7 @@ const CustomerProfile = () => {
   }, [customerLoading, vehiclesLoading]);
 
   const handleBack = () => {
-    navigate('/customers');
+    navigate(-1);
   };
 
   // Handlers para modales de cliente
@@ -224,7 +224,7 @@ const CustomerProfile = () => {
           className="flex items-center gap-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Volver a Clientes
+          Volver
         </button>
       </div>
 

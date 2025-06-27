@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import VehiclesTable from "@components/features/vehicles/VehiclesTable";
 import VehicleModal from "@components/features/vehicles/VehicleModal";
 import { useVehicles, useDeleteVehicle } from "@services/vehiclesService";
 import { useNotificationService } from "@services/notificationService";
 
 const Vehicles = () => {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [perPage] = useState(10);
@@ -65,8 +67,11 @@ const Vehicles = () => {
   };
 
   const handleView = (vehicle) => {
-    console.log("Ver vehículo:", vehicle);
-    notification.showInfo(`Ver detalles de: ${vehicle.brand} ${vehicle.model} - En desarrollo`);
+    if (vehicle.customer_id) {
+      navigate(`/customers/${vehicle.customer_id}`);
+    } else {
+      notification.showError("No se puede acceder al cliente: ID de cliente no disponible");
+    }
   };
 
   const handleModalClose = () => {
@@ -129,6 +134,7 @@ const Vehicles = () => {
         isOpen={isModalOpen}
         onClose={handleModalClose}
         vehicle={selectedVehicle}
+        customerId={selectedVehicle?.customer_id}
         onSuccess={handleModalSuccess}
       />
     </div>

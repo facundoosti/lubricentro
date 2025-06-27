@@ -1,37 +1,34 @@
 import { useForm } from 'react-hook-form';
-import { useCustomers } from '@services/customersService';
 import { useVehicles } from '@services/vehiclesService';
 import InputField from '@ui/InputField';
 import TextArea from '@ui/TextArea';
+import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
 
 const AppointmentForm = ({ onSubmit, initialData, isLoading, onCancel }) => {
-  const { register, handleSubmit, formState: { errors }, watch } = useForm({
+  const { register, handleSubmit, formState: { errors }, watch, setValue, trigger } = useForm({
     defaultValues: initialData || {
       customer_id: '',
       vehicle_id: '',
       scheduled_at: '',
       status: 'scheduled',
       notes: ''
-    }
+    },
+    mode: 'onChange'
   });
 
   const selectedCustomerId = watch('customer_id');
 
-  // Fetch customers and vehicles
-  const { data: customersData, isLoading: customersLoading } = useCustomers();
+  // Fetch vehicles for selected customer
   const { data: vehiclesData, isLoading: vehiclesLoading } = useVehicles(
     selectedCustomerId ? { customer_id: selectedCustomerId } : {}
   );
 
   // Ensure we always have arrays
-  const customers = Array.isArray(customersData?.data) ? customersData.data : [];
   const vehicles = selectedCustomerId && Array.isArray(vehiclesData?.data) ? vehiclesData.data : [];
 
   // Debug logs
-  console.log('AppointmentForm - customersData:', customersData);
   console.log('AppointmentForm - vehiclesData:', vehiclesData);
   console.log('AppointmentForm - selectedCustomerId:', selectedCustomerId);
-  console.log('AppointmentForm - customers:', customers);
   console.log('AppointmentForm - vehicles:', vehicles);
 
   const statusOptions = [
@@ -42,6 +39,11 @@ const AppointmentForm = ({ onSubmit, initialData, isLoading, onCancel }) => {
   ];
 
   const handleFormSubmit = (data) => {
+    // Validate customer_id before submission
+    if (!data.customer_id) {
+      return;
+    }
+    
     // Convert date string to ISO format for backend
     if (data.scheduled_at) {
       const date = new Date(data.scheduled_at);
@@ -50,6 +52,18 @@ const AppointmentForm = ({ onSubmit, initialData, isLoading, onCancel }) => {
     onSubmit(data);
   };
 
+  const handleCustomerChange = async (customerId) => {
+    setValue('customer_id', customerId);
+    // Clear vehicle selection when customer changes
+    setValue('vehicle_id', '');
+    
+    // Trigger validation for customer_id field
+    await trigger('customer_id');
+  };
+
+  // Custom validation for customer_id
+  const customerError = !selectedCustomerId ? 'Cliente es requerido' : null;
+
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Cliente */}
@@ -57,21 +71,15 @@ const AppointmentForm = ({ onSubmit, initialData, isLoading, onCancel }) => {
         <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
           Cliente *
         </label>
-        <select
-          {...register('customer_id', { required: 'Cliente es requerido' })}
-          className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-          disabled={customersLoading}
-        >
-          <option value="">Seleccionar cliente</option>
-          {Array.isArray(customers) && customers.map((customer) => (
-            <option key={customer.id} value={customer.id}>
-              {customer.name} - {customer.phone}
-            </option>
-          ))}
-        </select>
-        {errors.customer_id && (
+        <CustomerSearchInput
+          value={selectedCustomerId}
+          onChange={handleCustomerChange}
+          placeholder="Buscar cliente por nombre o email..."
+          error={customerError}
+        />
+        {customerError && (
           <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-            {errors.customer_id.message}
+            {customerError}
           </p>
         )}
       </div>

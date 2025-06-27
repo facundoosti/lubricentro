@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Button from "@ui/Button";
 import CustomerSearchInput from "@components/features/customers/CustomerSearchInput";
@@ -13,7 +13,7 @@ const VehicleForm = ({
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
     setValue,
     watch
@@ -26,6 +26,15 @@ const VehicleForm = ({
       customer_id: customerId || ""
     }
   });
+
+  // Efecto para inicializar el customer_id cuando se edita un vehículo
+  useEffect(() => {
+    if (vehicle && vehicle.customer_id) {
+      setValue('customer_id', vehicle.customer_id);
+    } else if (customerId) {
+      setValue('customer_id', customerId);
+    }
+  }, [vehicle, customerId, setValue]);
 
   const handleFormSubmit = async (data) => {
     try {
@@ -201,29 +210,21 @@ const VehicleForm = ({
         </div>
       </div>
 
-      {/* Botones */}
-      <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
         <Button
           type="button"
           variant="outline"
           onClick={onCancel}
-          disabled={isLoading || isSubmitting}
+          disabled={isLoading}
         >
           Cancelar
         </Button>
         <Button
           type="submit"
-          disabled={isLoading || isSubmitting}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
+          loading={isLoading}
+          disabled={isLoading}
         >
-          {isLoading || isSubmitting ? (
-            <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              {vehicle ? "Actualizando..." : "Creando..."}
-            </div>
-          ) : (
-            vehicle ? "Actualizar Vehículo" : "Crear Vehículo"
-          )}
+          {vehicle ? "Actualizar" : "Crear"} Vehículo
         </Button>
       </div>
     </form>

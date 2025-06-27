@@ -65,7 +65,7 @@ const VehicleModal = ({
         customerId={customerId}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
-        loading={isLoading}
+        isLoading={isLoading}
       />
     </Modal>
   );
