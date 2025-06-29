@@ -49,15 +49,15 @@ const Toast = ({
     
     switch (type) {
       case 'success':
-        return `${baseStyles} bg-green-900/20 border-green-500/30 text-green-100 shadow-lg shadow-green-500/10`;
+        return `${baseStyles} bg-green-50/90 border-green-200/50 text-black shadow-lg shadow-green-500/5`;
       case 'error':
-        return `${baseStyles} bg-red-900/20 border-red-500/30 text-red-100 shadow-lg shadow-red-500/10`;
+        return `${baseStyles} bg-red-50/90 border-red-200/50 text-black shadow-lg shadow-red-500/5`;
       case 'warning':
-        return `${baseStyles} bg-yellow-900/20 border-yellow-500/30 text-yellow-100 shadow-lg shadow-yellow-500/10`;
+        return `${baseStyles} bg-yellow-50/90 border-yellow-200/50 text-black shadow-lg shadow-yellow-500/5`;
       case 'loading':
-        return `${baseStyles} bg-blue-900/20 border-blue-500/30 text-blue-100 shadow-lg shadow-blue-500/10`;
+        return `${baseStyles} bg-blue-50/90 border-blue-200/50 text-black shadow-lg shadow-blue-500/5`;
       default:
-        return `${baseStyles} bg-gray-900/20 border-gray-500/30 text-gray-100 shadow-lg shadow-gray-500/10`;
+        return `${baseStyles} bg-gray-50/90 border-gray-200/50 text-black shadow-lg shadow-gray-500/5`;
     }
   };
 
@@ -80,13 +80,13 @@ const Toast = ({
           {getIcon()}
         </div>
         <div className="flex-1">
-          <p className="text-sm font-medium">{message}</p>
+          <p className="text-sm font-medium text-black">{message}</p>
         </div>
         <button
           onClick={handleClose}
           className="flex-shrink-0 p-1 rounded-lg hover:bg-white/10 transition-colors duration-200"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4 text-black" />
         </button>
       </div>
       
