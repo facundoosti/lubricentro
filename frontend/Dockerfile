@@ -18,6 +18,11 @@ RUN npm ci
 # Copy local code to the container image.
 COPY . ./
 
+
+# Aquí expongo el ARG y defino el ENV
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
 # Build the app.
 RUN npm run build
 
