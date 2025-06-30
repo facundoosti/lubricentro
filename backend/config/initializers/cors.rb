@@ -12,7 +12,9 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
             "http://localhost:3000",
             "http://127.0.0.1:5173",
             "http://127.0.0.1:3000",
-            "https://lubricentro-killa.up.railway.app"
+            # Production origins
+            "https://lubricentro-killa.up.railway.app",      # Frontend domain
+            "https://lubricentro-killa-api.up.railway.app"   # API domain (if needed)
 
     resource "*",
       headers: :any,
