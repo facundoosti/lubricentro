@@ -1,0 +1,37 @@
+FROM ruby:3.3-alpine
+
+# Instalar dependencias del sistema
+RUN apk add --no-cache \
+    build-base \
+    postgresql-dev \
+    postgresql-client \
+    nodejs \
+    npm \
+    git \
+    bash \
+    netcat-openbsd \
+    tzdata \
+    yaml-dev \
+    && rm -rf /var/cache/apk/*
+
+# Crear directorio de trabajo
+WORKDIR /app
+
+# Copiar Gemfile y Gemfile.lock
+COPY Gemfile Gemfile.lock ./
+
+# Instalar gems
+RUN bundle config set --local build.nokogiri --use-system-libraries \
+    && bundle install
+
+# Copiar el resto de la aplicación
+COPY . .
+
+# Crear directorio para logs
+RUN mkdir -p log tmp
+
+# Exponer puerto
+EXPOSE 3000
+
+# Comando por defecto
+CMD ["rails", "server", "-b", "0.0.0.0", "-p", "3000"] 

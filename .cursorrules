@@ -8,9 +8,9 @@ Soy un experto desarrollador full-stack especializado en el desarrollo de este s
 
 ### Stack Tecnológico Principal
 - **Backend**: Ruby on Rails 8.0.2 (API mode) + JWT + SQLite→PostgreSQL
-- **Frontend**: React 18 + Vite + Tailwind CSS + React Query
+- **Frontend**: React 19 + Vite + Tailwind CSS v4 + React Query
 - **Arquitectura**: API-First con SPA frontend
-- **Deploy**: Backend (Railway/Heroku) + Frontend (Netlify/Vercel)
+- **Deploy**: Backend (Railway) + Frontend (Railway)
 
 ## 📚 Memory Bank - SIEMPRE LEE PRIMERO
 
@@ -23,7 +23,8 @@ memory-bank/
 ├── systemPatterns.md    # ✅ Arquitectura y patrones
 ├── techContext.md       # ✅ Stack y configuraciones  
 ├── activeContext.md     # ✅ Estado actual y próximos pasos
-└── progress.md          # ✅ Lo que funciona y qué falta
+├── progress.md          # ✅ Lo que funciona y qué falta
+└── designSystem.md      # ✅ Sistema de diseño unificado
 ```
 
 El Memory Bank es mi única fuente de verdad sobre el proyecto. Si no está documentado ahí, no existe o no es correcto.
@@ -112,14 +113,14 @@ ServiceRecord (Atención)
 
 ## 🎨 UI/UX Guidelines
 
-### Tailwind Design System
+### Tailwind CSS v4 Design System
 ```javascript
 // Colors (usar consistentemente)
-primary: 'blue-600'     // Acciones principales
-secondary: 'gray-600'   // Elementos secundarios
-success: 'green-600'    // Estados exitosos
-danger: 'red-600'       // Errores y eliminaciones
-warning: 'yellow-600'   // Alertas
+brand-500: '#465fff'     // Acciones principales
+gray-500: '#667085'      // Elementos secundarios
+success-500: '#12b76a'   // Estados exitosos
+error-500: '#f04438'     // Errores y eliminaciones
+warning-500: '#f79009'   // Alertas
 
 // Spacing (mobile-first)
 xs: '0.5rem' sm: '1rem' md: '1.5rem' lg: '2rem'
@@ -139,7 +140,7 @@ xs: '0.5rem' sm: '1rem' md: '1.5rem' lg: '2rem'
 1. **Siempre usar migraciones**: `rails g model` nunca editar schema.rb
 2. **Validaciones en modelo**: `validates :nombre, presence: true`
 3. **Service Objects**: Para lógica compleja (ej: cálculo de totales)
-4. **Serializers**: `jsonapi-serializer` para responses consistentes
+4. **Serializers**: `blueprinter` para responses consistentes
 5. **Testing**: RSpec + FactoryBot para cada endpoint
 
 ### Frontend Development  
@@ -259,6 +260,11 @@ rspec # testing
 cd frontend && npm run dev
 npm run build # production build
 npm test # testing
+
+# Docker (recomendado)
+docker-compose up -d
+docker-compose exec backend rails console
+docker-compose exec frontend npm run dev
 ```
 
 ## ⚠️ Critical Guidelines
@@ -266,7 +272,7 @@ npm test # testing
 ### NUNCA hacer:
 - ❌ Editar schema.rb directamente
 - ❌ Hardcodear URLs de API
-- ❌ Usar CSS custom sin justificación (prefer Tailwind)
+- ❌ Usar CSS custom sin justificación (prefer Tailwind v4)
 - ❌ Fetch directo sin React Query
 - ❌ Estado global innecesario
 - ❌ Componentes >300 líneas
@@ -286,29 +292,31 @@ npm test # testing
 
 ## 🎯 Current Focus (Siempre verificar activeContext.md)
 
-**Estado Actual**: Fase 1 completada ✅ → Iniciando Fase 2 (Backend Setup)
+**Estado Actual**: Fase 17 - MVP PARCIALMENTE COMPLETADO (70% ✅)
 
 **Próximos pasos críticos**:
-1. Configurar Rails API mode + CORS
-2. Implementar JWT authentication  
-3. Crear modelos Customer, Vehicle, Service, Product
-4. Desarrollar API endpoints básicos CRUD
-5. Setup frontend React + Tailwind
+1. Completar CRUD Frontend (modales faltantes para 4 entidades)
+2. Testing frontend con Vitest
+3. Deploy a producción en Railway
+4. Optimización de performance
 
 ## 📊 Success Metrics
 
 ### MVP Definition of Done
-- [ ] CRUD completo clientes/vehículos
-- [ ] Sistema de turnos funcional  
-- [ ] Registro de atenciones con cálculo automático
-- [ ] Reportes básicos
-- [ ] UI responsive y profesional
-- [ ] Deploy en producción funcionando
+- [x] CRUD completo clientes
+- [ ] CRUD completo vehículos (modales faltantes)
+- [x] Sistema de turnos funcional  
+- [ ] CRUD completo productos (modales faltantes)
+- [ ] CRUD completo servicios (modales faltantes)
+- [ ] CRUD completo atenciones (modales faltantes)
+- [x] Reportes básicos
+- [x] UI responsive y profesional
+- [x] Deploy en producción funcionando
 
 ---
 
 **Memory Bank Location**: `memory-bank/`
-**Last Updated**: Project initialization
-**Next Review**: End of Week 1 (post backend setup)
+**Last Updated**: Junio 2025 - Documentación consolidada
+**Next Review**: Al completar CRUD de todas las entidades
 
 > 🧠 **Remember**: Mi memoria se resetea entre sesiones. El Memory Bank es mi única conexión con el contexto del proyecto. SIEMPRE consultarlo primero. 

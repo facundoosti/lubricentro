@@ -2,7 +2,7 @@
 
 Sistema web integral para la gestión completa de un lubricentro, desarrollado con Ruby on Rails (API) y React.
 
-## 🎯 Descripción del Proyecto
+## 🎯 **Descripción del Proyecto**
 
 Una aplicación web moderna que digitaliza y optimiza las operaciones de un lubricentro, incluyendo:
 
@@ -14,24 +14,22 @@ Una aplicación web moderna que digitaliza y optimiza las operaciones de un lubr
 - **Registro de Atenciones**: Documentación completa de servicios realizados
 - **Reportes Básicos**: Estadísticas y análisis del negocio
 
-## 🛠️ Stack Tecnológico
+## 🛠️ **Stack Tecnológico**
 
-### Backend
-
+### **Backend**
 - **Ruby on Rails 8.0.2** (API mode)
-- **SQLite3** (desarrollo) → **PostgreSQL** (producción)
+- **PostgreSQL** (producción) / **SQLite3** (desarrollo)
 - **JWT** para autenticación
 - **RSpec** para testing
 
-### Frontend
-
-- **React 18** con **Vite**
-- **Tailwind CSS** para estilos
+### **Frontend**
+- **React 19** con **Vite**
+- **Tailwind CSS v4** para estilos
 - **React Query** para gestión de estado del servidor
 - **React Router** para navegación
 - **Axios** para comunicación con API
 
-## 📁 Estructura del Proyecto
+## 📁 **Estructura del Proyecto**
 
 ```
 lubricentro/
@@ -43,16 +41,18 @@ lubricentro/
 │   ├── systemPatterns.md # Arquitectura y patrones
 │   ├── techContext.md    # Stack tecnológico
 │   ├── activeContext.md  # Estado actual
-│   └── progress.md       # Progreso del proyecto
+│   ├── progress.md       # Progreso del proyecto
+│   └── designSystem.md   # Sistema de diseño unificado
 ├── .cursorrules          # 🧠 Reglas de desarrollo
+├── DOCKER_README.md      # 🚀 Guía de deployment
 └── README.md
 ```
 
-## 📚 Memory Bank
+## 📚 **Memory Bank**
 
 Este proyecto utiliza un **Memory Bank** completo que documenta toda la inteligencia del proyecto:
 
-### Archivos Core (LEER ANTES DE DESARROLLAR)
+### **Archivos Core (LEER ANTES DE DESARROLLAR)**
 
 - `memory-bank/projectbrief.md` - Fundamentos del proyecto
 - `memory-bank/productContext.md` - Contexto y problemática
@@ -60,8 +60,9 @@ Este proyecto utiliza un **Memory Bank** completo que documenta toda la intelige
 - `memory-bank/techContext.md` - Configuraciones técnicas
 - `memory-bank/activeContext.md` - Estado actual y próximos pasos
 - `memory-bank/progress.md` - Progreso y métricas
+- `memory-bank/designSystem.md` - Sistema de diseño unificado
 
-### ⚠️ Importante para Desarrolladores
+### **⚠️ Importante para Desarrolladores**
 
 El Memory Bank es la **fuente única de verdad** del proyecto. Siempre consulta estos archivos antes de:
 
@@ -70,17 +71,18 @@ El Memory Bank es la **fuente única de verdad** del proyecto. Siempre consulta 
 - Resolver dudas sobre arquitectura
 - Entender el contexto del negocio
 
-## 🚀 Quick Start
+## 🚀 **Quick Start**
 
-### Prerrequisitos
+### **Prerrequisitos**
 
 - Ruby 3.2+
 - Node.js 18+
-- Rails 8.0.2
+- Docker (opcional, para desarrollo local)
 - Git
 
-### Setup Backend
+### **Opción 1: Desarrollo Local**
 
+#### **Setup Backend**
 ```bash
 cd backend
 bundle install
@@ -88,28 +90,43 @@ rails db:create db:migrate db:seed
 rails server -p 3000
 ```
 
-### Setup Frontend
-
+#### **Setup Frontend**
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-La aplicación estará disponible en:
+### **Opción 2: Docker Compose (Recomendado)**
+
+```bash
+# Clonar y configurar
+git clone <repository-url>
+cd lubricentro
+
+# Levantar servicios
+docker-compose up -d
+
+# Ver logs
+docker-compose logs -f
+```
+
+**Ver [DOCKER_README.md](./DOCKER_README.md) para más detalles.**
+
+### **Acceso a la Aplicación**
 
 - **Frontend**: http://localhost:5173
 - **Backend API**: http://localhost:3000/api/v1
 
-## 🏗️ Arquitectura
+## 🏗️ **Arquitectura**
 
-### Patrón API-First
+### **Patrón API-First**
 
 ```
 Frontend (React) ↔ HTTP/JSON API ↔ Backend (Rails) ↔ Database
 ```
 
-### Modelo de Datos Principal
+### **Modelo de Datos Principal**
 
 - **Customer** (Cliente) → tiene muchos **Vehicles**
 - **Vehicle** (Vehículo) → pertenece a **Customer**
@@ -118,53 +135,65 @@ Frontend (React) ↔ HTTP/JSON API ↔ Backend (Rails) ↔ Database
 - **Product** (Producto) → catálogo de productos
 - **ServiceRecord** (Atención) → registro de servicios realizados
 
-## 📊 Estado del Proyecto
+## 📊 **Estado del Proyecto**
 
-### ✅ Completado
+### **✅ Completado (70%)**
 
 - [x] Planificación y diseño completo
 - [x] Definición de arquitectura
 - [x] Stack tecnológico definido
 - [x] Memory Bank establecido
-- [x] Cursor rules configuradas
+- [x] Backend Rails API completo
+- [x] Autenticación JWT implementada
+- [x] Frontend React base implementado
+- [x] CRUD de clientes completo
+- [x] Sistema de turnos funcional
+- [x] Integración frontend-backend
 
-### 🚧 En Desarrollo
+### **🚧 En Desarrollo (30%)**
 
-- [ ] Backend Rails API setup
-- [ ] Frontend React setup
-- [ ] Modelos de datos
-- [ ] API endpoints básicos
-- [ ] Interface de usuario
+- [ ] CRUD de vehículos (modales faltantes)
+- [ ] CRUD de productos (modales faltantes)
+- [ ] CRUD de servicios (modales faltantes)
+- [ ] CRUD de atenciones (modales faltantes)
+- [ ] Testing frontend
+- [ ] Deploy a producción
 
-### 📋 Roadmap MVP (7-10 semanas)
+### **📋 Roadmap MVP**
 
-1. **Semana 1-2**: Backend API base
-2. **Semana 2-3**: Frontend base + layout
-3. **Semana 3-4**: CRUD clientes/vehículos
-4. **Semana 4-5**: Sistema de turnos
-5. **Semana 5-6**: Registro de atenciones
-6. **Semana 6-7**: Reportes básicos
-7. **Semana 7-8**: Testing y deploy
+1. **Semana 1-2**: Completar CRUD faltantes
+2. **Semana 3**: Testing frontend
+3. **Semana 4**: Deploy y optimización
 
-## 🧠 Desarrollo con Cursor
+## 🧠 **Desarrollo con Cursor**
 
 Este proyecto está optimizado para desarrollo con **Cursor AI**:
 
-### Cursor Rules
+### **Cursor Rules**
 
 - Lee `.cursorrules` para entender patrones específicos
 - Siempre consulta Memory Bank antes de desarrollar
 - Sigue las convenciones establecidas
 - Usa los patrones de arquitectura definidos
 
-### Memory Bank Integration
+### **Memory Bank Integration**
 
 - El sistema se resetea entre sesiones
 - Memory Bank mantiene contexto completo
 - Actualiza documentación cuando hagas cambios importantes
 - Usa `activeContext.md` para coordinar el trabajo actual
 
-## 🤝 Contribución
+## 🚀 **Deployment**
+
+### **Desarrollo Local**
+Ver [DOCKER_README.md](./DOCKER_README.md) para configuración con Docker Compose.
+
+### **Producción**
+El proyecto está configurado para deploy en Railway con GitHub Actions.
+
+**Ver [DOCKER_README.md](./DOCKER_README.md) para guía completa de deployment.**
+
+## 🤝 **Contribución**
 
 1. Lee completamente el Memory Bank
 2. Revisa `.cursorrules` para patrones
@@ -173,49 +202,45 @@ Este proyecto está optimizado para desarrollo con **Cursor AI**:
 5. Actualiza documentación si es necesario
 6. Crea PR con descripción detallada
 
-## 📝 Comandos Útiles
+## 📝 **Comandos Útiles**
 
-### Backend
-
+### **Backend**
 ```bash
 # Consola Rails
-rails console
+docker-compose exec backend rails console
 
 # Testing
-rspec
+docker-compose exec backend rspec
 
 # Migraciones
-rails db:migrate
+docker-compose exec backend rails db:migrate
 
 # Generar modelo
-rails g model ModelName field:type
+docker-compose exec backend rails g model ModelName field:type
 ```
 
-### Frontend
-
+### **Frontend**
 ```bash
 # Desarrollo
-npm run dev
+docker-compose exec frontend npm run dev
 
 # Build
-npm run build
+docker-compose exec frontend npm run build
 
 # Testing
-npm test
-
-# Linting
-npm run lint
+docker-compose exec frontend npm test
 ```
 
-## 📞 Soporte
+## 📚 **Documentación Adicional**
 
-Para dudas sobre el proyecto:
-
-1. Consulta el Memory Bank primero
-2. Revisa las cursor rules
-3. Busca en la documentación técnica
-4. Contacta al equipo de desarrollo
+- **[Memory Bank](./memory-bank/)** - Documentación completa del proyecto
+- **[Docker & Deployment](./DOCKER_README.md)** - Guía de deployment
+- **[Backend Technical Guide](./backend/BLUEPRINT_GUIDE.md)** - Guía técnica del backend
+- **[Frontend Import Rules](./frontend/IMPORT_RULES.md)** - Reglas de importación
 
 ---
 
-**Powered by Memory Bank System** 🧠 | **Optimized for Cursor AI** ⚡
+**Desarrollado para Sistema Lubricentro** 🚗
+
+**Última actualización**: Junio 2025
+**Versión**: 2.0 - Documentación consolidada
