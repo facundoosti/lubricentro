@@ -12,6 +12,7 @@ Una aplicación web moderna que digitaliza y optimiza las operaciones de un lubr
 - **Catálogo de Servicios**: Administración de servicios ofrecidos
 - **Gestión de Productos**: Control de productos utilizados
 - **Registro de Atenciones**: Documentación completa de servicios realizados
+- **Sistema de Presupuestos**: Cotizaciones y seguimiento
 - **Reportes Básicos**: Estadísticas y análisis del negocio
 
 ## 🛠️ **Stack Tecnológico**
@@ -35,41 +36,18 @@ Una aplicación web moderna que digitaliza y optimiza las operaciones de un lubr
 lubricentro/
 ├── backend/              # Rails API
 ├── frontend/             # React App
-├── memory-bank/          # 📚 Documentación del proyecto
-│   ├── projectbrief.md   # Objetivos y alcance
-│   ├── productContext.md # Contexto del producto
-│   ├── systemPatterns.md # Arquitectura y patrones
-│   ├── techContext.md    # Stack tecnológico
-│   ├── activeContext.md  # Estado actual
-│   ├── progress.md       # Progreso del proyecto
-│   └── designSystem.md   # Sistema de diseño unificado
-├── .cursorrules          # 🧠 Reglas de desarrollo
+├── .cursorrules          # 🧠 Reglas de desarrollo para Cursor
 ├── DOCKER_README.md      # 🚀 Guía de deployment
 └── README.md
 ```
 
-## 📚 **Memory Bank**
+## 📚 **Documentación Técnica**
 
-Este proyecto utiliza un **Memory Bank** completo que documenta toda la inteligencia del proyecto:
-
-### **Archivos Core (LEER ANTES DE DESARROLLAR)**
-
-- `memory-bank/projectbrief.md` - Fundamentos del proyecto
-- `memory-bank/productContext.md` - Contexto y problemática
-- `memory-bank/systemPatterns.md` - Arquitectura y patrones
-- `memory-bank/techContext.md` - Configuraciones técnicas
-- `memory-bank/activeContext.md` - Estado actual y próximos pasos
-- `memory-bank/progress.md` - Progreso y métricas
-- `memory-bank/designSystem.md` - Sistema de diseño unificado
-
-### **⚠️ Importante para Desarrolladores**
-
-El Memory Bank es la **fuente única de verdad** del proyecto. Siempre consulta estos archivos antes de:
-
-- Implementar nuevas funcionalidades
-- Tomar decisiones técnicas
-- Resolver dudas sobre arquitectura
-- Entender el contexto del negocio
+- **`.cursorrules`** - Patrones y reglas del proyecto (LEER ANTES DE DESARROLLAR)
+- **`backend/BLUEPRINT_GUIDE.md`** - Guía técnica completa del backend
+- **`frontend/IMPORT_RULES.md`** - Reglas de importación y alias
+- **`DOCKER_README.md`** - Guía de deployment y producción
+- **`CONTRIBUTING.md`** - Guía de contribución para desarrolladores
 
 ## 🚀 **Quick Start**
 
@@ -134,36 +112,38 @@ Frontend (React) ↔ HTTP/JSON API ↔ Backend (Rails) ↔ Database
 - **Service** (Servicio) → catálogo de servicios
 - **Product** (Producto) → catálogo de productos
 - **ServiceRecord** (Atención) → registro de servicios realizados
+- **Quote** (Presupuesto) → sistema de cotizaciones
 
 ## 📊 **Estado del Proyecto**
 
-### **✅ Completado (70%)**
+### **✅ Completado (98%)**
 
 - [x] Planificación y diseño completo
 - [x] Definición de arquitectura
 - [x] Stack tecnológico definido
-- [x] Memory Bank establecido
 - [x] Backend Rails API completo
 - [x] Autenticación JWT implementada
 - [x] Frontend React base implementado
 - [x] CRUD de clientes completo
+- [x] CRUD de vehículos completo
 - [x] Sistema de turnos funcional
+- [x] CRUD de productos y servicios
+- [x] Sistema de presupuestos completo
+- [x] Reportes básicos
 - [x] Integración frontend-backend
+- [x] UI responsive y profesional
 
-### **🚧 En Desarrollo (30%)**
+### **🚧 En Desarrollo (2%)**
 
-- [ ] CRUD de vehículos (modales faltantes)
-- [ ] CRUD de productos (modales faltantes)
-- [ ] CRUD de servicios (modales faltantes)
 - [ ] CRUD de atenciones (modales faltantes)
-- [ ] Testing frontend
+- [ ] Testing frontend completo
 - [ ] Deploy a producción
 
 ### **📋 Roadmap MVP**
 
-1. **Semana 1-2**: Completar CRUD faltantes
-2. **Semana 3**: Testing frontend
-3. **Semana 4**: Deploy y optimización
+1. **Semana 1**: Completar modales de atenciones
+2. **Semana 2**: Testing frontend con Vitest
+3. **Semana 3**: Deploy y optimización final
 
 ## 🧠 **Desarrollo con Cursor**
 
@@ -172,16 +152,31 @@ Este proyecto está optimizado para desarrollo con **Cursor AI**:
 ### **Cursor Rules**
 
 - Lee `.cursorrules` para entender patrones específicos
-- Siempre consulta Memory Bank antes de desarrollar
 - Sigue las convenciones establecidas
 - Usa los patrones de arquitectura definidos
+- Consulta documentación técnica según necesites
 
-### **Memory Bank Integration**
+### **Comandos Útiles**
 
-- El sistema se resetea entre sesiones
-- Memory Bank mantiene contexto completo
-- Actualiza documentación cuando hagas cambios importantes
-- Usa `activeContext.md` para coordinar el trabajo actual
+```bash
+# Desarrollo completo
+make dev
+
+# Backend
+cd backend && rails s
+rails console
+rspec
+
+# Frontend
+cd frontend && npm run dev
+npm run build
+npm test
+
+# Docker
+docker-compose up -d
+docker-compose exec backend rails console
+docker-compose exec frontend npm run dev
+```
 
 ## 🚀 **Deployment**
 
@@ -195,12 +190,14 @@ El proyecto está configurado para deploy en Railway con GitHub Actions.
 
 ## 🤝 **Contribución**
 
-1. Lee completamente el Memory Bank
-2. Revisa `.cursorrules` para patrones
-3. Crea feature branch desde `develop`
+1. Lee `.cursorrules` para patrones del proyecto
+2. Revisa documentación técnica según corresponda
+3. Crea feature branch desde `main`
 4. Implementa siguiendo patrones establecidos
-5. Actualiza documentación si es necesario
+5. Testing: `rspec` (backend) o `npm test` (frontend)
 6. Crea PR con descripción detallada
+
+**Ver [CONTRIBUTING.md](./CONTRIBUTING.md) para guía completa.**
 
 ## 📝 **Comandos Útiles**
 
@@ -233,14 +230,15 @@ docker-compose exec frontend npm test
 
 ## 📚 **Documentación Adicional**
 
-- **[Memory Bank](./memory-bank/)** - Documentación completa del proyecto
-- **[Docker & Deployment](./DOCKER_README.md)** - Guía de deployment
+- **[Cursor Rules](./.cursorrules)** - Patrones y reglas del proyecto
 - **[Backend Technical Guide](./backend/BLUEPRINT_GUIDE.md)** - Guía técnica del backend
 - **[Frontend Import Rules](./frontend/IMPORT_RULES.md)** - Reglas de importación
+- **[Docker & Deployment](./DOCKER_README.md)** - Guía de deployment
+- **[Contributing Guide](./CONTRIBUTING.md)** - Guía de contribución
 
 ---
 
 **Desarrollado para Sistema Lubricentro** 🚗
 
-**Última actualización**: Junio 2025
-**Versión**: 2.0 - Documentación consolidada
+**Última actualización**: Diciembre 2025
+**Versión**: 3.0 - Optimizado para Cursor AI

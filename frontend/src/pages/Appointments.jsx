@@ -62,6 +62,9 @@ const Appointments = () => {
     };
   });
 
+  // Debug log for calendar events
+  console.log('Appointments - calendarEvents:', calendarEvents);
+
   // Handle date selection (create new appointment)
   const handleDateSelect = () => {
     setSelectedAppointment(null);
@@ -190,6 +193,10 @@ const Appointments = () => {
           <p className="text-gray-600 dark:text-gray-400">
             Gestiona los turnos y citas de los clientes
           </p>
+          {/* Debug info - temporal */}
+          <div className="mt-2 text-xs text-gray-500">
+            Debug: {appointments.length} turnos cargados | Mes: {currentMonth}/{currentYear}
+          </div>
         </div>
 
         <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">

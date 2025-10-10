@@ -130,6 +130,8 @@ export const useCreateAppointment = () => {
     mutationFn: appointmentsApi.createAppointment,
     onSuccess: (data) => {
       console.log("Appointment created successfully:", data);
+      // Invalidar todas las queries de appointments para asegurar que se actualice el calendario
+      queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.upcoming() });
     },
@@ -146,6 +148,8 @@ export const useUpdateAppointment = () => {
     mutationFn: appointmentsApi.updateAppointment,
     onSuccess: (data, variables) => {
       console.log("Appointment updated successfully:", data);
+      // Invalidar todas las queries de appointments para asegurar que se actualice el calendario
+      queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.detail(variables.id) });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.upcoming() });
@@ -163,6 +167,8 @@ export const useDeleteAppointment = () => {
     mutationFn: appointmentsApi.deleteAppointment,
     onSuccess: (data) => {
       console.log("Appointment deleted successfully:", data);
+      // Invalidar todas las queries de appointments para asegurar que se actualice el calendario
+      queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.upcoming() });
     },
@@ -179,6 +185,8 @@ export const useConfirmAppointment = () => {
     mutationFn: appointmentsApi.confirmAppointment,
     onSuccess: (data) => {
       console.log("Appointment confirmed successfully:", data);
+      // Invalidar todas las queries de appointments para asegurar que se actualice el calendario
+      queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.upcoming() });
     },
@@ -195,6 +203,8 @@ export const useCompleteAppointment = () => {
     mutationFn: appointmentsApi.completeAppointment,
     onSuccess: (data) => {
       console.log("Appointment completed successfully:", data);
+      // Invalidar todas las queries de appointments para asegurar que se actualice el calendario
+      queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.upcoming() });
     },
@@ -211,6 +221,8 @@ export const useCancelAppointment = () => {
     mutationFn: appointmentsApi.cancelAppointment,
     onSuccess: (data) => {
       console.log("Appointment cancelled successfully:", data);
+      // Invalidar todas las queries de appointments para asegurar que se actualice el calendario
+      queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
       queryClient.invalidateQueries({ queryKey: appointmentKeys.upcoming() });
     },

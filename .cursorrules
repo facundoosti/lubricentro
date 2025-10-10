@@ -1,65 +1,48 @@
 # Cursor Rules - Sistema Lubricentro 🚗
 
-Soy un experto desarrollador full-stack especializado en el desarrollo de este sistema de gestión para lubricentro. Mi expertise incluye Rails 8.0.2, React, y arquitecturas API-first.
+Soy un experto full-stack especializado en Rails 8.0.2 (API) + React 19 + Tailwind CSS v4.
 
-## 🎯 Contexto del Proyecto
+## 🎯 Stack Tecnológico
 
-**Sistema de Gestión Lubricentro**: Una aplicación web integral para digitalizar y optimizar las operaciones de un lubricentro, incluyendo gestión de clientes, vehículos, turnos, servicios y reportes básicos.
-
-### Stack Tecnológico Principal
-- **Backend**: Ruby on Rails 8.0.2 (API mode) + JWT + SQLite→PostgreSQL
+- **Backend**: Ruby on Rails 8.0.2 (API mode) + JWT + PostgreSQL
 - **Frontend**: React 19 + Vite + Tailwind CSS v4 + React Query
 - **Arquitectura**: API-First con SPA frontend
-- **Deploy**: Backend (Railway) + Frontend (Railway)
 
-## 📚 Memory Bank - SIEMPRE LEE PRIMERO
+## 📋 Entidades Core
 
-**CRÍTICO**: Antes de cualquier tarea, SIEMPRE lee todos los archivos del Memory Bank:
+- **Customer** → has_many :vehicles, :appointments, :service_records
+- **Vehicle** → belongs_to :customer
+- **Appointment** → belongs_to :customer, :vehicle
+- **Service/Product** → catálogo de servicios y productos
+- **ServiceRecord** → registro de atenciones realizadas
+- **Quote** → sistema de presupuestos
 
-```bash
-memory-bank/
-├── projectbrief.md      # ✅ Foundation - objetivos y alcance
-├── productContext.md    # ✅ Problema y solución
-├── systemPatterns.md    # ✅ Arquitectura y patrones
-├── techContext.md       # ✅ Stack y configuraciones  
-├── activeContext.md     # ✅ Estado actual y próximos pasos
-├── progress.md          # ✅ Lo que funciona y qué falta
-└── designSystem.md      # ✅ Sistema de diseño unificado
-```
+## ⚡ Patrones Obligatorios
 
-El Memory Bank es mi única fuente de verdad sobre el proyecto. Si no está documentado ahí, no existe o no es correcto.
+### Backend Rails API
 
-## 🏗️ Patrones de Arquitectura
-
-### Backend Rails API Patterns
 ```ruby
-# Estructura de Controllers
-app/controllers/
-├── application_controller.rb (JWT auth base)
-├── api/v1/
-    ├── customers_controller.rb
-    ├── vehicles_controller.rb
-    ├── appointments_controller.rb
-    ├── services_controller.rb
-    ├── products_controller.rb
-    └── service_records_controller.rb
-
 # Response Pattern (SIEMPRE usar)
-{
-  success: true,
-  data: { ... },
-  message: "Success message"
-}
+{ success: true, data: { ... }, message: "Success message" }
+{ success: false, errors: ["Error details"], message: "Error occurred" }
 
-# Error Pattern
-{
-  success: false,
-  errors: ["Error details"],
-  message: "Error occurred"
-}
+# Controller Structure
+app/controllers/api/v1/
+├── customers_controller.rb
+├── vehicles_controller.rb
+├── appointments_controller.rb
+├── services_controller.rb
+├── products_controller.rb
+├── service_records_controller.rb
+└── quotes_controller.rb
+
+# Serializers: Blueprinter
+# Paginación: Pagy
+# Testing: RSpec + FactoryBot
 ```
 
-### Frontend React Patterns
+### Frontend React
+
 ```javascript
 // Estructura de Componentes
 src/
@@ -73,250 +56,107 @@ src/
 └── utils/               # Utilidades
 
 // Pattern: Container + View
-const CustomersContainer = () => {
+const EntityContainer = () => {
   // Lógica y estado
-  return <CustomersView {...props} />;
+  return <EntityView {...props} />;
 };
-```
-
-## 💾 Modelo de Datos Core
-
-### Entidades Principales
-```ruby
-Customer (Cliente)
-├── nombre, telefono, email, direccion
-└── has_many :vehicles, :appointments, :service_records
-
-Vehicle (Vehículo)  
-├── marca, modelo, patente, año, customer_id
-└── belongs_to :customer
-
-Appointment (Turno)
-├── fecha_hora, estado, observaciones
-├── customer_id, vehicle_id
-└── belongs_to :customer, :vehicle
-
-Service (Servicio)
-├── nombre, descripcion, precio_base
-└── has_many :service_record_services
-
-Product (Producto)
-├── nombre, descripcion, precio_unitario, unidad
-└── has_many :service_record_products
-
-ServiceRecord (Atención)
-├── fecha, total, observaciones
-├── customer_id, vehicle_id
-└── belongs_to :customer, :vehicle
-    has_many :service_record_services, :service_record_products
 ```
 
 ## 🎨 UI/UX Guidelines
 
-### Tailwind CSS v4 Design System
-```javascript
-// Colors (usar consistentemente)
+### Tailwind CSS v4 (OBLIGATORIO)
+
+```css
+/* Colores del sistema */
 brand-500: '#465fff'     // Acciones principales
 gray-500: '#667085'      // Elementos secundarios
 success-500: '#12b76a'   // Estados exitosos
 error-500: '#f04438'     // Errores y eliminaciones
 warning-500: '#f79009'   // Alertas
 
-// Spacing (mobile-first)
+/* Mobile-first responsive */
 xs: '0.5rem' sm: '1rem' md: '1.5rem' lg: '2rem'
-
-// Responsive: mobile → tablet (768px) → desktop (1024px)
 ```
-
-### Componentes Reutilizables SIEMPRE
-- Button: Estados loading, disabled, variants
-- Modal: Confirmaciones y formularios
-- Table: Paginación, filtros, acciones
-- Form: Validación con react-hook-form
-
-## ⚡ Patrones de Desarrollo
-
-### Backend Development
-1. **Siempre usar migraciones**: `rails g model` nunca editar schema.rb
-2. **Validaciones en modelo**: `validates :nombre, presence: true`
-3. **Service Objects**: Para lógica compleja (ej: cálculo de totales)
-4. **Serializers**: `blueprinter` para responses consistentes
-5. **Testing**: RSpec + FactoryBot para cada endpoint
-
-### Frontend Development  
-1. **React Query**: Para cache de API, nunca fetch directo
-2. **React Hook Form**: Para todos los formularios
-3. **Context solo para auth**: Estado de servidor via React Query
-4. **Lazy loading**: Para rutas no críticas
-5. **Error boundaries**: Manejo robusto de errores
-6. **SIEMPRE usar alias de importación**: Nunca rutas relativas
 
 ### Import Alias Rules (CRÍTICO)
+
 ```javascript
 // ❌ NUNCA usar rutas relativas
-import Button from '../../ui/Button';
-import { useCustomers } from '../services/customersService';
+import Button from "../../ui/Button";
+import { useCustomers } from "../services/customersService";
 
 // ✅ SIEMPRE usar alias configurados
-import Button from '@ui/Button';
-import { useCustomers } from '@services/customersService';
+import Button from "@ui/Button";
+import { useCustomers } from "@services/customersService";
 ```
 
-### Alias Disponibles (vite.config.js)
-```javascript
-'@' → './src'
-'@components' → './src/components'
-'@ui' → './src/components/ui'
-'@common' → './src/components/common'
-'@layout' → './src/layout'
-'@pages' → './src/pages'
-'@hooks' → './src/hooks'
-'@services' → './src/services'
-'@utils' → './src/utils'
-'@contexts' → './src/contexts'
-'@icons' → './src/icons'
-'@assets' → './src/assets'
-```
+**Alias disponibles:**
 
-### API Integration
-```javascript
-// Service Pattern (services/api.js)
-const api = axios.create({
-  baseURL: '/api/v1',
-  headers: { Authorization: `Bearer ${token}` }
-});
+- `@` → `./src`
+- `@ui` → `./src/components/ui`
+- `@services` → `./src/services`
+- `@components` → `./src/components`
+- `@pages` → `./src/pages`
+- `@hooks` → `./src/hooks`
+- `@contexts` → `./src/contexts`
+- `@icons` → `./src/icons`
+- `@assets` → `./src/assets`
 
-// Hook Pattern
-const useCustomers = () => {
-  return useQuery('customers', () => api.get('/customers'));
-};
-```
-
-## 🔐 Security & Auth
-
-### JWT Authentication
-- Login → Backend genera JWT → Frontend guarda en localStorage
-- Todas las requests: `Authorization: Bearer <token>`
-- Backend valida token en ApplicationController
-- Frontend: AuthContext + protected routes
-
-## 📱 Responsive & Accessibility  
-
-### Mobile-First Design
-- Base styles: mobile (320px+)
-- Breakpoints: md:768px lg:1024px xl:1280px
-- Touch-friendly: min 44px tap targets
-- Loading states visibles en mobile
-
-### Accessibility Basics
-- Semantic HTML always
-- Alt text for images
-- Focus management in modals
-- ARIA labels where needed
-
-## 🧪 Testing Strategy
-
-### Backend Testing
-```ruby
-# Model specs
-describe Customer do
-  it { should validate_presence_of(:nombre) }
-  it { should have_many(:vehicles) }
-end
-
-# Controller specs
-describe Api::V1::CustomersController do
-  describe 'GET #index' do
-    it 'returns success response'
-  end
-end
-```
-
-### Frontend Testing
-```javascript
-// Component testing
-test('renders customer list', () => {
-  render(<CustomerList customers={mockCustomers} />);
-  expect(screen.getByText('Customers')).toBeInTheDocument();
-});
-```
-
-## 🚀 Development Workflow
-
-### Git Flow
-- `main`: Production
-- `develop`: Staging  
-- `feature/feature-name`: New features
-- `hotfix/issue-name`: Urgent fixes
-
-### Commands Frecuentes
-```bash
-# Backend
-cd backend && rails db:migrate && rails s
-rails console # debugging
-rspec # testing
-
-# Frontend  
-cd frontend && npm run dev
-npm run build # production build
-npm test # testing
-
-# Docker (recomendado)
-docker-compose up -d
-docker-compose exec backend rails console
-docker-compose exec frontend npm run dev
-```
-
-## ⚠️ Critical Guidelines
+## ⚠️ Reglas Críticas
 
 ### NUNCA hacer:
+
 - ❌ Editar schema.rb directamente
-- ❌ Hardcodear URLs de API
-- ❌ Usar CSS custom sin justificación (prefer Tailwind v4)
+- ❌ Usar rutas relativas en importaciones
+- ❌ CSS custom sin justificación (prefer Tailwind v4)
 - ❌ Fetch directo sin React Query
 - ❌ Estado global innecesario
 - ❌ Componentes >300 líneas
 - ❌ Controllers sin validación de params
-- ❌ Usar rutas relativas en importaciones (SIEMPRE alias)
 
 ### SIEMPRE hacer:
-- ✅ Leer Memory Bank antes de empezar
+
 - ✅ Usar patrones establecidos
 - ✅ Validar datos en backend Y frontend
 - ✅ Manejar estados de loading y error
-- ✅ Testing para nuevas funcionalidades
-- ✅ Documentar decisiones importantes
 - ✅ Mobile-first responsive design
-- ✅ Actualizar progress.md después de cambios
 - ✅ Usar alias de importación (@ui, @services, @components, etc.)
+- ✅ Testing para nuevas funcionalidades
+- ✅ Migraciones para cambios de DB
 
-## 🎯 Current Focus (Siempre verificar activeContext.md)
+## 🚀 Comandos Útiles
 
-**Estado Actual**: Fase 17 - MVP PARCIALMENTE COMPLETADO (70% ✅)
+```bash
+# Backend
+cd backend && rails s
+rails console
+rspec
 
-**Próximos pasos críticos**:
-1. Completar CRUD Frontend (modales faltantes para 4 entidades)
-2. Testing frontend con Vitest
-3. Deploy a producción en Railway
-4. Optimización de performance
+# Frontend
+cd frontend && npm run dev
+npm run build
+npm test
 
-## 📊 Success Metrics
+# Docker (recomendado)
+docker-compose up -d
+make dev
+```
 
-### MVP Definition of Done
-- [x] CRUD completo clientes
-- [ ] CRUD completo vehículos (modales faltantes)
-- [x] Sistema de turnos funcional  
-- [ ] CRUD completo productos (modales faltantes)
-- [ ] CRUD completo servicios (modales faltantes)
-- [ ] CRUD completo atenciones (modales faltantes)
-- [x] Reportes básicos
-- [x] UI responsive y profesional
-- [x] Deploy en producción funcionando
+## 📊 Estado Actual
+
+- **MVP**: 98% completado
+- **Faltante**: CRUD modales atenciones
+- **Próximo**: Testing frontend + Deploy a producción
+
+## 🔧 Configuración Técnica
+
+- **Base de datos**: SQLite3 (desarrollo) → PostgreSQL (producción)
+- **Autenticación**: JWT en ApplicationController
+- **Paginación**: Pagy con metadata
+- **Serialización**: Blueprinter con múltiples vistas
+- **Testing**: RSpec + FactoryBot (backend), Vitest (frontend)
 
 ---
 
-**Memory Bank Location**: `memory-bank/`
-**Last Updated**: Junio 2025 - Documentación consolidada
-**Next Review**: Al completar CRUD de todas las entidades
-
-> 🧠 **Remember**: Mi memoria se resetea entre sesiones. El Memory Bank es mi única conexión con el contexto del proyecto. SIEMPRE consultarlo primero. 
+**Última actualización**: Diciembre 2025
+**Estado**: MVP 98% COMPLETADO - Sistema optimizado para Cursor

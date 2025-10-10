@@ -20,7 +20,10 @@ class Api::V1::VehiclesController < ApplicationController
 
     # Paginación con Pagy
     @pagy, @vehicles = pagy(@vehicles, items: safe_per_page(params[:per_page]))
-    @serializer = VehicleSerializer.render_as_hash(@vehicles, root: :vehicles)
+
+    # Usar vista específica si se solicita, o vista por defecto
+    view = params[:view] == "with_customer" ? :with_customer : nil
+    @serializer = VehicleSerializer.render_as_hash(@vehicles, root: :vehicles, view: view)
     render_json(@serializer)
   end
 
@@ -35,7 +38,7 @@ class Api::V1::VehiclesController < ApplicationController
     @vehicle = Vehicle.new(vehicle_params)
 
     if @vehicle.save
-      @serializer = VehicleSerializer.render_as_hash(@vehicle)
+      @serializer = VehicleSerializer.render_as_hash(@vehicle, view: :with_customer)
       render_json(@serializer, message: "Vehicle created successfully", status: :created)
     else
       render_json({ errors: @vehicle.errors.full_messages }, message: "Error creating vehicle", status: :unprocessable_entity)
@@ -45,7 +48,7 @@ class Api::V1::VehiclesController < ApplicationController
   # PATCH/PUT /api/v1/vehicles/:id
   def update
     if @vehicle.update(vehicle_params)
-      @serializer = VehicleSerializer.render_as_hash(@vehicle)
+      @serializer = VehicleSerializer.render_as_hash(@vehicle, view: :with_customer)
       render_json(@serializer, message: "Vehicle updated successfully")
     else
       render_json({ errors: @vehicle.errors.full_messages }, message: "Error updating vehicle", status: :unprocessable_entity)

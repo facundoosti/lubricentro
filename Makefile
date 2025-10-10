@@ -19,8 +19,17 @@ help: ## Mostrar esta ayuda
 start: ## Iniciar todos los servicios
 	docker-compose up -d
 
-stop: ## Detener todos los servicios
+stop: ## Detener todos los servicios y limpiar archivos temporales
 	docker-compose down
+	@echo "🧹 Limpiando archivos temporales del backend..."
+	@rm -rf backend/tmp/cache/*
+	@rm -rf backend/tmp/pids/*
+	@rm -rf backend/tmp/sockets/*
+	@rm -rf backend/tmp/storage/*
+	@rm -f backend/tmp/restart.txt
+	@rm -rf backend/log/*.log
+	@rm -rf backend/coverage/*
+	@echo "✅ Archivos temporales limpiados"
 
 restart: ## Reiniciar todos los servicios
 	docker-compose restart
@@ -109,6 +118,17 @@ lint: ## Ejecutar todos los linters
 	docker-compose exec $(FRONTEND_SERVICE) npm run lint
 
 # Limpieza
+clean-tmp: ## Limpiar archivos temporales del backend
+	@echo "🧹 Limpiando archivos temporales del backend..."
+	@rm -rf backend/tmp/cache/*
+	@rm -rf backend/tmp/pids/*
+	@rm -rf backend/tmp/sockets/*
+	@rm -rf backend/tmp/storage/*
+	@rm -f backend/tmp/restart.txt
+	@rm -rf backend/log/*.log
+	@rm -rf backend/coverage/*
+	@echo "✅ Archivos temporales limpiados"
+
 clean: ## Limpiar contenedores y volúmenes
 	docker-compose down -v
 	docker system prune -f
@@ -165,10 +185,55 @@ quick-start: ## Inicio rápido del proyecto
 	@sleep 15
 	make health
 
-quick-stop: ## Parada rápida
+quick-stop: ## Parada rápida con limpieza
 	@echo "🛑 Deteniendo servicios..."
 	make stop
-	@echo "✅ Servicios detenidos"
+	@echo "✅ Servicios detenidos y archivos temporales limpiados"
+
+# Cursor AI y desarrollo
+cursor-setup: ## Configurar proyecto para Cursor AI
+	@echo "🧠 Configurando proyecto para Cursor AI..."
+	@echo "✅ .cursorrules optimizado"
+	@echo "✅ .cursorignore creado"
+	@echo "✅ .vscode/settings.json configurado"
+	@echo "✅ Documentación consolidada"
+	@echo ""
+	@echo "💡 Tips para Cursor:"
+	@echo "  - Usa @ para referenciar archivos: @README.md, @.cursorrules"
+	@echo "  - Cmd+K para editar con contexto"
+	@echo "  - Cmd+L para chat con contexto del archivo"
+	@echo "  - Cmd+I para Composer (editar múltiples archivos)"
+
+# Optimización y performance
+optimize: ## Optimizar proyecto para desarrollo
+	@echo "⚡ Optimizando proyecto..."
+	@echo "🧹 Limpiando archivos temporales..."
+	make clean-tmp
+	@echo "📦 Reinstalando dependencias..."
+	make install
+	@echo "🗄️  Verificando base de datos..."
+	make db-migrate
+	@echo "✅ Proyecto optimizado"
+
+# Documentación
+docs: ## Abrir documentación del proyecto
+	@echo "📚 Documentación del Sistema Lubricentro:"
+	@echo ""
+	@echo "📖 Archivos principales:"
+	@echo "  .cursorrules          - Patrones y reglas del proyecto"
+	@echo "  README.md             - Guía de inicio rápido"
+	@echo "  CONTRIBUTING.md       - Guía de contribución"
+	@echo "  docs/ARCHITECTURE.md  - Arquitectura del sistema"
+	@echo ""
+	@echo "🔧 Documentación técnica:"
+	@echo "  backend/BLUEPRINT_GUIDE.md  - Guía técnica del backend"
+	@echo "  frontend/IMPORT_RULES.md    - Reglas de importación"
+	@echo "  DOCKER_README.md            - Guía de deployment"
+	@echo ""
+	@echo "💡 Para Cursor AI:"
+	@echo "  - Lee .cursorrules antes de desarrollar"
+	@echo "  - Usa @ para referenciar archivos en chat"
+	@echo "  - Sigue patrones establecidos"
 
 # Información
 info: ## Mostrar información del proyecto
@@ -183,4 +248,6 @@ info: ## Mostrar información del proyecto
 	@echo "  make logs         - Ver logs"
 	@echo "  make console      - Rails console"
 	@echo "  make test         - Ejecutar tests"
-	@echo "  make clean        - Limpiar contenedores" 
+	@echo "  make clean        - Limpiar contenedores"
+	@echo "  make cursor-setup - Configurar para Cursor AI"
+	@echo "  make docs         - Ver documentación" 

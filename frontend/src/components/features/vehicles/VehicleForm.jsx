@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Button from "@ui/Button";
 import CustomerSearchInput from "@components/features/customers/CustomerSearchInput";
@@ -10,13 +10,14 @@ const VehicleForm = ({
   onCancel,
   customerId = null
 }) => {
+  const [selectedCustomerId, setSelectedCustomerId] = useState(customerId || "");
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-    setValue,
-    watch
+    setValue
   } = useForm({
     defaultValues: vehicle || {
       brand: "",
@@ -27,19 +28,34 @@ const VehicleForm = ({
     }
   });
 
-  // Efecto para inicializar el customer_id cuando se edita un vehículo
+  // Sincronizar el customer_id del formulario con el estado local
   useEffect(() => {
-    if (vehicle && vehicle.customer_id) {
-      setValue('customer_id', vehicle.customer_id);
-    } else if (customerId) {
-      setValue('customer_id', customerId);
+    // Solo necesitamos sincronizar el estado local para el formulario
+    const customerIdToUse = vehicle?.customer_id || customerId;
+    if (customerIdToUse && customerIdToUse !== selectedCustomerId) {
+      setSelectedCustomerId(customerIdToUse);
+      setValue('customer_id', customerIdToUse);
     }
-  }, [vehicle, customerId, setValue]);
+  }, [vehicle, customerId, selectedCustomerId, setValue]);
+
+  // Debug: Log para verificar que el cliente se está pasando correctamente
+  useEffect(() => {
+    if (vehicle?.customer) {
+      console.log('VehicleForm - Cliente cargado:', vehicle.customer);
+    }
+  }, [vehicle]);
 
   const handleFormSubmit = async (data) => {
     try {
-      await onSubmit(data);
+      // Asegurar que el customer_id esté incluido en los datos
+      const formData = {
+        ...data,
+        customer_id: selectedCustomerId
+      };
+      
+      await onSubmit(formData);
       reset();
+      setSelectedCustomerId("");
     } catch (error) {
       console.error('Error submitting vehicle form:', error);
     }
@@ -49,13 +65,18 @@ const VehicleForm = ({
 
   const handleCustomerSelect = (customer) => {
     if (customer) {
+      setSelectedCustomerId(customer.id);
       setValue('customer_id', customer.id);
     } else {
-      setValue('customer_id', '');
+      setSelectedCustomerId("");
+      setValue('customer_id', "");
     }
   };
 
-  const customerIdValue = watch('customer_id');
+  const handleCustomerChange = (customerId) => {
+    setSelectedCustomerId(customerId);
+    setValue('customer_id', customerId);
+  };
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
@@ -188,18 +209,22 @@ const VehicleForm = ({
             Cliente *
           </label>
           <CustomerSearchInput
-            value={customerIdValue}
-            onChange={(value) => setValue('customer_id', value)}
+            value={vehicle?.customer_id || customerId || selectedCustomerId}
+            onChange={handleCustomerChange}
             onSelect={handleCustomerSelect}
             placeholder="Buscar cliente por nombre o email..."
             error={errors.customer_id?.message}
             disabled={isLoading}
+            initialCustomer={vehicle?.customer} // Pasar el cliente completo si existe
           />
           {/* Campo oculto para validación */}
           <input
             type="hidden"
             {...register("customer_id", {
-              required: "El cliente es requerido"
+              required: "El cliente es requerido",
+              validate: (value) => {
+                return value && value !== "" || "El cliente es requerido";
+              }
             })}
           />
           {errors.customer_id && (

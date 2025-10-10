@@ -27,6 +27,7 @@ export const useVehicles = (filters = {}) => {
       const params = new URLSearchParams({
         page: page.toString(),
         per_page: per_page.toString(),
+        view: 'with_customer', // Solicitar vista con información completa del cliente
       });
 
       if (search) {
@@ -48,9 +49,12 @@ export const useVehicles = (filters = {}) => {
         }
       });
 
+      console.log('VehiclesService - Making API call with params:', params.toString());
       const response = await api.get(`/vehicles?${params}`);
+      console.log('VehiclesService - API response:', response.data);
       return response.data;
     },
+    enabled: !!customer_id, // Solo ejecutar la query cuando hay un customer_id
     keepPreviousData: true,
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
@@ -60,7 +64,7 @@ export const useVehicle = (id) => {
   return useQuery({
     queryKey: vehicleKeys.detail(id),
     queryFn: async () => {
-      const response = await api.get(`/vehicles/${id}`);
+      const response = await api.get(`/vehicles/${id}?view=with_customer`);
       return response.data;
     },
     enabled: !!id,

@@ -1,0 +1,68 @@
+# Dependencies
+node_modules/
+vendor/
+coverage/
+
+# Build outputs
+dist/
+build/
+tmp/
+.cache/
+
+# Databases
+*.sqlite3
+*.sql
+storage/
+
+# Logs
+*.log
+log/
+logs/
+
+# Test artifacts
+spec/fixtures/
+test/fixtures/
+coverage/
+
+# Template analysis (no es parte del proyecto)
+frontend/template-analysis/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Environment files (keep .env.example)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Docker
+.dockerignore
+
+# Git
+.git/
+.gitignore
+
+# Documentation that's not core
+*.md.bak
+docs/temp/
