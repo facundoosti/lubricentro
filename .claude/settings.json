@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/facundooski/Dev/lubricentro/.github/**)",
+      "Bash(ls -la /Users/facundoosti/Dev/lubricentro/.cursor/rules/*.mdc)",
+      "Bash(cp /Users/facundoosti/Dev/lubricentro/backend/BLUEPRINT_GUIDE.md /Users/facundoosti/Dev/lubricentro/docs/BLUEPRINT_GUIDE.md)",
+      "Bash(cp /Users/facundoosti/Dev/lubricentro/backend/QUOTES_SYSTEM.md /Users/facundoosti/Dev/lubricentro/docs/QUOTES_SYSTEM.md)",
+      "Bash(cp /Users/facundoosti/Dev/lubricentro/backend/QUOTES_FRONTEND.md /Users/facundoosti/Dev/lubricentro/docs/QUOTES_FRONTEND.md)"
+    ],
+    "additionalDirectories": [
+      "/Users/facundoosti/Dev/lubricentro/backend"
+    ]
+  }
+}
