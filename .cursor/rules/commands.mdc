@@ -1,0 +1,29 @@
+---
+description: Comandos útiles para desarrollo
+alwaysApply: false
+---
+
+# Comandos Útiles
+
+## Backend
+
+```bash
+cd backend && rails s
+rails console
+rspec
+```
+
+## Frontend
+
+```bash
+cd frontend && npm run dev
+npm run build
+npm test
+```
+
+## Docker (recomendado)
+
+```bash
+docker-compose up -d
+make dev
+```

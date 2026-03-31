@@ -1,0 +1,855 @@
+---
+description: Reglas para escribir tests de modelos RSpec siguiendo los patrones del proyecto
+globs:
+  - spec/models/**/*_spec.rb
+alwaysApply: false
+---
+
+# Guía para Tests de Modelos con RSpec
+
+Esta regla define los patrones y convenciones para escribir tests de modelos ActiveRecord en Rails usando RSpec, Shoulda Matchers y las prácticas establecidas en el proyecto.
+
+## Estructura Base de Model Specs
+
+```ruby
+require 'rails_helper'
+
+RSpec.describe User, type: :model do
+  include_context 'with instanced described class'
+  
+  it 'does have a valid factory' do
+    expect(user).to be_valid
+  end
+  
+  describe 'validations' do
+    it { is_expected.to validate_presence_of(:name) }
+    it { is_expected.to validate_uniqueness_of(:email) }
+  end
+  
+  describe 'ActiveRecord associations' do
+    it { is_expected.to belong_to(:organization) }
+    it { is_expected.to have_many(:applicants) }
+  end
+  
+  describe 'callbacks' do
+    it { is_expected.to callback(:set_default_values).before(:validation) }
+  end
+  
+  describe 'scopes' do
+    it { expect(described_class).to respond_to(:active) }
+    it { expect(described_class).to respond_to(:admins) }
+  end
+  
+  describe 'public instance methods' do
+    describe '#full_name' do
+      it 'returns concatenated name and last_name' do
+        user = build(:user, name: 'John', last_name: 'Doe')
+        expect(user.full_name).to eq('John Doe')
+      end
+    end
+  end
+end
+```
+
+## Configuración Obligatoria
+
+### 1. Require Rails Helper
+**SIEMPRE** inicia el archivo con:
+```ruby
+require 'rails_helper'
+```
+
+### 2. Include Instanced Described Class Context
+Para crear automáticamente una instancia del modelo:
+```ruby
+include_context 'with instanced described class'
+```
+
+Este context crea automáticamente una variable con el nombre del modelo en snake_case:
+```ruby
+# Para User model, crea: let_it_be(:user) { build_stubbed(:user) }
+# Para SelectionProcess model, crea: let_it_be(:selection_process) { build_stubbed(:selection_process) }
+```
+
+### 3. Tipo de Spec
+Define explícitamente el tipo:
+```ruby
+RSpec.describe YourModel, type: :model do
+```
+
+## Orden de Sections (OBLIGATORIO)
+
+Los tests de modelos deben seguir este orden estricto:
+
+1. **Factory Validity Test** (siempre primero)
+2. **Validations**
+3. **ActiveRecord Associations**
+4. **Callbacks**
+5. **Scopes**
+6. **Delegations**
+7. **Concerns**
+8. **Public Instance Methods**
+9. **Public Class Methods**
+
+## 1. Factory Validity Test
+
+**SIEMPRE** el primer test debe verificar la validez de la factory:
+
+```ruby
+it 'does have a valid factory' do
+  expect(user).to be_valid
+end
+
+# O si no usas 'with instanced described class'
+it 'does have a valid factory' do
+  expect(build(:user)).to be_valid
+end
+```
+
+## 2. Validations
+
+Usa Shoulda Matchers para validaciones declarativas:
+
+```ruby
+describe 'validations' do
+  # Presence
+  it { is_expected.to validate_presence_of(:name) }
+  it { is_expected.to validate_presence_of(:email) }
+  
+  # Uniqueness
+  it { is_expected.to validate_uniqueness_of(:email).case_insensitive }
+  it { is_expected.to validate_uniqueness_of(:token).allow_nil }
+  
+  # Length
+  it { is_expected.to validate_length_of(:name).is_at_most(255) }
+  it { is_expected.to validate_length_of(:password).is_at_least(8) }
+  
+  # Format
+  it { is_expected.to allow_value('test@example.com').for(:email) }
+  it { is_expected.not_to allow_value('invalid').for(:email) }
+  
+  # Numericality
+  it { is_expected.to validate_numericality_of(:age).is_greater_than(0) }
+  it { is_expected.to validate_numericality_of(:score).only_integer }
+  
+  # Inclusion
+  it { is_expected.to validate_inclusion_of(:status).in_array(['active', 'inactive']) }
+  
+  # Custom validations (si no se puede usar shoulda-matchers)
+  context 'when custom validation fails' do
+    it 'adds error to the model' do
+      model = build(:model, invalid_attribute: 'bad')
+      expect(model).not_to be_valid
+      expect(model.errors[:invalid_attribute]).to be_present
+    end
+  end
+end
+```
+
+## 3. ActiveRecord Associations
+
+Usa Shoulda Matchers para asociaciones:
+
+```ruby
+describe 'ActiveRecord associations' do
+  # Belongs to
+  it { is_expected.to belong_to(:organization) }
+  it { is_expected.to belong_to(:user).optional }
+  it { is_expected.to belong_to(:category).class_name('CustomCategory') }
+  it { is_expected.to belong_to(:author).with_foreign_key('author_id') }
+  
+  # Has many
+  it { is_expected.to have_many(:applicants) }
+  it { is_expected.to have_many(:applicants).dependent(:destroy) }
+  it { is_expected.to have_many(:logs).class_name('ActivityLog') }
+  it { is_expected.to have_many(:users).through(:organization) }
+  it { is_expected.to have_many(:comments).inverse_of(:post) }
+  it { is_expected.to have_many(:items).order(:position) }
+  
+  # Has one
+  it { is_expected.to have_one(:profile) }
+  it { is_expected.to have_one(:profile).dependent(:destroy) }
+  it { is_expected.to have_one(:enterprise).through(:organization) }
+  
+  # Has and belongs to many
+  it { is_expected.to have_and_belong_to_many(:tags) }
+  
+  # Accepts nested attributes
+  it { is_expected.to accept_nested_attributes_for(:organization) }
+  it { is_expected.to accept_nested_attributes_for(:addresses).allow_destroy(true) }
+end
+```
+
+## 4. Callbacks
+
+Usa Shoulda Matchers o shoulda-callback-matchers:
+
+```ruby
+describe 'callbacks' do
+  # Before callbacks
+  it { is_expected.to callback(:set_default_values).before(:validation) }
+  it { is_expected.to callback(:normalize_email).before(:save) }
+  it { is_expected.to callback(:generate_token).before(:create) }
+  
+  # After callbacks
+  it { is_expected.to callback(:send_welcome_email).after(:create) }
+  it { is_expected.to callback(:update_counter_cache).after(:save) }
+  it { is_expected.to callback(:cleanup_files).after(:destroy) }
+  
+  # Around callbacks
+  it { is_expected.to callback(:log_changes).around(:save) }
+end
+```
+
+Si necesitas testear el comportamiento del callback:
+
+```ruby
+describe 'callbacks' do
+  describe 'before_validation :set_default_values' do
+    it 'sets default status when nil' do
+      user = build(:user, status: nil)
+      user.valid?
+      expect(user.status).to eq('active')
+    end
+  end
+  
+  describe 'after_create :send_welcome_email' do
+    it 'enqueues welcome email job' do
+      expect {
+        create(:user)
+      }.to have_enqueued_job(WelcomeEmailJob)
+    end
+  end
+end
+```
+
+## 5. Scopes
+
+**IMPORTANTE**: Solo testea la existencia de scopes, NO su implementación:
+
+```ruby
+describe 'scopes' do
+  it { expect(described_class).to respond_to(:active) }
+  it { expect(described_class).to respond_to(:admins) }
+  it { expect(described_class).to respond_to(:by_organization) }
+  it { expect(described_class).to respond_to(:recent) }
+end
+```
+
+**Excepción**: Si el scope es crítico para el negocio o muy complejo, puedes testearlo:
+
+```ruby
+describe 'scopes' do
+  describe '.active' do
+    let!(:active_user) { create(:user, active: true) }
+    let!(:inactive_user) { create(:user, active: false) }
+    
+    it 'returns only active users' do
+      expect(User.active).to include(active_user)
+      expect(User.active).not_to include(inactive_user)
+    end
+  end
+  
+  describe '.by_date_range' do
+    let!(:old_record) { create(:record, created_at: 1.year.ago) }
+    let!(:recent_record) { create(:record, created_at: 1.day.ago) }
+    
+    it 'returns records within date range' do
+      results = Record.by_date_range(1.week.ago, Time.current)
+      expect(results).to include(recent_record)
+      expect(results).not_to include(old_record)
+    end
+  end
+end
+```
+
+## 6. Delegations
+
+Usa Shoulda Matchers:
+
+```ruby
+describe 'delegations' do
+  it { is_expected.to delegate_method(:name).to(:organization) }
+  it { is_expected.to delegate_method(:email).to(:user).with_prefix }
+  it { is_expected.to delegate_method(:status).to(:workflow).allow_nil }
+end
+```
+
+## 7. Concerns
+
+Testea concerns incluidos en el modelo:
+
+```ruby
+describe 'concerns' do
+  describe 'Trackable' do
+    it { is_expected.to respond_to(:track_create) }
+    it { is_expected.to respond_to(:track_update) }
+    it { is_expected.to respond_to(:track_destroy) }
+  end
+  
+  describe 'EmailValidatable' do
+    describe '#downcase_email' do
+      it 'converts email to lowercase' do
+        applicant = create(:applicant, email: 'TEST@EXAMPLE.COM')
+        expect(applicant.email).to eq('test@example.com')
+      end
+    end
+    
+    describe '#validate_email' do
+      context 'when email is blank' do
+        it 'generates default email' do
+          applicant = create(:applicant, email: '')
+          expect(applicant.email).to include('@rankmiats.com')
+        end
+      end
+    end
+  end
+  
+  describe 'SoftDeletable' do
+    it_behaves_like 'soft_delete'
+  end
+end
+```
+
+## 8. Public Instance Methods
+
+Testea cada método público del modelo:
+
+```ruby
+describe 'public instance methods' do
+  describe '#full_name' do
+    it 'returns concatenated name and last_name' do
+      user = build(:user, name: 'John', last_name: 'Doe')
+      expect(user.full_name).to eq('John Doe')
+    end
+    
+    it 'handles nil last_name' do
+      user = build(:user, name: 'John', last_name: nil)
+      expect(user.full_name).to eq('John')
+    end
+  end
+  
+  describe '#active?' do
+    it 'returns true when status is active' do
+      user = build(:user, status: 'active')
+      expect(user.active?).to be true
+    end
+    
+    it 'returns false when status is inactive' do
+      user = build(:user, status: 'inactive')
+      expect(user.active?).to be false
+    end
+  end
+  
+  describe '#send_notification' do
+    it 'enqueues notification job' do
+      user = create(:user)
+      
+      expect {
+        user.send_notification('message')
+      }.to have_enqueued_job(NotificationJob)
+    end
+  end
+  
+  # Para métodos que retornan colecciones
+  describe '#recent_applicants' do
+    it 'returns ActiveRecord::Relation' do
+      user = create(:user)
+      expect(user.recent_applicants).to be_a(ActiveRecord::Relation)
+    end
+    
+    it 'includes recent applicants' do
+      user = create(:user)
+      recent = create(:applicant, user: user, created_at: 1.day.ago)
+      old = create(:applicant, user: user, created_at: 1.year.ago)
+      
+      expect(user.recent_applicants).to include(recent)
+      expect(user.recent_applicants).not_to include(old)
+    end
+  end
+  
+  # Para métodos con side effects
+  describe '#archive!' do
+    it 'updates archived_at timestamp' do
+      user = create(:user)
+      user.archive!
+      expect(user.archived_at).to be_present
+    end
+    
+    it 'broadcasts archive event' do
+      user = create(:user)
+      expect {
+        user.archive!
+      }.to broadcast(:user_archived)
+    end
+  end
+end
+```
+
+## 9. Public Class Methods
+
+Testea métodos de clase públicos:
+
+```ruby
+describe '.class_method_name' do
+  it 'returns expected result' do
+    result = User.some_class_method
+    expect(result).to be_a(Array)
+  end
+end
+```
+
+## Uso de FactoryBot en Model Specs
+
+```ruby
+# build - no persiste en BD, rápido
+let(:user) { build(:user) }
+
+# build_stubbed - no persiste, mockea id y timestamps, más rápido
+let(:user) { build_stubbed(:user) }
+
+# create - persiste en BD, necesario para tests de asociaciones y BD
+let(:user) { create(:user) }
+
+# create_list - crea múltiples registros
+let(:users) { create_list(:user, 3) }
+
+# let! - ejecuta inmediatamente, antes del test
+let!(:user) { create(:user) }
+
+# let_it_be - crea una sola vez por describe block (TestProf)
+let_it_be(:organization) { create(:organization) }
+
+# Con traits
+let(:admin) { build(:user, :admin) }
+let(:inactive_user) { create(:user, :inactive) }
+
+# Sobrescribiendo atributos
+let(:user) { build(:user, name: 'Custom Name', organization: org) }
+
+# Asociaciones
+let(:organization) { create(:organization) }
+let(:user) { create(:user, organization: organization) }
+```
+
+## Shared Examples
+
+Usa shared examples para comportamiento común:
+
+```ruby
+# En el spec
+describe 'soft delete behavior' do
+  it_behaves_like 'soft_delete'
+end
+
+# Definición en spec/support/concerns/soft_delete_examples.rb
+RSpec.shared_examples 'soft_delete' do
+  it 'has deleted attribute' do
+    expect(subject).to respond_to(:deleted)
+  end
+  
+  it 'soft deletes record' do
+    subject.soft_delete!
+    expect(subject.deleted).to be true
+  end
+end
+```
+
+## Testing de Enums
+
+```ruby
+describe 'enums' do
+  it { is_expected.to define_enum_for(:status).with_values(active: 0, inactive: 1) }
+  
+  # O testea manualmente
+  describe 'status enum' do
+    it 'defines status values' do
+      expect(User.statuses).to eq({ 'active' => 0, 'inactive' => 1 })
+    end
+    
+    it 'provides status query methods' do
+      user = build(:user, status: :active)
+      expect(user.active?).to be true
+      expect(user.inactive?).to be false
+    end
+    
+    it 'provides status setter methods' do
+      user = build(:user)
+      user.inactive!
+      expect(user.status).to eq('inactive')
+    end
+  end
+end
+```
+
+## Testing de JSON/JSONB Columns
+
+```ruby
+describe 'JSON attributes' do
+  describe 'metadata' do
+    it 'stores and retrieves JSON data' do
+      user = create(:user, metadata: { key: 'value', count: 42 })
+      expect(user.reload.metadata['key']).to eq('value')
+      expect(user.metadata['count']).to eq(42)
+    end
+    
+    it 'handles nil values' do
+      user = create(:user, metadata: nil)
+      expect(user.metadata).to be_nil
+    end
+  end
+end
+```
+
+## Testing de File Uploads (CarrierWave/ActiveStorage)
+
+```ruby
+describe 'file uploads' do
+  describe 'avatar' do
+    it 'uploads and stores file' do
+      user = create(:user)
+      user.avatar = File.open(Rails.root.join('spec/fixtures/files/avatar.jpg'))
+      user.save
+      
+      expect(user.avatar.present?).to be true
+      expect(user.avatar.filename).to eq('avatar.jpg')
+    end
+    
+    it 'validates file type' do
+      user = build(:user)
+      user.avatar = File.open(Rails.root.join('spec/fixtures/files/document.pdf'))
+      
+      expect(user).not_to be_valid
+      expect(user.errors[:avatar]).to be_present
+    end
+  end
+end
+```
+
+## Testing de State Machines
+
+```ruby
+describe 'state machine' do
+  describe 'transitions' do
+    it 'transitions from draft to published' do
+      post = create(:post, status: 'draft')
+      post.publish!
+      expect(post.status).to eq('published')
+    end
+    
+    it 'does not allow invalid transitions' do
+      post = create(:post, status: 'archived')
+      expect { post.publish! }.to raise_error(StateMachines::InvalidTransition)
+    end
+  end
+  
+  describe 'guards' do
+    it 'prevents transition when guard fails' do
+      post = create(:post, status: 'draft', content: nil)
+      expect(post.can_publish?).to be false
+    end
+  end
+end
+```
+
+## Testing de Complex Business Logic
+
+Para lógica de negocio compleja en modelos:
+
+```ruby
+describe '#calculate_score' do
+  it 'calculates correct score based on multiple factors' do
+    applicant = create(:applicant,
+      experience_years: 5,
+      education_level: 'masters',
+      skills: ['ruby', 'rails']
+    )
+    
+    expect(applicant.calculate_score).to eq(85)
+  end
+  
+  it 'applies penalty for missing required skills' do
+    applicant = create(:applicant, skills: [])
+    expect(applicant.calculate_score).to be < 50
+  end
+  
+  it 'caps score at maximum value' do
+    applicant = create(:applicant,
+      experience_years: 100,
+      education_level: 'phd'
+    )
+    
+    expect(applicant.calculate_score).to eq(100)
+  end
+end
+```
+
+## Testing con Multi-Tenancy (Apartment)
+
+```ruby
+# El tenant se configura automáticamente en rails_helper.rb
+# NO necesitas incluir 'with tenant' en tus tests
+
+# Si testeas queries que dependen del tenant:
+describe '.by_organization' do
+  let(:org1) { create(:organization) }
+  let(:org2) { create(:organization) }
+  
+  it 'returns only records from specified organization' do
+    user1 = create(:user, organization: org1)
+    user2 = create(:user, organization: org2)
+    
+    results = User.by_organization(org1.id)
+    expect(results).to include(user1)
+    expect(results).not_to include(user2)
+  end
+end
+```
+
+## Ejemplos Completos
+
+### Modelo Simple
+```ruby
+require 'rails_helper'
+
+RSpec.describe Tag, type: :model do
+  include_context 'with instanced described class'
+  
+  it 'does have a valid factory' do
+    expect(tag).to be_valid
+  end
+  
+  describe 'validations' do
+    it { is_expected.to validate_presence_of(:name) }
+    it { is_expected.to validate_uniqueness_of(:name).scoped_to(:organization_id) }
+  end
+  
+  describe 'ActiveRecord associations' do
+    it { is_expected.to belong_to(:organization) }
+    it { is_expected.to have_many(:applicant_tags).dependent(:destroy) }
+    it { is_expected.to have_many(:applicants).through(:applicant_tags) }
+  end
+  
+  describe 'scopes' do
+    it { expect(described_class).to respond_to(:active) }
+    it { expect(described_class).to respond_to(:by_type) }
+  end
+  
+  describe 'public instance methods' do
+    describe '#display_name' do
+      it 'returns name in uppercase' do
+        tag = build(:tag, name: 'ruby')
+        expect(tag.display_name).to eq('RUBY')
+      end
+    end
+  end
+end
+```
+
+### Modelo Complejo
+```ruby
+require 'rails_helper'
+
+RSpec.describe Applicant, type: :model do
+  let(:uniq_applicant) { create(:uniq_applicant) }
+  let(:applicant) { create(:applicant, uniq_applicant: uniq_applicant) }
+  
+  it_behaves_like 'soft_delete'
+  
+  it 'does have a valid factory' do
+    expect(applicant).to be_valid
+  end
+  
+  describe 'validations' do
+    it { is_expected.to validate_presence_of(:first_name) }
+    it { is_expected.to validate_presence_of(:last_name) }
+  end
+  
+  describe 'callbacks' do
+    it { is_expected.to callback(:movement_to_new_list).before(:validation) }
+    it { is_expected.to callback(:send_form_automatically).after(:create) }
+    it { is_expected.to callback(:parse_curriculum).after(:save) }
+  end
+  
+  describe 'ActiveRecord associations' do
+    it { is_expected.to have_many(:logs) }
+    it { is_expected.to have_many(:applicant_files).dependent(:destroy) }
+    it { is_expected.to have_one(:board).through(:list) }
+    it { is_expected.to have_one(:selection_process).through(:board) }
+    it { is_expected.to belong_to(:list) }
+    it { is_expected.to belong_to(:consultant).optional }
+    it { is_expected.to belong_to(:uniq_applicant).optional }
+  end
+  
+  describe 'scopes' do
+    it { expect(described_class).to respond_to(:active) }
+    it { expect(described_class).to respond_to(:disqualified) }
+    it { expect(described_class).to respond_to(:filter_by_organization) }
+  end
+  
+  describe 'delegations' do
+    it { is_expected.to delegate_method(:organization_id).to(:selection_process) }
+  end
+  
+  describe 'concerns' do
+    describe 'EmailValidatable' do
+      describe '#downcase_email' do
+        it 'converts email to lowercase' do
+          applicant = create(:applicant, email: 'TEST@EXAMPLE.COM')
+          expect(applicant.email).to eq('test@example.com')
+        end
+      end
+    end
+    
+    describe 'Trackable' do
+      it { is_expected.to respond_to(:track_create) }
+      it { is_expected.to respond_to(:track_update) }
+    end
+  end
+  
+  describe 'public instance methods' do
+    describe '#full_name' do
+      it 'returns concatenated first and last name' do
+        applicant = build(:applicant, first_name: 'John', last_name: 'Doe')
+        expect(applicant.full_name).to eq('John Doe')
+      end
+    end
+    
+    describe '#real_email?' do
+      context 'when email is from rankmiats.com' do
+        it 'returns false' do
+          applicant = build(:applicant, email: 'fake@rankmiats.com')
+          expect(applicant.real_email?).to be false
+        end
+      end
+      
+      context 'when email is real' do
+        it 'returns true' do
+          applicant = build(:applicant, email: 'real@example.com')
+          expect(applicant.real_email?).to be true
+        end
+      end
+    end
+    
+    describe '#calculate_score' do
+      it 'returns integer score' do
+        expect(applicant.calculate_score).to be_an(Integer)
+      end
+      
+      it 'returns score between 0 and 100' do
+        score = applicant.calculate_score
+        expect(score).to be >= 0
+        expect(score).to be <= 100
+      end
+    end
+  end
+end
+```
+
+## Checklist para Model Specs
+
+Antes de finalizar tus tests, verifica:
+
+- [ ] Incluye `require 'rails_helper'`
+- [ ] Define `type: :model`
+- [ ] Primer test valida factory
+- [ ] Usa Shoulda Matchers para associations/validations
+- [ ] Sigue el orden de sections recomendado
+- [ ] Testea solo existencia de scopes (salvo excepciones)
+- [ ] Testea todos los métodos públicos
+- [ ] NO testea métodos privados
+- [ ] Usa `build` o `build_stubbed` cuando sea posible
+- [ ] Usa `create` solo cuando necesites persistencia
+- [ ] Nombres descriptivos para tests
+- [ ] Tests independientes y aislados
+- [ ] Evita lógica compleja en los tests
+- [ ] Usa shared examples para comportamiento común
+
+## Anti-Patrones a Evitar
+
+❌ **No hagas esto:**
+```ruby
+# No testear métodos privados
+it 'calls private method' do
+  model.send(:private_method)
+end
+
+# No testear implementación de scopes
+it 'scope filters by status' do
+  expect(User.active.to_sql).to include('WHERE status = 1')
+end
+
+# No usar create cuando build es suficiente
+it 'validates name presence' do
+  user = create(:user, name: nil)  # Innecesario usar create
+  expect(user).not_to be_valid
+end
+
+# No testear Rails framework
+it 'has created_at and updated_at' do
+  expect(user).to respond_to(:created_at)
+end
+
+# Tests dependientes del orden
+it 'step 1' do
+  @user = create(:user)
+end
+
+it 'step 2' do
+  expect(@user.active?).to be true
+end
+```
+
+✅ **Haz esto:**
+```ruby
+# Testea interfaz pública
+it 'has public method' do
+  expect(model).to respond_to(:public_method)
+end
+
+# Testea comportamiento, no implementación
+describe '.active' do
+  it { expect(described_class).to respond_to(:active) }
+end
+
+# Usa build para validaciones
+it 'validates name presence' do
+  user = build(:user, name: nil)
+  expect(user).not_to be_valid
+end
+
+# Testea tu código, no Rails
+it 'calculates custom field' do
+  expect(user.custom_calculation).to eq(expected_value)
+end
+
+# Tests independientes
+it 'validates user' do
+  user = create(:user)
+  expect(user.active?).to be true
+end
+```
+
+## Optimización de Performance
+
+```ruby
+# Usa build_stubbed cuando no necesites BD
+let(:user) { build_stubbed(:user) }
+
+# Usa let_it_be para datos compartidos
+let_it_be(:organization) { create(:organization) }
+
+# Crea solo lo necesario
+let(:user) { build(:user, organization: build(:organization)) }
+# en vez de:
+let(:organization) { create(:organization) }
+let(:user) { create(:user, organization: organization) }
+```
+
+## Referencias Rápidas
+
+- FactoryBot: `/spec/factories/`
+- Shoulda Matchers: [Documentación](https://github.com/thoughtbot/shoulda-matchers)
+- Shared Examples: `/spec/support/concerns/`
+- Rails Helper: `/spec/rails_helper.rb`
+- TestProf: [Documentación](https://test-prof.evilmartians.io)

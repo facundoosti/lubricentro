@@ -142,8 +142,8 @@ class DashboardStatsService
     current_month = Date.current.beginning_of_month
     previous_month = current_month - 1.month
 
-    current_count = Customer.where(created_at: current_month.all_month).count
-    previous_count = Customer.where(created_at: previous_month.all_month).count
+    current_count = Customer.where(created_at: current_month.beginning_of_day..current_month.end_of_month.end_of_day).count
+    previous_count = Customer.where(created_at: previous_month.beginning_of_day..previous_month.end_of_month.end_of_day).count
 
     return 0 if previous_count == 0
     ((current_count - previous_count).to_f / previous_count * 100).round(1)
@@ -153,8 +153,8 @@ class DashboardStatsService
     current_month = Date.current.beginning_of_month
     previous_month = current_month - 1.month
 
-    current_count = Vehicle.where(created_at: current_month.all_month).count
-    previous_count = Vehicle.where(created_at: previous_month.all_month).count
+    current_count = Vehicle.where(created_at: current_month.beginning_of_day..current_month.end_of_month.end_of_day).count
+    previous_count = Vehicle.where(created_at: previous_month.beginning_of_day..previous_month.end_of_month.end_of_day).count
 
     return 0 if previous_count == 0
     ((current_count - previous_count).to_f / previous_count * 100).round(1)

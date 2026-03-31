@@ -1,0 +1,917 @@
+---
+description: Reglas para escribir tests de servicios RSpec siguiendo los patrones del proyecto
+globs:
+  - spec/services/**/*_spec.rb
+alwaysApply: false
+---
+
+# Guía para Tests de Servicios con RSpec
+
+Esta regla define los patrones y convenciones para escribir tests de Service Objects en Rails usando RSpec, siguiendo las prácticas establecidas en el proyecto y los principios SOLID.
+
+## Estructura Base de Service Specs
+
+```ruby
+require 'rails_helper'
+
+RSpec.describe Users::List, type: :service do
+  subject(:service) { described_class.new(params) }
+  
+  let(:params) { { search: 'test', filter: 'active' } }
+  
+  describe '#call' do
+    subject(:call) { service.call }
+    
+    context 'when params are valid' do
+      it 'returns expected result' do
+        expect(call).to be_a(ActiveRecord::Relation)
+      end
+      
+      it 'filters users correctly' do
+        active_user = create(:user, :active)
+        inactive_user = create(:user, :inactive)
+        
+        expect(call).to include(active_user)
+        expect(call).not_to include(inactive_user)
+      end
+    end
+    
+    context 'when params are invalid' do
+      let(:params) { { search: nil } }
+      
+      it 'returns empty result' do
+        expect(call).to be_empty
+      end
+    end
+  end
+end
+```
+
+## Configuración Obligatoria
+
+### 1. Require Rails Helper
+**SIEMPRE** inicia el archivo con:
+```ruby
+require 'rails_helper'
+```
+
+### 2. Frozen String Literal
+Buena práctica incluir al inicio:
+```ruby
+# frozen_string_literal: true
+```
+
+### 3. Tipo de Spec
+Define explícitamente el tipo:
+```ruby
+RSpec.describe YourService, type: :service do
+```
+
+## Principios para Service Objects
+
+Los servicios en este proyecto siguen estas convenciones:
+
+1. **Nombre**: Verbo + Objeto (ej: `CreateUser`, `SendNotification`, `CalculateDiscount`)
+2. **Método público**: Usa `#call` o `#perform` como método principal
+3. **Single Responsibility**: Un servicio = una acción
+4. **Retorno**: Debe tener un retorno consistente (objeto, colección, boolean, etc.)
+5. **Sin estado**: No deben mantener estado mutable entre llamadas
+
+## Estructura de Tests
+
+### Subject Definition
+Define el service como subject:
+
+```ruby
+# Patrón 1: subject con nombre
+subject(:service) { described_class.new(params) }
+
+# Patrón 2: subject anónimo
+subject { described_class.new(params) }
+
+# Define la llamada al servicio
+describe '#call' do
+  subject(:call) { service.call }
+  # o
+  subject(:perform) { service.perform }
+end
+```
+
+## Patrones de Testing
+
+### 1. Test del Resultado (OBLIGATORIO)
+
+Todo servicio debe testear su resultado:
+
+```ruby
+describe '#call' do
+  subject(:call) { service.call }
+  
+  it 'returns expected type' do
+    expect(call).to be_a(User)
+    # o
+    expect(call).to be_an(Array)
+    # o
+    expect(call).to be_kind_of(ActiveRecord::Relation)
+    # o
+    expect(call).to be true
+  end
+end
+```
+
+### 2. Happy Path (OBLIGATORIO)
+
+Siempre testea el caso exitoso primero:
+
+```ruby
+context 'when all conditions are met' do
+  let(:valid_params) { { name: 'Test', email: 'test@example.com' } }
+  
+  it 'creates a new user' do
+    expect { call }.to change(User, :count).by(1)
+  end
+  
+  it 'returns created user' do
+    expect(call).to be_a(User)
+    expect(call.name).to eq('Test')
+  end
+  
+  it 'sends welcome email' do
+    expect { call }.to have_enqueued_job(WelcomeEmailJob)
+  end
+end
+```
+
+### 3. Edge Cases
+
+Testea casos límite y situaciones especiales:
+
+```ruby
+context 'when user already exists' do
+  let!(:existing_user) { create(:user, email: params[:email]) }
+  
+  it 'does not create duplicate' do
+    expect { call }.not_to change(User, :count)
+  end
+  
+  it 'returns existing user' do
+    expect(call).to eq(existing_user)
+  end
+end
+
+context 'when input is empty' do
+  let(:params) { {} }
+  
+  it 'returns empty result' do
+    expect(call).to be_empty
+  end
+end
+
+context 'when input is nil' do
+  let(:params) { nil }
+  
+  it 'handles nil gracefully' do
+    expect(call).to be_nil
+  end
+end
+```
+
+### 4. Error Handling
+
+Testea manejo de errores:
+
+```ruby
+context 'when validation fails' do
+  let(:params) { { name: '' } }
+  
+  it 'raises validation error' do
+    expect { call }.to raise_error(ActiveRecord::RecordInvalid)
+  end
+end
+
+context 'when external service is unavailable' do
+  before do
+    stub_request(:post, 'https://api.example.com')
+      .to_return(status: 500)
+  end
+  
+  it 'raises service error' do
+    expect { call }.to raise_error(ExternalServiceError)
+  end
+end
+
+context 'when record not found' do
+  let(:params) { { id: 999999 } }
+  
+  it 'raises not found error' do
+    expect { call }.to raise_error(ActiveRecord::RecordNotFound)
+  end
+end
+```
+
+### 5. Side Effects
+
+Testea efectos secundarios del servicio:
+
+```ruby
+describe 'side effects' do
+  it 'creates associated records' do
+    expect { call }.to change(Profile, :count).by(1)
+  end
+  
+  it 'updates counter cache' do
+    organization = create(:organization, users_count: 0)
+    service = described_class.new(organization: organization)
+    
+    expect { service.call }.to change { organization.reload.users_count }.by(1)
+  end
+  
+  it 'enqueues background job' do
+    expect { call }.to have_enqueued_job(ProcessDataJob)
+  end
+  
+  it 'broadcasts event' do
+    expect { call }.to broadcast(:user_created)
+  end
+  
+  it 'sends notification' do
+    expect { call }.to change { ActionMailer::Base.deliveries.count }.by(1)
+  end
+end
+```
+
+### 6. Dependencias Externas
+
+Mockea dependencias externas:
+
+```ruby
+describe 'external dependencies' do
+  let(:external_client) { instance_double(ExternalAPI::Client) }
+  
+  before do
+    allow(ExternalAPI::Client).to receive(:new).and_return(external_client)
+    allow(external_client).to receive(:create_user).and_return({ id: 123 })
+  end
+  
+  it 'calls external API' do
+    call
+    expect(external_client).to have_received(:create_user).with(hash_including(email: params[:email]))
+  end
+  
+  it 'stores external ID' do
+    result = call
+    expect(result.external_id).to eq(123)
+  end
+end
+```
+
+### 7. Servicios que Llaman Otros Servicios
+
+```ruby
+describe 'service composition' do
+  let(:inner_service) { instance_double(InnerService, call: true) }
+  
+  before do
+    allow(InnerService).to receive(:new).and_return(inner_service)
+  end
+  
+  it 'delegates to inner service' do
+    call
+    expect(inner_service).to have_received(:call)
+  end
+  
+  it 'passes correct parameters to inner service' do
+    call
+    expect(InnerService).to have_received(:new).with(hash_including(user: instance_of(User)))
+  end
+end
+```
+
+## Uso de let y let!
+
+```ruby
+# let - evaluación lazy, no se ejecuta hasta que se llama
+let(:user) { create(:user) }
+
+# let! - evaluación eager, se ejecuta antes del test
+let!(:existing_user) { create(:user, email: 'test@example.com') }
+
+# let_it_be - se crea una vez por describe block (TestProf)
+let_it_be(:organization) { create(:organization) }
+
+# subject - define el sujeto del test
+subject(:service) { described_class.new(params) }
+```
+
+## Shared Contexts
+
+Usa shared contexts cuando sea necesario:
+
+```ruby
+describe Users::List do
+  include_context 'with admin user'
+  include_context 'with tenant'
+  
+  let(:service) { described_class.new(user: user) }
+  
+  # tests...
+end
+```
+
+## Estrategias de Mocking
+
+### Cuándo Usar Factories
+Usa factories (objetos reales) cuando:
+
+- El servicio depende de asociaciones complejas
+- Necesitas callbacks o validaciones de ActiveRecord
+- El servicio usa scopes o queries complejos
+- Estás haciendo test de integración
+
+```ruby
+describe CreateApplicant do
+  let(:selection_process) { create(:selection_process, :with_lists) }
+  let(:list) { selection_process.lists.first }
+  let(:params) { { first_name: 'John', list_id: list.id } }
+  
+  it 'creates applicant with associations' do
+    result = described_class.new(params).call
+    expect(result.list).to eq(list)
+    expect(result.selection_process).to eq(selection_process)
+  end
+end
+```
+
+### Cuándo Usar Mocks/Doubles
+Usa mocks cuando:
+
+- Quieres aislar la lógica del servicio
+- Necesitas evitar dependencias externas (APIs, filesystem)
+- El servicio solo usa métodos simples de objetos
+- Quieres tests más rápidos
+
+```ruby
+describe ProcessWebhook do
+  let(:webhook_data) { double('WebhookData', valid?: true, payload: {}) }
+  let(:service) { described_class.new(webhook_data) }
+  
+  before do
+    allow(webhook_data).to receive(:extract_user_data).and_return({ email: 'test@example.com' })
+  end
+  
+  it 'processes webhook data' do
+    expect(service.call).to be true
+  end
+end
+```
+
+## Patrones Comunes por Tipo de Servicio
+
+### 1. Create Services
+
+```ruby
+RSpec.describe Api::V1::Consultants::CreateService, type: :service do
+  describe '#perform' do
+    let(:organization) { create(:organization) }
+    let(:params) { { name: "Example Consultant", organization_id: organization.id } }
+    let(:service) { described_class.new(params) }
+    
+    context 'when params are valid' do
+      it 'creates a new consultant' do
+        expect { service.perform }.to change(Consultant, :count).by(1)
+      end
+      
+      it 'returns Consultant instance' do
+        expect(service.perform).to be_kind_of(Consultant)
+      end
+      
+      it 'sets correct attributes' do
+        consultant = service.perform
+        expect(consultant.name).to eq("Example Consultant")
+        expect(consultant.organization_id).to eq(organization.id)
+      end
+    end
+    
+    context 'when params are invalid' do
+      let(:params) { { name: '' } }
+      
+      it 'raises validation error' do
+        expect { service.perform }.to raise_error(ActiveRecord::RecordInvalid)
+      end
+    end
+  end
+end
+```
+
+### 2. Update Services
+
+```ruby
+RSpec.describe Api::V1::Applicants::UpdateService, type: :service do
+  describe '#call' do
+    let(:applicant) { create(:applicant, first_name: 'Old Name') }
+    let(:params) { { id: applicant.id, first_name: 'New Name' } }
+    let(:service) { described_class.new(params) }
+    
+    it 'updates applicant attributes' do
+      service.call
+      expect(applicant.reload.first_name).to eq('New Name')
+    end
+    
+    it 'returns updated applicant' do
+      result = service.call
+      expect(result).to eq(applicant)
+      expect(result.first_name).to eq('New Name')
+    end
+    
+    it 'creates audit log' do
+      expect { service.call }.to change(AuditLog, :count).by(1)
+    end
+  end
+end
+```
+
+### 3. List/Query Services
+
+```ruby
+RSpec.describe Users::List, type: :service do
+  subject(:service) { described_class.new(ransack_filters, strict, user, type) }
+  
+  let(:strict) { false }
+  let(:user) { nil }
+  let(:type) { nil }
+  let(:ransack_filters) { { q: { name_cont: "test" } } }
+  let!(:matching_users) { create_list(:user, 2, name: "test user") }
+  let!(:non_matching_user) { create(:user, name: "other") }
+  
+  describe '#call' do
+    subject(:call) { service.call }
+    
+    it 'returns ActiveRecord::Relation' do
+      expect(call).to be_a(ActiveRecord::Relation)
+    end
+    
+    it 'includes matching users' do
+      expect(call.ids).to match_array(matching_users.map(&:id))
+    end
+    
+    it 'excludes non-matching users' do
+      expect(call.ids).not_to include(non_matching_user.id)
+    end
+    
+    context 'when current user is provided' do
+      let(:user) { create(:user, :admin) }
+      
+      it 'filters by user organization' do
+        expect(call.ids).to match_array(
+          User.where(organization: user.organization, name: "test user").ids
+        )
+      end
+    end
+    
+    context 'when type is admin_and_colab' do
+      let(:type) { 'admin_and_colab' }
+      let!(:admin_user) { create(:user, :admin, name: "test admin") }
+      
+      it 'returns only admin and collaborator users' do
+        expect(call.ids).to include(admin_user.id)
+      end
+    end
+  end
+end
+```
+
+### 4. Process/Transform Services
+
+```ruby
+RSpec.describe Applicants::ParseCurriculum, type: :service do
+  let(:applicant) { create(:applicant) }
+  let(:curriculum_text) { "John Doe\nSoftware Engineer\n5 years experience" }
+  let(:service) { described_class.new(applicant, curriculum_text) }
+  
+  describe '#call' do
+    it 'extracts name from curriculum' do
+      service.call
+      expect(applicant.reload.parsed_name).to eq("John Doe")
+    end
+    
+    it 'extracts experience years' do
+      service.call
+      expect(applicant.reload.experience_years).to eq(5)
+    end
+    
+    it 'returns parsed data hash' do
+      result = service.call
+      expect(result).to include(
+        name: "John Doe",
+        title: "Software Engineer",
+        experience: 5
+      )
+    end
+  end
+end
+```
+
+### 5. Integration Services (APIs, External)
+
+```ruby
+RSpec.describe Reqlut::Publicator, type: :service do
+  let(:selection_process) { create(:selection_process) }
+  let(:service) { described_class.new(selection_process) }
+  let(:api_response) { { job_id: '12345', status: 'published' } }
+  
+  before do
+    stub_request(:post, 'https://api.reqlut.com/jobs')
+      .with(body: hash_including(title: selection_process.name))
+      .to_return(status: 200, body: api_response.to_json)
+  end
+  
+  describe '#call' do
+    it 'calls external API with correct data' do
+      service.call
+      
+      expect(WebMock).to have_requested(:post, 'https://api.reqlut.com/jobs')
+        .with(body: hash_including(title: selection_process.name))
+    end
+    
+    it 'stores external job ID' do
+      service.call
+      expect(selection_process.reload.reqlut_id).to eq('12345')
+    end
+    
+    context 'when API returns error' do
+      before do
+        stub_request(:post, 'https://api.reqlut.com/jobs')
+          .to_return(status: 500, body: { error: 'Server Error' }.to_json)
+      end
+      
+      it 'raises API error' do
+        expect { service.call }.to raise_error(Reqlut::APIError)
+      end
+      
+      it 'does not update selection process' do
+        expect {
+          begin
+            service.call
+          rescue Reqlut::APIError
+            nil
+          end
+        }.not_to change { selection_process.reload.reqlut_id }
+      end
+    end
+  end
+end
+```
+
+### 6. Notification Services
+
+```ruby
+RSpec.describe Messages::Create, type: :service do
+  let(:applicant) { create(:applicant) }
+  let(:user) { create(:user, :admin) }
+  let(:params) { { applicant_id: applicant.id, content: 'Hello', user_id: user.id } }
+  let(:service) { described_class.new(params) }
+  
+  describe '#call' do
+    it 'creates a message' do
+      expect { service.call }.to change(Message, :count).by(1)
+    end
+    
+    it 'enqueues email job' do
+      expect { service.call }.to have_enqueued_job(MessageEmailJob)
+    end
+    
+    it 'creates notification record' do
+      expect { service.call }.to change(Notification, :count).by(1)
+    end
+    
+    context 'when applicant has no email' do
+      let(:applicant) { create(:applicant, email: nil) }
+      
+      it 'does not enqueue email job' do
+        expect { service.call }.not_to have_enqueued_job(MessageEmailJob)
+      end
+    end
+  end
+end
+```
+
+### 7. Aggregator Services
+
+```ruby
+RSpec.describe Dashboard::Statistics, type: :service do
+  let(:organization) { create(:organization) }
+  let(:service) { described_class.new(organization) }
+  
+  describe '#call' do
+    let!(:active_processes) { create_list(:selection_process, 3, :active, organization: organization) }
+    let!(:closed_processes) { create_list(:selection_process, 2, :closed, organization: organization) }
+    let!(:applicants) { create_list(:applicant, 10, organization: organization) }
+    
+    it 'returns statistics hash' do
+      result = service.call
+      
+      expect(result).to include(
+        active_processes: 3,
+        closed_processes: 2,
+        total_applicants: 10
+      )
+    end
+    
+    it 'calculates average applicants per process' do
+      result = service.call
+      expect(result[:avg_applicants_per_process]).to eq(2)
+    end
+  end
+end
+```
+
+## Testing con Transacciones
+
+Para servicios que usan transacciones:
+
+```ruby
+describe 'transaction handling' do
+  context 'when all operations succeed' do
+    it 'commits transaction' do
+      expect { service.call }.to change(User, :count).by(1)
+        .and change(Profile, :count).by(1)
+    end
+  end
+  
+  context 'when operation fails' do
+    before do
+      allow_any_instance_of(Profile).to receive(:save!).and_raise(ActiveRecord::RecordInvalid)
+    end
+    
+    it 'rolls back all changes' do
+      expect { service.call rescue nil }.not_to change(User, :count)
+    end
+  end
+end
+```
+
+## Performance Testing
+
+Para servicios que deben ser eficientes:
+
+```ruby
+describe 'performance' do
+  it 'executes in reasonable time' do
+    expect { service.call }.to perform_under(100).ms
+  end
+  
+  it 'does not create N+1 queries' do
+    create_list(:user, 10, :with_organization)
+    
+    expect { service.call }.to perform_constant_number_of_queries
+  end
+end
+```
+
+## Ejemplos Completos
+
+### Servicio Simple
+```ruby
+# frozen_string_literal: true
+
+require 'rails_helper'
+
+RSpec.describe Api::V1::Consultants::CreateService, type: :service do
+  describe '#perform' do
+    let_it_be(:organization) { create(:organization) }
+    let(:params) { { name: "Example", organization_id: organization.id } }
+    let(:service) { described_class.new(params) }
+    
+    it 'returns a Consultant instance' do
+      expect(service.perform).to be_kind_of(Consultant)
+    end
+    
+    it 'creates a new consultant' do
+      expect { service.perform }.to change(Consultant, :count).by(1)
+    end
+    
+    it 'sets correct attributes' do
+      consultant = service.perform
+      expect(consultant.name).to eq("Example")
+      expect(consultant.organization).to eq(organization)
+    end
+  end
+end
+```
+
+### Servicio Complejo
+```ruby
+# frozen_string_literal: true
+
+require 'rails_helper'
+
+RSpec.describe SelectionProcesses::ExternalCreate, type: :service do
+  subject(:service) { described_class.new(params, current_user) }
+  
+  let(:organization) { create(:organization) }
+  let(:current_user) { create(:user, :admin, organization: organization) }
+  let(:valid_params) do
+    {
+      name: 'Software Engineer',
+      description: 'Ruby on Rails position',
+      areas: ['engineering'],
+      requirements: { experience: 3 }
+    }
+  end
+  
+  describe '#call' do
+    subject(:call) { service.call }
+    
+    context 'when all params are valid' do
+      let(:params) { valid_params }
+      
+      it 'creates a selection process' do
+        expect { call }.to change(SelectionProcess, :count).by(1)
+      end
+      
+      it 'creates default boards' do
+        expect { call }.to change(Board, :count).by(1)
+      end
+      
+      it 'creates default lists' do
+        expect { call }.to change(List, :count).by(3)
+      end
+      
+      it 'assigns organization' do
+        result = call
+        expect(result.organization).to eq(organization)
+      end
+      
+      it 'sets created_by user' do
+        result = call
+        expect(result.created_by).to eq(current_user)
+      end
+      
+      it 'enqueues notification job' do
+        expect { call }.to have_enqueued_job(ProcessCreatedNotificationJob)
+      end
+      
+      it 'creates audit log' do
+        expect { call }.to change(AuditLog, :count).by(1)
+      end
+    end
+    
+    context 'when name is missing' do
+      let(:params) { valid_params.except(:name) }
+      
+      it 'raises validation error' do
+        expect { call }.to raise_error(ActiveRecord::RecordInvalid)
+      end
+      
+      it 'does not create any records' do
+        expect {
+          call rescue nil
+        }.not_to change(SelectionProcess, :count)
+      end
+    end
+    
+    context 'when organization is invalid' do
+      let(:current_user) { create(:user, organization: nil) }
+      
+      it 'raises error' do
+        expect { call }.to raise_error(NoOrganizationError)
+      end
+    end
+    
+    context 'when user lacks permissions' do
+      let(:current_user) { create(:user, :employee) }
+      
+      it 'raises authorization error' do
+        expect { call }.to raise_error(NotAuthorizedError)
+      end
+    end
+    
+    context 'when external API integration is enabled' do
+      before do
+        organization.update(reqlut_enabled: true)
+        stub_request(:post, 'https://api.reqlut.com/jobs')
+          .to_return(status: 200, body: { id: '123' }.to_json)
+      end
+      
+      it 'publishes to external API' do
+        call
+        expect(WebMock).to have_requested(:post, 'https://api.reqlut.com/jobs')
+      end
+      
+      it 'stores external ID' do
+        result = call
+        expect(result.reqlut_id).to eq('123')
+      end
+    end
+  end
+end
+```
+
+## Checklist para Service Specs
+
+Antes de finalizar tus tests, verifica:
+
+- [ ] Incluye `require 'rails_helper'`
+- [ ] Define `type: :service`
+- [ ] Define service como subject
+- [ ] Testea el happy path primero
+- [ ] Testea casos de error
+- [ ] Testea edge cases
+- [ ] Testea side effects (jobs, emails, broadcasts)
+- [ ] Mockea dependencias externas
+- [ ] Usa factories para objetos de BD
+- [ ] Usa doubles para objetos simples
+- [ ] Nombres descriptivos para contexts
+- [ ] Tests independientes
+- [ ] Verifica el tipo del resultado
+- [ ] Testea transacciones si aplica
+
+## Anti-Patrones a Evitar
+
+❌ **No hagas esto:**
+```ruby
+# No testear lógica de Rails/ActiveRecord
+it 'saves to database' do
+  service.call
+  expect(User.count).to eq(1)
+end
+
+# No testear implementación interna
+it 'calls private method' do
+  expect(service).to receive(:private_method)
+  service.call
+end
+
+# No crear datos innecesarios
+let!(:user1) { create(:user) }
+let!(:user2) { create(:user) }
+# ... cuando no se usan
+
+# Tests vagos
+it 'works' do
+  expect(service.call).to be_truthy
+end
+
+# Múltiples responsabilidades en un test
+it 'does everything' do
+  result = service.call
+  expect(result).to be_present
+  expect(User.count).to eq(1)
+  expect(Email.last.subject).to eq('Welcome')
+  expect(result.status).to eq('active')
+end
+```
+
+✅ **Haz esto:**
+```ruby
+# Testea el contrato del servicio
+it 'returns created user' do
+  result = service.call
+  expect(result).to be_a(User)
+end
+
+# Testea interfaz pública
+it 'creates user successfully' do
+  expect { service.call }.to change(User, :count).by(1)
+end
+
+# Usa let para lazy loading
+let(:user) { create(:user) }  # solo se crea si se usa
+
+# Tests específicos y descriptivos
+it 'returns User instance with correct attributes' do
+  result = service.call
+  expect(result).to be_a(User)
+  expect(result.persisted?).to be true
+end
+
+# Una expectativa por test
+it 'creates a user' do
+  expect { service.call }.to change(User, :count).by(1)
+end
+
+it 'sends welcome email' do
+  expect { service.call }.to have_enqueued_job(WelcomeEmailJob)
+end
+
+it 'returns active user' do
+  result = service.call
+  expect(result.status).to eq('active')
+end
+```
+
+## Notas Finales
+
+- **Aislamiento**: Los tests de servicios deben ser rápidos y aislados
+- **Mocks vs Factories**: Elige según el contexto (ver sección de estrategias)
+- **Cobertura**: Enfócate en casos importantes, no en 100% de cobertura
+- **Legibilidad**: El código del test es documentación viva
+- **Mantenibilidad**: Tests simples y claros son más valiosos que tests complejos
+
+## Referencias Rápidas
+
+- FactoryBot: `/spec/factories/`
+- Shared Contexts: `/spec/support/shared_contexts/`
+- Rails Helper: `/spec/rails_helper.rb`
+- RSpec Mocks: [Documentación](https://rspec.info/features/3-12/rspec-mocks/)
+- WebMock: [Documentación](https://github.com/bblimke/webmock)

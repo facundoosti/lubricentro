@@ -1,0 +1,26 @@
+---
+description: Reglas críticas que NUNCA deben violarse
+alwaysApply: true
+---
+
+# Reglas Críticas
+
+## ❌ NUNCA hacer:
+
+- ❌ Editar schema.rb directamente
+- ❌ Usar rutas relativas en importaciones
+- ❌ CSS custom sin justificación (prefer Tailwind v4)
+- ❌ Fetch directo sin React Query
+- ❌ Estado global innecesario
+- ❌ Componentes >300 líneas
+- ❌ Controllers sin validación de params
+
+## ✅ SIEMPRE hacer:
+
+- ✅ Usar patrones establecidos
+- ✅ Validar datos en backend Y frontend
+- ✅ Manejar estados de loading y error
+- ✅ Mobile-first responsive design
+- ✅ Usar alias de importación (@ui, @services, @components, etc.)
+- ✅ Testing para nuevas funcionalidades
+- ✅ Migraciones para cambios de DB

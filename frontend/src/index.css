@@ -1,24 +1,26 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap")
-layer(base);
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap");
 
 @import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+  /* ── Tipografía ─────────────────────────────────────────────── */
   --font-*: initial;
-  --font-outfit: Outfit, sans-serif;
+  --font-geist: Geist, sans-serif;
 
+  /* ── Breakpoints ─────────────────────────────────────────────── */
   --breakpoint-*: initial;
   --breakpoint-2xsm: 375px;
   --breakpoint-xsm: 425px;
-  --breakpoint-3xl: 2000px;
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
   --breakpoint-2xl: 1536px;
+  --breakpoint-3xl: 2000px;
 
+  /* ── Escala tipográfica ──────────────────────────────────────── */
   --text-title-2xl: 72px;
   --text-title-2xl--line-height: 90px;
   --text-title-xl: 60px;
@@ -36,128 +38,101 @@ layer(base);
   --text-theme-xs: 12px;
   --text-theme-xs--line-height: 18px;
 
+  /* ── Colores base ────────────────────────────────────────────── */
   --color-current: currentColor;
   --color-transparent: transparent;
   --color-white: #ffffff;
-  --color-black: #101828;
+  --color-black: #000000;
 
-  /* Colores de grises */
-  --color-gray-25: #fcfcfd;
-  --color-gray-50: #f9fafb;
-  --color-gray-100: #f2f4f7;
-  --color-gray-200: #e4e7ec;
-  --color-gray-300: #d0d5dd;
-  --color-gray-400: #98a2b3;
-  --color-gray-500: #667085;
-  --color-gray-600: #475467;
-  --color-gray-700: #344054;
-  --color-gray-800: #1d2939;
-  --color-gray-900: #101828;
-  --color-gray-950: #0c111d;
-  --color-gray-dark: #1a2231;
-  
-  /* Colores de marca */
-  --color-brand-25: #f2f7ff;
-  --color-brand-50: #ecf3ff;
-  --color-brand-100: #dde9ff;
-  --color-brand-200: #c2d6ff;
-  --color-brand-300: #9cb9ff;
-  --color-brand-400: #7592ff;
-  --color-brand-500: #465fff;
-  --color-brand-600: #3641f5;
-  --color-brand-700: #2a31d8;
-  --color-brand-800: #252dae;
-  --color-brand-900: #262e89;
-  --color-brand-950: #161950;
+  /* ── Fondos / Superficies (dark-only) ───────────────────────── */
+  --color-background: #09090b;
+  --color-on-background: #fafafa;
 
-  /* Colores azul claro */
-  --color-blue-light-25: #f5fbff;
-  --color-blue-light-50: #f0f9ff;
-  --color-blue-light-100: #e0f2fe;
-  --color-blue-light-200: #b9e6fe;
-  --color-blue-light-300: #7cd4fd;
-  --color-blue-light-400: #36bffa;
-  --color-blue-light-500: #0ba5ec;
-  --color-blue-light-600: #0086c9;
-  --color-blue-light-700: #026aa2;
-  --color-blue-light-800: #065986;
-  --color-blue-light-900: #0b4a6f;
-  --color-blue-light-950: #062c41;
+  --color-surface: #0c0c0f;
+  --color-surface-dim: #0c0c0f;
+  --color-surface-bright: #18181b;
+  --color-surface-container-lowest: #09090b;
+  --color-surface-container-low: #0f0f12;
+  --color-surface-container: #121215;
+  --color-surface-container-high: #18181b;
+  --color-surface-container-highest: #1e1e22;
+  --color-surface-variant: #18181b;
+  --color-surface-tint: #a78bfa;
 
-  /* Colores naranja */
-  --color-orange-25: #fffaf5;
-  --color-orange-50: #fff6ed;
-  --color-orange-100: #ffead5;
-  --color-orange-200: #fddcab;
-  --color-orange-300: #feb273;
-  --color-orange-400: #fd853a;
-  --color-orange-500: #fb6514;
-  --color-orange-600: #ec4a0a;
-  --color-orange-700: #c4320a;
-  --color-orange-800: #9c2a10;
-  --color-orange-900: #7e2410;
-  --color-orange-950: #511c10;
-  
-  /* Colores de éxito */
-  --color-success-25: #f6fef9;
-  --color-success-50: #ecfdf3;
-  --color-success-100: #d1fadf;
-  --color-success-200: #a6f4c5;
-  --color-success-300: #6ce9a6;
-  --color-success-400: #32d583;
+  --color-on-surface: #fafafa;
+  --color-on-surface-variant: #a1a1aa;
+  --color-inverse-surface: #fafafa;
+  --color-inverse-on-surface: #09090b;
+
+  /* ── Primario (violeta/púrpura) ──────────────────────────────── */
+  --color-primary: #a78bfa;
+  --color-primary-container: #7c3aed;
+  --color-on-primary: #0a0012;
+  --color-on-primary-container: #ede9fe;
+  --color-primary-fixed: #ede9fe;
+  --color-primary-fixed-dim: #c4b5fd;
+  --color-on-primary-fixed: #2e1065;
+  --color-on-primary-fixed-variant: #5b21b6;
+  --color-inverse-primary: #5b21b6;
+
+  /* ── Secundario (grises zinc) ────────────────────────────────── */
+  --color-secondary: #71717a;
+  --color-secondary-container: #27272a;
+  --color-on-secondary: #09090b;
+  --color-on-secondary-container: #a1a1aa;
+  --color-secondary-fixed: #a1a1aa;
+  --color-secondary-fixed-dim: #71717a;
+  --color-on-secondary-fixed: #18181b;
+  --color-on-secondary-fixed-variant: #3f3f46;
+
+  /* ── Terciario (verde esmeralda) ─────────────────────────────── */
+  --color-tertiary: #34d399;
+  --color-tertiary-container: #065f46;
+  --color-on-tertiary: #001a12;
+  --color-on-tertiary-container: #bbf7d0;
+  --color-tertiary-fixed: #bbf7d0;
+  --color-tertiary-fixed-dim: #6ee7b7;
+  --color-on-tertiary-fixed: #003318;
+  --color-on-tertiary-fixed-variant: #047857;
+
+  /* ── Contornos / Bordes ──────────────────────────────────────── */
+  --color-outline: #52525b;
+  --color-outline-variant: #27272a;
+
+  /* ── Error ───────────────────────────────────────────────────── */
+  --color-error: #ef4444;
+  --color-error-container: #3b1111;
+  --color-on-error: #1a0000;
+  --color-on-error-container: #fca5a5;
+
+  /* ── Estados semánticos (utilidades) ─────────────────────────── */
   --color-success-500: #12b76a;
-  --color-success-600: #039855;
-  --color-success-700: #027a48;
-  --color-success-800: #05603a;
-  --color-success-900: #054f31;
-  --color-success-950: #053321;
-  
-  /* Colores de error */
-  --color-error-25: #fffbfa;
-  --color-error-50: #fef3f2;
-  --color-error-100: #fee4e2;
-  --color-error-200: #fecdca;
-  --color-error-300: #fda29b;
-  --color-error-400: #f97066;
-  --color-error-500: #f04438;
-  --color-error-600: #d92d20;
-  --color-error-700: #b42318;
-  --color-error-800: #912018;
-  --color-error-900: #7a271a;
-  --color-error-950: #55160c;
-  
-  /* Colores de advertencia */
-  --color-warning-25: #fffcf5;
-  --color-warning-50: #fffaeb;
-  --color-warning-100: #fef0c7;
-  --color-warning-200: #fedf89;
-  --color-warning-300: #fec84b;
-  --color-warning-400: #fdb022;
+  --color-success-container: #052e16;
   --color-warning-500: #f79009;
-  --color-warning-600: #dc6803;
-  --color-warning-700: #b54708;
-  --color-warning-800: #93370d;
-  --color-warning-900: #7a2e0e;
-  --color-warning-950: #4e1d09;
+  --color-warning-container: #431407;
 
-  /* Colores de tema */
-  --color-theme-pink-500: #ee46bc;
-  --color-theme-purple-500: #7a5af8;
-  
-  /* Sombras */
-  --shadow-theme-sm: 0px 1px 3px 0px rgba(16, 24, 40, 0.1), 0px 1px 2px 0px rgba(16, 24, 40, 0.06);
-  --shadow-theme-md: 0px 4px 8px -2px rgba(16, 24, 40, 0.1), 0px 2px 4px -2px rgba(16, 24, 40, 0.06);
-  --shadow-theme-lg: 0px 12px 16px -4px rgba(16, 24, 40, 0.08), 0px 4px 6px -2px rgba(16, 24, 40, 0.03);
-  --shadow-theme-xl: 0px 20px 24px -4px rgba(16, 24, 40, 0.08), 0px 8px 8px -4px rgba(16, 24, 40, 0.03);
-  --shadow-theme-xs: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
-  --shadow-datepicker: -5px 0 0 #262d3c, 5px 0 0 #262d3c;
-  --shadow-focus-ring: 0px 0px 0px 4px rgba(70, 95, 255, 0.12);
-  --shadow-slider-navigation: 0px 1px 2px 0px rgba(16, 24, 40, 0.1), 0px 1px 3px 0px rgba(16, 24, 40, 0.1);
-  --shadow-tooltip: 0px 4px 6px -2px rgba(16, 24, 40, 0.05), -8px 0px 20px 8px rgba(16, 24, 40, 0.05);
+  /* ── Grises (escala de zinc para utilidades) ─────────────────── */
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f4f4f5;
+  --color-gray-200: #e4e4e7;
+  --color-gray-300: #d4d4d8;
+  --color-gray-400: #a1a1aa;
+  --color-gray-500: #71717a;
+  --color-gray-600: #52525b;
+  --color-gray-700: #3f3f46;
+  --color-gray-800: #27272a;
+  --color-gray-900: #18181b;
+  --color-gray-950: #09090b;
 
-  --drop-shadow-4xl: 0 35px 35px rgba(0, 0, 0, 0.25), 0 45px 65px rgba(0, 0, 0, 0.15);
+  /* ── Sombras ─────────────────────────────────────────────────── */
+  --shadow-theme-sm: 0px 1px 3px 0px rgba(0, 0, 0, 0.4), 0px 1px 2px 0px rgba(0, 0, 0, 0.3);
+  --shadow-theme-md: 0px 4px 8px -2px rgba(0, 0, 0, 0.4), 0px 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --shadow-theme-lg: 0px 12px 16px -4px rgba(0, 0, 0, 0.4), 0px 4px 6px -2px rgba(0, 0, 0, 0.2);
+  --shadow-theme-xl: 0px 20px 24px -4px rgba(0, 0, 0, 0.4), 0px 8px 8px -4px rgba(0, 0, 0, 0.2);
+  --shadow-theme-xs: 0px 1px 2px 0px rgba(0, 0, 0, 0.3);
+  --shadow-focus-ring: 0px 0px 0px 4px rgba(167, 139, 250, 0.2);
 
-  /* Z-index system */
+  /* ── Z-index ─────────────────────────────────────────────────── */
   --z-index-1: 1;
   --z-index-9: 9;
   --z-index-99: 99;
@@ -167,60 +142,52 @@ layer(base);
   --z-index-999999: 999999;
 }
 
-/*
-  The default border color has changed to `currentColor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
 @layer base {
   *,
   ::after,
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
+    border-color: var(--color-outline-variant, currentColor);
   }
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
   body {
-    @apply relative font-normal font-outfit z-1 bg-gray-50;
+    @apply font-geist font-normal bg-background text-on-surface z-1;
   }
 }
 
-/* Utilities personalizadas del template */
+/* ── Utilidades de menú (sidebar) ───────────────────────────────── */
 @utility menu-item {
-  @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm;
+  @apply relative flex items-center w-full gap-3 px-3 py-2.5 font-medium rounded-lg text-theme-sm transition-colors duration-150;
 }
 
 @utility menu-item-active {
-  @apply bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400;
+  @apply bg-surface-container-high text-primary;
 }
 
 @utility menu-item-inactive {
-  @apply text-gray-700 hover:bg-gray-100 group-hover:text-gray-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300;
+  @apply text-secondary hover:text-on-surface hover:bg-surface-container-high;
 }
 
 @utility menu-item-icon {
-  @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400;
+  @apply text-secondary;
 }
 
 @utility menu-item-icon-active {
-  @apply text-brand-500 dark:text-brand-400;
+  @apply text-primary;
 }
 
 @utility menu-item-icon-size {
   & svg {
-    @apply !size-6;
+    @apply !size-5;
   }
 }
 
 @utility menu-item-icon-inactive {
-  @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300;
+  @apply text-secondary group-hover:text-on-surface;
 }
 
 @utility menu-item-arrow {
@@ -228,77 +195,53 @@ layer(base);
 }
 
 @utility menu-item-arrow-active {
-  @apply rotate-180 text-brand-500 dark:text-brand-400;
+  @apply rotate-180 text-primary;
 }
 
 @utility menu-item-arrow-inactive {
-  @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300;
+  @apply text-secondary group-hover:text-on-surface;
 }
 
 @utility menu-dropdown-item {
-  @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-theme-sm font-medium;
+  @apply relative flex items-center gap-3 rounded-lg px-3 py-2 text-theme-sm font-medium transition-colors duration-150;
 }
 
 @utility menu-dropdown-item-active {
-  @apply bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400;
+  @apply text-primary bg-surface-container-high;
 }
 
 @utility menu-dropdown-item-inactive {
-  @apply text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5;
+  @apply text-secondary hover:text-on-surface hover:bg-surface-container-high;
 }
 
-@utility menu-dropdown-badge {
-  @apply block rounded-full px-2.5 py-0.5 text-xs font-medium uppercase text-brand-500 dark:text-brand-400;
-}
-
-@utility menu-dropdown-badge-active {
-  @apply bg-brand-100 dark:bg-brand-500/20;
-}
-
-@utility menu-dropdown-badge-inactive {
-  @apply bg-brand-50 group-hover:bg-brand-100 dark:bg-brand-500/15 dark:group-hover:bg-brand-500/20;
-}
-
+/* ── Scrollbar ───────────────────────────────────────────────────── */
 @utility no-scrollbar {
-  /* Chrome, Safari and Opera */
   &::-webkit-scrollbar {
     display: none;
   }
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 @utility custom-scrollbar {
   &::-webkit-scrollbar {
-    @apply size-1.5;
+    @apply size-1;
   }
-
   &::-webkit-scrollbar-track {
-    @apply rounded-full;
+    @apply rounded-full bg-surface-container;
   }
-
   &::-webkit-scrollbar-thumb {
-    @apply bg-gray-200 rounded-full dark:bg-gray-700;
+    @apply bg-outline rounded-full;
   }
 }
 
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #344054;
-}
-
-/* 
-  Estilos de componentes personalizados (.btn, .card, etc.) han sido eliminados 
-  para evitar conflictos con el sistema de diseño de Tailwind del template.
-  Los componentes ahora traen sus propios estilos.
-*/
-
-/* FullCalendar Styles */
+/* ── FullCalendar ────────────────────────────────────────────────── */
 .custom-calendar {
   padding: 1rem;
 }
 
 .fc {
-  font-family: var(--font-outfit);
+  font-family: var(--font-geist);
 }
 
 .fc-toolbar {
@@ -306,19 +249,15 @@ layer(base);
 }
 
 .fc-toolbar-title {
-  font-size: 1.5rem !important;
+  font-size: 1.25rem !important;
   font-weight: 600 !important;
-  color: var(--color-gray-900) !important;
-}
-
-.dark .fc-toolbar-title {
-  color: var(--color-white) !important;
+  color: var(--color-on-surface) !important;
 }
 
 .fc-button {
-  background-color: var(--color-brand-500) !important;
-  border-color: var(--color-brand-500) !important;
-  color: white !important;
+  background-color: var(--color-primary-container) !important;
+  border-color: var(--color-primary-container) !important;
+  color: var(--color-on-primary) !important;
   font-weight: 500 !important;
   padding: 0.5rem 1rem !important;
   border-radius: 0.5rem !important;
@@ -326,48 +265,34 @@ layer(base);
 }
 
 .fc-button:hover {
-  background-color: var(--color-brand-600) !important;
-  border-color: var(--color-brand-600) !important;
+  filter: brightness(1.1) !important;
 }
 
 .fc-button:focus {
-  box-shadow: 0 0 0 3px rgba(70, 95, 255, 0.1) !important;
+  box-shadow: var(--shadow-focus-ring) !important;
 }
 
 .fc-button-primary:not(:disabled).fc-button-active,
 .fc-button-primary:not(:disabled):active {
-  background-color: var(--color-brand-700) !important;
-  border-color: var(--color-brand-700) !important;
+  filter: brightness(0.9) !important;
 }
 
 .fc-daygrid-day {
-  background-color: white !important;
-}
-
-.dark .fc-daygrid-day {
-  background-color: var(--color-gray-900) !important;
+  background-color: var(--color-surface-container) !important;
 }
 
 .fc-daygrid-day-number {
-  color: var(--color-gray-700) !important;
+  color: var(--color-on-surface-variant) !important;
   font-weight: 500 !important;
 }
 
-.dark .fc-daygrid-day-number {
-  color: var(--color-gray-300) !important;
-}
-
 .fc-daygrid-day.fc-day-today {
-  background-color: var(--color-brand-25) !important;
-}
-
-.dark .fc-daygrid-day.fc-day-today {
-  background-color: rgba(70, 95, 255, 0.1) !important;
+  background-color: rgba(167, 139, 250, 0.08) !important;
 }
 
 .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
-  background-color: var(--color-brand-500) !important;
-  color: white !important;
+  background-color: var(--color-primary-container) !important;
+  color: var(--color-on-primary) !important;
   border-radius: 50% !important;
   width: 2rem !important;
   height: 2rem !important;
@@ -377,23 +302,14 @@ layer(base);
 }
 
 .fc-col-header-cell {
-  background-color: var(--color-gray-50) !important;
-  border-color: var(--color-gray-200) !important;
-}
-
-.dark .fc-col-header-cell {
-  background-color: var(--color-gray-800) !important;
-  border-color: var(--color-gray-700) !important;
+  background-color: var(--color-surface-container-high) !important;
+  border-color: var(--color-outline-variant) !important;
 }
 
 .fc-col-header-cell-cushion {
-  color: var(--color-gray-700) !important;
+  color: var(--color-secondary) !important;
   font-weight: 600 !important;
   text-decoration: none !important;
-}
-
-.dark .fc-col-header-cell-cushion {
-  color: var(--color-gray-300) !important;
 }
 
 .fc-event {
@@ -405,7 +321,7 @@ layer(base);
 
 .fc-event:hover {
   transform: translateY(-1px) !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: var(--shadow-theme-md) !important;
 }
 
 .fc-event-main {
@@ -422,54 +338,41 @@ layer(base);
   line-height: 1.2 !important;
 }
 
-/* Status colors for appointments */
 .fc-bg-scheduled {
-  background-color: var(--color-blue-light-500) !important;
+  background-color: var(--color-primary-container) !important;
 }
 
 .fc-bg-confirmed {
-  background-color: var(--color-success-500) !important;
+  background-color: var(--color-tertiary-container) !important;
 }
 
 .fc-bg-completed {
-  background-color: var(--color-gray-500) !important;
+  background-color: var(--color-secondary-container) !important;
 }
 
 .fc-bg-cancelled {
-  background-color: var(--color-error-500) !important;
+  background-color: var(--color-error-container) !important;
 }
 
-/* Time grid styles */
 .fc-timegrid-slot {
-  border-color: var(--color-gray-200) !important;
-}
-
-.dark .fc-timegrid-slot {
-  border-color: var(--color-gray-700) !important;
+  border-color: var(--color-outline-variant) !important;
 }
 
 .fc-timegrid-slot-label {
-  color: var(--color-gray-600) !important;
+  color: var(--color-secondary) !important;
   font-size: 0.75rem !important;
 }
 
-.dark .fc-timegrid-slot-label {
-  color: var(--color-gray-400) !important;
-}
-
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .fc-toolbar {
     flex-direction: column !important;
     gap: 1rem !important;
   }
-  
   .fc-toolbar-chunk {
     display: flex !important;
     justify-content: center !important;
   }
-  
   .fc-toolbar-title {
-    font-size: 1.25rem !important;
+    font-size: 1rem !important;
   }
 }

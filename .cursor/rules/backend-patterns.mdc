@@ -1,0 +1,52 @@
+---
+description: Patrones obligatorios para el backend Rails API
+globs:
+  - backend/app/controllers/**/*.rb
+  - backend/app/models/**/*.rb
+  - backend/app/services/**/*.rb
+  - backend/app/serializers/**/*.rb
+alwaysApply: true
+---
+
+# Patrones Backend Rails API
+
+## Response Pattern (SIEMPRE usar)
+
+```ruby
+# Respuesta exitosa
+{ success: true, data: { ... }, message: "Success message" }
+
+# Respuesta con error
+{ success: false, errors: ["Error details"], message: "Error occurred" }
+```
+
+## Controller Structure
+
+```
+app/controllers/api/v1/
+├── customers_controller.rb
+├── vehicles_controller.rb
+├── appointments_controller.rb
+├── services_controller.rb
+├── products_controller.rb
+├── service_records_controller.rb
+└── quotes_controller.rb
+```
+
+## Tecnologías y Herramientas
+
+- **Serializers**: Blueprinter
+- **Paginación**: Pagy
+- **Testing**: RSpec + FactoryBot
+
+## Validaciones
+
+- ✅ Controllers SIEMPRE deben validar params
+- ✅ Validar datos en backend Y frontend
+- ✅ Manejar estados de loading y error
+
+## Reglas Específicas
+
+- ❌ NUNCA editar schema.rb directamente
+- ✅ SIEMPRE usar migraciones para cambios de DB
+- ✅ Testing para nuevas funcionalidades

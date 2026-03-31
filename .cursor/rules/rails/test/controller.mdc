@@ -1,0 +1,583 @@
+---
+description: Reglas para escribir tests de controladores RSpec siguiendo los patrones del proyecto
+globs:
+  - spec/controllers/**/*_spec.rb
+alwaysApply: false
+---
+
+# Guía para Tests de Controladores con RSpec
+
+Esta regla define los patrones y convenciones para escribir tests de controladores en Rails usando RSpec, siguiendo las prácticas establecidas en el proyecto.
+
+## Estructura Base de Controller Specs
+
+```ruby
+require 'rails_helper'
+
+RSpec.describe Api::V1::YourController, type: :controller do
+  # Setup común
+  let(:organization) { create(:organization) }
+  let(:admin_user) { create(:user, :admin, organization: organization) }
+  let(:regular_user) { create(:user, organization: organization) }
+  
+  describe "#GET index" do
+    context "when user is unauthenticated" do
+      it "returns unauthorized status" do
+        get :index
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+    
+    context "when user is authenticated" do
+      before { login(admin_user) }
+      
+      it "returns ok status" do
+        get :index
+        expect(response).to have_http_status(:ok)
+      end
+      
+      it "returns expected JSON structure" do
+        get :index
+        expect(json).to be_an(Array)
+      end
+    end
+  end
+end
+```
+
+## Configuración Obligatoria
+
+### 1. Require Rails Helper
+**SIEMPRE** inicia el archivo con:
+```ruby
+require 'rails_helper'
+```
+
+### 2. Tipo de Spec
+Define explícitamente el tipo:
+```ruby
+RSpec.describe YourController, type: :controller do
+```
+
+**Nota**: El multi-tenancy con Apartment se configura automáticamente en `rails_helper.rb`, no necesitas incluir `with tenant` en cada test.
+
+## Helpers Disponibles
+
+### Autenticación
+```ruby
+# Para autenticar un usuario en el contexto del test
+login(user)
+
+# Genera JWT con: User.generate_jwt(tenant, user, admin: true)
+# Configura headers: Authorization: "Bearer #{jwt}"
+```
+
+### Acceso a Response JSON
+```ruby
+# Accede al body del response parseado
+json  # equivale a response.parsed_body
+
+# Limpia el cache del json parseado
+clear_json
+```
+
+### Shared Contexts Disponibles
+```ruby
+include_context 'with admin user'      # Usuario admin pre-creado
+include_context 'with user'            # Usuario regular pre-creado
+```
+
+## Patrones de Testing
+
+### 1. Test de Autenticación (OBLIGATORIO)
+Cada endpoint debe verificar autenticación/autorización:
+
+```ruby
+describe "#POST create" do
+  context "when user is unauthenticated" do
+    it "returns unauthorized status" do
+      post :create, params: { name: "Test" }
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+  
+  context "when user is authenticated" do
+    before { login(admin_user) }
+    
+    # tests del endpoint
+  end
+end
+```
+
+### 2. Test de HTTP Status Codes
+Verifica los códigos de estado apropiados:
+
+```ruby
+it "returns ok status" do
+  expect(response).to have_http_status(:ok)          # 200
+end
+
+it "returns created status" do
+  expect(response).to have_http_status(:created)     # 201
+end
+
+it "returns no_content status" do
+  expect(response).to have_http_status(:no_content)  # 204
+end
+
+it "returns bad_request status" do
+  expect(response).to have_http_status(:bad_request) # 400
+end
+
+it "returns unauthorized status" do
+  expect(response).to have_http_status(:unauthorized) # 401
+end
+
+it "returns forbidden status" do
+  expect(response).to have_http_status(:forbidden)   # 403
+end
+
+it "returns not_found status" do
+  expect(response).to have_http_status(:not_found)   # 404
+end
+
+it "returns unprocessable_entity status" do
+  expect(response).to have_http_status(:unprocessable_entity) # 422
+end
+```
+
+### 3. Test de Estructura JSON
+Verifica la estructura del response:
+
+```ruby
+it "returns array of users" do
+  get :index
+  expect(json).to be_an(Array)
+end
+
+it "returns user attributes" do
+  get :show, params: { id: user.id }
+  expect(json).to include('id', 'name', 'email')
+end
+
+it "returns nested associations" do
+  get :show, params: { id: user.id }
+  expect(json['organization']).to be_present
+  expect(json['organization']).to include('id', 'name')
+end
+
+it "includes specific user in response" do
+  get :index
+  expect(json.map { |u| u['id'] }).to include(user.id)
+end
+
+it "excludes specific user from response" do
+  get :index
+  expect(json.map { |u| u['id'] }).not_to include(excluded_user.id)
+end
+```
+
+### 4. Test de Params y Validaciones
+```ruby
+context "when params are valid" do
+  let(:valid_params) { { name: "Test", email: "test@example.com" } }
+  
+  it "creates a new record" do
+    expect {
+      post :create, params: valid_params
+    }.to change(User, :count).by(1)
+  end
+end
+
+context "when params are invalid" do
+  let(:invalid_params) { { name: "" } }
+  
+  it "returns unprocessable_entity status" do
+    post :create, params: invalid_params
+    expect(response).to have_http_status(:unprocessable_entity)
+  end
+  
+  it "returns validation errors" do
+    post :create, params: invalid_params
+    expect(json['errors']).to be_present
+  end
+end
+```
+
+### 5. Test de Side Effects
+```ruby
+it "calls the service object" do
+  service_double = instance_double(SomeService, call: true)
+  allow(SomeService).to receive(:new).and_return(service_double)
+  
+  post :create, params: { name: "Test" }
+  
+  expect(service_double).to have_received(:call)
+end
+
+it "enqueues a background job" do
+  expect {
+    post :create, params: { name: "Test" }
+  }.to have_enqueued_job(SomeJob)
+end
+
+it "sends an email" do
+  expect {
+    post :create, params: { name: "Test" }
+  }.to change { ActionMailer::Base.deliveries.count }.by(1)
+end
+```
+
+## Organización de Tests
+
+### Estructura de describe/context
+```ruby
+describe "#HTTP_METHOD action_name" do
+  # Ejemplo: describe "#POST create"
+  # Ejemplo: describe "#GET index"
+  # Ejemplo: describe "#PATCH update"
+  # Ejemplo: describe "#DELETE destroy"
+  
+  context "when [condición específica]" do
+    # Contextos para diferentes escenarios
+    
+    it "then [resultado esperado]" do
+      # Expectativa específica
+    end
+  end
+end
+```
+
+### Orden Recomendado
+1. Setup (let statements, before blocks)
+2. Tests de autenticación
+3. Tests de casos exitosos (happy path)
+4. Tests de casos de error
+5. Tests de edge cases
+
+## Setup de Datos con FactoryBot
+
+### Uso de create vs build
+```ruby
+# Para tests que necesitan persistencia
+let(:user) { create(:user) }
+let!(:users) { create_list(:user, 3) }
+
+# Para tests que no requieren BD
+let(:user) { build(:user) }
+
+# Con traits
+let(:admin_user) { create(:user, :admin) }
+let(:inactive_user) { create(:user, :inactive) }
+
+# Con sobrescritura de atributos
+let(:user) { create(:user, name: "Custom", organization: organization) }
+```
+
+### Optimización con let_it_be
+Para datos que no cambian entre tests:
+```ruby
+let_it_be(:organization) { create(:organization) }
+let_it_be(:admin_user) { create(:user, :admin) }
+
+# Estos se crean una vez por describe block
+```
+
+## Manejo de Multi-Tenancy
+
+El proyecto usa Apartment para multi-tenancy. Consideraciones:
+
+```ruby
+# El tenant se configura automáticamente en rails_helper.rb
+# NO necesitas incluir 'with tenant' en tus tests
+
+# Los objetos deben pertenecer al tenant actual
+let(:organization) { create(:organization) }  # ya se crea en el tenant correcto
+
+# El before(:each) en rails_helper se encarga automáticamente de:
+# - Apartment::Tenant.switch!('test')
+# - Rails.cache.clear
+```
+
+## Convenciones de Nombres
+
+### Nombres de Tests
+- Usa `it` con frases descriptivas que comiencen con verbo
+- Sé específico sobre qué se está testeando
+- Evita nombres genéricos como "works" o "is valid"
+
+**Bien:**
+```ruby
+it "returns list of active users"
+it "creates a new selection process"
+it "updates user email successfully"
+it "returns error when email is invalid"
+```
+
+**Mal:**
+```ruby
+it "works"
+it "is ok"
+it "does the thing"
+```
+
+### Nombres de Contexts
+- Siempre comienza con "when" o "with"
+- Describe la precondición o estado
+
+**Bien:**
+```ruby
+context "when user is admin"
+context "when params are invalid"
+context "with existing record"
+```
+
+## Testing de JSON con JSON Matchers
+
+El proyecto incluye json_matchers. Uso:
+
+```ruby
+# Definir schema en spec/support/api/v2/schemas/
+it "matches expected schema" do
+  get :index
+  expect(response).to match_json_schema('users/index')
+end
+```
+
+## Testing con WebMock
+
+Para mockear requests HTTP externos:
+
+```ruby
+before do
+  stub_request(:post, "https://external-api.com/endpoint")
+    .to_return(status: 200, body: { success: true }.to_json, headers: {})
+end
+
+it "calls external API" do
+  post :create, params: { name: "Test" }
+  
+  expect(WebMock).to have_requested(:post, "https://external-api.com/endpoint")
+end
+```
+
+## Ejemplos Completos
+
+### CRUD básico
+```ruby
+require 'rails_helper'
+
+RSpec.describe Api::V1::ConsultantsController, type: :controller do
+  let(:organization) { create(:organization) }
+  let(:admin_user) { create(:user, :admin, organization: organization) }
+  let(:consultant) { create(:consultant, organization: organization) }
+  
+  describe "#GET index" do
+    context "when user is unauthenticated" do
+      it "returns unauthorized status" do
+        get :index
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+    
+    context "when user is authenticated" do
+      before do
+        login(admin_user)
+        consultant # ensure consultant exists
+      end
+      
+      it "returns ok status" do
+        get :index
+        expect(response).to have_http_status(:ok)
+      end
+      
+      it "returns consultants list" do
+        get :index
+        expect(json).to be_an(Array)
+        expect(json.map { |c| c['id'] }).to include(consultant.id)
+      end
+    end
+  end
+  
+  describe "#POST create" do
+    let(:valid_params) { { name: "New Consultant", organization_id: organization.id } }
+    
+    context "when user is unauthenticated" do
+      it "returns unauthorized status" do
+        post :create, params: valid_params
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+    
+    context "when user is authenticated" do
+      before { login(admin_user) }
+      
+      context "when params are valid" do
+        it "creates a new consultant" do
+          expect {
+            post :create, params: valid_params
+          }.to change(Consultant, :count).by(1)
+        end
+        
+        it "returns created status" do
+          post :create, params: valid_params
+          expect(response).to have_http_status(:created)
+        end
+        
+        it "returns created consultant" do
+          post :create, params: valid_params
+          expect(json['name']).to eq("New Consultant")
+        end
+      end
+      
+      context "when params are invalid" do
+        let(:invalid_params) { { name: "" } }
+        
+        it "does not create a consultant" do
+          expect {
+            post :create, params: invalid_params
+          }.not_to change(Consultant, :count)
+        end
+        
+        it "returns unprocessable_entity status" do
+          post :create, params: invalid_params
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+      end
+    end
+  end
+  
+  describe "#PATCH update" do
+    let(:update_params) { { id: consultant.id, name: "Updated Name" } }
+    
+    context "when user is authenticated" do
+      before { login(admin_user) }
+      
+      it "updates the consultant" do
+        patch :update, params: update_params
+        expect(consultant.reload.name).to eq("Updated Name")
+      end
+      
+      it "returns ok status" do
+        patch :update, params: update_params
+        expect(response).to have_http_status(:ok)
+      end
+    end
+  end
+  
+  describe "#DELETE destroy" do
+    context "when user is authenticated" do
+      before do
+        login(admin_user)
+        consultant # ensure consultant exists
+      end
+      
+      it "deletes the consultant" do
+        expect {
+          delete :destroy, params: { id: consultant.id }
+        }.to change(Consultant, :count).by(-1)
+      end
+      
+      it "returns no_content status" do
+        delete :destroy, params: { id: consultant.id }
+        expect(response).to have_http_status(:no_content)
+      end
+    end
+  end
+end
+```
+
+## Checklist para Controller Specs
+
+Antes de finalizar tus tests, verifica:
+
+- [ ] Incluye `require 'rails_helper'`
+- [ ] Define `type: :controller`
+- [ ] Testea autenticación/autorización
+- [ ] Testea HTTP status codes
+- [ ] Testea estructura de JSON responses
+- [ ] Testea casos exitosos (happy path)
+- [ ] Testea casos de error
+- [ ] Usa FactoryBot para datos de prueba
+- [ ] Nombres descriptivos para tests y contexts
+- [ ] Tests aislados e independientes
+- [ ] No testea lógica de negocio (eso va en servicios)
+- [ ] Usa `let` para setup, `let!` para setup con side effects
+- [ ] Limpia después de cada test (DatabaseCleaner lo hace automáticamente)
+
+## Anti-Patrones a Evitar
+
+❌ **No hagas esto:**
+```ruby
+# No testear lógica compleja en controllers
+it "calculates discount and applies business rules" do
+  # Esta lógica debería estar en un servicio
+end
+
+# No usar sleep o waits
+it "waits for async operation" do
+  sleep 2
+  expect(something).to be_present
+end
+
+# No testear implementation details
+it "calls private method" do
+  controller.send(:private_method)
+end
+
+# No tener tests dependientes del orden
+it "step 1" do
+  @result = do_something
+end
+
+it "step 2" do
+  expect(@result).to be_present  # depende del test anterior
+end
+```
+
+✅ **Haz esto:**
+```ruby
+# Controllers delgados, testea solo el flujo
+it "calls the business service" do
+  service_double = instance_double(BusinessService, call: result)
+  allow(BusinessService).to receive(:new).and_return(service_double)
+  
+  post :create, params: params
+  
+  expect(service_double).to have_received(:call)
+end
+
+# Usa mocks para operaciones asíncronas
+it "enqueues background job" do
+  expect {
+    post :create, params: params
+  }.to have_enqueued_job(AsyncJob)
+end
+
+# Testea solo interfaz pública
+it "returns expected response" do
+  post :create, params: params
+  expect(response).to have_http_status(:ok)
+end
+
+# Tests independientes
+it "creates record" do
+  result = do_something
+  expect(result).to be_present
+end
+```
+
+## Notas Adicionales
+
+- **Velocidad**: Los tests de controllers deben ser rápidos. Si son lentos, revisa el uso de factories y considera mocks.
+- **Cobertura**: Aim for high coverage pero no al 100%. Enfócate en casos importantes.
+- **Mantenibilidad**: Tests claros y bien organizados son más valiosos que muchos tests confusos.
+- **Realismo**: Usa datos realistas en factories para encontrar bugs reales.
+
+## Referencias Rápidas
+
+- FactoryBot: `/spec/factories/`
+- Shared Contexts: `/spec/support/shared_contexts/`
+- Request Helpers: `/spec/support/request_helpers.rb`
+- Rails Helper: `/spec/rails_helper.rb`
+- JSON Schemas: `/spec/support/api/v2/schemas/`

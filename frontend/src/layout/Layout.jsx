@@ -8,18 +8,18 @@ const LayoutContent = () => {
   const { isExpanded, isHovered } = useSidebar();
   
   return (
-    <div className="dark:bg-boxdark-2 dark:text-bodydark">
+    <div className="bg-background text-on-surface min-h-screen">
       <TokenExpiredHandler />
       <div className="flex h-screen overflow-hidden">
         <Sidebar />
-        <div 
+        <div
           className={`relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out ${
             isExpanded || isHovered ? 'lg:ml-[290px]' : 'lg:ml-[90px]'
           }`}
         >
           <Header />
-          <main>
-            <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+          <main className="pt-16 min-h-screen bg-background">
+            <div className="p-6 md:p-8 max-w-screen-2xl mx-auto">
               <Outlet />
             </div>
           </main>

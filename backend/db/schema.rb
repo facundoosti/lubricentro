@@ -12,6 +12,7 @@
 
 ActiveRecord::Schema[8.0].define(version: 2025_06_26_170806) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "cube"
   enable_extension "pg_catalog.plpgsql"
 
   create_table "appointments", force: :cascade do |t|

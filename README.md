@@ -18,12 +18,14 @@ Una aplicación web moderna que digitaliza y optimiza las operaciones de un lubr
 ## 🛠️ **Stack Tecnológico**
 
 ### **Backend**
+
 - **Ruby on Rails 8.0.2** (API mode)
 - **PostgreSQL** (producción) / **SQLite3** (desarrollo)
 - **JWT** para autenticación
 - **RSpec** para testing
 
 ### **Frontend**
+
 - **React 19** con **Vite**
 - **Tailwind CSS v4** para estilos
 - **React Query** para gestión de estado del servidor
@@ -61,6 +63,7 @@ lubricentro/
 ### **Opción 1: Desarrollo Local**
 
 #### **Setup Backend**
+
 ```bash
 cd backend
 bundle install
@@ -69,6 +72,7 @@ rails server -p 3000
 ```
 
 #### **Setup Frontend**
+
 ```bash
 cd frontend
 npm install
@@ -151,7 +155,7 @@ Este proyecto está optimizado para desarrollo con **Cursor AI**:
 
 ### **Cursor Rules**
 
-- Lee `.cursorrules` para entender patrones específicos
+- Lee `.cursor/*` para entender patrones específicos
 - Sigue las convenciones establecidas
 - Usa los patrones de arquitectura definidos
 - Consulta documentación técnica según necesites
@@ -181,9 +185,11 @@ docker-compose exec frontend npm run dev
 ## 🚀 **Deployment**
 
 ### **Desarrollo Local**
+
 Ver [DOCKER_README.md](./DOCKER_README.md) para configuración con Docker Compose.
 
 ### **Producción**
+
 El proyecto está configurado para deploy en Railway con GitHub Actions.
 
 **Ver [DOCKER_README.md](./DOCKER_README.md) para guía completa de deployment.**
@@ -202,6 +208,7 @@ El proyecto está configurado para deploy en Railway con GitHub Actions.
 ## 📝 **Comandos Útiles**
 
 ### **Backend**
+
 ```bash
 # Consola Rails
 docker-compose exec backend rails console
@@ -217,6 +224,7 @@ docker-compose exec backend rails g model ModelName field:type
 ```
 
 ### **Frontend**
+
 ```bash
 # Desarrollo
 docker-compose exec frontend npm run dev

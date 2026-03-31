@@ -1,0 +1,40 @@
+---
+description: Stack tecnológico, entidades core y estado actual del proyecto
+alwaysApply: true
+---
+
+# Stack Tecnológico y Entidades Core
+
+## 🎯 Stack Tecnológico
+
+- **Backend**: Ruby on Rails 8.0.2 (API mode) + JWT + PostgreSQL
+- **Frontend**: React 19 + Vite + Tailwind CSS v4 + React Query
+- **Arquitectura**: API-First con SPA frontend
+
+## 📋 Entidades Core
+
+- **Customer** → has_many :vehicles, :appointments, :service_records
+- **Vehicle** → belongs_to :customer
+- **Appointment** → belongs_to :customer, :vehicle
+- **Service/Product** → catálogo de servicios y productos
+- **ServiceRecord** → registro de atenciones realizadas
+- **Quote** → sistema de presupuestos
+
+## 📊 Estado Actual
+
+- **MVP**: 98% completado
+- **Faltante**: CRUD modales atenciones
+- **Próximo**: Testing frontend + Deploy a producción
+
+## 🔧 Configuración Técnica
+
+- **Base de datos**: SQLite3 (desarrollo) → PostgreSQL (producción)
+- **Autenticación**: JWT en ApplicationController
+- **Paginación**: Pagy con metadata
+- **Serialización**: Blueprinter con múltiples vistas
+- **Testing**: RSpec + FactoryBot (backend), Vitest (frontend)
+
+---
+
+**Última actualización**: Diciembre 2025
+**Estado**: MVP 98% COMPLETADO - Sistema optimizado para Cursor

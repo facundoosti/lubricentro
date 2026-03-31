@@ -1,6 +1,9 @@
 FactoryBot.define do
   factory :appointment do
-    scheduled_at { 1.day.from_now }
+    scheduled_at do
+      tomorrow = 1.day.from_now
+      tomorrow.month == Time.current.month ? tomorrow : 1.hour.from_now
+    end
     status { 'scheduled' }
     notes { Faker::Lorem.sentence(word_count: 8, supplemental: false, random_words_to_add: 4) }
     association :customer

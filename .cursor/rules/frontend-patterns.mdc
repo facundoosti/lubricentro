@@ -1,0 +1,66 @@
+---
+description: Patrones obligatorios para el frontend React
+globs:
+  - frontend/src/**/*.jsx
+  - frontend/src/**/*.js
+alwaysApply: true
+---
+
+# Patrones Frontend React
+
+## Estructura de Componentes
+
+```
+src/
+├── components/
+│   ├── layout/          # Layout, Navigation, Header
+│   ├── common/          # Button, Modal, Table, Form
+│   └── features/        # Por dominio: customers/, vehicles/, etc.
+├── hooks/               # Custom hooks reutilizables
+├── services/            # API calls con axios
+├── contexts/            # Estado global (solo auth)
+└── utils/               # Utilidades
+```
+
+## Pattern: Container + View
+
+```javascript
+const EntityContainer = () => {
+  // Lógica y estado
+  return <EntityView {...props} />;
+};
+```
+
+## Import Alias Rules (CRÍTICO)
+
+```javascript
+// ❌ NUNCA usar rutas relativas
+import Button from "../../ui/Button";
+import { useCustomers } from "../services/customersService";
+
+// ✅ SIEMPRE usar alias configurados
+import Button from "@ui/Button";
+import { useCustomers } from "@services/customersService";
+```
+
+**Alias disponibles:**
+
+- `@` → `./src`
+- `@ui` → `./src/components/ui`
+- `@services` → `./src/services`
+- `@components` → `./src/components`
+- `@pages` → `./src/pages`
+- `@hooks` → `./src/hooks`
+- `@contexts` → `./src/contexts`
+- `@icons` → `./src/icons`
+- `@assets` → `./src/assets`
+
+## Reglas Específicas
+
+- ❌ NUNCA usar rutas relativas en importaciones
+- ❌ NUNCA usar fetch directo sin React Query
+- ❌ NUNCA usar estado global innecesario
+- ❌ NUNCA crear componentes >300 líneas
+- ✅ SIEMPRE usar alias de importación (@ui, @services, @components, etc.)
+- ✅ SIEMPRE manejar estados de loading y error
+- ✅ SIEMPRE usar React Query para llamadas API

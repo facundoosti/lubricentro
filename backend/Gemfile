@@ -52,6 +52,12 @@ gem "doorkeeper-jwt", "~> 0.4"
 # Authentication solution for Rails
 gem "devise", "~> 4.9"
 
+# Vector embeddings and similarity search
+gem "neighbor"
+
+# LLM integration for embeddings generation
+gem "ruby_llm"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
