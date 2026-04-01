@@ -2,7 +2,7 @@ import { Wrench } from 'lucide-react';
 import SlideOver from '@ui/SlideOver';
 import ServiceForm from '@components/features/services/ServiceForm';
 import { useCreateService, useUpdateService } from '@services/servicesService';
-import { showSuccess, showError } from '@services/notificationService';
+import { showServiceSuccess, showServiceError, parseApiError } from '@services/notificationService';
 
 const FORM_ID = 'service-form';
 
@@ -17,18 +17,16 @@ const ServiceModal = ({ isOpen, onClose, service = null, onSuccess }) => {
     try {
       if (isEditing) {
         await updateService.mutateAsync({ id: service.id, serviceData: data });
-        showSuccess('Servicio actualizado exitosamente');
+        showServiceSuccess('UPDATED');
       } else {
         await createService.mutateAsync(data);
-        showSuccess('Servicio creado exitosamente');
+        showServiceSuccess('CREATED');
       }
       onClose();
       if (onSuccess) onSuccess();
     } catch (error) {
-      const msg = error.response?.data?.errors
-        ? Object.values(error.response.data.errors).flat().join(', ')
-        : error.response?.data?.message || 'Error al guardar el servicio';
-      showError(msg);
+      const action = isEditing ? 'ERROR_UPDATE' : 'ERROR_CREATE';
+      showServiceError(action, parseApiError(error));
     }
   };
 

@@ -36,8 +36,16 @@ const CustomerVehiclesCard = ({ vehicles = [], onAddVehicle, onEditVehicle }) =>
               className="flex items-center justify-between p-4 border border-outline-variant rounded-lg bg-surface-container-high hover:bg-surface-variant transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center shrink-0">
-                  <Car className="w-5 h-5 text-primary" />
+                <div className="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center shrink-0 overflow-hidden">
+                  {vehicle.image_url ? (
+                    <img
+                      src={vehicle.image_url}
+                      alt={`${vehicle.brand} ${vehicle.model}`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Car className="w-5 h-5 text-primary" />
+                  )}
                 </div>
                 <div>
                   <h5 className="text-sm font-medium text-on-surface">

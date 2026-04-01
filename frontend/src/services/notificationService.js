@@ -66,6 +66,15 @@ const MESSAGES = {
   },
 };
 
+// Extrae el mensaje de error de una respuesta de API de Rails
+export const parseApiError = (error, fallback = 'Ocurrió un error inesperado') => {
+  const data = error?.response?.data;
+  if (data?.errors) {
+    return Object.values(data.errors).flat().join(', ');
+  }
+  return data?.message || error?.message || fallback;
+};
+
 // Primitivas base
 export const showSuccess = (title, description) =>
   sileo.success({ title, ...(description && { description }) });

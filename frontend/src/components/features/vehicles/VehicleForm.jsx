@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import CustomerSearchInput from "@components/features/customers/CustomerSearchInput";
 import ImageUpload from '@ui/ImageUpload';
@@ -8,6 +8,7 @@ const VehicleForm = ({
   vehicle = null,
   isLoading = false,
   customerId = null,
+  initialCustomer = null,
   formId = 'vehicle-form',
 }) => {
   const [selectedCustomerId, setSelectedCustomerId] = useState(customerId || "");
@@ -212,8 +213,8 @@ const VehicleForm = ({
             onSelect={handleCustomerSelect}
             placeholder="Buscar cliente por nombre o email..."
             error={errors.customer_id?.message}
-            disabled={isLoading}
-            initialCustomer={vehicle?.customer} // Pasar el cliente completo si existe
+            disabled={isLoading || !!customerId}
+            initialCustomer={vehicle?.customer || initialCustomer}
           />
           {/* Campo oculto para validación */}
           <input

@@ -24,7 +24,15 @@ import BudgetPrint from "@pages/BudgetPrint";
 function App() {
   return (
     <>
-      <Toaster position="top-right" />
+      <Toaster
+        position="top-right"
+        offset={{ top: 16, right: 16 }}
+        options={{
+          duration: 4000,
+          fill: "#121215",
+          roundness: 10,
+        }}
+      />
       <QueryProvider>
         <Router>
           <Routes>

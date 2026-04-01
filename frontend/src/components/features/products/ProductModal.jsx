@@ -2,7 +2,7 @@ import { Package } from 'lucide-react';
 import SlideOver from '@ui/SlideOver';
 import ProductForm from '@components/features/products/ProductForm';
 import { useCreateProduct, useUpdateProduct } from '@services/productsService';
-import { showSuccess, showError } from '@services/notificationService';
+import { showProductSuccess, showProductError, parseApiError } from '@services/notificationService';
 
 const FORM_ID = 'product-form';
 
@@ -17,18 +17,16 @@ const ProductModal = ({ isOpen, onClose, product = null, onSuccess }) => {
     try {
       if (isEditing) {
         await updateProduct.mutateAsync({ id: product.id, productData: data });
-        showSuccess('Producto actualizado exitosamente');
+        showProductSuccess('UPDATED');
       } else {
         await createProduct.mutateAsync(data);
-        showSuccess('Producto creado exitosamente');
+        showProductSuccess('CREATED');
       }
       onClose();
       if (onSuccess) onSuccess();
     } catch (error) {
-      const msg = error.response?.data?.errors
-        ? Object.values(error.response.data.errors).flat().join(', ')
-        : error.response?.data?.message || 'Error al guardar el producto';
-      showError(msg);
+      const action = isEditing ? 'ERROR_UPDATE' : 'ERROR_CREATE';
+      showProductError(action, parseApiError(error));
     }
   };
 

@@ -101,7 +101,7 @@ const CustomersTable = ({
                   isHeader
                   className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
                 >
-                  Vehículos
+                  Teléfono
                 </TableCell>
                 <TableCell
                   isHeader
@@ -161,11 +161,6 @@ const CustomersTable = ({
                             {customer.email}
                           </div>
                         )}
-                        {customer.phone && (
-                          <div className="text-gray-500 text-xs dark:text-gray-400">
-                            {customer.phone}
-                          </div>
-                        )}
                         {customer.address && (
                           <div className="text-gray-500 text-xs dark:text-gray-400 truncate max-w-xs">
                             {customer.address}
@@ -173,10 +168,10 @@ const CustomersTable = ({
                         )}
                       </div>
                     </TableCell>
-                    
+
                     <TableCell className="px-4 py-3 text-start">
                       <div className="text-gray-800 text-sm dark:text-white/90">
-                        {customer.vehicles_count || 0} vehículos
+                        {customer.phone || "-"}
                       </div>
                     </TableCell>
                     

@@ -177,6 +177,7 @@ const CustomerProfile = () => {
         onClose={() => setIsAddVehicleModalOpen(false)}
         onSubmit={handleAddVehicleSubmit}
         customerId={displayCustomer.id}
+        initialCustomer={displayCustomer}
         isLoading={createVehicleMutation.isPending}
       />
 
