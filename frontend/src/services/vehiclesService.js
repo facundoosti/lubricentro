@@ -54,7 +54,7 @@ export const useVehicles = (filters = {}) => {
       console.log('VehiclesService - API response:', response.data);
       return response.data;
     },
-    enabled: !!customer_id, // Solo ejecutar la query cuando hay un customer_id
+    enabled: true,
     keepPreviousData: true,
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
