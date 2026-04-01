@@ -28,6 +28,7 @@ class ServiceRecord < ApplicationRecord
   has_many :service_record_products, dependent: :destroy
   has_many :services, through: :service_record_services
   has_many :products, through: :service_record_products
+  has_many_attached :photos
 
   # Validaciones
   validates :service_date, presence: true

@@ -130,11 +130,19 @@ const CustomersTable = ({
                   <TableRow key={customer.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                     <TableCell className="px-5 py-4 sm:px-6 text-start">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                          <span className="text-blue-600 dark:text-blue-400 font-medium text-sm">
-                            {getInitials(customer.name)}
-                          </span>
-                        </div>
+                        {customer.avatar_url ? (
+                          <img
+                            src={customer.avatar_url}
+                            alt={customer.name}
+                            className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-blue-600 dark:text-blue-400 font-medium text-sm">
+                              {getInitials(customer.name)}
+                            </span>
+                          </div>
+                        )}
                         <div>
                           <span className="block font-medium text-gray-800 text-sm dark:text-white/90">
                             {customer.name}

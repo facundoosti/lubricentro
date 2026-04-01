@@ -21,6 +21,7 @@ class Vehicle < ApplicationRecord
   belongs_to :customer
   has_many :appointments, dependent: :destroy
   has_many :service_records, dependent: :destroy
+  has_one_attached :image
 
   # Validaciones
   validates :brand, presence: true, length: { minimum: 2, maximum: 50 }

@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useVehicles } from '@services/vehiclesService';
 import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
+import PhotosUpload from '@ui/PhotosUpload';
 
 const ServiceRecordForm = ({
   record = null,
@@ -10,6 +11,7 @@ const ServiceRecordForm = ({
   formId = 'service-record-form',
 }) => {
   const today = new Date().toISOString().split('T')[0];
+  const [photoFiles, setPhotoFiles] = useState([]);
 
   const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm({
     defaultValues: {
@@ -62,6 +64,7 @@ const ServiceRecordForm = ({
       total_amount: data.total_amount ? parseFloat(data.total_amount) : null,
       next_service_date: data.next_service_date || null,
     };
+    if (photoFiles.length > 0) cleanPayload.photos = photoFiles;
     onSubmit(cleanPayload);
   };
 
@@ -201,6 +204,13 @@ const ServiceRecordForm = ({
           placeholder="Observaciones, trabajos realizados..."
         />
       </div>
+
+      {/* Fotos */}
+      <PhotosUpload
+        label="Fotos de la Atención"
+        currentUrls={record?.photos_urls || []}
+        onChange={setPhotoFiles}
+      />
     </form>
   );
 };

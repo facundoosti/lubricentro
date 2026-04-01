@@ -72,15 +72,31 @@ export const useVehicle = (id) => {
   });
 };
 
+// Helper: build FormData for multipart uploads
+const toFormData = (namespace, data) => {
+  const fd = new FormData();
+  Object.entries(data).forEach(([key, value]) => {
+    if (value === null || value === undefined) return;
+    if (Array.isArray(value)) {
+      value.forEach((v) => fd.append(`${namespace}[${key}][]`, v));
+    } else {
+      fd.append(`${namespace}[${key}]`, value);
+    }
+  });
+  return fd;
+};
+
 // Mutations
 export const useCreateVehicle = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (vehicleData) => {
-      console.log("useCreateVehicle - mutationFn called with:", vehicleData);
-      const response = await api.post('/vehicles', { vehicle: vehicleData });
-      console.log("useCreateVehicle - Response:", response);
+      const { image, ...fields } = vehicleData;
+      const payload = image instanceof File
+        ? toFormData('vehicle', { ...fields, image })
+        : { vehicle: fields };
+      const response = await api.post('/vehicles', payload);
       return response.data;
     },
     onSuccess: (data) => {
@@ -109,9 +125,11 @@ export const useUpdateVehicle = () => {
 
   return useMutation({
     mutationFn: async ({ id, vehicleData }) => {
-      console.log("useUpdateVehicle - mutationFn called with:", { id, vehicleData });
-      const response = await api.put(`/vehicles/${id}`, { vehicle: vehicleData });
-      console.log("useUpdateVehicle - Response:", response);
+      const { image, ...fields } = vehicleData;
+      const payload = image instanceof File
+        ? toFormData('vehicle', { ...fields, image })
+        : { vehicle: fields };
+      const response = await api.put(`/vehicles/${id}`, payload);
       return response.data;
     },
     onSuccess: (data, variables) => {

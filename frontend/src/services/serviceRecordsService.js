@@ -75,13 +75,31 @@ export const useUpcomingServiceRecords = () => {
   });
 };
 
+// Helper: build FormData for multipart uploads
+const toFormData = (namespace, data) => {
+  const fd = new FormData();
+  Object.entries(data).forEach(([key, value]) => {
+    if (value === null || value === undefined) return;
+    if (Array.isArray(value)) {
+      value.forEach((v) => fd.append(`${namespace}[${key}][]`, v));
+    } else {
+      fd.append(`${namespace}[${key}]`, value);
+    }
+  });
+  return fd;
+};
+
 // Mutations
 export const useCreateServiceRecord = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data) => {
-      console.log("API call with:", data);
-      const response = await api.post('/service_records', { service_record: data });
+      const { photos, ...fields } = data;
+      const hasPhotos = Array.isArray(photos) && photos.length > 0;
+      const payload = hasPhotos
+        ? toFormData('service_record', { ...fields, photos })
+        : { service_record: fields };
+      const response = await api.post('/service_records', payload);
       return response.data;
     },
     onSuccess: () => {
@@ -99,8 +117,12 @@ export const useUpdateServiceRecord = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, data }) => {
-      console.log("API call with:", { id, data });
-      const response = await api.patch(`/service_records/${id}`, { service_record: data });
+      const { photos, ...fields } = data;
+      const hasPhotos = Array.isArray(photos) && photos.length > 0;
+      const payload = hasPhotos
+        ? toFormData('service_record', { ...fields, photos })
+        : { service_record: fields };
+      const response = await api.patch(`/service_records/${id}`, payload);
       return response.data;
     },
     onSuccess: (_, variables) => {

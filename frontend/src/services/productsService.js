@@ -68,15 +68,31 @@ export const useProduct = (id) => {
   });
 };
 
+// Helper: build FormData for multipart uploads
+const toFormData = (namespace, data) => {
+  const fd = new FormData();
+  Object.entries(data).forEach(([key, value]) => {
+    if (value === null || value === undefined) return;
+    if (Array.isArray(value)) {
+      value.forEach((v) => fd.append(`${namespace}[${key}][]`, v));
+    } else {
+      fd.append(`${namespace}[${key}]`, value);
+    }
+  });
+  return fd;
+};
+
 // Mutations
 export const useCreateProduct = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (productData) => {
-      console.log("useCreateProduct - mutationFn called with:", productData);
-      const response = await api.post('/products', { product: productData });
-      console.log("useCreateProduct - Response:", response);
+      const { image, ...fields } = productData;
+      const payload = image instanceof File
+        ? toFormData('product', { ...fields, image })
+        : { product: fields };
+      const response = await api.post('/products', payload);
       return response.data;
     },
     onSuccess: (data) => {
@@ -105,9 +121,11 @@ export const useUpdateProduct = () => {
 
   return useMutation({
     mutationFn: async ({ id, productData }) => {
-      console.log("useUpdateProduct - mutationFn called with:", { id, productData });
-      const response = await api.put(`/products/${id}`, { product: productData });
-      console.log("useUpdateProduct - Response:", response);
+      const { image, ...fields } = productData;
+      const payload = image instanceof File
+        ? toFormData('product', { ...fields, image })
+        : { product: fields };
+      const response = await api.put(`/products/${id}`, payload);
       return response.data;
     },
     onSuccess: (data, variables) => {

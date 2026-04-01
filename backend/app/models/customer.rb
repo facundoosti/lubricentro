@@ -21,6 +21,7 @@ class Customer < ApplicationRecord
   has_many :vehicles, dependent: :destroy
   has_many :appointments, dependent: :destroy
   has_many :service_records, dependent: :destroy
+  has_one_attached :avatar
 
   # Validaciones (siguiendo BD constraints)
   validates :name, presence: true, length: { maximum: 100 }

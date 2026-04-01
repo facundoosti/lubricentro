@@ -7,6 +7,10 @@ class ProductSerializer < Blueprinter::Base
     product.unit_price.to_s
   end
 
+  field :image_url do |product|
+    ActiveStorageUrlHelper.url_for(product.image)
+  end
+
   view :summary do
     exclude :description
     exclude :created_at

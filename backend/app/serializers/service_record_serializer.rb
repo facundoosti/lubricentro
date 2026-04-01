@@ -8,6 +8,10 @@ class ServiceRecordSerializer < Blueprinter::Base
     obj.next_service_date&.iso8601
   end
 
+  field :photos_urls do |record|
+    ActiveStorageUrlHelper.urls_for(record.photos)
+  end
+
   view :default do
     field :total_amount
     field :notes

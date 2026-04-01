@@ -3,8 +3,8 @@ import { Table, TableBody, TableCell, TableHeader, TableRow } from "@ui/Table";
 import Badge from "@ui/Badge";
 import Button from "@ui/Button";
 import Pagination from "@ui/Pagination";
-import { 
-  Search, 
+import {
+  Search,
   Plus,
   Edit,
   Trash2,
@@ -12,7 +12,8 @@ import {
   Calendar,
   Car,
   User,
-  DollarSign
+  DollarSign,
+  Camera
 } from "lucide-react";
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -188,15 +189,32 @@ const ServiceRecordsTable = ({
                   <TableRow key={record.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                     <TableCell className="px-5 py-4 sm:px-6 text-start">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                          <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                        </div>
+                        {record.photos_urls?.length > 0 ? (
+                          <div className="relative w-10 h-10 flex-shrink-0">
+                            <img
+                              src={record.photos_urls[0]}
+                              alt=""
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                            {record.photos_urls.length > 1 && (
+                              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center text-white text-[9px] font-bold">
+                                {record.photos_urls.length}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                            <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                          </div>
+                        )}
                         <div>
                           <span className="block font-medium text-gray-800 text-sm dark:text-white/90">
                             {formatDate(record.service_date)}
                           </span>
                           <span className="block text-gray-500 text-xs dark:text-gray-400">
-                            ID: {record.id}
+                            {record.photos_urls?.length > 0
+                              ? `${record.photos_urls.length} foto${record.photos_urls.length > 1 ? 's' : ''}`
+                              : `ID: ${record.id}`}
                           </span>
                         </div>
                       </div>

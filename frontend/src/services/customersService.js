@@ -58,18 +58,31 @@ export const useCustomer = (id) => {
   });
 };
 
+// Helper: build FormData for multipart uploads
+const toFormData = (namespace, data) => {
+  const fd = new FormData();
+  Object.entries(data).forEach(([key, value]) => {
+    if (value === null || value === undefined) return;
+    if (Array.isArray(value)) {
+      value.forEach((v) => fd.append(`${namespace}[${key}][]`, v));
+    } else {
+      fd.append(`${namespace}[${key}]`, value);
+    }
+  });
+  return fd;
+};
+
 // Mutations
 export const useCreateCustomer = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (customerData) => {
-      console.log("useCreateCustomer - mutationFn called with:", customerData);
-      console.log("useCreateCustomer - API URL:", '/customers');
-      console.log("useCreateCustomer - Request data:", { customer: customerData });
-      
-      const response = await api.post('/customers', { customer: customerData });
-      console.log("useCreateCustomer - Response:", response);
+      const { avatar, ...fields } = customerData;
+      const payload = avatar instanceof File
+        ? toFormData('customer', { ...fields, avatar })
+        : { customer: fields };
+      const response = await api.post('/customers', payload);
       return response.data;
     },
     onSuccess: (data) => {
@@ -98,7 +111,11 @@ export const useUpdateCustomer = () => {
 
   return useMutation({
     mutationFn: async ({ id, customerData }) => {
-      const response = await api.put(`/customers/${id}`, { customer: customerData });
+      const { avatar, ...fields } = customerData;
+      const payload = avatar instanceof File
+        ? toFormData('customer', { ...fields, avatar })
+        : { customer: fields };
+      const response = await api.put(`/customers/${id}`, payload);
       return response.data;
     },
     onSuccess: (data, variables) => {

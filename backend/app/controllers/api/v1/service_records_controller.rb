@@ -122,6 +122,6 @@ class Api::V1::ServiceRecordsController < ApplicationController
   end
 
   def service_record_params
-    params.require(:service_record).permit(:service_date, :total_amount, :notes, :mileage, :next_service_date, :customer_id, :vehicle_id)
+    params.require(:service_record).permit(:service_date, :total_amount, :notes, :mileage, :next_service_date, :customer_id, :vehicle_id, photos: [])
   end
 end

@@ -8,6 +8,10 @@ class VehicleSerializer < Blueprinter::Base
     vehicle.customer&.name
   end
 
+  field :image_url do |vehicle|
+    ActiveStorageUrlHelper.url_for(vehicle.image)
+  end
+
   view :with_customer do
     association :customer, blueprint: CustomerSerializer, view: :summary
     field :appointments_count do |vehicle|

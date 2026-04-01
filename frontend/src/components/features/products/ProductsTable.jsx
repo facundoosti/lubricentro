@@ -180,7 +180,15 @@ const ProductsTable = ({
                   <TableRow key={product.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                     <TableCell className="px-5 py-4 sm:px-6 text-start">
                       <div className="flex items-center gap-3">
-                        {getProductIcon(product.name)}
+                        {product.image_url ? (
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          getProductIcon(product.name)
+                        )}
                         <div>
                           <span className="block font-medium text-gray-800 text-sm dark:text-white/90">
                             {product.name}

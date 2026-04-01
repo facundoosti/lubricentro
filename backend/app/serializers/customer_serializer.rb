@@ -4,6 +4,10 @@ class CustomerSerializer < Blueprinter::Base
   fields :name, :phone, :email, :address, :created_at, :updated_at
   # fields :observaciones # Descomentar cuando se agregue el campo a la BD
 
+  field :avatar_url do |customer|
+    ActiveStorageUrlHelper.url_for(customer.avatar)
+  end
+
   field :vehicles_count do |customer|
     customer.vehicles.count
   end

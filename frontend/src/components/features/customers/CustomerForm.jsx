@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import ImageUpload from '@ui/ImageUpload';
 
 const CustomerForm = ({
   onSubmit,
@@ -7,6 +8,8 @@ const CustomerForm = ({
   isLoading = false,
   formId = 'customer-form',
 }) => {
+  const [avatarFile, setAvatarFile] = useState(null);
+
   const {
     register,
     handleSubmit,
@@ -22,8 +25,9 @@ const CustomerForm = ({
   });
 
   const handleFormSubmit = (data) => {
-    console.log("CustomerForm - handleFormSubmit called with data:", data);
-    onSubmit(data);
+    const payload = { ...data };
+    if (avatarFile) payload.avatar = avatarFile;
+    onSubmit(payload);
   };
 
   console.log("CustomerForm - errors:", errors);
@@ -116,6 +120,13 @@ const CustomerForm = ({
           )}
         </div>
       </div>
+
+      {/* Avatar */}
+      <ImageUpload
+        label="Foto del Cliente"
+        currentUrl={initialData?.avatar_url}
+        onChange={setAvatarFile}
+      />
 
     </form>
   );

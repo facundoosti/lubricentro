@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import ImageUpload from '@ui/ImageUpload';
 
 const ProductForm = ({
   product = null,
@@ -7,6 +8,8 @@ const ProductForm = ({
   loading = false,
   formId = 'product-form',
 }) => {
+  const [imageFile, setImageFile] = useState(null);
+
   const {
     register,
     handleSubmit,
@@ -23,14 +26,11 @@ const ProductForm = ({
 
   const handleFormSubmit = async (data) => {
     try {
-      // Convertir unit_price a número
-      const formData = {
-        ...data,
-        unit_price: parseFloat(data.unit_price)
-      };
-      
+      const formData = { ...data, unit_price: parseFloat(data.unit_price) };
+      if (imageFile) formData.image = imageFile;
       await onSubmit(formData);
       reset();
+      setImageFile(null);
     } catch (error) {
       console.error('Error submitting product form:', error);
     }
@@ -171,6 +171,13 @@ const ProductForm = ({
           </p>
         )}
       </div>
+
+      {/* Imagen */}
+      <ImageUpload
+        label="Imagen del Producto"
+        currentUrl={product?.image_url}
+        onChange={setImageFile}
+      />
 
     </form>
   );

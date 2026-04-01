@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import CustomerSearchInput from "@components/features/customers/CustomerSearchInput";
+import ImageUpload from '@ui/ImageUpload';
 
 const VehicleForm = ({
   onSubmit,
@@ -10,6 +11,7 @@ const VehicleForm = ({
   formId = 'vehicle-form',
 }) => {
   const [selectedCustomerId, setSelectedCustomerId] = useState(customerId || "");
+  const [imageFile, setImageFile] = useState(null);
 
   const {
     register,
@@ -46,14 +48,11 @@ const VehicleForm = ({
 
   const handleFormSubmit = async (data) => {
     try {
-      // Asegurar que el customer_id esté incluido en los datos
-      const formData = {
-        ...data,
-        customer_id: selectedCustomerId
-      };
-      
+      const formData = { ...data, customer_id: selectedCustomerId };
+      if (imageFile) formData.image = imageFile;
       await onSubmit(formData);
       reset();
+      setImageFile(null);
       setSelectedCustomerId("");
     } catch (error) {
       console.error('Error submitting vehicle form:', error);
@@ -234,8 +233,15 @@ const VehicleForm = ({
         </div>
       </div>
 
+      {/* Imagen */}
+      <ImageUpload
+        label="Foto del Vehículo"
+        currentUrl={vehicle?.image_url}
+        onChange={setImageFile}
+      />
+
     </form>
   );
 };
 
-export default VehicleForm; 
+export default VehicleForm;

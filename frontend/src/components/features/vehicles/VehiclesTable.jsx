@@ -156,7 +156,15 @@ const VehiclesTable = ({
                   <TableRow key={vehicle.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                     <TableCell className="px-5 py-4 sm:px-6 text-start">
                       <div className="flex items-center gap-3">
-                        {getVehicleIcon(vehicle.brand)}
+                        {vehicle.image_url ? (
+                          <img
+                            src={vehicle.image_url}
+                            alt={`${vehicle.brand} ${vehicle.model}`}
+                            className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          getVehicleIcon(vehicle.brand)
+                        )}
                         <div>
                           <span className="block font-medium text-gray-800 text-sm dark:text-white/90">
                             {vehicle.brand} {vehicle.model}
