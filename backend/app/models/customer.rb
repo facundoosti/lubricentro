@@ -2,11 +2,11 @@
 #
 # Table name: customers
 #
-#  id         :integer          not null, primary key
+#  id         :bigint           not null, primary key
+#  address    :text
+#  email      :string(100)
 #  name       :string(100)      not null
 #  phone      :string(20)
-#  email      :string(100)
-#  address    :text
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #

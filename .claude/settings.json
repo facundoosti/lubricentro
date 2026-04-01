@@ -6,7 +6,8 @@
       "Bash(cp /Users/facundoosti/Dev/lubricentro/backend/BLUEPRINT_GUIDE.md /Users/facundoosti/Dev/lubricentro/docs/BLUEPRINT_GUIDE.md)",
       "Bash(cp /Users/facundoosti/Dev/lubricentro/backend/QUOTES_SYSTEM.md /Users/facundoosti/Dev/lubricentro/docs/QUOTES_SYSTEM.md)",
       "Bash(cp /Users/facundoosti/Dev/lubricentro/backend/QUOTES_FRONTEND.md /Users/facundoosti/Dev/lubricentro/docs/QUOTES_FRONTEND.md)",
-      "Bash(curl -L \"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzdjYWM5MjBjOTRjNjRkMGZiZjZiZWVkYzQ1YjhhMWY1EgsSBxCrts2C3BkYAZIBJAoKcHJvamVjdF9pZBIWQhQxNjI0OTU2NDc1NTQ4MjYyNjUwOQ&filename=&opi=89354086\" -o /tmp/clientes_screen.html)"
+      "Bash(curl -L \"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzdjYWM5MjBjOTRjNjRkMGZiZjZiZWVkYzQ1YjhhMWY1EgsSBxCrts2C3BkYAZIBJAoKcHJvamVjdF9pZBIWQhQxNjI0OTU2NDc1NTQ4MjYyNjUwOQ&filename=&opi=89354086\" -o /tmp/clientes_screen.html)",
+      "Bash(bundle remove:*)"
     ],
     "additionalDirectories": [
       "/Users/facundoosti/Dev/lubricentro/backend"

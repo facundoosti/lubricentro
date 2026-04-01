@@ -1,3 +1,25 @@
+# == Schema Information
+#
+# Table name: vehicles
+#
+#  id            :bigint           not null, primary key
+#  brand         :string           not null
+#  license_plate :string           not null
+#  model         :string           not null
+#  year          :string           not null
+#  created_at    :datetime         not null
+#  updated_at    :datetime         not null
+#  customer_id   :bigint           not null
+#
+# Indexes
+#
+#  index_vehicles_on_customer_id    (customer_id)
+#  index_vehicles_on_license_plate  (license_plate) UNIQUE
+#
+# Foreign Keys
+#
+#  fk_rails_...  (customer_id => customers.id)
+#
 require 'rails_helper'
 
 RSpec.describe VehicleSerializer, type: :serializer do

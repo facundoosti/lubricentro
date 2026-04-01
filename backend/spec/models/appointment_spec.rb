@@ -1,3 +1,30 @@
+# == Schema Information
+#
+# Table name: appointments
+#
+#  id           :bigint           not null, primary key
+#  notes        :text
+#  scheduled_at :datetime         not null
+#  status       :string           default("scheduled"), not null
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
+#  customer_id  :bigint           not null
+#  vehicle_id   :bigint           not null
+#
+# Indexes
+#
+#  index_appointments_on_customer_id                   (customer_id)
+#  index_appointments_on_customer_id_and_scheduled_at  (customer_id,scheduled_at)
+#  index_appointments_on_scheduled_at                  (scheduled_at)
+#  index_appointments_on_status                        (status)
+#  index_appointments_on_vehicle_id                    (vehicle_id)
+#  index_appointments_on_vehicle_id_and_scheduled_at   (vehicle_id,scheduled_at)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (customer_id => customers.id)
+#  fk_rails_...  (vehicle_id => vehicles.id)
+#
 require 'rails_helper'
 
 RSpec.describe Appointment, type: :model do

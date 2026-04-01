@@ -2,10 +2,10 @@
 #
 # Table name: services
 #
-#  id          :integer          not null, primary key
-#  name        :string(100)      not null
-#  description :text
+#  id          :bigint           not null, primary key
 #  base_price  :decimal(10, 2)   not null
+#  description :text
+#  name        :string(100)      not null
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #

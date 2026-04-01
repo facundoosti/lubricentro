@@ -1,3 +1,20 @@
+# == Schema Information
+#
+# Table name: products
+#
+#  id          :bigint           not null, primary key
+#  description :text
+#  name        :string(100)      not null
+#  unit        :string(50)
+#  unit_price  :decimal(10, 2)   not null
+#  created_at  :datetime         not null
+#  updated_at  :datetime         not null
+#
+# Indexes
+#
+#  index_products_on_name        (name) UNIQUE
+#  index_products_on_unit_price  (unit_price)
+#
 require 'rails_helper'
 
 RSpec.describe ProductSerializer do

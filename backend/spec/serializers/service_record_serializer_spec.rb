@@ -1,3 +1,28 @@
+# == Schema Information
+#
+# Table name: service_records
+#
+#  id                :bigint           not null, primary key
+#  mileage           :integer
+#  next_service_date :date
+#  notes             :text
+#  service_date      :date
+#  total_amount      :decimal(, )
+#  created_at        :datetime         not null
+#  updated_at        :datetime         not null
+#  customer_id       :bigint           not null
+#  vehicle_id        :bigint           not null
+#
+# Indexes
+#
+#  index_service_records_on_customer_id  (customer_id)
+#  index_service_records_on_vehicle_id   (vehicle_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (customer_id => customers.id)
+#  fk_rails_...  (vehicle_id => vehicles.id)
+#
 require 'rails_helper'
 
 RSpec.describe ServiceRecordSerializer do

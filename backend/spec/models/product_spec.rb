@@ -2,11 +2,11 @@
 #
 # Table name: products
 #
-#  id          :integer          not null, primary key
-#  name        :string(100)      not null
+#  id          :bigint           not null, primary key
 #  description :text
-#  unit_price  :decimal(10, 2)   not null
+#  name        :string(100)      not null
 #  unit        :string(50)
+#  unit_price  :decimal(10, 2)   not null
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #
