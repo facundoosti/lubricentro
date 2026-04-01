@@ -18,14 +18,15 @@ import { useSidebarStore } from "@stores/useSidebarStore";
 import { useAuthStore } from "@stores/useAuthStore";
 
 const NavItem = ({ name, icon, path, subItems, menuType, index }) => {
-  const { isExpanded, isMobileOpen, isHovered, openSubmenu, toggleSubmenu } = useSidebarStore();
+  const { isExpanded, isMobileOpen, isHovered, openSubmenu, toggleSubmenu } =
+    useSidebarStore();
   const location = useLocation();
   const [subMenuHeight, setSubMenuHeight] = useState(0);
   const subMenuRef = useRef(null);
 
   const isActive = useCallback(
     (path) => location.pathname === path,
-    [location.pathname]
+    [location.pathname],
   );
 
   const hasActiveSubItem = subItems?.some((subItem) => isActive(subItem.path));
@@ -68,7 +69,9 @@ const NavItem = ({ name, icon, path, subItems, menuType, index }) => {
               <span className="flex-1 text-left">{name}</span>
               <ChevronDown
                 className={`w-4 h-4 transition-transform duration-200 ${
-                  isSubmenuOpen ? "menu-item-arrow-active rotate-180" : "menu-item-arrow-inactive"
+                  isSubmenuOpen
+                    ? "menu-item-arrow-active rotate-180"
+                    : "menu-item-arrow-inactive"
                 }`}
               />
             </>
@@ -113,7 +116,9 @@ const NavItem = ({ name, icon, path, subItems, menuType, index }) => {
         >
           <span
             className={`menu-item-icon-size flex-shrink-0 ${
-              isActive(path) ? "menu-item-icon-active" : "menu-item-icon-inactive"
+              isActive(path)
+                ? "menu-item-icon-active"
+                : "menu-item-icon-inactive"
             }`}
           >
             {icon}
@@ -126,7 +131,8 @@ const NavItem = ({ name, icon, path, subItems, menuType, index }) => {
 };
 
 const Sidebar = () => {
-  const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebarStore();
+  const { isExpanded, isMobileOpen, isHovered, setIsHovered } =
+    useSidebarStore();
   const { logout } = useAuthStore();
   const navigate = useNavigate();
   const isVisible = isExpanded || isHovered || isMobileOpen;
@@ -209,7 +215,9 @@ const Sidebar = () => {
         </div>
         {isVisible && (
           <div>
-            <p className="text-sm font-black text-on-surface leading-tight">Lubricentro</p>
+            <p className="text-sm font-black text-on-surface leading-tight">
+              Lubricentro
+            </p>
             <p className="text-[10px] uppercase tracking-widest text-primary font-bold leading-tight">
               Consola Admin
             </p>
@@ -252,7 +260,9 @@ const Sidebar = () => {
             }`}
           >
             <LogOut className="w-5 h-5 flex-shrink-0" />
-            {isVisible && <span className="flex-1 text-left">Cerrar sesión</span>}
+            {isVisible && (
+              <span className="flex-1 text-left">Cerrar sesión</span>
+            )}
           </button>
         </div>
       </div>

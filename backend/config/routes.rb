@@ -41,6 +41,8 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :budgets
+
       resources :service_records do
         collection do
           get :overdue
