@@ -1,9 +1,10 @@
 class Api::V1::CustomersController < ApplicationController
-  before_action :set_customer, only: [ :show, :update, :destroy ]
+  before_action :set_customer, only: [ :update, :destroy ]
+  before_action :set_customer_with_vehicles, only: [ :show ]
 
   # GET /api/v1/customers
   def index
-    @customers = Customer.all
+    @customers = Customer.includes(:avatar_attachment)
     @customers = @customers.by_search(params[:search]) if params[:search].present?
 
     # Paginación con Pagy
@@ -56,6 +57,12 @@ class Api::V1::CustomersController < ApplicationController
 
   def set_customer
     @customer = Customer.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render_json({ errors: [ "Customer not found" ] }, message: "Customer not found", status: :not_found)
+  end
+
+  def set_customer_with_vehicles
+    @customer = Customer.includes(vehicles: :image_attachment).find(params[:id])
   rescue ActiveRecord::RecordNotFound
     render_json({ errors: [ "Customer not found" ] }, message: "Customer not found", status: :not_found)
   end

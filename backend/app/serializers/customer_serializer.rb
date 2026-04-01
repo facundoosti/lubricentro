@@ -25,14 +25,10 @@ class CustomerSerializer < Blueprinter::Base
     ActiveStorageUrlHelper.url_for(customer.avatar)
   end
 
-  field :vehicles_count do |customer|
-    customer.vehicles.count
-  end
-
   view :with_vehicles do
     association :vehicles, blueprint: VehicleSerializer, view: :summary
     field :vehicles_count do |customer|
-      customer.vehicles.count
+      customer.vehicles.size
     end
   end
 
@@ -42,8 +38,5 @@ class CustomerSerializer < Blueprinter::Base
     exclude :address
     exclude :created_at
     exclude :updated_at
-    field :vehicles_count do |customer|
-      customer.vehicles.count
-    end
   end
 end

@@ -102,7 +102,9 @@ RSpec.describe "Api::V1::Customers", type: :request do
 
     context 'with search parameter' do
       let!(:searchable_customer) { create(:customer, name: 'Jane Smith') }
-      let!(:other_customers) { create_list(:customer, 3) }
+      let!(:other_customers) do
+        [ 'Alice Brown', 'Bob Wilson', 'Charlie Davis' ].map { |n| create(:customer, name: n) }
+      end
 
       before do
         get '/api/v1/customers', params: { search: 'Jane' }, headers: auth_headers(user)

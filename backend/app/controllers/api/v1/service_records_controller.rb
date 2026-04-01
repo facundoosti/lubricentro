@@ -5,7 +5,7 @@ class Api::V1::ServiceRecordsController < ApplicationController
 
   # GET /api/v1/service_records
   def index
-    @service_records = ServiceRecord.all
+    @service_records = ServiceRecord.includes(:customer, :vehicle, :photos_attachments)
     @service_records = @service_records.by_customer(params[:customer_id]) if params[:customer_id].present?
     @service_records = @service_records.by_vehicle(params[:vehicle_id]) if params[:vehicle_id].present?
     @service_records = @service_records.by_date_range(params[:start_date], params[:end_date]) if params[:start_date].present? && params[:end_date].present?

@@ -25,7 +25,7 @@ RSpec.describe ProductSerializer do
 
     it 'includes all the required fields' do
       expect(serialized.keys).to contain_exactly(
-        :id, :name, :description, :unit_price, :unit, :created_at, :updated_at
+        :id, :name, :description, :unit_price, :unit, :image_url, :created_at, :updated_at
       )
     end
 
@@ -38,7 +38,7 @@ RSpec.describe ProductSerializer do
     let(:serialized) { ProductSerializer.render_as_hash(product, view: :summary) }
 
     it 'includes only the summary fields' do
-      expect(serialized.keys).to contain_exactly(:id, :name, :unit_price, :unit)
+      expect(serialized.keys).to contain_exactly(:id, :name, :unit_price, :unit, :image_url)
     end
   end
 

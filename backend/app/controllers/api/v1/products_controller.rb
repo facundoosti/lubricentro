@@ -2,7 +2,7 @@ class Api::V1::ProductsController < ApplicationController
   before_action :set_product, only: [ :show, :update, :destroy ]
 
   def index
-    @products = Product.all
+    @products = Product.includes(:image_attachment)
     @products = @products.by_name(params[:search]) if params[:search].present?
 
     @pagy, @products = pagy(@products, items: safe_per_page(params[:per_page]))

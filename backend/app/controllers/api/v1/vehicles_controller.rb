@@ -3,7 +3,7 @@ class Api::V1::VehiclesController < ApplicationController
 
   # GET /api/v1/vehicles
   def index
-    @vehicles = Vehicle.includes(:customer)
+    @vehicles = Vehicle.includes(:customer, :image_attachment)
 
     # Filtros
     @vehicles = @vehicles.by_customer(params[:customer_id]) if params[:customer_id].present?
@@ -70,7 +70,7 @@ class Api::V1::VehiclesController < ApplicationController
   private
 
   def set_vehicle
-    @vehicle = Vehicle.includes(:customer).find(params[:id])
+    @vehicle = Vehicle.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     render_json({ errors: [ "Vehicle not found" ] }, message: "Vehicle not found", status: :not_found)
   end
