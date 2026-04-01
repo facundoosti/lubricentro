@@ -44,7 +44,7 @@ render json: { success: false, errors: ["..."], message: "..." }, status: :unpro
 - `Customer` → has many `Vehicle`s, `Appointment`s, `ServiceRecord`s
 - `Vehicle` → belongs to `Customer`, has many `Appointment`s, `ServiceRecord`s
 - `ServiceRecord` → has many `Service`s and `Product`s (through join tables)
-- `Product` → has vector `embedding` (neighbor gem, 4096 dims) for semantic search via `Product.search_similar(query)`
+- `Product` → name, description, unit_price, unit
 
 ## Key Patterns
 
@@ -66,7 +66,6 @@ POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 SECRET_KEY_BASE=          # rails secret
 JWT_SECRET=
-OPENAI_API_KEY=           # for product embeddings
 ```
 
 ## CI
@@ -78,7 +77,3 @@ GitHub Actions on push/PR to `main`/`develop` (changes in `backend/`):
 - bundle-audit (dependency vulnerabilities)
 
 Deploy target: **Railway**
-
-## AI/Embeddings
-
-`Product` model uses `ruby_llm` + `neighbor` gem for vector similarity search. Embeddings are generated automatically via `before_save` callback using model `text-embedding-qwen3-embedding-8b` (OpenAI-compatible endpoint). Requires `OPENAI_API_KEY` (or compatible) in environment.
