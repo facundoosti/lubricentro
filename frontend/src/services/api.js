@@ -2,9 +2,6 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_BASE_URL}/api/v1`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
   timeout: 10000,
 });
 
@@ -14,6 +11,10 @@ api.interceptors.request.use(
     const token = localStorage.getItem('authToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Solo setear JSON si el body no es FormData (que necesita multipart/form-data con boundary)
+    if (!(config.data instanceof FormData)) {
+      config.headers['Content-Type'] = 'application/json';
     }
     return config;
   },
