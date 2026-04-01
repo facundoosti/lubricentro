@@ -1,25 +1,19 @@
 import { useCallback } from 'react';
-import { useToast } from '@hooks/useToast';
+import { showError } from '@services/notificationService';
 
 export const useModalError = (onCloseModal) => {
-  const toast = useToast();
-
   const handleError = useCallback((error, customMessage = null) => {
-    console.error('Modal error:', error);
-    
-    // Mostrar toast de error
-    const errorMessage = customMessage || 
-      error.response?.data?.message || 
-      error.message || 
+    const message = customMessage ||
+      error.response?.data?.message ||
+      error.message ||
       'Ocurrió un error inesperado';
-    
-    toast.showError(errorMessage);
-    
-    // Cerrar el modal automáticamente
+
+    showError(message);
+
     if (onCloseModal) {
       onCloseModal();
     }
-  }, [toast, onCloseModal]);
+  }, [onCloseModal]);
 
   return { handleError };
-}; 
+};

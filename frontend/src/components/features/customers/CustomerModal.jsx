@@ -1,40 +1,37 @@
-import React from "react";
-import Modal from "@/components/ui/Modal";
-import CustomerForm from "./CustomerForm";
+import { Users } from 'lucide-react';
+import SlideOver from '@ui/SlideOver';
+import CustomerForm from './CustomerForm';
+
+const FORM_ID = 'customer-form';
 
 const CustomerModal = ({
   isOpen,
   onClose,
   onSubmit,
   initialData = null,
-  isLoading = false
+  isLoading = false,
 }) => {
   const isEditing = !!initialData;
-  const title = isEditing ? "Editar Cliente" : "Nuevo Cliente";
-
-  const handleSubmit = (data) => {
-    onSubmit(data);
-  };
-
-  const handleCancel = () => {
-    onClose();
-  };
 
   return (
-    <Modal
+    <SlideOver
       isOpen={isOpen}
       onClose={onClose}
-      title={title}
-      className="max-w-4xl"
+      title={isEditing ? 'Editar Cliente' : 'Nuevo Cliente'}
+      subtitle={isEditing ? initialData.name : 'Completa los datos del cliente'}
+      icon={Users}
+      formId={FORM_ID}
+      submitLabel={isEditing ? 'Guardar Cambios' : 'Crear Cliente'}
+      isLoading={isLoading}
     >
       <CustomerForm
-        onSubmit={handleSubmit}
+        onSubmit={onSubmit}
         initialData={initialData}
         isLoading={isLoading}
-        onCancel={handleCancel}
+        formId={FORM_ID}
       />
-    </Modal>
+    </SlideOver>
   );
 };
 
-export default CustomerModal; 
+export default CustomerModal;

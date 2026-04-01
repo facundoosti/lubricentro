@@ -1,12 +1,11 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import Button from '@ui/Button';
 
-const ServiceForm = ({ 
-  service = null, 
-  onSubmit, 
-  onCancel, 
-  loading = false 
+const ServiceForm = ({
+  service = null,
+  onSubmit,
+  loading = false,
+  formId = 'service-form',
 }) => {
   const {
     register,
@@ -37,7 +36,7 @@ const ServiceForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Nombre */}
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -129,31 +128,6 @@ const ServiceForm = ({
         )}
       </div>
 
-      {/* Botones */}
-      <div className="flex justify-end gap-3 pt-4">
-        <Button
-          type="button"
-          onClick={onCancel}
-          variant="outline"
-          disabled={loading || isSubmitting}
-        >
-          Cancelar
-        </Button>
-        <Button
-          type="submit"
-          disabled={loading || isSubmitting}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          {loading || isSubmitting ? (
-            <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              {service ? 'Actualizando...' : 'Creando...'}
-            </div>
-          ) : (
-            service ? 'Actualizar Servicio' : 'Crear Servicio'
-          )}
-        </Button>
-      </div>
     </form>
   );
 };

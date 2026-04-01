@@ -13,41 +13,41 @@ const MonthlyServicesChart = ({ data }) => {
   const maxServices = chartData.length > 0 ? Math.max(...chartData.map(item => item.services || 0)) : 1;
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
+    <div className="p-5 bg-surface-container border border-outline-variant rounded-lg">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Servicios por Mes</h2>
-        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-          <ServiceIcon className="text-blue-600 size-5" />
-          <span className="text-sm text-gray-600 dark:text-gray-400">
+        <h2 className="text-lg font-semibold text-on-surface">Servicios por Mes</h2>
+        <div className="flex items-center gap-1 text-sm text-secondary">
+          <ServiceIcon className="text-primary size-5" />
+          <span>
             Total: {chartData.reduce((sum, item) => sum + (item.services || 0), 0)} servicios
           </span>
         </div>
       </div>
-      
+
       <div className="space-y-3">
         {chartData.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div className="text-center py-8 text-secondary">
             No hay datos de servicios disponibles
           </div>
         ) : (
           chartData.map((item, index) => (
             <div key={index} className="flex items-center space-x-3">
-              <div className="w-12 text-sm font-medium text-gray-600 dark:text-gray-400">
+              <div className="w-12 text-sm font-medium text-on-surface-variant">
                 {item.month}
               </div>
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
-                  <div className="flex-1 bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  <div className="flex-1 bg-surface-container-high rounded-full h-2">
+                    <div
+                      className="bg-primary h-2 rounded-full transition-all duration-300"
                       style={{ width: `${((item.services || 0) / maxServices) * 100}%` }}
                     ></div>
                   </div>
-                  <span className="text-sm font-medium text-gray-800 dark:text-white min-w-[3rem]">
+                  <span className="text-sm font-medium text-on-surface min-w-[3rem]">
                     {item.services || 0}
                   </span>
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <div className="text-xs text-secondary mt-1">
                   ${(item.revenue || 0).toLocaleString()}
                 </div>
               </div>

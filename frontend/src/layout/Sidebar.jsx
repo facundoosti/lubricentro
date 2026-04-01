@@ -14,11 +14,11 @@ import {
   MoreHorizontal,
   LogOut,
 } from "lucide-react";
-import { useSidebar } from "../contexts/SidebarContext";
-import { useAuth } from "../contexts/AuthContext";
+import { useSidebarStore } from "@stores/useSidebarStore";
+import { useAuthStore } from "@stores/useAuthStore";
 
 const NavItem = ({ name, icon, path, subItems, menuType, index }) => {
-  const { isExpanded, isMobileOpen, isHovered, openSubmenu, toggleSubmenu } = useSidebar();
+  const { isExpanded, isMobileOpen, isHovered, openSubmenu, toggleSubmenu } = useSidebarStore();
   const location = useLocation();
   const [subMenuHeight, setSubMenuHeight] = useState(0);
   const subMenuRef = useRef(null);
@@ -126,8 +126,8 @@ const NavItem = ({ name, icon, path, subItems, menuType, index }) => {
 };
 
 const Sidebar = () => {
-  const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
-  const { logout } = useAuth();
+  const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebarStore();
+  const { logout } = useAuthStore();
   const navigate = useNavigate();
   const isVisible = isExpanded || isHovered || isMobileOpen;
 

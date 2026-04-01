@@ -1,9 +1,5 @@
 import axios from 'axios';
 
-// TODO: Remove this
-console.log("VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
-
-// Crear instancia de Axios
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_BASE_URL}/api/v1`,
   headers: {
@@ -15,53 +11,32 @@ const api = axios.create({
 // Interceptor para requests
 api.interceptors.request.use(
   (config) => {
-    console.log("API Request:", config.method?.toUpperCase(), config.url, config.data);
-    
-    // Agregar token de autenticación si existe
     const token = localStorage.getItem('authToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
     return config;
   },
-  (error) => {
-    console.error("API Request Error:", error);
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Interceptor para responses
 api.interceptors.response.use(
-  (response) => {
-    console.log("API Response:", response.status, response.data);
-    return response;
-  },
+  (response) => response,
   (error) => {
-    console.error("API Response Error:", error.response?.status, error.response?.data);
-    
-    // Manejar errores de autenticación
     if (error.response?.status === 401) {
-      console.log("Token expirado o inválido, redirigiendo a login...");
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
-      
-      // Redirigir a login si no estamos ya ahí
+
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
     }
-    
-    // Manejar errores de servidor
-    if (error.response?.status >= 500) {
-      console.error("Error del servidor:", error.response.data);
-    }
-    
+
     return Promise.reject(error);
   }
 );
 
-// Servicios específicos por entidad
 export const customersAPI = {
   getAll: (params = {}) => api.get('/customers', { params }),
   getById: (id) => api.get(`/customers/${id}`),
@@ -120,4 +95,4 @@ export const serviceRecordsAPI = {
 };
 
 export { api };
-export default api; 
+export default api;

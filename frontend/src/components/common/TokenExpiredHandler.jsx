@@ -1,20 +1,17 @@
 import { useEffect } from 'react';
-import { useAuth } from '@contexts/AuthContext';
-import { useNotificationService } from '@services/notificationService';
+import { useAuthStore } from '@stores/useAuthStore';
+import { showAuthError } from '@services/notificationService';
 
 const TokenExpiredHandler = () => {
-  const { user, isAuthenticated } = useAuth();
-  const notification = useNotificationService();
+  const { user, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    // Verificar si el usuario está autenticado pero no hay datos de usuario
-    // Esto puede indicar que el token expiró
     if (isAuthenticated && !user) {
-      notification.showAuthError('TOKEN_EXPIRED');
+      showAuthError('TOKEN_EXPIRED');
     }
-  }, [isAuthenticated, user, notification]);
+  }, [isAuthenticated, user]);
 
-  return null; // Este componente no renderiza nada
+  return null;
 };
 
-export default TokenExpiredHandler; 
+export default TokenExpiredHandler;

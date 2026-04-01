@@ -1,13 +1,11 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import InputField from "@/components/ui/InputField";
-import Button from "@/components/ui/Button";
 
-const CustomerForm = ({ 
-  onSubmit, 
-  initialData = null, 
+const CustomerForm = ({
+  onSubmit,
+  initialData = null,
   isLoading = false,
-  onCancel 
+  formId = 'customer-form',
 }) => {
   const {
     register,
@@ -28,16 +26,11 @@ const CustomerForm = ({
     onSubmit(data);
   };
 
-  const handleCancel = () => {
-    reset();
-    onCancel();
-  };
-
   console.log("CustomerForm - errors:", errors);
   console.log("CustomerForm - isLoading:", isLoading);
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -124,23 +117,6 @@ const CustomerForm = ({
         </div>
       </div>
 
-      <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleCancel}
-          disabled={isLoading}
-        >
-          Cancelar
-        </Button>
-        <Button
-          type="submit"
-          loading={isLoading}
-          disabled={isLoading}
-        >
-          {initialData ? "Actualizar" : "Crear"} Cliente
-        </Button>
-      </div>
     </form>
   );
 };

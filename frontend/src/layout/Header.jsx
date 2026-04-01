@@ -1,15 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSidebar } from '@contexts/SidebarContext';
-import { useAuth } from '@contexts/AuthContext';
-import { useNotificationService } from '@services/notificationService';
+import { useSidebarStore } from '@stores/useSidebarStore';
+import { useAuthStore } from '@stores/useAuthStore';
+import { showAuthSuccess } from '@services/notificationService';
 import { LogOut, User, Search, Bell, Settings, Menu, X } from 'lucide-react';
 
 const Header = () => {
-  const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
-  const { user, logout } = useAuth();
+  const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebarStore();
+  const { user, logout } = useAuthStore();
   const navigate = useNavigate();
-  const notification = useNotificationService();
   const inputRef = useRef(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -23,7 +22,7 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
-    notification.showAuthSuccess('LOGOUT_SUCCESS');
+    showAuthSuccess('LOGOUT_SUCCESS');
     navigate('/login');
   };
 

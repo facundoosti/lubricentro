@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
+import { showAppointmentSuccess, showAppointmentError } from '@services/notificationService';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -12,7 +13,7 @@ import {
   useUpdateAppointment, 
   useDeleteAppointment 
 } from '@services/appointmentsService';
-import { useNotificationService } from "@services/notificationService";
+
 
 const Appointments = () => {
   const calendarRef = useRef(null);
@@ -21,9 +22,6 @@ const Appointments = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
-
-  // Servicio de notificaciones
-  const notification = useNotificationService();
 
   // Obtener año y mes actual
   const currentYear = currentDate.getFullYear();
@@ -92,17 +90,17 @@ const Appointments = () => {
           id: selectedAppointment.id,
           data: data
         });
-        notification.showAppointmentSuccess('UPDATED');
+        showAppointmentSuccess('UPDATED');
       } else {
         // Create new appointment
         await createAppointmentMutation.mutateAsync(data);
-        notification.showAppointmentSuccess('CREATED');
+        showAppointmentSuccess('CREATED');
       }
       setIsModalOpen(false);
       setSelectedAppointment(null);
     } catch (error) {
       console.error('Error saving appointment:', error);
-      notification.showAppointmentError('ERROR_CREATE', error.response?.data?.message || error.message);
+      showAppointmentError('ERROR_CREATE', error.response?.data?.message || error.message);
     }
   };
 
@@ -112,12 +110,12 @@ const Appointments = () => {
 
     try {
       await deleteAppointmentMutation.mutateAsync(appointmentToDelete.id);
-      notification.showAppointmentSuccess('DELETED');
+      showAppointmentSuccess('DELETED');
       setIsDeleteModalOpen(false);
       setAppointmentToDelete(null);
     } catch (error) {
       console.error('Error deleting appointment:', error);
-      notification.showAppointmentError('ERROR_DELETE', error.response?.data?.message || error.message);
+      showAppointmentError('ERROR_DELETE', error.response?.data?.message || error.message);
     }
   };
 

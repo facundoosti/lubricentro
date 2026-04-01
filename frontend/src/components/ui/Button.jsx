@@ -17,14 +17,14 @@ const Button = ({
   const baseStyles = "inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
 
   const variants = {
-    primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
-    secondary: "bg-gray-200 text-gray-900 hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 focus:ring-gray-500",
-    outline: "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 focus:ring-gray-500",
-    ghost: "text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-800 focus:ring-gray-500",
-    danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
-    success: "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500",
-    error: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
-    warning: "bg-yellow-600 text-white hover:bg-yellow-700 focus:ring-yellow-500",
+    primary: "bg-primary-container text-on-primary hover:brightness-110 focus:ring-primary",
+    secondary: "bg-surface-container-high border border-outline-variant text-on-surface hover:brightness-110 focus:ring-outline-variant",
+    outline: "border border-outline text-on-surface bg-transparent hover:bg-surface-container-high focus:ring-outline",
+    ghost: "text-on-surface hover:bg-surface-container-high focus:ring-outline-variant",
+    danger: "bg-error text-white hover:brightness-90 focus:ring-error",
+    success: "bg-[var(--color-success-500)] text-white hover:brightness-90 focus:ring-[var(--color-success-500)]",
+    error: "bg-error text-white hover:brightness-90 focus:ring-error",
+    warning: "bg-[var(--color-warning-500)] text-white hover:brightness-90 focus:ring-[var(--color-warning-500)]",
   };
 
   const sizes = {

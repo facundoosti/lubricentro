@@ -1,21 +1,17 @@
-import React from 'react';
-import Modal from '@ui/Modal';
+import { Package } from 'lucide-react';
+import SlideOver from '@ui/SlideOver';
 import ProductForm from '@components/features/products/ProductForm';
 import { useCreateProduct, useUpdateProduct } from '@services/productsService';
-import { useToast } from '@hooks/useToast';
+import { showSuccess, showError } from '@services/notificationService';
 
-const ProductModal = ({ 
-  isOpen, 
-  onClose, 
-  product = null, 
-  onSuccess 
-}) => {
-  const { showSuccess, showError } = useToast();
+const FORM_ID = 'product-form';
+
+const ProductModal = ({ isOpen, onClose, product = null, onSuccess }) => {
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
 
   const isEditing = !!product;
-  const title = isEditing ? 'Editar Producto' : 'Nuevo Producto';
+  const isLoading = createProduct.isPending || updateProduct.isPending;
 
   const handleSubmit = async (data) => {
     try {
@@ -26,47 +22,30 @@ const ProductModal = ({
         await createProduct.mutateAsync(data);
         showSuccess('Producto creado exitosamente');
       }
-      
       onClose();
-      if (onSuccess) {
-        onSuccess();
-      }
+      if (onSuccess) onSuccess();
     } catch (error) {
-      console.error('Error saving product:', error);
-      
-      let errorMessage = 'Error al guardar el producto';
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.response?.data?.errors) {
-        const errors = error.response.data.errors;
-        errorMessage = Object.values(errors).flat().join(', ');
-      }
-      
-      showError(errorMessage);
+      const msg = error.response?.data?.errors
+        ? Object.values(error.response.data.errors).flat().join(', ')
+        : error.response?.data?.message || 'Error al guardar el producto';
+      showError(msg);
     }
   };
 
-  const handleCancel = () => {
-    onClose();
-  };
-
-  const isLoading = createProduct.isLoading || updateProduct.isLoading;
-
   return (
-    <Modal
+    <SlideOver
       isOpen={isOpen}
-      onClose={handleCancel}
-      title={title}
-      size="lg"
+      onClose={onClose}
+      title={isEditing ? 'Editar Producto' : 'Nuevo Producto'}
+      subtitle={isEditing ? `ID: ${product.id}` : 'Completa los datos del producto'}
+      icon={Package}
+      formId={FORM_ID}
+      submitLabel={isEditing ? 'Guardar Cambios' : 'Crear Producto'}
+      isLoading={isLoading}
     >
-      <ProductForm
-        product={product}
-        onSubmit={handleSubmit}
-        onCancel={handleCancel}
-        loading={isLoading}
-      />
-    </Modal>
+      <ProductForm product={product} onSubmit={handleSubmit} loading={isLoading} formId={FORM_ID} />
+    </SlideOver>
   );
 };
 
-export default ProductModal; 
+export default ProductModal;

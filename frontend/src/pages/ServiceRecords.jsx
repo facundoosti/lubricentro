@@ -1,94 +1,82 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import ServiceRecordsTable from "@components/features/service-records/ServiceRecordsTable";
+import ServiceRecordModal from "@components/features/service-records/ServiceRecordModal";
 import { useServiceRecords, useDeleteServiceRecord } from "@services/serviceRecordsService";
-import { useNotificationService } from "@services/notificationService";
+import { showServiceRecordSuccess, showServiceRecordError } from "@services/notificationService";
+import PageHeader from "@ui/PageHeader";
+import PageError from "@ui/PageError";
+import ConfirmModal from "@ui/ConfirmModal";
 
 const ServiceRecords = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [perPage] = useState(10);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState(null);
 
-  // Servicio de notificaciones
-  const notification = useNotificationService();
-
-  // Query para obtener atenciones con paginación y búsqueda
-  const {
-    data,
-    isLoading,
-    error
-  } = useServiceRecords({
+  const { data, isLoading, error } = useServiceRecords({
     page: currentPage,
     per_page: perPage,
     search: searchTerm,
   });
 
-  // Mutation para eliminar atenciones
   const deleteServiceRecordMutation = useDeleteServiceRecord();
 
   const records = data?.data?.service_records || [];
   const pagination = data?.data?.pagination;
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
+  const handlePageChange = (page) => setCurrentPage(page);
 
   const handleSearch = (term) => {
     setSearchTerm(term);
-    setCurrentPage(1); // Reset a la primera página al buscar
-  };
-
-  const handleDelete = async (record) => {
-    if (confirm(`¿Estás seguro de que quieres eliminar la atención del ${record.service_date}?`)) {
-      try {
-        await deleteServiceRecordMutation.mutateAsync(record.id);
-        notification.showServiceRecordSuccess('DELETED');
-      } catch (error) {
-        console.error("Error al eliminar la atención:", error);
-        notification.showServiceRecordError('ERROR_DELETE', error.response?.data?.message || error.message);
-      }
-    }
-  };
-
-  const handleEdit = (record) => {
-    console.log("Editar atención:", record);
-    notification.showInfo('Funcionalidad de edición en desarrollo');
-  };
-
-  const handleView = (record) => {
-    console.log("Ver atención:", record);
-    notification.showInfo('Funcionalidad de vista detallada en desarrollo');
+    setCurrentPage(1);
   };
 
   const handleCreate = () => {
-    console.log("Crear nueva atención");
-    notification.showInfo('Funcionalidad de creación en desarrollo');
+    setSelectedRecord(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (record) => {
+    setSelectedRecord(record);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedRecord(null);
+  };
+
+  const handleDelete = (record) => {
+    setRecordToDelete(record);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteServiceRecordMutation.mutateAsync(recordToDelete.id);
+      setIsDeleteModalOpen(false);
+      setRecordToDelete(null);
+      showServiceRecordSuccess('DELETED');
+    } catch (err) {
+      showServiceRecordError('ERROR_DELETE', err.response?.data?.message || err.message);
+    }
   };
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="text-red-600 text-lg font-medium mb-2">
-            Error al cargar las atenciones
-          </div>
-          <div className="text-gray-600">
-            {error.message || 'Ha ocurrido un error inesperado'}
-          </div>
-        </div>
-      </div>
+      <PageError
+        title="Error al cargar las atenciones"
+        message={error.message || 'Ha ocurrido un error inesperado'}
+      />
     );
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Atenciones
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Gestiona todas las atenciones y servicios realizados
-        </p>
-      </div>
+      <PageHeader title="Atenciones" description="Gestiona todas las atenciones y servicios realizados" />
 
       <ServiceRecordsTable
         serviceRecords={records}
@@ -97,12 +85,29 @@ const ServiceRecords = () => {
         onSearch={handleSearch}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        onView={handleView}
+        onView={handleEdit}
         onCreate={handleCreate}
         loading={isLoading || deleteServiceRecordMutation.isPending}
+      />
+
+      <ServiceRecordModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        record={selectedRecord}
+      />
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => { setIsDeleteModalOpen(false); setRecordToDelete(null); }}
+        onConfirm={handleDeleteConfirm}
+        title="Eliminar Atención"
+        message={`¿Estás seguro de que quieres eliminar la atención del ${recordToDelete?.service_date}? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        loading={deleteServiceRecordMutation.isPending}
       />
     </div>
   );
 };
 
-export default ServiceRecords; 
+export default ServiceRecords;

@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import Button from "@ui/Button";
 import CustomerSearchInput from "@components/features/customers/CustomerSearchInput";
 
 const VehicleForm = ({
   onSubmit,
   vehicle = null,
   isLoading = false,
-  onCancel,
-  customerId = null
+  customerId = null,
+  formId = 'vehicle-form',
 }) => {
   const [selectedCustomerId, setSelectedCustomerId] = useState(customerId || "");
 
@@ -79,7 +78,7 @@ const VehicleForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Marca */}
         <div>
@@ -235,23 +234,6 @@ const VehicleForm = ({
         </div>
       </div>
 
-      <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isLoading}
-        >
-          Cancelar
-        </Button>
-        <Button
-          type="submit"
-          loading={isLoading}
-          disabled={isLoading}
-        >
-          {vehicle ? "Actualizar" : "Crear"} Vehículo
-        </Button>
-      </div>
     </form>
   );
 };

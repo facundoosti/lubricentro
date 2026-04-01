@@ -5,7 +5,7 @@ import TextArea from '@ui/TextArea';
 import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
 import { useEffect } from 'react';
 
-const AppointmentForm = ({ onSubmit, initialData, isLoading, onCancel }) => {
+const AppointmentForm = ({ onSubmit, initialData, isLoading, formId = 'appointment-form' }) => {
   // Función para obtener la fecha y hora actual
   const getCurrentDateTime = () => {
     const now = new Date();
@@ -127,7 +127,7 @@ const AppointmentForm = ({ onSubmit, initialData, isLoading, onCancel }) => {
   const customerError = !selectedCustomerId ? 'Cliente es requerido' : null;
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Cliente */}
       <div>
         <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
@@ -258,23 +258,6 @@ const AppointmentForm = ({ onSubmit, initialData, isLoading, onCancel }) => {
         />
       </div>
 
-      {/* Botones */}
-      <div className="flex items-center gap-3 sm:justify-end">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
-        >
-          Cancelar
-        </button>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="flex w-full justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50 sm:w-auto"
-        >
-          {isLoading ? 'Guardando...' : (initialData ? 'Actualizar' : 'Crear')}
-        </button>
-      </div>
     </form>
   );
 };

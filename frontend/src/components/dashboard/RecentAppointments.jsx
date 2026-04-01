@@ -31,10 +31,10 @@ const RecentAppointments = ({ data }) => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'confirmed': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
-      case 'cancelled': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+      case 'confirmed': return 'bg-tertiary/15 text-tertiary';
+      case 'pending': return 'bg-warning-500/15 text-warning-500';
+      case 'cancelled': return 'bg-error-container text-on-error-container';
+      default: return 'bg-surface-container-high text-secondary';
     }
   };
 
@@ -48,40 +48,40 @@ const RecentAppointments = ({ data }) => {
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md dark:bg-boxdark">
-      <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Turnos Recientes</h2>
-      <div className="space-y-4">
+    <div className="p-5 bg-surface-container border border-outline-variant rounded-lg">
+      <h2 className="mb-4 text-lg font-semibold text-on-surface">Turnos Recientes</h2>
+      <div className="space-y-3">
         {appointments.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div className="text-center py-8 text-secondary">
             No hay turnos programados para hoy
           </div>
         ) : (
           appointments.map((appointment) => (
-            <div key={appointment.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg dark:border-gray-700">
+            <div key={appointment.id} className="flex items-center justify-between p-3 border border-outline-variant rounded-lg bg-surface-container-high">
               <div className="flex items-center space-x-3">
-                <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg dark:bg-blue-900">
-                  <CalendarIcon className="text-blue-600 size-5 dark:text-blue-400" />
+                <div className="flex items-center justify-center w-10 h-10 bg-primary-container/20 rounded-lg">
+                  <CalendarIcon className="text-primary size-5" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-800 dark:text-white">
+                  <p className="font-medium text-on-surface">
                     {appointment.customer}
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-on-surface-variant">
                     {appointment.vehicle}
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">
+                  <p className="text-sm text-secondary">
                     {appointment.service}
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <div className="flex items-center space-x-2">
-                  <ClockIcon className="text-gray-400 size-4" />
-                  <span className="text-sm font-medium text-gray-800 dark:text-white">
+                <div className="flex items-center space-x-2 justify-end">
+                  <ClockIcon className="text-secondary size-4" />
+                  <span className="text-sm font-medium text-on-surface">
                     {appointment.time}
                   </span>
                 </div>
-                <span className={`inline-block px-2 py-1 text-xs rounded-full ${getStatusColor(appointment.status)}`}>
+                <span className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${getStatusColor(appointment.status)}`}>
                   {getStatusText(appointment.status)}
                 </span>
               </div>

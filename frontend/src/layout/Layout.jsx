@@ -1,12 +1,22 @@
+import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { SidebarProvider, useSidebar } from '@contexts/SidebarContext';
+import { useSidebarStore } from '@stores/useSidebarStore';
 import Header from '@layout/Header';
 import Sidebar from '@layout/Sidebar';
 import TokenExpiredHandler from '@common/TokenExpiredHandler';
 
-const LayoutContent = () => {
-  const { isExpanded, isHovered } = useSidebar();
-  
+const Layout = () => {
+  const { isExpanded, isHovered, setIsMobile } = useSidebarStore();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [setIsMobile]);
+
   return (
     <div className="bg-background text-on-surface min-h-screen">
       <TokenExpiredHandler />
@@ -29,12 +39,4 @@ const LayoutContent = () => {
   );
 };
 
-const Layout = () => {
-  return (
-    <SidebarProvider>
-      <LayoutContent />
-    </SidebarProvider>
-  );
-};
-
-export default Layout; 
+export default Layout;

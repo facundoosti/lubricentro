@@ -1,22 +1,17 @@
-import React from 'react';
-import Modal from '@ui/Modal';
+import { Car } from 'lucide-react';
+import SlideOver from '@ui/SlideOver';
 import VehicleForm from '@components/features/vehicles/VehicleForm';
 import { useCreateVehicle, useUpdateVehicle } from '@services/vehiclesService';
-import { useToast } from '@hooks/useToast';
+import { showSuccess, showError } from '@services/notificationService';
 
-const VehicleModal = ({ 
-  isOpen, 
-  onClose, 
-  vehicle = null, 
-  customerId = null,
-  onSuccess 
-}) => {
-  const { showSuccess, showError } = useToast();
+const FORM_ID = 'vehicle-form';
+
+const VehicleModal = ({ isOpen, onClose, vehicle = null, customerId = null, onSuccess }) => {
   const createVehicle = useCreateVehicle();
   const updateVehicle = useUpdateVehicle();
 
   const isEditing = !!vehicle;
-  const title = isEditing ? 'Editar Vehículo' : 'Nuevo Vehículo';
+  const isLoading = createVehicle.isPending || updateVehicle.isPending;
 
   const handleSubmit = async (data) => {
     try {
@@ -27,48 +22,36 @@ const VehicleModal = ({
         await createVehicle.mutateAsync(data);
         showSuccess('Vehículo creado exitosamente');
       }
-      
       onClose();
-      if (onSuccess) {
-        onSuccess();
-      }
+      if (onSuccess) onSuccess();
     } catch (error) {
-      console.error('Error saving vehicle:', error);
-      
-      let errorMessage = 'Error al guardar el vehículo';
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.response?.data?.errors) {
-        const errors = error.response.data.errors;
-        errorMessage = Object.values(errors).flat().join(', ');
-      }
-      
-      showError(errorMessage);
+      const msg = error.response?.data?.errors
+        ? Object.values(error.response.data.errors).flat().join(', ')
+        : error.response?.data?.message || 'Error al guardar el vehículo';
+      showError(msg);
     }
   };
 
-  const handleCancel = () => {
-    onClose();
-  };
-
-  const isLoading = createVehicle.isLoading || updateVehicle.isLoading;
-
   return (
-    <Modal
+    <SlideOver
       isOpen={isOpen}
-      onClose={handleCancel}
-      title={title}
-      size="lg"
+      onClose={onClose}
+      title={isEditing ? 'Editar Vehículo' : 'Nuevo Vehículo'}
+      subtitle={isEditing ? `${vehicle.brand} ${vehicle.model} · ${vehicle.license_plate}` : 'Completa los datos del vehículo'}
+      icon={Car}
+      formId={FORM_ID}
+      submitLabel={isEditing ? 'Guardar Cambios' : 'Crear Vehículo'}
+      isLoading={isLoading}
     >
       <VehicleForm
         vehicle={vehicle}
         customerId={customerId}
         onSubmit={handleSubmit}
-        onCancel={handleCancel}
         isLoading={isLoading}
+        formId={FORM_ID}
       />
-    </Modal>
+    </SlideOver>
   );
 };
 
-export default VehicleModal; 
+export default VehicleModal;
