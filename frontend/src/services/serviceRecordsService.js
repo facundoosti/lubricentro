@@ -75,12 +75,21 @@ export const useUpcomingServiceRecords = () => {
   });
 };
 
-// Helper: build FormData for multipart uploads
+// Helper: build FormData for multipart uploads (only when photos are present)
 const toFormData = (namespace, data) => {
   const fd = new FormData();
   Object.entries(data).forEach(([key, value]) => {
     if (value === null || value === undefined) return;
-    if (Array.isArray(value)) {
+    if (key === 'service_record_services_attributes' || key === 'service_record_products_attributes') {
+      // Serialize nested arrays into indexed FormData keys
+      value.forEach((item, idx) => {
+        Object.entries(item).forEach(([k, v]) => {
+          if (v !== null && v !== undefined) {
+            fd.append(`${namespace}[${key}][${idx}][${k}]`, v);
+          }
+        });
+      });
+    } else if (Array.isArray(value)) {
       value.forEach((v) => fd.append(`${namespace}[${key}][]`, v));
     } else {
       fd.append(`${namespace}[${key}]`, value);
@@ -107,7 +116,6 @@ export const useCreateServiceRecord = () => {
       queryClient.invalidateQueries({ queryKey: serviceRecordKeys.statistics() });
     },
     onError: (error) => {
-      console.error('Error:', error);
       throw error;
     },
   });
@@ -131,7 +139,6 @@ export const useUpdateServiceRecord = () => {
       queryClient.invalidateQueries({ queryKey: serviceRecordKeys.statistics() });
     },
     onError: (error) => {
-      console.error('Error:', error);
       throw error;
     },
   });

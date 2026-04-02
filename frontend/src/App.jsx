@@ -20,6 +20,7 @@ import Appointments from "@pages/Appointments";
 import Budgets from "@pages/Budgets";
 import BudgetForm from "@pages/BudgetForm";
 import BudgetPrint from "@pages/BudgetPrint";
+import ServiceRecordFormPage from "@pages/ServiceRecordFormPage";
 
 function App() {
   return (
@@ -55,6 +56,8 @@ function App() {
               <Route path="vehicles" element={<Vehicles />} />
               <Route path="services" element={<Services />} />
               <Route path="products" element={<Products />} />
+              <Route path="atenciones/nueva" element={<ServiceRecordFormPage />} />
+              <Route path="atenciones/:id/editar" element={<ServiceRecordFormPage />} />
               <Route path="presupuestos" element={<Budgets />} />
               <Route path="presupuestos/nuevo" element={<BudgetForm />} />
               <Route path="presupuestos/:id/editar" element={<BudgetForm />} />

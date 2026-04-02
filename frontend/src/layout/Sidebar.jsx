@@ -3,10 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutGrid,
   Calendar,
-  ClipboardList,
   Users,
-  Car,
-  FileText,
   Package,
   Wrench,
   Settings,
@@ -162,12 +159,8 @@ const Sidebar = () => {
       subItems: [
         { name: "Turnos", path: "/appointments" },
         { name: "Atenciones", path: "/service-records" },
+        { name: "Presupuestos", path: "/presupuestos" },
       ],
-    },
-    {
-      name: "Presupuestos",
-      icon: <FileText className="w-5 h-5" />,
-      path: "/presupuestos",
     },
     {
       name: "Catálogo",

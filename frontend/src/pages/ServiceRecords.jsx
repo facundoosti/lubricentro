@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ServiceRecordsTable from "@components/features/service-records/ServiceRecordsTable";
-import ServiceRecordModal from "@components/features/service-records/ServiceRecordModal";
 import { useServiceRecords, useDeleteServiceRecord } from "@services/serviceRecordsService";
 import { showServiceRecordSuccess, showServiceRecordError } from "@services/notificationService";
 import PageHeader from "@ui/PageHeader";
@@ -8,11 +8,10 @@ import PageError from "@ui/PageError";
 import ConfirmModal from "@ui/ConfirmModal";
 
 const ServiceRecords = () => {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [perPage] = useState(10);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState(null);
 
@@ -34,20 +33,9 @@ const ServiceRecords = () => {
     setCurrentPage(1);
   };
 
-  const handleCreate = () => {
-    setSelectedRecord(null);
-    setIsModalOpen(true);
-  };
+  const handleCreate = () => navigate('/atenciones/nueva');
 
-  const handleEdit = (record) => {
-    setSelectedRecord(record);
-    setIsModalOpen(true);
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setSelectedRecord(null);
-  };
+  const handleEdit = (record) => navigate(`/atenciones/${record.id}/editar`);
 
   const handleDelete = (record) => {
     setRecordToDelete(record);
@@ -88,12 +76,6 @@ const ServiceRecords = () => {
         onView={handleEdit}
         onCreate={handleCreate}
         loading={isLoading || deleteServiceRecordMutation.isPending}
-      />
-
-      <ServiceRecordModal
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        record={selectedRecord}
       />
 
       <ConfirmModal

@@ -137,7 +137,6 @@ export const useCreateAppointment = () => {
     },
     onError: (error) => {
       console.error('Error creating appointment:', error);
-      throw error;
     },
   });
 };
@@ -156,7 +155,6 @@ export const useUpdateAppointment = () => {
     },
     onError: (error) => {
       console.error('Error updating appointment:', error);
-      throw error;
     },
   });
 };
@@ -174,7 +172,6 @@ export const useDeleteAppointment = () => {
     },
     onError: (error) => {
       console.error('Error deleting appointment:', error);
-      throw error;
     },
   });
 };

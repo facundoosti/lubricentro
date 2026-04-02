@@ -29,6 +29,7 @@
 class Appointment < ApplicationRecord
   belongs_to :customer
   belongs_to :vehicle
+  has_one :service_record
 
   # Validaciones
   validates :scheduled_at, presence: true

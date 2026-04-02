@@ -7,19 +7,22 @@
 #  next_service_date :date
 #  notes             :text
 #  service_date      :date
-#  total_amount      :decimal(, )
+#  total_amount      :decimal(, )      default(0.0)
 #  created_at        :datetime         not null
 #  updated_at        :datetime         not null
+#  appointment_id    :bigint
 #  customer_id       :bigint           not null
 #  vehicle_id        :bigint           not null
 #
 # Indexes
 #
-#  index_service_records_on_customer_id  (customer_id)
-#  index_service_records_on_vehicle_id   (vehicle_id)
+#  index_service_records_on_appointment_id  (appointment_id) UNIQUE
+#  index_service_records_on_customer_id     (customer_id)
+#  index_service_records_on_vehicle_id      (vehicle_id)
 #
 # Foreign Keys
 #
+#  fk_rails_...  (appointment_id => appointments.id)
 #  fk_rails_...  (customer_id => customers.id)
 #  fk_rails_...  (vehicle_id => vehicles.id)
 #
@@ -27,6 +30,7 @@
 class ServiceRecord < ApplicationRecord
   belongs_to :customer
   belongs_to :vehicle
+  belongs_to :appointment, optional: true
 
   # Relaciones con servicios y productos
   has_many :service_record_services, dependent: :destroy
@@ -35,12 +39,16 @@ class ServiceRecord < ApplicationRecord
   has_many :products, through: :service_record_products
   has_many_attached :photos
 
+  accepts_nested_attributes_for :service_record_services, allow_destroy: true
+  accepts_nested_attributes_for :service_record_products, allow_destroy: true
+
   # Validaciones
   validates :service_date, presence: true
-  validates :total_amount, presence: true, numericality: { greater_than_or_equal_to: 0 }
-  validates :mileage, presence: true, numericality: { greater_than: 0 }
+  validates :total_amount, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :mileage, numericality: { greater_than: 0 }, allow_nil: true
   validates :customer_id, presence: true
   validates :vehicle_id, presence: true
+  validates :appointment_id, uniqueness: true, allow_nil: true
 
   # Validaciones de fecha
   validate :service_date_cannot_be_in_future

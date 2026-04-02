@@ -71,6 +71,12 @@ class AppointmentSerializer < Blueprinter::Base
     field :is_overdue do |appointment|
       appointment.is_overdue?
     end
+    field :service_record_id do |appointment|
+      appointment.service_record&.id
+    end
+    field :has_service_record do |appointment|
+      appointment.service_record.present?
+    end
     association :customer, blueprint: CustomerSerializer, view: :summary
     association :vehicle, blueprint: VehicleSerializer, view: :summary
   end

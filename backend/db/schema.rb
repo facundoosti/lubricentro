@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_01_130001) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_01_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -183,7 +183,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_01_130001) do
 
   create_table "service_records", force: :cascade do |t|
     t.date "service_date"
-    t.decimal "total_amount"
+    t.decimal "total_amount", default: "0.0"
     t.text "notes"
     t.integer "mileage"
     t.date "next_service_date"
@@ -191,6 +191,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_01_130001) do
     t.bigint "vehicle_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "appointment_id"
+    t.index ["appointment_id"], name: "index_service_records_on_appointment_id", unique: true
     t.index ["customer_id"], name: "index_service_records_on_customer_id"
     t.index ["vehicle_id"], name: "index_service_records_on_vehicle_id"
   end
@@ -239,6 +241,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_01_130001) do
   add_foreign_key "service_record_products", "service_records"
   add_foreign_key "service_record_services", "service_records"
   add_foreign_key "service_record_services", "services"
+  add_foreign_key "service_records", "appointments"
   add_foreign_key "service_records", "customers"
   add_foreign_key "service_records", "vehicles"
   add_foreign_key "vehicles", "customers"

@@ -3,7 +3,7 @@ import { useVehicles } from '@services/vehiclesService';
 import InputField from '@ui/InputField';
 import TextArea from '@ui/TextArea';
 import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const AppointmentForm = ({ onSubmit, initialData, isLoading, formId = 'appointment-form' }) => {
   // Función para obtener la fecha y hora actual
@@ -23,8 +23,10 @@ const AppointmentForm = ({ onSubmit, initialData, isLoading, formId = 'appointme
 
   const currentDateTime = getCurrentDateTime();
 
-  const { register, handleSubmit, formState: { errors }, watch, setValue, trigger } = useForm({
-    defaultValues: initialData || {
+  const [submitted, setSubmitted] = useState(false);
+
+  const { register, handleSubmit, formState: { errors }, watch, setValue, trigger, reset } = useForm({
+    defaultValues: {
       customer_id: '',
       vehicle_id: '',
       scheduled_date: currentDateTime.date,
@@ -57,13 +59,6 @@ const AppointmentForm = ({ onSubmit, initialData, isLoading, formId = 'appointme
     }
   }
 
-  // Debug logs
-  console.log('AppointmentForm - selectedCustomerId:', selectedCustomerId);
-  console.log('AppointmentForm - vehiclesData:', vehiclesData);
-  console.log('AppointmentForm - vehiclesLoading:', vehiclesLoading);
-  console.log('AppointmentForm - vehiclesError:', vehiclesError);
-  console.log('AppointmentForm - vehicles:', vehicles);
-
   const statusOptions = [
     { value: 'scheduled', label: 'Agendado' },
     { value: 'confirmed', label: 'Confirmado' },
@@ -80,6 +75,7 @@ const AppointmentForm = ({ onSubmit, initialData, isLoading, formId = 'appointme
   ];
 
   const handleFormSubmit = (data) => {
+    setSubmitted(true);
     // Validate customer_id before submission
     if (!data.customer_id) {
       return;
@@ -101,30 +97,57 @@ const AppointmentForm = ({ onSubmit, initialData, isLoading, formId = 'appointme
 
   // Effect to handle initial data when editing
   useEffect(() => {
-    if (initialData && initialData.scheduled_at) {
-      const date = new Date(initialData.scheduled_at);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      
-      setValue('scheduled_date', `${year}-${month}-${day}`);
-      setValue('scheduled_time', `${hours}:${minutes}`);
+    if (initialData) {
+      let scheduled_date = currentDateTime.date;
+      let scheduled_time = currentDateTime.time;
+
+      if (initialData.scheduled_at) {
+        const date = new Date(initialData.scheduled_at);
+        scheduled_date = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        scheduled_time = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+      }
+
+      reset({
+        customer_id: initialData.customer_id || initialData.customer?.id || '',
+        vehicle_id: initialData.vehicle_id || initialData.vehicle?.id || '',
+        scheduled_date,
+        scheduled_time,
+        status: initialData.status || 'scheduled',
+        notes: initialData.notes || '',
+      });
+    } else {
+      reset({
+        customer_id: '',
+        vehicle_id: '',
+        scheduled_date: currentDateTime.date,
+        scheduled_time: currentDateTime.time,
+        status: 'scheduled',
+        notes: '',
+      });
     }
-  }, [initialData, setValue]);
+  }, [initialData]);
+
+  // When editing, set vehicle_id once vehicles finish loading
+  useEffect(() => {
+    if (initialData && vehicles.length > 0) {
+      const vehicleId = initialData.vehicle_id || initialData.vehicle?.id;
+      if (vehicleId) {
+        setValue('vehicle_id', String(vehicleId));
+      }
+    }
+  }, [vehicles, initialData, setValue]);
 
   const handleCustomerChange = async (customerId) => {
     setValue('customer_id', customerId);
     // Clear vehicle selection when customer changes
     setValue('vehicle_id', '');
-    
+
     // Trigger validation for customer_id field
     await trigger('customer_id');
   };
 
-  // Custom validation for customer_id
-  const customerError = !selectedCustomerId ? 'Cliente es requerido' : null;
+  // Custom validation for customer_id — only show after a submit attempt
+  const customerError = submitted && !selectedCustomerId ? 'Cliente es requerido' : null;
 
   return (
     <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
@@ -138,12 +161,8 @@ const AppointmentForm = ({ onSubmit, initialData, isLoading, formId = 'appointme
           onChange={handleCustomerChange}
           placeholder="Buscar cliente por nombre o email..."
           error={customerError}
+          initialCustomer={initialData?.customer || null}
         />
-        {customerError && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-            {customerError}
-          </p>
-        )}
       </div>
 
       {/* Vehículo */}

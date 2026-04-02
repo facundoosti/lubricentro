@@ -1,7 +1,5 @@
 class Api::V1::ServiceRecordsController < ApplicationController
   before_action :set_service_record, only: [ :show, :update, :destroy ]
-  before_action :set_customer, only: [ :index, :create ]
-  before_action :set_vehicle, only: [ :index, :create ]
 
   # GET /api/v1/service_records
   def index
@@ -36,7 +34,9 @@ class Api::V1::ServiceRecordsController < ApplicationController
     @service_record = ServiceRecord.new(service_record_params)
 
     if @service_record.save
-      @serializer = ServiceRecordSerializer.render_as_hash(@service_record, view: :with_details)
+      recalculate_total(@service_record)
+      complete_linked_appointment(@service_record)
+      @serializer = ServiceRecordSerializer.render_as_hash(@service_record.reload, view: :with_details)
       render_json(@serializer, message: "Service record created successfully", status: :created)
     else
       render_json({ errors: @service_record.errors.full_messages }, message: "Failed to create service record", status: :unprocessable_entity)
@@ -46,7 +46,8 @@ class Api::V1::ServiceRecordsController < ApplicationController
   # PATCH/PUT /api/v1/service_records/:id
   def update
     if @service_record.update(service_record_params)
-      @serializer = ServiceRecordSerializer.render_as_hash(@service_record, view: :with_details)
+      recalculate_total(@service_record)
+      @serializer = ServiceRecordSerializer.render_as_hash(@service_record.reload, view: :with_details)
       render_json(@serializer, message: "Service record updated successfully")
     else
       render_json({ errors: @service_record.errors.full_messages }, message: "Failed to update service record", status: :unprocessable_entity)
@@ -109,19 +110,24 @@ class Api::V1::ServiceRecordsController < ApplicationController
     render_json({ errors: [ "Service record not found" ] }, message: "Service record not found", status: :not_found)
   end
 
-  def set_customer
-    @customer = Customer.find(params[:customer_id]) if params[:customer_id].present?
-  rescue ActiveRecord::RecordNotFound
-    render_json({ errors: [ "Customer not found" ] }, message: "Customer not found", status: :not_found)
+  def recalculate_total(record)
+    new_total = record.calculate_total_from_items
+    record.update_column(:total_amount, new_total)
   end
 
-  def set_vehicle
-    @vehicle = Vehicle.find(params[:vehicle_id]) if params[:vehicle_id].present?
-  rescue ActiveRecord::RecordNotFound
-    render_json({ errors: [ "Vehicle not found" ] }, message: "Vehicle not found", status: :not_found)
+  def complete_linked_appointment(record)
+    return unless record.appointment_id.present?
+    appointment = record.appointment
+    appointment.update(status: "completed") if appointment&.can_be_completed?
   end
 
   def service_record_params
-    params.require(:service_record).permit(:service_date, :total_amount, :notes, :mileage, :next_service_date, :customer_id, :vehicle_id, photos: [])
+    params.require(:service_record).permit(
+      :service_date, :total_amount, :notes, :mileage, :next_service_date,
+      :customer_id, :vehicle_id, :appointment_id,
+      photos: [],
+      service_record_services_attributes: [ :id, :service_id, :quantity, :unit_price, :_destroy ],
+      service_record_products_attributes: [ :id, :product_id, :quantity, :unit_price, :_destroy ]
+    )
   end
 end

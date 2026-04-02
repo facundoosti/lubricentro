@@ -115,7 +115,7 @@ const Budgets = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Budgets"
+        title="Presupuestos"
         description="Gestioná y generá budgets para tus clientes"
       />
 

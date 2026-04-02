@@ -7,19 +7,22 @@
 #  next_service_date :date
 #  notes             :text
 #  service_date      :date
-#  total_amount      :decimal(, )
+#  total_amount      :decimal(, )      default(0.0)
 #  created_at        :datetime         not null
 #  updated_at        :datetime         not null
+#  appointment_id    :bigint
 #  customer_id       :bigint           not null
 #  vehicle_id        :bigint           not null
 #
 # Indexes
 #
-#  index_service_records_on_customer_id  (customer_id)
-#  index_service_records_on_vehicle_id   (vehicle_id)
+#  index_service_records_on_appointment_id  (appointment_id) UNIQUE
+#  index_service_records_on_customer_id     (customer_id)
+#  index_service_records_on_vehicle_id      (vehicle_id)
 #
 # Foreign Keys
 #
+#  fk_rails_...  (appointment_id => appointments.id)
 #  fk_rails_...  (customer_id => customers.id)
 #  fk_rails_...  (vehicle_id => vehicles.id)
 #
@@ -69,6 +72,7 @@ class ServiceRecordSerializer < Blueprinter::Base
     field :mileage
     field :customer_id
     field :vehicle_id
+    field :appointment_id
     field :created_at
     field :updated_at
     field :formatted_total_amount
@@ -78,6 +82,32 @@ class ServiceRecordSerializer < Blueprinter::Base
       obj.is_overdue?
     end
     field :days_until_next_service
+    association :customer, blueprint: CustomerSerializer, view: :summary
+    association :vehicle, blueprint: VehicleSerializer, view: :summary
+    field :service_record_services do |obj|
+      obj.service_record_services.map do |srs|
+        {
+          id: srs.id,
+          service_id: srs.service_id,
+          name: srs.service&.name,
+          quantity: srs.quantity,
+          unit_price: srs.unit_price,
+          total_price: srs.total_price
+        }
+      end
+    end
+    field :service_record_products do |obj|
+      obj.service_record_products.map do |srp|
+        {
+          id: srp.id,
+          product_id: srp.product_id,
+          name: srp.product&.name,
+          quantity: srp.quantity,
+          unit_price: srp.unit_price,
+          total_price: srp.total_price
+        }
+      end
+    end
   end
 
   view :formatted do
