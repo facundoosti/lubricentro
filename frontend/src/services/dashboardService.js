@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@services/api';
+import { appointmentKeys } from '@services/appointmentsService';
 
 // Query keys para el dashboard
 export const dashboardKeys = {
@@ -19,6 +20,19 @@ export const useDashboardStats = () => {
     },
     staleTime: 5 * 60 * 1000, // 5 minutos
     refetchInterval: 5 * 60 * 1000, // Refetch cada 5 minutos
+  });
+};
+
+// Hook para obtener los próximos turnos (próximos 3)
+export const useUpcomingAppointments = () => {
+  return useQuery({
+    queryKey: appointmentKeys.upcoming(),
+    queryFn: async () => {
+      const response = await api.get('/appointments/upcoming', { params: { per_page: 3 } });
+      return response.data;
+    },
+    staleTime: 2 * 60 * 1000,
+    refetchInterval: 2 * 60 * 1000,
   });
 };
 

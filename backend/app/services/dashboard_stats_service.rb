@@ -11,7 +11,11 @@ class DashboardStatsService
       appointments_today: Appointment.where(scheduled_at: Date.current.all_day).count,
       appointments_change: calculate_appointment_change,
       monthly_revenue: calculate_monthly_revenue,
+      weekly_revenue: calculate_weekly_revenue,
       revenue_change: calculate_revenue_growth,
+      monthly_customers_served: ServiceRecord.where(created_at: Date.current.beginning_of_month.all_month).distinct.count(:customer_id),
+      weekly_customers_served: ServiceRecord.where(created_at: Date.current.beginning_of_week.all_week).distinct.count(:customer_id),
+      pending_budgets: Budget.where(status: %w[draft sent]).count,
       services_completed_today: ServiceRecord.where(created_at: Date.current.all_day).count,
       productivity_average: calculate_productivity_average,
       retention_rate: calculate_retention_rate,
@@ -106,7 +110,7 @@ class DashboardStatsService
       today_appointments: Appointment.where(scheduled_at: Date.current.all_day)
         .includes(:customer, :vehicle)
         .order(:scheduled_at)
-        .limit(5)
+        .limit(10)
         .map do |appointment|
         {
           id: appointment.id,
@@ -170,6 +174,10 @@ class DashboardStatsService
 
   def self.calculate_monthly_revenue
     ServiceRecord.where(created_at: Date.current.beginning_of_month.all_month).sum(:total_amount)
+  end
+
+  def self.calculate_weekly_revenue
+    ServiceRecord.where(created_at: Date.current.beginning_of_week.all_week).sum(:total_amount)
   end
 
   def self.calculate_revenue_growth
