@@ -62,7 +62,7 @@ const Vehicles = () => {
   }
 
   return (
-    <div className="p-6">
+    <div id="tour-vehicles-page" className="p-6">
       <PageHeader title="Vehículos" description="Gestiona los vehículos de los clientes" />
 
       <VehiclesTable

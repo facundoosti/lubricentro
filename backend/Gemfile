@@ -49,6 +49,8 @@ gem "rack-cors"
 # OpenAI client — used by AiAgentService (gpt-4o) and EmbeddingService (text-embedding-3-small)
 gem "ruby-openai", "~> 7.0"
 
+# pgvector support for PostgreSQL vector type (embeddings)
+
 # OAuth2 provider for Rails
 gem "doorkeeper", "~> 5.6"
 
@@ -85,3 +87,5 @@ group :development, :test do
   gem "simplecov", require: false
   gem "pry", require: true
 end
+
+gem "neighbor", "~> 0.6.0"

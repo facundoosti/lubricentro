@@ -75,7 +75,7 @@ const Customers = () => {
   }
 
   return (
-    <div className="p-6">
+    <div id="tour-customers-page" className="p-6">
       <PageHeader title="Clientes" description="Gestiona los clientes del lubricentro" />
 
       <CustomersTable

@@ -139,7 +139,7 @@ const Appointments = () => {
             <h1 className="text-3xl font-bold tracking-tight text-on-surface mb-1">Turnos</h1>
             <p className="text-secondary text-sm">Gestione los horarios de servicio y el mantenimiento próximo de los vehículos.</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div id="tour-appointments-actions" className="flex items-center gap-3">
             {/* View toggle */}
             <div className="flex bg-surface-container rounded-lg p-1 border border-outline-variant">
               <button
@@ -166,6 +166,7 @@ const Appointments = () => {
               </button>
             </div>
             <button
+              id="tour-appointments-new-btn"
               onClick={openCreate}
               className="bg-primary-container text-on-primary font-bold px-4 py-2 rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity active:scale-95 text-sm"
             >
@@ -179,7 +180,7 @@ const Appointments = () => {
         {view === 'calendar' && (
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
             {/* Calendar (3 cols) */}
-            <div className="xl:col-span-3 bg-surface border border-outline-variant rounded-xl overflow-hidden shadow-xl">
+            <div id="tour-appointments-calendar" className="xl:col-span-3 bg-surface border border-outline-variant rounded-xl overflow-hidden shadow-xl">
               {/* Legend header */}
               <div className="px-5 py-3 border-b border-outline-variant bg-surface-container-low flex flex-wrap gap-4 items-center justify-end">
                 {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (

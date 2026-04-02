@@ -20,6 +20,7 @@ const Layout = () => {
   return (
     <div className="bg-background text-on-surface min-h-screen">
       <TokenExpiredHandler />
+      <Header />
       <div className="flex h-screen overflow-hidden">
         <Sidebar />
         <div
@@ -27,7 +28,6 @@ const Layout = () => {
             isExpanded || isHovered ? 'lg:ml-[290px]' : 'lg:ml-[90px]'
           }`}
         >
-          <Header />
           <main className="pt-16 min-h-screen bg-background">
             <div className="p-6 md:p-8 max-w-screen-2xl mx-auto">
               <Outlet />

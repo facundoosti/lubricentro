@@ -16,7 +16,7 @@ import {
 import { useSidebarStore } from "@stores/useSidebarStore";
 import { useAuthStore } from "@stores/useAuthStore";
 
-const NavItem = ({ name, icon, path, subItems, menuType, index }) => {
+const NavItem = ({ name, icon, path, subItems, menuType, index, tourId }) => {
   const { isExpanded, isMobileOpen, isHovered, openSubmenu, toggleSubmenu } =
     useSidebarStore();
   const location = useLocation();
@@ -45,7 +45,7 @@ const NavItem = ({ name, icon, path, subItems, menuType, index }) => {
 
   if (subItems) {
     return (
-      <li>
+      <li id={tourId}>
         <button
           onClick={handleSubmenuToggle}
           className={`menu-item group w-full ${
@@ -105,7 +105,7 @@ const NavItem = ({ name, icon, path, subItems, menuType, index }) => {
   }
 
   return (
-    <li>
+    <li id={tourId}>
       {path && (
         <Link
           to={path}
@@ -146,10 +146,12 @@ const Sidebar = () => {
       name: "Dashboard",
       icon: <LayoutGrid className="w-5 h-5" />,
       path: "/dashboard",
+      tourId: "tour-nav-dashboard",
     },
     {
       name: "Clientes",
       icon: <Users className="w-5 h-5" />,
+      tourId: "tour-nav-clientes",
       subItems: [
         { name: "Clientes", path: "/customers" },
         { name: "Vehículos", path: "/vehicles" },
@@ -158,6 +160,7 @@ const Sidebar = () => {
     {
       name: "Operaciones",
       icon: <Calendar className="w-5 h-5" />,
+      tourId: "tour-nav-operaciones",
       subItems: [
         { name: "Turnos", path: "/appointments" },
         { name: "Atenciones", path: "/service-records" },
@@ -167,6 +170,7 @@ const Sidebar = () => {
     {
       name: "Catálogo",
       icon: <Package className="w-5 h-5" />,
+      tourId: "tour-nav-catalogo",
       subItems: [
         { name: "Servicios", path: "/services" },
         { name: "Productos", path: "/products" },
@@ -179,24 +183,27 @@ const Sidebar = () => {
       name: "Inbox",
       icon: <MessageSquare className="w-5 h-5" />,
       path: "/inbox",
+      tourId: "tour-nav-inbox",
     },
     {
       name: "Recordatorios",
       icon: <BellRing className="w-5 h-5" />,
       path: "/reminders",
+      tourId: "tour-nav-recordatorios",
     },
   ];
 
   const renderMenuItems = (items, menuType) => (
     <ul className="flex flex-col gap-0.5">
       {items.map((nav, index) => (
-        <NavItem key={nav.name} {...nav} menuType={menuType} index={index} />
+        <NavItem key={nav.name} {...nav} menuType={menuType} index={index} tourId={nav.tourId} />
       ))}
     </ul>
   );
 
   return (
     <aside
+      id="tour-sidebar"
       className={`fixed flex flex-col top-0 left-0 h-full bg-surface border-r border-outline-variant z-50 transition-all duration-300 ease-in-out
         ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}

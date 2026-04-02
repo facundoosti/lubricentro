@@ -37,7 +37,7 @@ export default function Inbox() {
 
   return (
     // Break out of Layout's p-6/p-8 padding and fill the remaining viewport height
-    <div className="-m-6 md:-m-8 flex h-[calc(100vh-64px)] overflow-hidden">
+    <div id="tour-inbox" className="-m-6 md:-m-8 flex h-[calc(100vh-64px)] overflow-hidden">
       <ConversationList
         conversations={isLoading ? [] : conversations}
         activeId={activeConversation?.id}

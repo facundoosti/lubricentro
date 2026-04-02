@@ -51,7 +51,7 @@ const Services = () => {
   }
 
   return (
-    <div className="p-6">
+    <div id="tour-services-page" className="p-6">
       <PageHeader title="Servicios" description="Gestiona los servicios ofrecidos por el lubricentro" />
 
       <ServicesTable

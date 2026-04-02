@@ -51,7 +51,7 @@ const Products = () => {
   }
 
   return (
-    <div className="p-6">
+    <div id="tour-products-page" className="p-6">
       <PageHeader title="Productos" description="Gestiona el catálogo de productos del lubricentro" />
 
       <ProductsTable

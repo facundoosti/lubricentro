@@ -120,7 +120,7 @@ const Budgets = () => {
       />
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-3 justify-between">
+      <div id="tour-budgets-toolbar" className="flex flex-col sm:flex-row gap-3 justify-between">
         <div className="relative max-w-sm w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary" />
           <input
@@ -132,6 +132,7 @@ const Budgets = () => {
           />
         </div>
         <button
+          id="tour-budgets-new-btn"
           onClick={() => navigate("/presupuestos/nuevo")}
           className="flex items-center gap-2 px-4 py-2 bg-primary-container text-on-primary rounded-lg font-semibold text-sm hover:brightness-110 transition-all"
         >
@@ -141,7 +142,7 @@ const Budgets = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-surface-container border border-outline-variant rounded-lg overflow-hidden">
+      <div id="tour-budgets-table" className="bg-surface-container border border-outline-variant rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

@@ -5,6 +5,7 @@
 #  id          :bigint           not null, primary key
 #  base_price  :decimal(10, 2)   not null
 #  description :text
+#  embedding   :vector(1536)
 #  name        :string(100)      not null
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
@@ -29,6 +30,8 @@ class Service < ApplicationRecord
   scope :by_name, ->(name) { where("name ILIKE ?", "%#{name}%") }
   scope :by_price_range, ->(min, max) { where(base_price: min..max) }
   scope :active, -> { where(active: true) } # Para futuro soft delete
+
+  has_neighbors :embedding
 
   # Métodos helper
   def display_name

@@ -63,7 +63,7 @@ const ServiceRecords = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div id="tour-service-records-page" className="space-y-6">
       <PageHeader title="Atenciones" description="Gestiona todas las atenciones y servicios realizados" />
 
       <ServiceRecordsTable

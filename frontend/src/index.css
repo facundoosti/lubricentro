@@ -481,3 +481,117 @@
     font-size: 1rem !important;
   }
 }
+
+/* ── Driver.js Tour Styles ─────────────────────────────────────────── */
+.lubricentro-tour-popover.driver-popover {
+  background-color: #121215;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  color: #fafafa;
+  font-family: Geist, sans-serif;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  max-width: 360px;
+}
+
+.lubricentro-tour-popover .driver-popover-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fafafa;
+  margin-bottom: 6px;
+}
+
+.lubricentro-tour-popover .driver-popover-description {
+  font-size: 0.82rem;
+  color: #a1a1aa;
+  line-height: 1.6;
+}
+
+.lubricentro-tour-popover .driver-popover-description strong {
+  color: #fafafa;
+}
+
+.lubricentro-tour-popover .driver-popover-description code {
+  background: #1e1e24;
+  border: 1px solid #27272a;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.78rem;
+  color: #a78bfa;
+}
+
+.lubricentro-tour-popover .driver-popover-description em {
+  color: #71717a;
+  font-style: italic;
+}
+
+.lubricentro-tour-popover .driver-popover-progress-text {
+  font-size: 0.72rem;
+  color: #71717a;
+}
+
+.lubricentro-tour-popover .driver-popover-footer {
+  margin-top: 14px;
+  gap: 6px;
+}
+
+.lubricentro-tour-popover .driver-popover-prev-btn,
+.lubricentro-tour-popover .driver-popover-next-btn,
+.lubricentro-tour-popover .driver-popover-close-btn {
+  font-family: Geist, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 6px 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+.lubricentro-tour-popover .driver-popover-prev-btn {
+  background: #18181b;
+  color: #a1a1aa;
+  border: 1px solid #27272a;
+}
+
+.lubricentro-tour-popover .driver-popover-prev-btn:hover {
+  background: #27272a;
+  color: #fafafa;
+}
+
+.lubricentro-tour-popover .driver-popover-next-btn {
+  background: #7c3aed;
+  color: #0a0012;
+}
+
+.lubricentro-tour-popover .driver-popover-next-btn:hover {
+  filter: brightness(1.15);
+}
+
+.lubricentro-tour-popover .driver-popover-close-btn {
+  background: transparent;
+  color: #52525b;
+  font-size: 1rem;
+  padding: 2px 6px;
+}
+
+.lubricentro-tour-popover .driver-popover-close-btn:hover {
+  color: #fafafa;
+}
+
+.lubricentro-tour-popover .driver-popover-arrow-side-left.driver-popover-arrow {
+  border-left-color: #27272a;
+}
+
+.lubricentro-tour-popover .driver-popover-arrow-side-right.driver-popover-arrow {
+  border-right-color: #27272a;
+}
+
+.lubricentro-tour-popover .driver-popover-arrow-side-top.driver-popover-arrow {
+  border-top-color: #27272a;
+}
+
+.lubricentro-tour-popover .driver-popover-arrow-side-bottom.driver-popover-arrow {
+  border-bottom-color: #27272a;
+}

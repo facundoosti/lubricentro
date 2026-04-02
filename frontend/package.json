@@ -26,6 +26,7 @@
     "apexcharts": "^4.7.0",
     "axios": "^1.10.0",
     "date-fns": "^4.1.0",
+    "driver.js": "^1.4.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "lucide-react": "^0.518.0",

@@ -93,7 +93,6 @@ shell-frontend: ## Acceder al shell del frontend
 
 # Testing
 test-backend: ## Ejecutar tests del backend
-	docker-compose exec -e RAILS_ENV=test -e DATABASE_URL=postgresql://lubricentro:lubricentro123@postgres:5432/lubricentro_test $(BACKEND_SERVICE) rails db:drop db:create db:migrate
 	docker-compose exec -e RAILS_ENV=test -e DATABASE_URL=postgresql://lubricentro:lubricentro123@postgres:5432/lubricentro_test $(BACKEND_SERVICE) bundle exec rspec
 
 test-frontend: ## Ejecutar tests del frontend
@@ -101,7 +100,6 @@ test-frontend: ## Ejecutar tests del frontend
 
 test: ## Ejecutar todos los tests
 	@echo "🧪 Ejecutando tests del backend..."
-	docker-compose exec -e RAILS_ENV=test -e DATABASE_URL=postgresql://lubricentro:lubricentro123@postgres:5432/lubricentro_test $(BACKEND_SERVICE) rails db:drop db:create db:migrate
 	docker-compose exec -e RAILS_ENV=test -e DATABASE_URL=postgresql://lubricentro:lubricentro123@postgres:5432/lubricentro_test $(BACKEND_SERVICE) bundle exec rspec
 	@echo "🧪 Ejecutando tests del frontend..."
 	docker-compose exec $(FRONTEND_SERVICE) npm test

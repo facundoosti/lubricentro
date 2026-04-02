@@ -70,7 +70,7 @@ export default function Dashboard() {
             <h1 className="text-base font-bold text-on-surface leading-tight">{greeting}</h1>
             <p className="text-xs text-secondary capitalize">{dateLabel}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div id="tour-dashboard-quickactions" className="flex items-center gap-2">
             <QuickAction icon={Plus} label="Turno" variant="primary" onClick={() => navigate('/appointments')} />
             <QuickAction icon={Wrench} label="Atención" onClick={() => navigate('/atenciones/nueva')} />
             <QuickAction icon={FileText} label="Presupuesto" onClick={() => navigate('/presupuestos/nuevo')} />
@@ -79,7 +79,7 @@ export default function Dashboard() {
         </div>
 
         {/* KPI Cards */}
-        <div className="flex-shrink-0">
+        <div id="tour-dashboard-kpi" className="flex-shrink-0">
           <DashboardKpiCards metrics={metrics} />
         </div>
 
@@ -92,10 +92,10 @@ export default function Dashboard() {
 
         {/* Main section: Today appointments + Upcoming & Budgets */}
         <div className="grid grid-cols-12 gap-3 flex-1 min-h-0">
-          <div className="col-span-12 lg:col-span-7 min-h-0">
+          <div id="tour-dashboard-today" className="col-span-12 lg:col-span-7 min-h-0">
             <TodayAppointments appointments={todayAppointments} />
           </div>
-          <div className="col-span-12 lg:col-span-5 min-h-0">
+          <div id="tour-dashboard-upcoming" className="col-span-12 lg:col-span-5 min-h-0">
             <UpcomingAppointments
               appointments={upcomingAppointments}
               pendingBudgets={metrics.pending_budgets || 0}
@@ -104,7 +104,7 @@ export default function Dashboard() {
         </div>
 
         {/* Chart */}
-        <div className="flex-shrink-0">
+        <div id="tour-dashboard-chart" className="flex-shrink-0">
           <MiniChart data={chartData} />
         </div>
 

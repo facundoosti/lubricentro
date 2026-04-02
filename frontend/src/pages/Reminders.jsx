@@ -115,7 +115,7 @@ const Reminders = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div id="tour-reminders-stats" className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard
           label="Enviados este mes"
           value={stats.sent_this_month}
@@ -137,7 +137,7 @@ const Reminders = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-surface-container border border-outline-variant p-4 rounded-xl flex flex-wrap items-center gap-4">
+      <div id="tour-reminders-filters" className="bg-surface-container border border-outline-variant p-4 rounded-xl flex flex-wrap items-center gap-4">
         <div className="flex-1 min-w-[220px] relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary" />
           <input
@@ -186,7 +186,7 @@ const Reminders = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-surface-container border border-outline-variant rounded-xl overflow-hidden">
+      <div id="tour-reminders-table" className="bg-surface-container border border-outline-variant rounded-xl overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-surface-container-high border-b border-outline-variant">

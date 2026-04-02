@@ -4,6 +4,7 @@
 #
 #  id          :bigint           not null, primary key
 #  description :text
+#  embedding   :vector(1536)
 #  name        :string(100)      not null
 #  unit        :string(50)
 #  unit_price  :decimal(10, 2)   not null
