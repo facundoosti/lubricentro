@@ -33,6 +33,7 @@ export const useUpdateConversationStatus = () => {
     mutationFn: ({ id, status }) => {
       if (status === 'resolved') return conversationsAPI.resolve(id);
       if (status === 'needs_human') return conversationsAPI.assignHuman(id);
+      if (status === 'archived') return conversationsAPI.archive(id);
       throw new Error(`Unknown status: ${status}`);
     },
     onSuccess: () => {

@@ -73,6 +73,93 @@ RSpec.describe DashboardStatsService do
     end
   end
 
+  describe '.calculate_trends' do
+    it 'returns trends with expected keys' do
+      trends = described_class.calculate_trends
+      expect(trends).to include(
+        :monthly_services, :services_by_type, :customer_flow,
+        :revenue_by_service_type, :revenue_by_product_type, :service_product_ratio
+      )
+    end
+
+    it 'returns monthly_services for last 6 months' do
+      trends = described_class.calculate_trends
+      expect(trends[:monthly_services].length).to eq(6)
+      expect(trends[:monthly_services].first).to include(:month, :services, :revenue)
+    end
+
+    it 'returns service_product_ratio with zero values when no data' do
+      ServiceRecordProduct.delete_all
+      ServiceRecordService.delete_all
+      trends = described_class.calculate_trends
+      expect(trends[:service_product_ratio]).to include(services: 0, products: 0, ratio: 0)
+    end
+
+    it 'calculates service_product_ratio correctly when data exists' do
+      customer = create(:customer)
+      vehicle  = create(:vehicle, customer: customer)
+      service  = create(:service)
+      product  = create(:product)
+      sr       = create(:service_record, customer: customer, vehicle: vehicle)
+      create(:service_record_service, service_record: sr, service: service, quantity: 4)
+      create(:service_record_product, service_record: sr, product: product, quantity: 2)
+
+      trends = described_class.calculate_trends
+      ratio = trends[:service_product_ratio]
+      expect(ratio[:services]).to eq(4)
+      expect(ratio[:products]).to eq(2)
+      expect(ratio[:ratio]).to eq(2.0)
+    end
+  end
+
+  describe '.get_recent_activity' do
+    it 'returns today_appointments and recent_services' do
+      activity = described_class.get_recent_activity
+      expect(activity).to include(:today_appointments, :recent_services)
+    end
+
+    it 'returns recent_services with expected shape' do
+      customer = create(:customer)
+      vehicle  = create(:vehicle, customer: customer)
+      create(:service_record, customer: customer, vehicle: vehicle)
+
+      activity = described_class.get_recent_activity
+      expect(activity[:recent_services]).to be_an(Array)
+      if activity[:recent_services].any?
+        item = activity[:recent_services].first
+        expect(item).to include(:id, :customer, :vehicle, :total, :date)
+      end
+    end
+
+    it 'returns today_appointments with expected shape' do
+      customer    = create(:customer)
+      vehicle     = create(:vehicle, customer: customer)
+      appointment = create(:appointment, customer: customer, vehicle: vehicle, scheduled_at: 1.hour.from_now)
+
+      activity = described_class.get_recent_activity
+      expect(activity[:today_appointments]).to be_an(Array)
+      if activity[:today_appointments].any?
+        item = activity[:today_appointments].first
+        expect(item).to include(:id, :customer, :vehicle, :time, :status)
+      end
+    end
+  end
+
+  describe '.generate_alerts' do
+    context 'when there are pending appointments today' do
+      it 'includes pending appointments warning' do
+        customer = create(:customer)
+        vehicle  = create(:vehicle, customer: customer)
+        create(:appointment, customer: customer, vehicle: vehicle,
+               scheduled_at: 1.hour.from_now, status: "scheduled")
+
+        alerts = described_class.generate_alerts
+        warning = alerts.find { |a| a[:type] == "warning" }
+        expect(warning).to be_present
+      end
+    end
+  end
+
   describe 'private methods' do
     describe '.calculate_customer_growth' do
       it 'calculates growth correctly' do

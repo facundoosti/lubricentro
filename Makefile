@@ -8,6 +8,7 @@ COMPOSE_FILE = docker-compose.yml
 BACKEND_SERVICE = backend
 FRONTEND_SERVICE = frontend
 POSTGRES_SERVICE = postgres
+WORKER_SERVICE = worker
 
 # Comando por defecto
 help: ## Mostrar esta ayuda
@@ -51,6 +52,9 @@ logs-frontend: ## Ver logs del frontend
 
 logs-db: ## Ver logs de la base de datos
 	docker-compose logs -f $(POSTGRES_SERVICE)
+
+logs-worker: ## Ver logs del worker (Solid Queue)
+	docker-compose logs -f $(WORKER_SERVICE)
 
 # Desarrollo
 dev: ## Iniciar entorno de desarrollo completo

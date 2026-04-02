@@ -1,4 +1,4 @@
-import { MessageSquare, LayoutList, Bot, UserCheck, Package } from 'lucide-react';
+import { MessageSquare, LayoutList, Bot, UserCheck, Package, Archive } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -7,6 +7,7 @@ const STATUS_FILTERS = [
   { label: 'Bot', value: 'bot', icon: Bot },
   { label: 'Atención', value: 'needs_human', icon: UserCheck },
   { label: 'Proveedores', value: 'supplier', icon: Package },
+  { label: 'Archivadas', value: 'archived', icon: Archive },
 ];
 
 const STATUS_BADGE = {
@@ -14,6 +15,7 @@ const STATUS_BADGE = {
   needs_human: 'bg-primary/10 text-primary border-primary/20',
   supplier: 'bg-zinc-800 text-zinc-400 border-zinc-700',
   resolved: 'bg-surface-container-high text-secondary border-outline-variant',
+  archived: 'bg-zinc-900 text-zinc-600 border-zinc-800',
 };
 
 const STATUS_LABEL = {
@@ -21,6 +23,7 @@ const STATUS_LABEL = {
   needs_human: 'Atención',
   supplier: 'Proveedor',
   resolved: 'Resuelto',
+  archived: 'Archivada',
 };
 
 function ConversationItem({ conversation, isActive, onClick }) {
@@ -81,7 +84,7 @@ export function ConversationList({
 }) {
   const filtered =
     statusFilter === null
-      ? conversations
+      ? conversations.filter((c) => c.status !== 'archived')
       : conversations.filter((c) => c.status === statusFilter);
 
   return (
@@ -100,17 +103,37 @@ export function ConversationList({
       </div>
 
       {/* Filters */}
-      <div className="px-4 pb-4 border-b border-zinc-800 grid grid-cols-2 gap-2 flex-shrink-0">
-        {STATUS_FILTERS.map((f) => {
+      <div className="px-4 pb-4 border-b border-zinc-800 flex flex-col gap-2 flex-shrink-0">
+        <div className="grid grid-cols-2 gap-2">
+          {STATUS_FILTERS.filter((f) => f.value !== 'archived').map((f) => {
+            const Icon = f.icon;
+            const active = statusFilter === f.value;
+            return (
+              <button
+                key={f.label}
+                onClick={() => onFilterChange(f.value)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                  active
+                    ? 'bg-primary text-on-primary'
+                    : 'bg-surface-variant text-on-surface-variant hover:bg-zinc-800 hover:text-on-surface'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>{f.label}</span>
+              </button>
+            );
+          })}
+        </div>
+        {(() => {
+          const f = STATUS_FILTERS.find((f) => f.value === 'archived');
           const Icon = f.icon;
           const active = statusFilter === f.value;
           return (
             <button
-              key={f.label}
               onClick={() => onFilterChange(f.value)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors w-full ${
                 active
-                  ? 'bg-primary text-on-primary'
+                  ? 'bg-zinc-700 text-zinc-200'
                   : 'bg-surface-variant text-on-surface-variant hover:bg-zinc-800 hover:text-on-surface'
               }`}
             >
@@ -118,7 +141,7 @@ export function ConversationList({
               <span>{f.label}</span>
             </button>
           );
-        })}
+        })()}
       </div>
 
       {/* List */}

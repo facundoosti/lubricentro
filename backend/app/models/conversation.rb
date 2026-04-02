@@ -22,7 +22,7 @@
 #  fk_rails_...  (customer_id => customers.id)
 #
 class Conversation < ApplicationRecord
-  STATUSES = %w[bot needs_human supplier resolved].freeze
+  STATUSES = %w[bot needs_human supplier resolved archived].freeze
 
   belongs_to :customer, optional: true
   has_many :messages, dependent: :destroy
@@ -34,8 +34,9 @@ class Conversation < ApplicationRecord
   scope :recent, -> { order(last_message_at: :desc) }
   scope :with_last_message, -> { includes(:messages) }
 
-  def bot?       = status == "bot"
+  def bot?        = status == "bot"
   def needs_human? = status == "needs_human"
-  def supplier?  = status == "supplier"
-  def resolved?  = status == "resolved"
+  def supplier?   = status == "supplier"
+  def resolved?   = status == "resolved"
+  def archived?   = status == "archived"
 end

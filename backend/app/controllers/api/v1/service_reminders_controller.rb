@@ -1,7 +1,7 @@
 class Api::V1::ServiceRemindersController < ApplicationController
   # GET /api/v1/service_reminders
   def index
-    @reminders = ServiceReminder.includes(:customer, :vehicle, :service_record)
+    @reminders = ServiceReminder.includes(:service_record, customer: :avatar_attachment, vehicle: :image_attachment)
 
     if params[:search].present?
       term = "%#{params[:search]}%"

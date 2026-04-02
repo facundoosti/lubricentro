@@ -3,7 +3,7 @@ class Api::V1::BudgetsController < ApplicationController
 
   # GET /api/v1/budgets
   def index
-    @budgets = Budget.includes(:customer, :vehicle)
+    @budgets = Budget.includes(:customer, :vehicle, :items)
     @budgets = @budgets.by_search(params[:search]) if params[:search].present?
     @budgets = @budgets.by_status(params[:status]) if params[:status].present?
     @budgets = @budgets.recent
@@ -50,7 +50,7 @@ class Api::V1::BudgetsController < ApplicationController
   private
 
   def set_budget
-    @budget = Budget.includes(:customer, :vehicle, :items).find(params[:id])
+    @budget = Budget.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     render_json({ errors: [ "Budget no encontrado" ] }, message: "Budget no encontrado", status: :not_found)
   end

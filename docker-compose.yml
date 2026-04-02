@@ -57,6 +57,38 @@ services:
         rails server -b 0.0.0.0 -p 3000
       "
 
+  # Solid Queue worker
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: lubricentro_worker
+    environment:
+      RAILS_ENV: ${RAILS_ENV}
+      DATABASE_URL: ${DATABASE_URL}
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      AI_API_KEY: ${AI_API_KEY}
+      AI_API_URL: ${AI_API_URL}
+    volumes:
+      - ./backend:/app
+      - backend_bundle:/usr/local/bundle
+      - backend_node_modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    networks:
+      - lubricentro_network
+    command: >
+      sh -c "
+        echo 'Waiting for database...' &&
+        while ! nc -z postgres 5432; do sleep 1; done &&
+        echo 'Starting Solid Queue worker...' &&
+        bundle exec bin/jobs start
+      "
+
   # Frontend React
   frontend:
     build:

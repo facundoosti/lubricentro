@@ -58,6 +58,7 @@ Rails.application.routes.draw do
         member do
           patch :resolve
           patch :assign_human
+          patch :archive
         end
         resources :messages, only: [ :create ]
       end

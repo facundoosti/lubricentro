@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { User, Bot, Send, Paperclip, Smile, UserCheck, CheckCircle } from 'lucide-react';
+import { User, Bot, Send, Paperclip, Smile, UserCheck, CheckCircle, Archive } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useMessages, useSendMessage, useUpdateConversationStatus } from '@services/inboxService';
@@ -10,6 +10,7 @@ const STATUS_BADGE = {
   needs_human: 'bg-primary/10 text-primary border-primary/20',
   supplier: 'bg-zinc-800 text-zinc-400 border-zinc-700',
   resolved: 'bg-surface-container-high text-secondary border-outline-variant',
+  archived: 'bg-zinc-900 text-zinc-600 border-zinc-800',
 };
 
 const STATUS_LABEL = {
@@ -17,6 +18,7 @@ const STATUS_LABEL = {
   needs_human: 'Atención',
   supplier: 'Proveedor',
   resolved: 'Resuelto',
+  archived: 'Archivada',
 };
 
 function MessageBubble({ message }) {
@@ -100,7 +102,7 @@ export function ConversationDetail({ conversation }) {
   const displayName = conversation.customer_name || conversation.whatsapp_phone;
   const badge = STATUS_BADGE[conversation.status] ?? STATUS_BADGE.resolved;
   const label = STATUS_LABEL[conversation.status] ?? conversation.status;
-  const canSend = conversation.status !== 'resolved';
+  const canSend = conversation.status !== 'resolved' && conversation.status !== 'archived';
 
   const handleSend = async () => {
     const body = text.trim();
@@ -128,6 +130,10 @@ export function ConversationDetail({ conversation }) {
     updateStatus.mutate({ id: conversation.id, status: 'resolved' });
   };
 
+  const handleArchive = () => {
+    updateStatus.mutate({ id: conversation.id, status: 'archived' });
+  };
+
   return (
     <section className="flex-1 flex flex-col bg-zinc-950 min-w-0">
       {/* Chat Header */}
@@ -148,7 +154,7 @@ export function ConversationDetail({ conversation }) {
         </div>
 
         <div className="flex gap-2">
-          {conversation.status !== 'needs_human' && conversation.status !== 'resolved' && (
+          {conversation.status !== 'needs_human' && conversation.status !== 'resolved' && conversation.status !== 'archived' && (
             <button
               onClick={handleDerivate}
               disabled={updateStatus.isPending}
@@ -158,7 +164,7 @@ export function ConversationDetail({ conversation }) {
               Derivar a humano
             </button>
           )}
-          {conversation.status !== 'resolved' && (
+          {conversation.status !== 'resolved' && conversation.status !== 'archived' && (
             <button
               onClick={handleResolve}
               disabled={updateStatus.isPending}
@@ -166,6 +172,16 @@ export function ConversationDetail({ conversation }) {
             >
               <CheckCircle className="w-4 h-4" />
               Marcar resuelto
+            </button>
+          )}
+          {conversation.status !== 'archived' && (
+            <button
+              onClick={handleArchive}
+              disabled={updateStatus.isPending}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium border border-zinc-700 rounded-lg hover:bg-zinc-900 transition-all disabled:opacity-50"
+            >
+              <Archive className="w-4 h-4" />
+              Archivar
             </button>
           )}
         </div>
@@ -195,7 +211,7 @@ export function ConversationDetail({ conversation }) {
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={canSend ? 'Respondé como agente...' : 'Conversación resuelta'}
+              placeholder={canSend ? 'Respondé como agente...' : conversation.status === 'archived' ? 'Conversación archivada' : 'Conversación resuelta'}
               disabled={!canSend}
               rows={1}
               className="w-full bg-surface-container border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-xl py-3 px-4 pr-20 text-sm text-on-surface resize-none h-12 disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-secondary"
@@ -221,6 +237,8 @@ export function ConversationDetail({ conversation }) {
           <p className="text-[10px] text-zinc-500">
             {canSend
               ? `${displayName} verá este mensaje en su WhatsApp`
+              : conversation.status === 'archived'
+              ? 'Esta conversación está archivada'
               : 'Esta conversación está resuelta'}
           </p>
         </div>

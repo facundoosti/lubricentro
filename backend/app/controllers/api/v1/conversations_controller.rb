@@ -1,5 +1,5 @@
 class Api::V1::ConversationsController < ApplicationController
-  before_action :set_conversation, only: [ :show, :resolve, :assign_human ]
+  before_action :set_conversation, only: [ :show, :resolve, :assign_human, :archive ]
 
   # GET /api/v1/conversations
   def index
@@ -32,6 +32,14 @@ class Api::V1::ConversationsController < ApplicationController
     broadcast_status_update(@conversation)
     data = ConversationSerializer.render_as_hash(@conversation, root: :conversation)
     render_json(data, message: "Conversación derivada a agente humano")
+  end
+
+  # PATCH /api/v1/conversations/:id/archive
+  def archive
+    @conversation.update!(status: "archived")
+    broadcast_status_update(@conversation)
+    data = ConversationSerializer.render_as_hash(@conversation, root: :conversation)
+    render_json(data, message: "Conversación archivada")
   end
 
   private

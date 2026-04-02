@@ -83,8 +83,10 @@ const Header = () => {
         </button>
 
         <button
+          onClick={() => navigate("/settings")}
           className="p-2 text-secondary hover:text-on-surface hover:bg-surface-container-high rounded-full transition-colors"
           aria-label="Configuración"
+          title="Configuración"
         >
           <Settings className="w-5 h-5" />
         </button>

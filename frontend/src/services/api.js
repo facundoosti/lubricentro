@@ -100,6 +100,7 @@ export const conversationsAPI = {
   getById: (id) => api.get(`/conversations/${id}`),
   resolve: (id) => api.patch(`/conversations/${id}/resolve`),
   assignHuman: (id) => api.patch(`/conversations/${id}/assign_human`),
+  archive: (id) => api.patch(`/conversations/${id}/archive`),
 };
 
 export const messagesAPI = {
