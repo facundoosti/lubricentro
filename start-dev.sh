@@ -74,7 +74,7 @@ RAILS_ENV=development
 RAILS_MASTER_KEY=dummy_key_for_dev
 DATABASE_URL=postgresql://lubricentro:lubricentro123@localhost:5432/lubricentro_development
 JWT_SECRET=lubricentro_jwt_secret_dev
-CORS_ORIGIN=http://localhost:5173
+ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
 VITE_API_BASE_URL=http://localhost:3000
 VITE_APP_NAME=Lubricentro
 EOF
@@ -127,9 +127,6 @@ show_access_info() {
     echo "   PostgreSQL: localhost:5432"
     echo "   Usuario: lubricentro"
     echo "   Base de datos: lubricentro_development"
-    echo ""
-    echo "⚡ Redis:"
-    echo "   URL: localhost:6379"
     echo ""
     echo "📊 Monitoreo:"
     echo "   Ver logs: docker-compose logs -f"

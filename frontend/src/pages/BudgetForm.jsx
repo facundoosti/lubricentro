@@ -254,6 +254,7 @@ const BudgetForm = () => {
               </label>
               {selectedCustomerId && customerVehicles.length > 0 ? (
                 <select
+                  value={watch("vehicle_description")}
                   onChange={handleVehicleSelect}
                   className="w-full px-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary"
                 >
@@ -267,7 +268,11 @@ const BudgetForm = () => {
               ) : (
                 <input
                   type="text"
-                  placeholder={selectedCustomerId ? "Sin vehículos registrados" : "Ej: Ford Falcon 1986"}
+                  placeholder={
+                    selectedCustomerId
+                      ? "Sin vehículos registrados"
+                      : "Ej: Ford Falcon 1986"
+                  }
                   {...register("vehicle_description")}
                   className="w-full px-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary placeholder:text-secondary"
                 />
@@ -353,11 +358,22 @@ const BudgetForm = () => {
                       </td>
                       <td className="py-2 pr-2">
                         <ItemSearchInput
-                          value={watchedItems[index]?.description || ''}
-                          onChange={(text) => setValue(`items_attributes.${index}.description`, text)}
+                          value={watchedItems[index]?.description || ""}
+                          onChange={(text) =>
+                            setValue(
+                              `items_attributes.${index}.description`,
+                              text,
+                            )
+                          }
                           onSelect={({ description, unit_price }) => {
-                            setValue(`items_attributes.${index}.description`, description);
-                            setValue(`items_attributes.${index}.unit_price`, unit_price);
+                            setValue(
+                              `items_attributes.${index}.description`,
+                              description,
+                            );
+                            setValue(
+                              `items_attributes.${index}.unit_price`,
+                              unit_price,
+                            );
                           }}
                         />
                       </td>
@@ -456,8 +472,8 @@ const BudgetForm = () => {
             {isSaving
               ? "Guardando..."
               : isEditing
-                ? "Guardar cambios"
-                : "Crear budget"}
+                ? "Guardar"
+                : "Crear Presupuesto"}
           </button>
         </div>
       </form>

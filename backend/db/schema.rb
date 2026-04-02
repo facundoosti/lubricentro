@@ -169,9 +169,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_02_120000) do
     t.index ["uid"], name: "index_oauth_applications_on_uid", unique: true
   end
 
-# Could not dump table "products" because of following StandardError
-#   Unknown type 'vector' for column 'embedding'
-
+  create_table "products", force: :cascade do |t|
+    t.string "name", limit: 100, null: false
+    t.text "description"
+    t.decimal "unit_price", precision: 10, scale: 2, null: false
+    t.string "unit", limit: 50
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_products_on_name", unique: true
+    t.index ["unit_price"], name: "index_products_on_unit_price"
+  end
 
   create_table "service_record_products", force: :cascade do |t|
     t.bigint "service_record_id", null: false
@@ -233,9 +240,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_02_120000) do
     t.index ["vehicle_id"], name: "index_service_reminders_on_vehicle_id"
   end
 
-# Could not dump table "services" because of following StandardError
-#   Unknown type 'vector' for column 'embedding'
-
+  create_table "services", force: :cascade do |t|
+    t.string "name", limit: 100, null: false
+    t.text "description"
+    t.decimal "base_price", precision: 10, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["base_price"], name: "index_services_on_base_price"
+    t.index ["name"], name: "index_services_on_name", unique: true
+  end
 
   create_table "settings", force: :cascade do |t|
     t.string "lubricentro_name"
