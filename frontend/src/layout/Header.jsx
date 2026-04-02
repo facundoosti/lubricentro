@@ -36,7 +36,7 @@ const Header = () => {
   }, [showUserMenu]);
 
   return (
-    <header className="fixed top-0 w-full z-50 flex items-center justify-between px-4 lg:px-6 h-16 bg-background border-b border-outline-variant">
+    <header className="fixed top-0 w-full z-50 flex items-center justify-between px-4 lg:px-6 h-16 bg-surface border-b border-outline-variant">
       {/* Left: toggle + title */}
       <div className="flex items-center gap-4">
         <button

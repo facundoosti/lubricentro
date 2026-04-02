@@ -11,6 +11,7 @@ import {
   MoreHorizontal,
   LogOut,
   MessageSquare,
+  BellRing,
 } from "lucide-react";
 import { useSidebarStore } from "@stores/useSidebarStore";
 import { useAuthStore } from "@stores/useAuthStore";
@@ -180,9 +181,9 @@ const Sidebar = () => {
       path: "/inbox",
     },
     {
-      name: "Configuración",
-      icon: <Settings className="w-5 h-5" />,
-      path: "/settings",
+      name: "Recordatorios",
+      icon: <BellRing className="w-5 h-5" />,
+      path: "/reminders",
     },
   ];
 
@@ -250,8 +251,19 @@ const Sidebar = () => {
           </div>
         </nav>
 
-        {/* Logout */}
-        <div className="mt-4 pt-4 border-t border-outline-variant">
+        {/* Bottom actions */}
+        <div className="mt-4 flex flex-col gap-0.5">
+          <Link
+            to="/settings"
+            className={`menu-item group menu-item-inactive ${
+              !isVisible ? "lg:justify-center" : ""
+            }`}
+          >
+            <Settings className="w-5 h-5 flex-shrink-0 menu-item-icon-inactive" />
+            {isVisible && <span className="flex-1 text-left">Configuración</span>}
+          </Link>
+        </div>
+        <div className="pt-4 border-t border-outline-variant">
           <button
             onClick={handleLogout}
             className={`menu-item group w-full text-secondary hover:text-error hover:bg-error-container/20 ${

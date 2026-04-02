@@ -70,6 +70,12 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :service_reminders, only: [ :index ] do
+        collection do
+          get :statistics
+        end
+      end
+
       # resources :reports, only: [:index]
     end
   end

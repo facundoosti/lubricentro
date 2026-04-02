@@ -21,6 +21,7 @@ import Budgets from "@pages/Budgets";
 import BudgetForm from "@pages/BudgetForm";
 import BudgetPrint from "@pages/BudgetPrint";
 import ServiceRecordFormPage from "@pages/ServiceRecordFormPage";
+import Reminders from "@pages/Reminders";
 import Settings from "@pages/Settings";
 import Inbox from "@pages/Inbox";
 
@@ -68,6 +69,7 @@ function App() {
                 element={<BudgetPrint />}
               />
               <Route path="inbox" element={<Inbox />} />
+              <Route path="reminders" element={<Reminders />} />
               <Route path="settings" element={<Settings />} />
             </Route>
 

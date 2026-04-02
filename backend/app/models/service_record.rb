@@ -69,6 +69,14 @@ class ServiceRecord < ApplicationRecord
           .where("created_at >= ?", 30.days.ago)
           .select(:vehicle_id)
       )
+      .where(
+        "NOT EXISTS (
+          SELECT 1 FROM service_records sr2
+          WHERE sr2.vehicle_id = service_records.vehicle_id
+          AND sr2.service_date >= service_records.next_service_date
+          AND sr2.id != service_records.id
+        )"
+      )
       .where.not(customer_id: Customer.where(phone: [ nil, "" ]).select(:id))
   }
 
