@@ -4,6 +4,15 @@ Rails.application.routes.draw do
   # Health check route
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # WhatsApp webhook — no auth required
+  namespace :webhooks do
+    get  "whatsapp", to: "whatsapp#verify"
+    post "whatsapp", to: "whatsapp#receive"
+  end
+
+  # ActionCable
+  mount ActionCable.server => "/cable"
+
   # API routes
   namespace :api do
     namespace :v1 do
@@ -44,6 +53,14 @@ Rails.application.routes.draw do
       resources :budgets
 
       resource :setting, only: [ :show, :update ]
+
+      resources :conversations, only: [ :index, :show ] do
+        member do
+          patch :resolve
+          patch :assign_human
+        end
+        resources :messages, only: [ :create ]
+      end
 
       resources :service_records do
         collection do

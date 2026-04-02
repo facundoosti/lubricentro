@@ -46,6 +46,9 @@ gem "aws-sdk-s3", require: false
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible
 gem "rack-cors"
 
+# OpenAI client — used by AiAgentService (gpt-4o) and EmbeddingService (text-embedding-3-small)
+gem "ruby-openai", "~> 7.0"
+
 # OAuth2 provider for Rails
 gem "doorkeeper", "~> 5.6"
 

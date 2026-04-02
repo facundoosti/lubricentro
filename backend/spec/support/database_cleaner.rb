@@ -4,6 +4,7 @@ require 'database_cleaner/active_record'
 RSpec.configure do |config|
   # Configuration for Database Cleaner
   config.before(:suite) do
+    DatabaseCleaner.allow_remote_database_url = true
     DatabaseCleaner.strategy = :transaction
     DatabaseCleaner.clean_with(:truncation)
   end

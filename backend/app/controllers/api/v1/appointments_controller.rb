@@ -3,7 +3,7 @@ class Api::V1::AppointmentsController < ApplicationController
 
   # GET /api/v1/appointments
   def index
-    @appointments = Appointment.includes(customer: :avatar_attachment, vehicle: :image_attachment)
+    @appointments = Appointment.includes(:service_record, customer: :avatar_attachment, vehicle: :image_attachment)
 
     # Filtros
     @appointments = @appointments.by_customer(params[:customer_id]) if params[:customer_id].present?
@@ -106,7 +106,7 @@ class Api::V1::AppointmentsController < ApplicationController
 
   # GET /api/v1/appointments/upcoming
   def upcoming
-    @appointments = Appointment.includes(customer: :avatar_attachment, vehicle: :image_attachment).upcoming
+    @appointments = Appointment.includes(:service_record, customer: :avatar_attachment, vehicle: :image_attachment).upcoming
     @pagy, @appointments = pagy(@appointments, items: params[:per_page] || 10)
 
     render json: {

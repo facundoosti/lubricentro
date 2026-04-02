@@ -215,7 +215,8 @@ RSpec.describe "Api::V1::ServiceRecords", type: :request do
         patch "/api/v1/service_records/#{service_record.id}", params: { service_record: new_attributes }, headers: auth_headers(user)
         service_record.reload
         expect(service_record.notes).to eq("Updated notes")
-        expect(service_record.total_amount).to eq(150.50)
+        # total_amount is auto-recalculated from items (0 when no items present)
+        expect(service_record.total_amount).to eq(0.0)
       end
 
       it "returns a successful response" do

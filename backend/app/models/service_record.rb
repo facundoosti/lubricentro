@@ -38,6 +38,7 @@ class ServiceRecord < ApplicationRecord
   has_many :services, through: :service_record_services
   has_many :products, through: :service_record_products
   has_many_attached :photos
+  has_many :service_reminders, dependent: :destroy
 
   accepts_nested_attributes_for :service_record_services, allow_destroy: true
   accepts_nested_attributes_for :service_record_products, allow_destroy: true
@@ -60,6 +61,16 @@ class ServiceRecord < ApplicationRecord
   scope :by_customer, ->(customer_id) { where(customer_id: customer_id) }
   scope :by_vehicle, ->(vehicle_id) { where(vehicle_id: vehicle_id) }
   scope :with_high_mileage, ->(threshold = 100000) { where("mileage > ?", threshold) }
+  scope :pending_reminders, ->(days_ahead = 7) {
+    joins(:customer, :vehicle)
+      .where(next_service_date: Date.current..(Date.current + days_ahead.days))
+      .where.not(
+        vehicle_id: ServiceReminder
+          .where("created_at >= ?", 30.days.ago)
+          .select(:vehicle_id)
+      )
+      .where.not(customer_id: Customer.where(phone: [ nil, "" ]).select(:id))
+  }
 
   # Callbacks
   before_save :calculate_next_service_date, if: :mileage_changed?

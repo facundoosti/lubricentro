@@ -95,5 +95,18 @@ export const serviceRecordsAPI = {
   statistics: () => api.get('/service_records/statistics'),
 };
 
+export const conversationsAPI = {
+  getAll: (params = {}) => api.get('/conversations', { params }),
+  getById: (id) => api.get(`/conversations/${id}`),
+  updateStatus: (id, status) => api.patch(`/conversations/${id}`, { conversation: { status } }),
+};
+
+export const messagesAPI = {
+  getByConversation: (conversationId) =>
+    api.get(`/conversations/${conversationId}/messages`),
+  create: (conversationId, data) =>
+    api.post(`/conversations/${conversationId}/messages`, { message: data }),
+};
+
 export { api };
 export default api;

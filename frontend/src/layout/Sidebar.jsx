@@ -10,6 +10,7 @@ import {
   ChevronDown,
   MoreHorizontal,
   LogOut,
+  MessageSquare,
 } from "lucide-react";
 import { useSidebarStore } from "@stores/useSidebarStore";
 import { useAuthStore } from "@stores/useAuthStore";
@@ -173,6 +174,11 @@ const Sidebar = () => {
   ];
 
   const otherNavItems = [
+    {
+      name: "Inbox",
+      icon: <MessageSquare className="w-5 h-5" />,
+      path: "/inbox",
+    },
     {
       name: "Configuración",
       icon: <Settings className="w-5 h-5" />,

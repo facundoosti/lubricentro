@@ -30,13 +30,13 @@ Sistema de gestión para lubricentro automotriz. Maneja clientes, vehículos, pr
 - Tiene fecha de atención y fecha sugerida del próximo servicio.
 - Puede originarse de la conversión de un presupuesto aprobado.
 
-### Quote (Presupuesto)
+### Budget (Presupuesto)
 - Cotización emitida a un cliente para un vehículo específico.
 - Pertenece a un cliente y un vehículo.
-- Contiene items: servicios (`QuoteService`) y productos (`QuoteProduct`).
+- Contiene items: servicios (`BudgetService`) y productos (`BudgetProduct`).
 - El total se calcula automáticamente como la suma de todos los items.
 
-### QuoteService / QuoteProduct (Items del Presupuesto)
+### BudgetService / BudgetProduct (Items del Presupuesto)
 - Vinculan un presupuesto con un servicio o producto.
 - Campos: `quantity`, `unit_price`, `total_price`.
 - `total_price = quantity × unit_price` (calculado automáticamente).
@@ -76,9 +76,9 @@ expired expired  expired
 
 ---
 
-## Numeración de Presupuestos
+## Numeración de Budgets
 
-- Formato: `Q{año}-{NNNN}` (ej: `Q2025-0001`)
+- Formato: `B{año}-{NNNN}` (ej: `B2025-0001`)
 - El número es único e inmutable una vez creado.
 - Se genera automáticamente al crear el presupuesto.
 
@@ -87,7 +87,7 @@ expired expired  expired
 ## Cálculo de Totales
 
 - Cada item: `total_price = quantity × unit_price`
-- Total del presupuesto: `total_amount = Σ quote_services.total_price + Σ quote_products.total_price`
+- Total del presupuesto: `total_amount = Σ budget_services.total_price + Σ budget_products.total_price`
 - Los totales se recalculan automáticamente ante cualquier cambio en los items.
 
 ---
@@ -98,7 +98,7 @@ expired expired  expired
 
 **Proceso (transaccional):**
 1. Crear un `ServiceRecord` con el mismo cliente, vehículo y total del presupuesto.
-2. Copiar todos los `QuoteService` y `QuoteProduct` al nuevo `ServiceRecord`.
+2. Copiar todos los `BudgetService` y `BudgetProduct` al nuevo `ServiceRecord`.
 3. Marcar el presupuesto como `converted`.
 
 **Postcondición:** el presupuesto queda en `converted` y no puede editarse. El `ServiceRecord` queda activo.
@@ -116,8 +116,8 @@ expired expired  expired
 ## Relaciones entre Entidades
 
 ```
-Customer ──< Vehicle ──< Quote ──< QuoteService >── Service
-                    ↑         └──< QuoteProduct >── Product
+Customer ──< Vehicle ──< Budget ──< BudgetService >── Service
+                    ↑          └──< BudgetProduct >── Product
                     └──< ServiceRecord ──< ServiceRecordService >── Service
                                       └──< ServiceRecordProduct >── Product
 ```

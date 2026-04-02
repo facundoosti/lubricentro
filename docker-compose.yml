@@ -1,7 +1,7 @@
 services:
   # Base de datos PostgreSQL
   postgres:
-    image: postgres:15-alpine
+    image: pgvector/pgvector:pg15
     container_name: lubricentro_postgres
     environment:
       POSTGRES_DB: lubricentro_development

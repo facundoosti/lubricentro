@@ -22,6 +22,7 @@ import BudgetForm from "@pages/BudgetForm";
 import BudgetPrint from "@pages/BudgetPrint";
 import ServiceRecordFormPage from "@pages/ServiceRecordFormPage";
 import Settings from "@pages/Settings";
+import Inbox from "@pages/Inbox";
 
 function App() {
   return (
@@ -66,6 +67,7 @@ function App() {
                 path="presupuestos/:id/imprimir"
                 element={<BudgetPrint />}
               />
+              <Route path="inbox" element={<Inbox />} />
               <Route path="settings" element={<Settings />} />
             </Route>
 

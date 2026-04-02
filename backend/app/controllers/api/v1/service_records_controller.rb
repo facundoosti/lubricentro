@@ -31,6 +31,14 @@ class Api::V1::ServiceRecordsController < ApplicationController
 
   # POST /api/v1/service_records
   def create
+    if params[:customer_id].present?
+      return render_json({ errors: [ "Customer not found" ] }, message: "Customer not found", status: :not_found) unless Customer.exists?(params[:customer_id])
+    end
+
+    if params[:vehicle_id].present?
+      return render_json({ errors: [ "Vehicle not found" ] }, message: "Vehicle not found", status: :not_found) unless Vehicle.exists?(params[:vehicle_id])
+    end
+
     @service_record = ServiceRecord.new(service_record_params)
 
     if @service_record.save

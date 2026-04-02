@@ -1,6 +1,7 @@
 module ActiveStorageUrlHelper
   def self.url_for(attachment)
-    return nil unless attachment.attached?
+    return nil if attachment.nil?
+    return nil if attachment.respond_to?(:attached?) && !attachment.attached?
 
     Rails.application.routes.url_helpers.rails_blob_url(attachment)
   end

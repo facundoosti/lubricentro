@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import SearchableSelect from '@ui/SearchableSelect';
-import { ArrowLeft, Save, Plus, Trash2, Car, User, Wrench, Package, Search, X } from 'lucide-react';
+import PhotosUpload from '@ui/PhotosUpload';
+import { ArrowLeft, Save, Plus, Trash2, Car, User, Wrench, Package, Search, X, ImageIcon } from 'lucide-react';
 import { useAppointment } from '@services/appointmentsService';
 import { useServiceRecord, useCreateServiceRecord, useUpdateServiceRecord } from '@services/serviceRecordsService';
 import { useServices } from '@services/servicesService';
@@ -41,6 +42,8 @@ const ServiceRecordFormPage = () => {
   const createMutation = useCreateServiceRecord();
   const updateMutation = useUpdateServiceRecord();
   const isSaving = createMutation.isPending || updateMutation.isPending;
+
+  const [photoFiles, setPhotoFiles] = useState([]);
 
   const isStandaloneCreate = !isEditing && !appointmentId;
 
@@ -246,6 +249,7 @@ const ServiceRecordFormPage = () => {
         .filter((p) => p.product_id)
         .map((p) => ({ ...p, quantity: parseInt(p.quantity, 10) || 1 })),
     };
+    if (photoFiles.length > 0) payload.photos = photoFiles;
 
     try {
       if (isEditing) {
@@ -734,6 +738,20 @@ const ServiceRecordFormPage = () => {
               </table>
             </div>
           )}
+        </div>
+
+        {/* Fotos */}
+        <div className="bg-surface-container border border-outline-variant rounded-lg p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <ImageIcon className="w-4 h-4 text-primary" />
+            <h2 className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
+              Fotos
+            </h2>
+          </div>
+          <PhotosUpload
+            currentUrls={existingData?.data?.photos_urls || []}
+            onChange={setPhotoFiles}
+          />
         </div>
 
         {/* Total */}
