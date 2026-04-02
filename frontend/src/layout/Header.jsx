@@ -1,15 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSidebarStore } from '@stores/useSidebarStore';
 import { useAuthStore } from '@stores/useAuthStore';
 import { showAuthSuccess } from '@services/notificationService';
-import { LogOut, User, Search, Bell, Settings, Menu, X } from 'lucide-react';
+import { LogOut, User, Bell, Settings, Menu, X } from 'lucide-react';
 
 const Header = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebarStore();
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
-  const inputRef = useRef(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleToggle = () => {
@@ -25,17 +24,6 @@ const Header = () => {
     showAuthSuccess('LOGOUT_SUCCESS');
     navigate('/login');
   };
-
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
-        event.preventDefault();
-        inputRef.current?.focus();
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -62,19 +50,6 @@ const Header = () => {
         <h1 className="hidden lg:block text-sm font-bold tracking-tighter text-on-surface">
           SISTEMA LUBRICENTRO
         </h1>
-      </div>
-
-      {/* Center: search */}
-      <div className="hidden md:flex flex-1 max-w-sm mx-6">
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary pointer-events-none" />
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="Buscar... (⌘K)"
-            className="w-full h-9 bg-surface-variant border border-outline-variant rounded-lg pl-9 pr-4 text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
-          />
-        </div>
       </div>
 
       {/* Right: actions + user */}

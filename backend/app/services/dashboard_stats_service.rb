@@ -96,12 +96,6 @@ class DashboardStatsService
       alerts << { type: "info", message: "#{upcoming_services} servicios próximos a vencer", count: upcoming_services }
     end
 
-    # Objetivos en riesgo
-    goals = calculate_goals
-    if goals[:revenue_percentage] < 70
-      alerts << { type: "error", message: "Objetivo de ingresos en riesgo", percentage: goals[:revenue_percentage] }
-    end
-
     alerts
   end
 
