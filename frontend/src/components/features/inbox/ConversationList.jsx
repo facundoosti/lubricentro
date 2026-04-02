@@ -73,7 +73,7 @@ function ConversationItem({ conversation, isActive, onClick }) {
 }
 
 export function ConversationList({
-  conversations,
+  conversations = [],
   activeId,
   statusFilter,
   onFilterChange,

@@ -28,41 +28,36 @@ function MessageBubble({ message }) {
     ? format(new Date(message.received_at || message.created_at), 'HH:mm', { locale: es })
     : '';
 
-  if (isOutbound && isAgent) {
+  // Outbound: agent or bot → right side
+  if (isOutbound || isBot) {
+    const isAgentMsg = isOutbound && isAgent;
     return (
       <div className="flex flex-col max-w-[70%] self-end items-end">
-        <div className="bg-primary p-4 rounded-xl rounded-tr-none border border-primary-container shadow-lg shadow-primary/5">
-          <p className="text-sm text-on-primary font-medium leading-relaxed">
+        <div className={`p-4 rounded-xl rounded-tr-none border shadow-lg ${
+          isAgentMsg
+            ? 'bg-primary border-primary-container shadow-primary/5'
+            : 'bg-tertiary/10 border-tertiary/20 shadow-tertiary/5'
+        }`}>
+          <p className={`text-sm font-medium leading-relaxed ${
+            isAgentMsg ? 'text-on-primary' : 'text-tertiary italic'
+          }`}>
             {message.body}
           </p>
         </div>
-        <span className="text-[10px] text-zinc-500 mt-1 mr-1">
-          {time} · Agente (Vos)
-        </span>
-      </div>
-    );
-  }
-
-  if (isBot) {
-    return (
-      <div className="flex flex-col max-w-[70%]">
-        <div className="bg-surface-variant p-4 rounded-xl rounded-tl-none border border-zinc-800 opacity-80">
-          <p className="text-sm text-on-surface leading-relaxed italic">
-            {message.body}
-          </p>
-        </div>
-        <div className="flex items-center gap-1 mt-1 ml-1">
-          <Bot className="w-3 h-3 text-tertiary" />
-          <span className="text-[10px] text-zinc-500">{time} · Bot Automático</span>
+        <div className="flex items-center gap-1 mt-1 mr-1">
+          {isBot && <Bot className="w-3 h-3 text-tertiary" />}
+          <span className="text-[10px] text-zinc-500">
+            {time} · {isAgentMsg ? 'Agente (Vos)' : 'Bot Automático'}
+          </span>
         </div>
       </div>
     );
   }
 
-  // inbound / customer
+  // inbound / customer → left side
   return (
     <div className="flex flex-col max-w-[70%]">
-      <div className="bg-surface-variant p-4 rounded-xl rounded-tl-none border border-zinc-800">
+      <div className="bg-zinc-800 p-4 rounded-xl rounded-tl-none border border-zinc-700">
         <p className="text-sm text-on-surface leading-relaxed">{message.body}</p>
       </div>
       <span className="text-[10px] text-zinc-500 mt-1 ml-1">

@@ -218,12 +218,12 @@ end
 
 El LLM recibe estas funciones como `tools` (function calling).
 
-| Tool                   | Descripción                                                         |
-|------------------------|---------------------------------------------------------------------|
-| `clasificar_intencion` | Detecta si el remitente es cliente o proveedor                      |
-| `consultar_precios`    | Devuelve precio y descripción de un producto/servicio               |
-| `derivar_a_humano`     | Cambia `conversation.status` a `needs_human` y avisa en la UI      |
-| `agendar_turno`        | Crea un registro de turno tentativo y confirma por WhatsApp         |
+| Tool                   | Descripción                                                   |
+| ---------------------- | ------------------------------------------------------------- |
+| `clasificar_intencion` | Detecta si el remitente es cliente o proveedor                |
+| `consultar_precios`    | Devuelve precio y descripción de un producto/servicio         |
+| `derivar_a_humano`     | Cambia `conversation.status` a `needs_human` y avisa en la UI |
+| `agendar_turno`        | Crea un registro de turno tentativo y confirma por WhatsApp   |
 
 ```ruby
 TOOLS = [
@@ -387,17 +387,19 @@ InboxPage
 
 ```javascript
 // hooks/useInboxCable.js
-import { createConsumer } from "@rails/actioncable"
+import { createConsumer } from "@rails/actioncable";
 
-const consumer = createConsumer(import.meta.env.VITE_CABLE_URL)
+const consumer = createConsumer(import.meta.env.VITE_CABLE_URL);
 
 export function useInboxCable(onUpdate) {
   useEffect(() => {
     const subscription = consumer.subscriptions.create("InboxChannel", {
-      received(data) { onUpdate(data) }
-    })
-    return () => subscription.unsubscribe()
-  }, [])
+      received(data) {
+        onUpdate(data);
+      },
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 }
 ```
 
@@ -412,12 +414,12 @@ end
 
 ### Estados de Conversación (UI)
 
-| Status         | Badge UI              | Comportamiento                              |
-|----------------|-----------------------|---------------------------------------------|
-| `bot`          | 🤖 Bot atendiendo     | El agente responde automáticamente          |
-| `needs_human`  | 🙋 Requiere atención  | Notificación en sidebar, input habilitado   |
-| `supplier`     | 📦 Proveedor          | Clasificado automáticamente, sin bot        |
-| `resolved`     | ✅ Resuelto            | Solo lectura                                |
+| Status        | Badge UI             | Comportamiento                            |
+| ------------- | -------------------- | ----------------------------------------- |
+| `bot`         | 🤖 Bot atendiendo    | El agente responde automáticamente        |
+| `needs_human` | 🙋 Requiere atención | Notificación en sidebar, input habilitado |
+| `supplier`    | 📦 Proveedor         | Clasificado automáticamente, sin bot      |
+| `resolved`    | ✅ Resuelto          | Solo lectura                              |
 
 ---
 
@@ -463,7 +465,7 @@ end
 WHATSAPP_PHONE_NUMBER_ID=...
 WHATSAPP_ACCESS_TOKEN=...
 WHATSAPP_VERIFY_TOKEN=...     # token propio para verificar el webhook
-OPENAI_API_KEY=...            # o la clave del LLM elegido
+AI_API_KEY=...            # o la clave del LLM elegido
 VITE_CABLE_URL=...            # ws://localhost:3000/cable en desarrollo
 ```
 
@@ -475,7 +477,7 @@ VITE_CABLE_URL=...            # ws://localhost:3000/cable en desarrollo
 # config/recurring.yml (si se necesita mantenimiento periódico de embeddings)
 reindex_embeddings:
   class: ReindexEmbeddingsJob
-  schedule: "0 3 * * 0"   # domingos a las 3 AM
+  schedule: "0 3 * * 0" # domingos a las 3 AM
   queue: ai
 ```
 

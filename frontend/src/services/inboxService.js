@@ -13,7 +13,7 @@ export const useConversations = (filters = {}) =>
     queryKey: inboxKeys.conversations(),
     queryFn: async () => {
       const { data } = await conversationsAPI.getAll(filters);
-      return data;
+      return data?.data?.conversations ?? [];
     },
   });
 
@@ -21,8 +21,8 @@ export const useMessages = (conversationId) =>
   useQuery({
     queryKey: inboxKeys.messages(conversationId),
     queryFn: async () => {
-      const { data } = await messagesAPI.getByConversation(conversationId);
-      return data;
+      const { data } = await conversationsAPI.getById(conversationId);
+      return data?.data?.conversation?.messages ?? [];
     },
     enabled: !!conversationId,
   });
@@ -30,7 +30,11 @@ export const useMessages = (conversationId) =>
 export const useUpdateConversationStatus = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }) => conversationsAPI.updateStatus(id, status),
+    mutationFn: ({ id, status }) => {
+      if (status === 'resolved') return conversationsAPI.resolve(id);
+      if (status === 'needs_human') return conversationsAPI.assignHuman(id);
+      throw new Error(`Unknown status: ${status}`);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: inboxKeys.conversations() });
     },

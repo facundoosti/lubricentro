@@ -1,5 +1,5 @@
 class EmbeddingService
-  MODEL = "text-embedding-3-small"
+  MODEL = "text-embedding-nomic-embed-text-v1.5@f32" #"text-embedding-3-small"
 
   def self.generate(text)
     new.generate(text)
@@ -36,6 +36,8 @@ class EmbeddingService
   private
 
   def client
-    @client ||= OpenAI::Client.new(access_token: ENV.fetch("OPENAI_API_KEY"))
+    @client ||= OpenAI::Client.new(
+            uri_base: ENV.fetch("AI_API_URL"),
+            access_token: ENV.fetch("AI_API_KEY"))
   end
 end

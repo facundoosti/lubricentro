@@ -1,5 +1,5 @@
 class Api::V1::ConversationsController < ApplicationController
-  before_action :set_conversation, only: [ :show, :update, :resolve, :assign_human ]
+  before_action :set_conversation, only: [ :show, :resolve, :assign_human ]
 
   # GET /api/v1/conversations
   def index

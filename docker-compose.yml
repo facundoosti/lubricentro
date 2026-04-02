@@ -33,6 +33,8 @@ services:
       RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
       JWT_SECRET: ${JWT_SECRET}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      AI_API_KEY: ${AI_API_KEY}
+      AI_API_URL: ${AI_API_URL}
     ports:
       - "3000:3000"
     volumes:

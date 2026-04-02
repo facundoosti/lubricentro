@@ -1,5 +1,5 @@
 class AiAgentService
-  MODEL = "gpt-4o"
+  MODEL = "qwen/qwen3.5-9b"
 
   TOOLS = [
     {
@@ -156,17 +156,17 @@ class AiAgentService
     return fallback_context unless embedding
 
     products = Product.order(Arel.sql("embedding <-> '#{embedding}'")).limit(3)
-               .map { |p| "- #{p.name}: $#{p.price}" }.join("\n")
+               .map { |p| "- #{p.name}: #{p.formatted_price}" }.join("\n")
 
     services = Service.order(Arel.sql("embedding <-> '#{embedding}'")).limit(3)
-               .map { |s| "- #{s.name}: $#{s.price}" }.join("\n")
+               .map { |s| "- #{s.name}: #{s.formatted_price}" }.join("\n")
 
     "Productos:\n#{products}\n\nServicios:\n#{services}"
   end
 
   def fallback_context
-    products = Product.limit(5).map { |p| "- #{p.name}: $#{p.price}" }.join("\n")
-    services = Service.limit(5).map { |s| "- #{s.name}: $#{s.price}" }.join("\n")
+    products = Product.limit(5).map { |p| "- #{p.name}: $#{p.formatted_price}" }.join("\n")
+    services = Service.limit(5).map { |s| "- #{s.name}: $#{s.formatted_price}" }.join("\n")
     "Productos:\n#{products}\n\nServicios:\n#{services}"
   end
 
@@ -185,7 +185,9 @@ class AiAgentService
   end
 
   def client
-    @client ||= OpenAI::Client.new(access_token: ENV.fetch("OPENAI_API_KEY"))
+    @client ||= OpenAI::Client.new(
+      uri_base: ENV.fetch("AI_API_URL"),
+      access_token: ENV.fetch("AI_API_KEY"))
   end
 
   def postgresql?

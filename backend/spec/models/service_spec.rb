@@ -5,7 +5,7 @@
 #  id          :bigint           not null, primary key
 #  base_price  :decimal(10, 2)   not null
 #  description :text
-#  embedding   :vector(1536)
+#  embedding   :vector(768)
 #  name        :string(100)      not null
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null

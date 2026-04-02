@@ -4,7 +4,7 @@
 #
 #  id          :bigint           not null, primary key
 #  description :text
-#  embedding   :vector(1536)
+#  embedding   :vector(768)
 #  name        :string(100)      not null
 #  unit        :string(50)
 #  unit_price  :decimal(10, 2)   not null
@@ -35,8 +35,21 @@ class Product < ApplicationRecord
 
   has_neighbors :embedding
 
+  after_save :generate_embedding, if: :embedding_text_changed?
+
   # Métodos
   def formatted_price
     "$#{unit_price.to_f}"
+  end
+
+  private
+
+  def generate_embedding
+    embedding = EmbeddingService.generate("#{name} #{description}")
+    update_column(:embedding, embedding) if embedding
+  end
+
+  def embedding_text_changed?
+    saved_change_to_name? || saved_change_to_description?
   end
 end

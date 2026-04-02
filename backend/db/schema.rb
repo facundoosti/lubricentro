@@ -176,7 +176,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_02_195650) do
     t.string "unit", limit: 50
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.vector "embedding", limit: 1536
+    t.vector "embedding", limit: 768
     t.index ["name"], name: "index_products_on_name", unique: true
     t.index ["unit_price"], name: "index_products_on_unit_price"
   end
@@ -247,7 +247,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_02_195650) do
     t.decimal "base_price", precision: 10, scale: 2, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.vector "embedding", limit: 1536
+    t.vector "embedding", limit: 768
     t.index ["base_price"], name: "index_services_on_base_price"
     t.index ["name"], name: "index_services_on_name", unique: true
   end

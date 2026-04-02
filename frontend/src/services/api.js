@@ -98,12 +98,11 @@ export const serviceRecordsAPI = {
 export const conversationsAPI = {
   getAll: (params = {}) => api.get('/conversations', { params }),
   getById: (id) => api.get(`/conversations/${id}`),
-  updateStatus: (id, status) => api.patch(`/conversations/${id}`, { conversation: { status } }),
+  resolve: (id) => api.patch(`/conversations/${id}/resolve`),
+  assignHuman: (id) => api.patch(`/conversations/${id}/assign_human`),
 };
 
 export const messagesAPI = {
-  getByConversation: (conversationId) =>
-    api.get(`/conversations/${conversationId}/messages`),
   create: (conversationId, data) =>
     api.post(`/conversations/${conversationId}/messages`, { message: data }),
 };

@@ -5,7 +5,7 @@
 #  id          :bigint           not null, primary key
 #  base_price  :decimal(10, 2)   not null
 #  description :text
-#  embedding   :vector(1536)
+#  embedding   :vector(768)
 #  name        :string(100)      not null
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
@@ -33,6 +33,8 @@ class Service < ApplicationRecord
 
   has_neighbors :embedding
 
+  after_save :generate_embedding, if: :embedding_text_changed?
+
   # Métodos helper
   def display_name
     name.presence || "Service ##{id}"
@@ -40,5 +42,16 @@ class Service < ApplicationRecord
 
   def formatted_price
     "$#{base_price.to_f}"
+  end
+
+  private
+
+  def generate_embedding
+    embedding = EmbeddingService.generate("#{name} #{description}")
+    update_column(:embedding, embedding) if embedding
+  end
+
+  def embedding_text_changed?
+    saved_change_to_name? || saved_change_to_description?
   end
 end
