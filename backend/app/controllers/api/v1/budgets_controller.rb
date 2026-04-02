@@ -9,7 +9,7 @@ class Api::V1::BudgetsController < ApplicationController
     @budgets = @budgets.recent
 
     @pagy, @budgets = pagy(@budgets, items: safe_per_page(params[:per_page]))
-    @serializer = BudgetSerializer.render_as_hash(@budgets, root: :budgets)
+    @serializer = BudgetSerializer.render_as_hash(@budgets, root: :budgets, view: :with_items)
     render_json(@serializer)
   end
 

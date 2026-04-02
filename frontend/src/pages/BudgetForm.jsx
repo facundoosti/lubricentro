@@ -7,11 +7,13 @@ import {
   useCreateBudget,
   useUpdateBudget,
 } from "@services/budgetsService";
-import { useCustomers } from "@services/customersService";
+import { useVehicles } from "@services/vehiclesService";
 import {
   showBudgetSuccess,
   showBudgetError,
 } from "@services/notificationService";
+import CustomerSearchInput from "@components/features/customers/CustomerSearchInput";
+import ItemSearchInput from "@components/features/budgets/ItemSearchInput";
 
 const STATUSES = [
   { value: "draft", label: "Borrador" },
@@ -25,20 +27,26 @@ const formatCurrency = (value) => {
   return `$${n.toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 };
 
+const formatVehicle = (v) =>
+  [v.brand, v.model, v.year, v.license_plate ? `(${v.license_plate})` : ""]
+    .filter(Boolean)
+    .join(" ");
+
 const BudgetForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditing = !!id;
 
-  const [customerSearch, setCustomerSearch] = useState("");
-  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [initialCustomer, setInitialCustomer] = useState(null);
 
   const { data: existingData, isLoading: loadingExisting } = useBudget(id);
-  const { data: customersData } = useCustomers({
-    search: customerSearch,
-    per_page: 20,
+  const { data: vehiclesData } = useVehicles({
+    customer_id: selectedCustomerId,
+    per_page: 50,
+    enabled: !!selectedCustomerId,
   });
-  const customers = customersData?.data?.customers || [];
+  const customerVehicles = vehiclesData?.data?.vehicles || [];
 
   const createMutation = useCreateBudget();
   const updateMutation = useUpdateBudget();
@@ -92,7 +100,10 @@ const BudgetForm = () => {
             }))
           : [{ quantity: 1, description: "", unit_price: 0, position: 0 }],
       });
-      if (p.customer) setCustomerSearch(p.customer.name);
+      if (p.customer) {
+        setInitialCustomer(p.customer);
+        setSelectedCustomerId(p.customer_id);
+      }
     }
   }, [existingData, isEditing, reset]);
 
@@ -105,10 +116,14 @@ const BudgetForm = () => {
   }, 0);
   const totalCard = totalList * (1 + watchedSurcharge / 100);
 
-  const handleSelectCustomer = (customer) => {
-    setValue("customer_id", customer.id);
-    setCustomerSearch(customer.name);
-    setShowCustomerDropdown(false);
+  const handleCustomerChange = (customerId) => {
+    setValue("customer_id", customerId);
+    setSelectedCustomerId(customerId);
+    if (!customerId) setValue("vehicle_description", "");
+  };
+
+  const handleVehicleSelect = (e) => {
+    setValue("vehicle_description", e.target.value);
   };
 
   const onSubmit = async (formData) => {
@@ -161,10 +176,10 @@ const BudgetForm = () => {
         </button>
         <div>
           <h1 className="text-2xl font-bold text-on-surface">
-            {isEditing ? "Editar Budget" : "Nuevo Budget"}
+            {isEditing ? "Editar Presupuesto" : "Nuevo Presupuesto"}
           </h1>
           <p className="text-secondary text-sm mt-0.5">
-            {isEditing ? `Budget #${id}` : "Completá los datos del budget"}
+            {isEditing ? `Presupuesto #${id}` : "Completá los datos del budget"}
           </p>
         </div>
         {isEditing && (
@@ -220,55 +235,43 @@ const BudgetForm = () => {
             </div>
 
             {/* Customer */}
-            <div className="relative">
+            <div>
               <label className="block text-sm font-medium text-on-surface mb-1">
                 Cliente
               </label>
-              <input
-                type="text"
-                placeholder="Buscar cliente..."
-                value={customerSearch}
-                onChange={(e) => {
-                  setCustomerSearch(e.target.value);
-                  setShowCustomerDropdown(true);
-                  if (!e.target.value) setValue("customer_id", "");
-                }}
-                onFocus={() => setShowCustomerDropdown(true)}
-                onBlur={() =>
-                  setTimeout(() => setShowCustomerDropdown(false), 150)
-                }
-                className="w-full px-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary placeholder:text-secondary"
-              />
               <input type="hidden" {...register("customer_id")} />
-              {showCustomerDropdown && customers.length > 0 && (
-                <ul className="absolute z-20 top-full mt-1 w-full bg-surface-container border border-outline-variant rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                  {customers.map((c) => (
-                    <li
-                      key={c.id}
-                      onMouseDown={() => handleSelectCustomer(c)}
-                      className="px-3 py-2 text-sm text-on-surface hover:bg-surface-container-high cursor-pointer"
-                    >
-                      <span className="font-medium">{c.name}</span>
-                      {c.phone && (
-                        <span className="text-secondary ml-2">{c.phone}</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <CustomerSearchInput
+                value={selectedCustomerId}
+                onChange={handleCustomerChange}
+                initialCustomer={initialCustomer}
+              />
             </div>
 
-            {/* Vehicle description */}
+            {/* Vehicle */}
             <div>
               <label className="block text-sm font-medium text-on-surface mb-1">
                 Vehículo
               </label>
-              <input
-                type="text"
-                placeholder="Ej: Ford Falcon 1986"
-                {...register("vehicle_description")}
-                className="w-full px-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary placeholder:text-secondary"
-              />
+              {selectedCustomerId && customerVehicles.length > 0 ? (
+                <select
+                  onChange={handleVehicleSelect}
+                  className="w-full px-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary"
+                >
+                  <option value="">Seleccionar vehículo...</option>
+                  {customerVehicles.map((v) => (
+                    <option key={v.id} value={formatVehicle(v)}>
+                      {formatVehicle(v)}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  placeholder={selectedCustomerId ? "Sin vehículos registrados" : "Ej: Ford Falcon 1986"}
+                  {...register("vehicle_description")}
+                  className="w-full px-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary placeholder:text-secondary"
+                />
+              )}
             </div>
           </div>
 
@@ -309,7 +312,7 @@ const BudgetForm = () => {
             </button>
           </div>
 
-          <div className="overflow-x-auto">
+          <div>
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-outline-variant">
@@ -349,14 +352,13 @@ const BudgetForm = () => {
                         />
                       </td>
                       <td className="py-2 pr-2">
-                        <input
-                          type="text"
-                          placeholder="Descripción del artículo"
-                          {...register(
-                            `items_attributes.${index}.description`,
-                            { required: true },
-                          )}
-                          className="w-full px-2 py-1.5 bg-surface-variant border border-outline-variant rounded text-on-surface text-sm focus:outline-none focus:border-primary placeholder:text-secondary"
+                        <ItemSearchInput
+                          value={watchedItems[index]?.description || ''}
+                          onChange={(text) => setValue(`items_attributes.${index}.description`, text)}
+                          onSelect={({ description, unit_price }) => {
+                            setValue(`items_attributes.${index}.description`, description);
+                            setValue(`items_attributes.${index}.unit_price`, unit_price);
+                          }}
                         />
                       </td>
                       <td className="py-2 pr-2">

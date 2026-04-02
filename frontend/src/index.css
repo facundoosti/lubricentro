@@ -157,6 +157,97 @@
   body {
     @apply font-geist font-normal bg-background text-on-surface z-1;
   }
+
+  /* ── Autofill: evitar fondo claro del browser ───────────────── */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 40px var(--color-surface-container) inset !important;
+    -webkit-text-fill-color: var(--color-on-surface) !important;
+    caret-color: var(--color-on-surface);
+  }
+
+  /* ── Number inputs: spinners en modo oscuro ─────────────────── */
+  input[type="number"] {
+    color-scheme: dark;
+  }
+  input[type="number"]::-webkit-inner-spin-button {
+    opacity: 0.4;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  input[type="number"]:hover::-webkit-inner-spin-button,
+  input[type="number"]:focus::-webkit-inner-spin-button {
+    opacity: 0.75;
+  }
+
+  /* ── Date / Time: modo oscuro + ícono consistente ────────────── */
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    color-scheme: dark;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator,
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    background-color: transparent;
+    color: var(--color-on-surface-variant);
+    opacity: 0.45;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px;
+    filter: invert(0.7);
+    transition: opacity 0.15s;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator:hover,
+  input[type="time"]::-webkit-calendar-picker-indicator:hover,
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 0.85;
+    background-color: var(--color-surface-container-high);
+  }
+
+  /* ── Checkbox nativo con estilo de la app ────────────────────── */
+  input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 4px;
+    border: 1.5px solid var(--color-outline);
+    background-color: var(--color-surface-container);
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: background-color 0.15s, border-color 0.15s;
+  }
+  input[type="checkbox"]:checked {
+    background-color: var(--color-primary-container);
+    border-color: var(--color-primary-container);
+  }
+  input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%230a0012'%3E%3Cpath d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 0.75rem;
+  }
+  input[type="checkbox"]:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.25);
+  }
+  input[type="checkbox"]:hover:not(:checked) {
+    border-color: var(--color-outline);
+    background-color: var(--color-surface-container-high);
+  }
 }
 
 /* ── Utilidades de menú (sidebar) ───────────────────────────────── */

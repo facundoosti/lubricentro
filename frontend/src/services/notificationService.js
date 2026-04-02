@@ -58,6 +58,10 @@ const MESSAGES = {
     ERROR_UPDATE: "Error al actualizar el budget",
     ERROR_DELETE: "Error al eliminar el budget",
   },
+  SETTING: {
+    UPDATED: "Configuración actualizada exitosamente",
+    ERROR_UPDATE: "Error al actualizar la configuración",
+  },
   AUTH: {
     LOGIN_SUCCESS: "Inicio de sesión exitoso",
     LOGOUT_SUCCESS: "Sesión cerrada exitosamente",
@@ -122,6 +126,11 @@ export const showBudgetSuccess = (action) =>
   showSuccess(MESSAGES.PRESUPUESTO[action]);
 export const showBudgetError = (action, detail) =>
   showError(MESSAGES.PRESUPUESTO[action], detail);
+
+export const showSettingSuccess = (action) =>
+  showSuccess(MESSAGES.SETTING[action]);
+export const showSettingError = (action, detail) =>
+  showError(MESSAGES.SETTING[action], detail);
 
 export const showAuthSuccess = (action) => showSuccess(MESSAGES.AUTH[action]);
 export const showAuthError = (action, detail) =>

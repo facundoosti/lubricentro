@@ -43,6 +43,8 @@ Rails.application.routes.draw do
 
       resources :budgets
 
+      resource :setting, only: [ :show, :update ]
+
       resources :service_records do
         collection do
           get :overdue

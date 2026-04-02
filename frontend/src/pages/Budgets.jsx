@@ -136,7 +136,7 @@ const Budgets = () => {
           className="flex items-center gap-2 px-4 py-2 bg-primary-container text-on-primary rounded-lg font-semibold text-sm hover:brightness-110 transition-all"
         >
           <Plus className="w-4 h-4" />
-          Nuevo Budget
+          Nuevo Presupuesto
         </button>
       </div>
 

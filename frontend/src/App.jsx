@@ -21,6 +21,7 @@ import Budgets from "@pages/Budgets";
 import BudgetForm from "@pages/BudgetForm";
 import BudgetPrint from "@pages/BudgetPrint";
 import ServiceRecordFormPage from "@pages/ServiceRecordFormPage";
+import Settings from "@pages/Settings";
 
 function App() {
   return (
@@ -65,14 +66,7 @@ function App() {
                 path="presupuestos/:id/imprimir"
                 element={<BudgetPrint />}
               />
-              <Route
-                path="settings"
-                element={
-                  <div className="p-6 text-on-surface">
-                    Configuración - En desarrollo
-                  </div>
-                }
-              />
+              <Route path="settings" element={<Settings />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
