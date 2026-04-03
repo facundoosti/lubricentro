@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useCustomers, useCustomer } from '@services/customersService';
 import { Search, ChevronDown, X } from 'lucide-react';
 
@@ -61,7 +61,7 @@ const CustomerSearchInput = ({
     per_page: 10,
     enabled: debouncedSearchTerm.length > 0 && isOpen, 
   });
-  const customers = customersData?.data?.customers || [];
+  const customers = useMemo(() => customersData?.data?.customers || [], [customersData]);
 
   // Query para obtener el cliente inicial basado en el `value` (ID)
   const { data: initialCustomerData, isLoading: isLoadingInitialCustomer } = useCustomer(value, {

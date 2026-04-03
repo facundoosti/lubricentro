@@ -3,7 +3,7 @@ import { useVehicles } from '@services/vehiclesService';
 import InputField from '@ui/InputField';
 import TextArea from '@ui/TextArea';
 import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' }) => {
   // Función para obtener la fecha y hora actual
@@ -21,7 +21,7 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
     };
   };
 
-  const currentDateTime = getCurrentDateTime();
+  const currentDateTime = useMemo(() => getCurrentDateTime(), []);
 
   const [submitted, setSubmitted] = useState(false);
 
@@ -45,19 +45,20 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
   );
 
   // Ensure we always have arrays - manejar la estructura de respuesta del backend
-  let vehicles = [];
-  if (selectedCustomerId && vehiclesData) {
+  const vehicles = useMemo(() => {
+    if (!selectedCustomerId || !vehiclesData) return [];
     // La respuesta del backend tiene estructura: { success: true, data: { vehicles: [...] } }
     if (vehiclesData.data && Array.isArray(vehiclesData.data.vehicles)) {
-      vehicles = vehiclesData.data.vehicles;
+      return vehiclesData.data.vehicles;
     } else if (Array.isArray(vehiclesData.data)) {
-      vehicles = vehiclesData.data;
+      return vehiclesData.data;
     } else if (Array.isArray(vehiclesData.vehicles)) {
-      vehicles = vehiclesData.vehicles;
+      return vehiclesData.vehicles;
     } else if (Array.isArray(vehiclesData)) {
-      vehicles = vehiclesData;
+      return vehiclesData;
     }
-  }
+    return [];
+  }, [selectedCustomerId, vehiclesData]);
 
   const statusOptions = [
     { value: 'scheduled', label: 'Agendado' },
@@ -125,7 +126,7 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
         notes: '',
       });
     }
-  }, [initialData]);
+  }, [initialData, currentDateTime.date, currentDateTime.time, reset]);
 
   // When editing, set vehicle_id once vehicles finish loading
   useEffect(() => {

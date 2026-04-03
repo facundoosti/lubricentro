@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderWithProviders } from '@/test/utils'
 import ItemSearchInput from '@components/features/budgets/ItemSearchInput'
@@ -18,10 +18,6 @@ import { useServices } from '@services/servicesService'
 const mockProducts = [
   { id: 1, name: 'Aceite 10W40', unit_price: '1500', _type: 'Producto' },
   { id: 2, name: 'Filtro de aire', unit_price: '800', _type: 'Producto' },
-]
-
-const mockServices = [
-  { id: 1, name: 'Cambio de aceite', base_price: '2000', _type: 'Servicio' },
 ]
 
 beforeEach(() => {
