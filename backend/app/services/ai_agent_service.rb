@@ -1,6 +1,4 @@
 class AiAgentService
-  MODEL = "qwen/qwen3.5-9b"
-
   TOOLS = [
     {
       type: "function",
@@ -96,7 +94,7 @@ class AiAgentService
   def call_llm(messages)
     response = client.chat(
       parameters: {
-        model: MODEL,
+        model: ENV.fetch("AI_MODEL", nil),
         messages: messages,
         tools: TOOLS,
         tool_choice: "auto"

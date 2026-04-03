@@ -4,11 +4,11 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'backend/**'
+      - "backend/**"
   pull_request:
     branches: [main, develop]
     paths:
-      - 'backend/**'
+      - "backend/**"
 
 jobs:
   test:
@@ -34,7 +34,7 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.3'
+          ruby-version: "3.4.3"
           bundler-cache: true
           working-directory: backend
 
@@ -52,6 +52,8 @@ jobs:
           SECRET_KEY_BASE: test_secret_key_base_for_ci_only
           JWT_SECRET: test_jwt_secret_for_ci_only
           ALLOWED_ORIGINS: http://localhost:5173
+          AI_MODEL: ${{ secrets.AI_MODEL }}
+          AI_MODEL_EMBEDDING: ${{ secrets.AI_MODEL_EMBEDDING }}
         run: bundle exec rails db:prepare
 
       - name: Run tests
@@ -83,7 +85,7 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.3'
+          ruby-version: "3.4.3"
           bundler-cache: true
           working-directory: backend
 
@@ -99,7 +101,7 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.3'
+          ruby-version: "3.4.3"
           bundler-cache: true
           working-directory: backend
 
@@ -122,7 +124,7 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.3'
+          ruby-version: "3.4.3"
           bundler-cache: true
           working-directory: backend
 

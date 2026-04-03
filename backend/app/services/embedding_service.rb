@@ -1,6 +1,4 @@
 class EmbeddingService
-  MODEL = "text-embedding-nomic-embed-text-v1.5@f32" # "text-embedding-3-small"
-
   def self.generate(text)
     new.generate(text)
   end
@@ -12,7 +10,7 @@ class EmbeddingService
   def generate(text)
     response = client.embeddings(
       parameters: {
-        model: MODEL,
+        model: ENV.fetch("AI_MODEL_EMBEDDING", nil),
         input: text.to_s.strip
       }
     )

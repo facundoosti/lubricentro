@@ -1,3 +1,26 @@
+# == Schema Information
+#
+# Table name: conversations
+#
+#  id              :bigint           not null, primary key
+#  label           :string
+#  last_message_at :datetime
+#  status          :string           default("bot"), not null
+#  whatsapp_phone  :string           not null
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#  customer_id     :bigint
+#
+# Indexes
+#
+#  index_conversations_on_customer_id     (customer_id)
+#  index_conversations_on_status          (status)
+#  index_conversations_on_whatsapp_phone  (whatsapp_phone) UNIQUE
+#
+# Foreign Keys
+#
+#  fk_rails_...  (customer_id => customers.id)
+#
 FactoryBot.define do
   factory :conversation do
     sequence(:whatsapp_phone) { |n| "+5491100#{n.to_s.rjust(6, '0')}" }
