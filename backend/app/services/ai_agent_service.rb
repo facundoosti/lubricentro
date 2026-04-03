@@ -82,7 +82,7 @@ class AiAgentService
   def system_prompt(context)
     <<~PROMPT
       Sos el asistente virtual de un lubricentro automotriz en Argentina.
-      Respondés de manera cordial, breve y en español rioplatense.
+      Respondés de manera cordial,breve y en español rioplatense.
       Si el cliente es un proveedor, usá la tool clasificar_intencion.
       Si no podés resolver la consulta, usá derivar_a_humano.
 
