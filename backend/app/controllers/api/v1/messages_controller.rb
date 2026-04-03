@@ -26,7 +26,7 @@ class Api::V1::MessagesController < ApplicationController
       data = MessageSerializer.render_as_hash(message, root: :message)
       render_json(data, message: "Mensaje enviado", status: :created)
     else
-      render_json({ errors: message.errors.full_messages }, message: "Error al enviar el mensaje", status: :unprocessable_entity)
+      render_json({ errors: message.errors.full_messages }, message: "Error al enviar el mensaje", status: :unprocessable_content)
     end
   end
 

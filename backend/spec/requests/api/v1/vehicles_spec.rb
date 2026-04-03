@@ -156,7 +156,7 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
       it 'returns error response' do
         post '/api/v1/vehicles', params: { vehicle: invalid_attributes }, headers: auth_headers(user)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response[:success]).to be false
         expect(json_response[:errors]).to be_present
       end
@@ -171,7 +171,7 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
         duplicate_params = valid_attributes.merge(license_plate: existing_vehicle.license_plate)
         post '/api/v1/vehicles', params: { vehicle: duplicate_params }, headers: auth_headers(user)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response[:errors]).to include(match(/license plate.*taken/i))
       end
     end
@@ -213,7 +213,7 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
       end
 
       it 'returns error response' do
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response[:success]).to be false
       end
     end

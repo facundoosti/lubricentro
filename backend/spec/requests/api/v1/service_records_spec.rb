@@ -140,7 +140,7 @@ RSpec.describe "Api::V1::ServiceRecords", type: :request do
 
       it "returns an unprocessable entity response" do
         post "/api/v1/service_records", params: { service_record: invalid_attributes }, headers: auth_headers(user)
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
 
       it "returns error response" do
@@ -231,7 +231,7 @@ RSpec.describe "Api::V1::ServiceRecords", type: :request do
     context "with invalid parameters" do
       it "returns error response" do
         patch "/api/v1/service_records/#{service_record.id}", params: { service_record: invalid_attributes }, headers: auth_headers(user)
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         json_response = JSON.parse(response.body)
         expect(json_response["success"]).to be false
         expect(json_response["errors"]).to be_present

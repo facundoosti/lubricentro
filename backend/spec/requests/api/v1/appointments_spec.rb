@@ -131,7 +131,7 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
 
         post '/api/v1/appointments', params: { appointment: invalid_attributes }, headers: auth_headers(user)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         json_response = JSON.parse(response.body)
 
         expect(json_response['success']).to be false
@@ -143,7 +143,7 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
 
         post '/api/v1/appointments', params: { appointment: invalid_attributes }, headers: auth_headers(user)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         json_response = JSON.parse(response.body)
 
         expect(json_response['success']).to be false
@@ -182,7 +182,7 @@ RSpec.describe 'Api::V1::Appointments', type: :request do
               params: { appointment: { status: 'invalid_status' } },
               headers: auth_headers(user)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         json_response = JSON.parse(response.body)
 
         expect(json_response['success']).to be false

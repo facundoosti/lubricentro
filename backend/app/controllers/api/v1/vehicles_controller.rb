@@ -41,7 +41,7 @@ class Api::V1::VehiclesController < ApplicationController
       @serializer = VehicleSerializer.render_as_hash(@vehicle, view: :with_customer)
       render_json(@serializer, message: "Vehicle created successfully", status: :created)
     else
-      render_json({ errors: @vehicle.errors.full_messages }, message: "Error creating vehicle", status: :unprocessable_entity)
+      render_json({ errors: @vehicle.errors.full_messages }, message: "Error creating vehicle", status: :unprocessable_content)
     end
   end
 
@@ -51,7 +51,7 @@ class Api::V1::VehiclesController < ApplicationController
       @serializer = VehicleSerializer.render_as_hash(@vehicle, view: :with_customer)
       render_json(@serializer, message: "Vehicle updated successfully")
     else
-      render_json({ errors: @vehicle.errors.full_messages }, message: "Error updating vehicle", status: :unprocessable_entity)
+      render_json({ errors: @vehicle.errors.full_messages }, message: "Error updating vehicle", status: :unprocessable_content)
     end
   end
 
@@ -59,7 +59,7 @@ class Api::V1::VehiclesController < ApplicationController
   def destroy
     # TODO: Verificar si tiene turnos o atenciones asociadas
     # if @vehicle.appointments.exists? || @vehicle.service_records.exists?
-    #   render_json({ errors: ["Cannot delete vehicle with associated appointments or service records"] }, message: "Error deleting vehicle", status: :unprocessable_entity)
+    #   render_json({ errors: ["Cannot delete vehicle with associated appointments or service records"] }, message: "Error deleting vehicle", status: :unprocessable_content)
     #   return
     # end
 

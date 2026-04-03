@@ -73,7 +73,7 @@ RSpec.describe "Api::V1::Products", type: :request do
 
       it "returns an unprocessable entity response" do
         post api_v1_products_url, params: { product: invalid_attributes }, headers: auth_headers(user)
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response[:errors]).to be_present
       end
     end

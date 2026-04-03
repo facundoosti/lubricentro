@@ -27,7 +27,7 @@ class Api::V1::CustomersController < ApplicationController
       @serializer = CustomerSerializer.render_as_hash(@customer)
       render_json(@serializer, message: "Customer created successfully", status: :created)
     else
-      render_json({ errors: @customer.errors.full_messages }, message: "Error creating customer", status: :unprocessable_entity)
+      render_json({ errors: @customer.errors.full_messages }, message: "Error creating customer", status: :unprocessable_content)
     end
   end
 
@@ -37,7 +37,7 @@ class Api::V1::CustomersController < ApplicationController
       @serializer = CustomerSerializer.render_as_hash(@customer)
       render_json(@serializer, message: "Customer updated successfully")
     else
-      render_json({ errors: @customer.errors.full_messages }, message: "Error updating customer", status: :unprocessable_entity)
+      render_json({ errors: @customer.errors.full_messages }, message: "Error updating customer", status: :unprocessable_content)
     end
   end
 
@@ -45,7 +45,7 @@ class Api::V1::CustomersController < ApplicationController
   def destroy
     # Verificar si tiene vehículos asociados
     if @customer.vehicles.exists?
-      render_json({ errors: [ "Cannot delete customer with associated vehicles" ] }, message: "Error deleting customer", status: :unprocessable_entity)
+      render_json({ errors: [ "Cannot delete customer with associated vehicles" ] }, message: "Error deleting customer", status: :unprocessable_content)
       return
     end
 

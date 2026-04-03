@@ -47,7 +47,7 @@ class Api::V1::ServiceRecordsController < ApplicationController
       @serializer = ServiceRecordSerializer.render_as_hash(@service_record.reload, view: :with_details)
       render_json(@serializer, message: "Service record created successfully", status: :created)
     else
-      render_json({ errors: @service_record.errors.full_messages }, message: "Failed to create service record", status: :unprocessable_entity)
+      render_json({ errors: @service_record.errors.full_messages }, message: "Failed to create service record", status: :unprocessable_content)
     end
   end
 
@@ -58,7 +58,7 @@ class Api::V1::ServiceRecordsController < ApplicationController
       @serializer = ServiceRecordSerializer.render_as_hash(@service_record.reload, view: :with_details)
       render_json(@serializer, message: "Service record updated successfully")
     else
-      render_json({ errors: @service_record.errors.full_messages }, message: "Failed to update service record", status: :unprocessable_entity)
+      render_json({ errors: @service_record.errors.full_messages }, message: "Failed to update service record", status: :unprocessable_content)
     end
   end
 

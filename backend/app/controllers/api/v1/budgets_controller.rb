@@ -27,7 +27,7 @@ class Api::V1::BudgetsController < ApplicationController
       @serializer = BudgetSerializer.render_as_hash(@budget, view: :with_items)
       render_json(@serializer, message: "Budget creado exitosamente", status: :created)
     else
-      render_json({ errors: @budget.errors.full_messages }, message: "Error al crear el budget", status: :unprocessable_entity)
+      render_json({ errors: @budget.errors.full_messages }, message: "Error al crear el budget", status: :unprocessable_content)
     end
   end
 
@@ -37,7 +37,7 @@ class Api::V1::BudgetsController < ApplicationController
       @serializer = BudgetSerializer.render_as_hash(@budget, view: :with_items)
       render_json(@serializer, message: "Budget actualizado exitosamente")
     else
-      render_json({ errors: @budget.errors.full_messages }, message: "Error al actualizar el budget", status: :unprocessable_entity)
+      render_json({ errors: @budget.errors.full_messages }, message: "Error al actualizar el budget", status: :unprocessable_content)
     end
   end
 

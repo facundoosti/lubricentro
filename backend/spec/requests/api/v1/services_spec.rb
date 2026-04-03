@@ -196,7 +196,7 @@ RSpec.describe "Api::V1::Services", type: :request do
         post api_v1_services_url,
              params: { service: invalid_attributes }.to_json,
              headers: valid_headers.merge(auth_headers(user))
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
 
       it "returns validation errors" do
@@ -256,7 +256,7 @@ RSpec.describe "Api::V1::Services", type: :request do
               params: { service: invalid_attributes }.to_json,
               headers: valid_headers.merge(auth_headers(user))
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         parsed_response = JSON.parse(response.body, symbolize_names: true)
         expect(parsed_response[:success]).to be false
         expect(parsed_response[:errors]).to be_present
@@ -308,7 +308,7 @@ RSpec.describe "Api::V1::Services", type: :request do
       it "returns error response" do
         delete api_v1_service_url(service), headers: valid_headers.merge(auth_headers(user))
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         parsed_response = JSON.parse(response.body, symbolize_names: true)
         expect(parsed_response[:success]).to be false
         expect(parsed_response[:errors]).to include("Cannot delete service with associated records")

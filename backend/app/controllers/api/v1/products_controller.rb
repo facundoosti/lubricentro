@@ -19,7 +19,7 @@ class Api::V1::ProductsController < ApplicationController
     if @product.save
       render_json(ProductSerializer.render_as_hash(@product), message: "Product created successfully", status: :created)
     else
-      render_json({}, message: "Error creating product", errors: @product.errors.full_messages, status: :unprocessable_entity)
+      render_json({}, message: "Error creating product", errors: @product.errors.full_messages, status: :unprocessable_content)
     end
   end
 
@@ -27,7 +27,7 @@ class Api::V1::ProductsController < ApplicationController
     if @product.update(product_params)
       render_json(ProductSerializer.render_as_hash(@product), message: "Product updated successfully")
     else
-      render_json({}, message: "Error updating product", errors: @product.errors.full_messages, status: :unprocessable_entity)
+      render_json({}, message: "Error updating product", errors: @product.errors.full_messages, status: :unprocessable_content)
     end
   end
 

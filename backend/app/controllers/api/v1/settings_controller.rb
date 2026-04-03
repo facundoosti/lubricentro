@@ -9,7 +9,7 @@ class Api::V1::SettingsController < ApplicationController
     if @setting.update(setting_params)
       render_json(SettingSerializer.render_as_hash(@setting), message: "Configuración actualizada exitosamente")
     else
-      render_json({}, message: "Error al actualizar la configuración", errors: @setting.errors.full_messages, status: :unprocessable_entity)
+      render_json({}, message: "Error al actualizar la configuración", errors: @setting.errors.full_messages, status: :unprocessable_content)
     end
   end
 

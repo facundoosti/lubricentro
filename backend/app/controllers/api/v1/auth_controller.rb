@@ -34,7 +34,7 @@ class Api::V1::AuthController < ApplicationController
         {},
         errors: user.errors.full_messages,
         message: "Error al crear usuario",
-        status: :unprocessable_entity
+        status: :unprocessable_content
       )
     end
   end

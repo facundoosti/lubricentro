@@ -27,7 +27,7 @@ class Api::V1::ServicesController < ApplicationController
       @serializer = ServiceSerializer.render_as_hash(@service)
       render_json(@serializer, message: "Service created successfully", status: :created)
     else
-      render_json({}, message: "Error creating service", errors: @service.errors.full_messages, status: :unprocessable_entity)
+      render_json({}, message: "Error creating service", errors: @service.errors.full_messages, status: :unprocessable_content)
     end
   end
 
@@ -37,7 +37,7 @@ class Api::V1::ServicesController < ApplicationController
       @serializer = ServiceSerializer.render_as_hash(@service)
       render_json(@serializer, message: "Service updated successfully")
     else
-      render_json({}, message: "Error updating service", errors: @service.errors.full_messages, status: :unprocessable_entity)
+      render_json({}, message: "Error updating service", errors: @service.errors.full_messages, status: :unprocessable_content)
     end
   end
 
@@ -45,7 +45,7 @@ class Api::V1::ServicesController < ApplicationController
   def destroy
     # Verificar si tiene service_records asociados
     if @service.service_record_services.exists?
-      render_json({}, errors: [ "Cannot delete service with associated records" ], message: "Error deleting service", status: :unprocessable_entity)
+      render_json({}, errors: [ "Cannot delete service with associated records" ], message: "Error deleting service", status: :unprocessable_content)
       return
     end
 

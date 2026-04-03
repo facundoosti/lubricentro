@@ -67,7 +67,7 @@ class Api::V1::AppointmentsController < ApplicationController
         success: false,
         errors: @appointment.errors.full_messages,
         message: "Failed to create appointment"
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     end
   end
 
@@ -84,7 +84,7 @@ class Api::V1::AppointmentsController < ApplicationController
         success: false,
         errors: @appointment.errors.full_messages,
         message: "Failed to update appointment"
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     end
   end
 
@@ -100,7 +100,7 @@ class Api::V1::AppointmentsController < ApplicationController
         success: false,
         errors: @appointment.errors.full_messages,
         message: "Failed to delete appointment"
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     end
   end
 
@@ -131,7 +131,7 @@ class Api::V1::AppointmentsController < ApplicationController
         success: false,
         errors: [ "Appointment cannot be confirmed" ],
         message: "Failed to confirm appointment"
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     end
   end
 
@@ -149,7 +149,7 @@ class Api::V1::AppointmentsController < ApplicationController
         success: false,
         errors: [ "Appointment cannot be completed" ],
         message: "Failed to complete appointment"
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     end
   end
 
@@ -167,7 +167,7 @@ class Api::V1::AppointmentsController < ApplicationController
         success: false,
         errors: [ "Appointment cannot be cancelled" ],
         message: "Failed to cancel appointment"
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     end
   end
 

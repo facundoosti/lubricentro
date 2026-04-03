@@ -46,7 +46,7 @@ RSpec.describe 'Api::V1::Auth', type: :request do
           post '/api/v1/auth/register', params: valid_params
         }.not_to change(User, :count)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
 
         json_response = JSON.parse(response.body)
         expect(json_response['success']).to be false
@@ -60,7 +60,7 @@ RSpec.describe 'Api::V1::Auth', type: :request do
           post '/api/v1/auth/register', params: invalid_params
         }.not_to change(User, :count)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
 
         json_response = JSON.parse(response.body)
         expect(json_response['errors']).to include('Email is invalid')
@@ -78,7 +78,7 @@ RSpec.describe 'Api::V1::Auth', type: :request do
           post '/api/v1/auth/register', params: short_password_params
         }.not_to change(User, :count)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
 
         json_response = JSON.parse(response.body)
         expect(json_response['errors']).to include('Password is too short (minimum is 6 characters)')
@@ -91,7 +91,7 @@ RSpec.describe 'Api::V1::Auth', type: :request do
           post '/api/v1/auth/register', params: mismatch_params
         }.not_to change(User, :count)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
 
         json_response = JSON.parse(response.body)
         expect(json_response['errors']).to include("Password confirmation doesn't match Password")
@@ -106,7 +106,7 @@ RSpec.describe 'Api::V1::Auth', type: :request do
           post '/api/v1/auth/register', params: no_name_params
         }.not_to change(User, :count)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
 
         json_response = JSON.parse(response.body)
         expect(json_response['errors']).to include("Name can't be blank")
@@ -119,7 +119,7 @@ RSpec.describe 'Api::V1::Auth', type: :request do
           post '/api/v1/auth/register', params: no_email_params
         }.not_to change(User, :count)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
 
         json_response = JSON.parse(response.body)
         expect(json_response['errors']).to include("Email can't be blank")

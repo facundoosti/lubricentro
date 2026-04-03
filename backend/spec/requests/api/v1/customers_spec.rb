@@ -190,7 +190,7 @@ RSpec.describe "Api::V1::Customers", type: :request do
       it 'returns error response' do
         post '/api/v1/customers', params: { customer: invalid_attributes }, headers: auth_headers(user)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response[:success]).to be false
         expect(json_response[:errors]).to be_present
       end
@@ -232,7 +232,7 @@ RSpec.describe "Api::V1::Customers", type: :request do
       end
 
       it 'returns error response' do
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response[:success]).to be false
       end
     end
@@ -269,7 +269,7 @@ RSpec.describe "Api::V1::Customers", type: :request do
       it 'returns error response' do
         delete "/api/v1/customers/#{customer_with_vehicles.id}", headers: auth_headers(user)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response[:success]).to be false
         expect(json_response[:errors]).to include('Cannot delete customer with associated vehicles')
       end

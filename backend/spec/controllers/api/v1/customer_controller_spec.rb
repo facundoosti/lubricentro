@@ -130,7 +130,7 @@ RSpec.describe Api::V1::CustomersController, type: :controller do
         request.headers.merge!(auth_headers(user))
         post :create, params: { customer: invalid_attributes }
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response[:success]).to be false
         expect(json_response[:errors]).to be_present
       end
@@ -146,7 +146,7 @@ RSpec.describe Api::V1::CustomersController, type: :controller do
         request.headers.merge!(auth_headers(user))
         post :create, params: { customer: duplicate_params }
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response[:errors]).to include(match(/email.*taken/i))
       end
     end
@@ -182,7 +182,7 @@ RSpec.describe Api::V1::CustomersController, type: :controller do
       end
 
       it 'returns error response' do
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response[:success]).to be false
       end
     end
@@ -224,7 +224,7 @@ RSpec.describe Api::V1::CustomersController, type: :controller do
         request.headers.merge!(auth_headers(user))
         delete :destroy, params: { id: customer.id }
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(json_response[:success]).to be false
         expect(json_response[:errors]).to include(match(/associated vehicles/i))
       end
