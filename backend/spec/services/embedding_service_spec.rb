@@ -42,7 +42,7 @@ RSpec.describe EmbeddingService do
 
       it 'passes the correct model to the API' do
         expect(openai_client).to receive(:embeddings).with(
-          parameters: hash_including(model: ENV.fetch("AI_MODEL_EMBEDDING"))
+          parameters: hash_including(model: ENV.fetch("AI_MODEL_EMBEDDING", nil))
         ).and_return({ "data" => [ { "embedding" => embedding_vector } ] })
 
         service.generate("test")
