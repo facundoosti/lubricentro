@@ -1,5 +1,5 @@
 class EmbeddingService
-  MODEL = "text-embedding-nomic-embed-text-v1.5@f32" #"text-embedding-3-small"
+  MODEL = "text-embedding-nomic-embed-text-v1.5@f32" # "text-embedding-3-small"
 
   def self.generate(text)
     new.generate(text)
