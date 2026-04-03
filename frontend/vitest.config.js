@@ -34,6 +34,7 @@ export default defineConfig({
       '@contexts': fileURLToPath(new URL('./src/contexts', import.meta.url)),
       '@icons': fileURLToPath(new URL('./src/icons', import.meta.url)),
       '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),
+      '@stores': fileURLToPath(new URL('./src/stores', import.meta.url)),
     },
   },
 }) 
