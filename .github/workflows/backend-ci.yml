@@ -1,0 +1,132 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: lubricentro_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.3'
+          bundler-cache: true
+          working-directory: backend
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libpq-dev
+
+      - name: Setup test database
+        working-directory: backend
+        env:
+          RAILS_ENV: test
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: lubricentro_test
+          SECRET_KEY_BASE: test_secret_key_base_for_ci_only
+          JWT_SECRET: test_jwt_secret_for_ci_only
+        run: bundle exec rails db:prepare
+
+      - name: Run tests
+        working-directory: backend
+        env:
+          RAILS_ENV: test
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: lubricentro_test
+          SECRET_KEY_BASE: test_secret_key_base_for_ci_only
+          JWT_SECRET: test_jwt_secret_for_ci_only
+        run: bundle exec rspec
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          file: ./backend/coverage/.resultset.json
+          flags: backend
+          name: backend-coverage
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.3'
+          bundler-cache: true
+          working-directory: backend
+
+      - name: Run RuboCop
+        working-directory: backend
+        run: bundle exec rubocop --format github
+
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.3'
+          bundler-cache: true
+          working-directory: backend
+
+      - name: Run Brakeman
+        working-directory: backend
+        run: bundle exec brakeman --no-pager --format json --output brakeman-report.json
+
+      - name: Upload Brakeman results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: brakeman-report
+          path: backend/brakeman-report.json
+
+  bundle-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.3'
+          bundler-cache: true
+          working-directory: backend
+
+      - name: Install bundler-audit
+        run: gem install bundler-audit
+
+      - name: Run bundle audit
+        working-directory: backend
+        run: bundle-audit check --update
