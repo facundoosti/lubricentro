@@ -109,3 +109,5 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+docs/notes.md
