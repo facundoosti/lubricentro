@@ -16,7 +16,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15
+        image: pgvector/pgvector:pg15
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
@@ -105,10 +105,7 @@ jobs:
 
       - name: Run Brakeman
         working-directory: backend
-        run: |
-          bundle exec brakeman --no-pager --format json --output brakeman-report.json
-          exit_code=$?
-          [ $exit_code -eq 0 ] || [ $exit_code -eq 3 ]
+        run: bundle exec brakeman --no-pager --format json --output brakeman-report.json || [ $? -eq 3 ]
 
       - name: Upload Brakeman results
         uses: actions/upload-artifact@v4
