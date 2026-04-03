@@ -7,7 +7,6 @@ import PhotosUpload from '@ui/PhotosUpload';
 const ServiceRecordForm = ({
   record = null,
   onSubmit,
-  isLoading = false,
   formId = 'service-record-form',
 }) => {
   const today = new Date().toISOString().split('T')[0];

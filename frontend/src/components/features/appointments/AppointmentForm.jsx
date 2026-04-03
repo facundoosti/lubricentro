@@ -5,7 +5,7 @@ import TextArea from '@ui/TextArea';
 import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
 import { useEffect, useState } from 'react';
 
-const AppointmentForm = ({ onSubmit, initialData, isLoading, formId = 'appointment-form' }) => {
+const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' }) => {
   // Función para obtener la fecha y hora actual
   const getCurrentDateTime = () => {
     const now = new Date();

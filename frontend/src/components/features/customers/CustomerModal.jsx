@@ -1,6 +1,6 @@
 import { Users } from 'lucide-react';
 import SlideOver from '@ui/SlideOver';
-import CustomerForm from './CustomerForm';
+import CustomerForm from '@components/features/customers/CustomerForm';
 
 const FORM_ID = 'customer-form';
 

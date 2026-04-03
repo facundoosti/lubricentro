@@ -4,13 +4,12 @@ import { useForm } from 'react-hook-form';
 const ServiceForm = ({
   service = null,
   onSubmit,
-  loading = false,
   formId = 'service-form',
 }) => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset
   } = useForm({
     defaultValues: {

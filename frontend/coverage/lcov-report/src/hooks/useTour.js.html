@@ -1,0 +1,1240 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for src/hooks/useTour.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/hooks</a> useTour.js</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>0/358</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>0/1</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/1</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>0/358</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line low'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a>
+<a name='L153'></a><a href='#L153'>153</a>
+<a name='L154'></a><a href='#L154'>154</a>
+<a name='L155'></a><a href='#L155'>155</a>
+<a name='L156'></a><a href='#L156'>156</a>
+<a name='L157'></a><a href='#L157'>157</a>
+<a name='L158'></a><a href='#L158'>158</a>
+<a name='L159'></a><a href='#L159'>159</a>
+<a name='L160'></a><a href='#L160'>160</a>
+<a name='L161'></a><a href='#L161'>161</a>
+<a name='L162'></a><a href='#L162'>162</a>
+<a name='L163'></a><a href='#L163'>163</a>
+<a name='L164'></a><a href='#L164'>164</a>
+<a name='L165'></a><a href='#L165'>165</a>
+<a name='L166'></a><a href='#L166'>166</a>
+<a name='L167'></a><a href='#L167'>167</a>
+<a name='L168'></a><a href='#L168'>168</a>
+<a name='L169'></a><a href='#L169'>169</a>
+<a name='L170'></a><a href='#L170'>170</a>
+<a name='L171'></a><a href='#L171'>171</a>
+<a name='L172'></a><a href='#L172'>172</a>
+<a name='L173'></a><a href='#L173'>173</a>
+<a name='L174'></a><a href='#L174'>174</a>
+<a name='L175'></a><a href='#L175'>175</a>
+<a name='L176'></a><a href='#L176'>176</a>
+<a name='L177'></a><a href='#L177'>177</a>
+<a name='L178'></a><a href='#L178'>178</a>
+<a name='L179'></a><a href='#L179'>179</a>
+<a name='L180'></a><a href='#L180'>180</a>
+<a name='L181'></a><a href='#L181'>181</a>
+<a name='L182'></a><a href='#L182'>182</a>
+<a name='L183'></a><a href='#L183'>183</a>
+<a name='L184'></a><a href='#L184'>184</a>
+<a name='L185'></a><a href='#L185'>185</a>
+<a name='L186'></a><a href='#L186'>186</a>
+<a name='L187'></a><a href='#L187'>187</a>
+<a name='L188'></a><a href='#L188'>188</a>
+<a name='L189'></a><a href='#L189'>189</a>
+<a name='L190'></a><a href='#L190'>190</a>
+<a name='L191'></a><a href='#L191'>191</a>
+<a name='L192'></a><a href='#L192'>192</a>
+<a name='L193'></a><a href='#L193'>193</a>
+<a name='L194'></a><a href='#L194'>194</a>
+<a name='L195'></a><a href='#L195'>195</a>
+<a name='L196'></a><a href='#L196'>196</a>
+<a name='L197'></a><a href='#L197'>197</a>
+<a name='L198'></a><a href='#L198'>198</a>
+<a name='L199'></a><a href='#L199'>199</a>
+<a name='L200'></a><a href='#L200'>200</a>
+<a name='L201'></a><a href='#L201'>201</a>
+<a name='L202'></a><a href='#L202'>202</a>
+<a name='L203'></a><a href='#L203'>203</a>
+<a name='L204'></a><a href='#L204'>204</a>
+<a name='L205'></a><a href='#L205'>205</a>
+<a name='L206'></a><a href='#L206'>206</a>
+<a name='L207'></a><a href='#L207'>207</a>
+<a name='L208'></a><a href='#L208'>208</a>
+<a name='L209'></a><a href='#L209'>209</a>
+<a name='L210'></a><a href='#L210'>210</a>
+<a name='L211'></a><a href='#L211'>211</a>
+<a name='L212'></a><a href='#L212'>212</a>
+<a name='L213'></a><a href='#L213'>213</a>
+<a name='L214'></a><a href='#L214'>214</a>
+<a name='L215'></a><a href='#L215'>215</a>
+<a name='L216'></a><a href='#L216'>216</a>
+<a name='L217'></a><a href='#L217'>217</a>
+<a name='L218'></a><a href='#L218'>218</a>
+<a name='L219'></a><a href='#L219'>219</a>
+<a name='L220'></a><a href='#L220'>220</a>
+<a name='L221'></a><a href='#L221'>221</a>
+<a name='L222'></a><a href='#L222'>222</a>
+<a name='L223'></a><a href='#L223'>223</a>
+<a name='L224'></a><a href='#L224'>224</a>
+<a name='L225'></a><a href='#L225'>225</a>
+<a name='L226'></a><a href='#L226'>226</a>
+<a name='L227'></a><a href='#L227'>227</a>
+<a name='L228'></a><a href='#L228'>228</a>
+<a name='L229'></a><a href='#L229'>229</a>
+<a name='L230'></a><a href='#L230'>230</a>
+<a name='L231'></a><a href='#L231'>231</a>
+<a name='L232'></a><a href='#L232'>232</a>
+<a name='L233'></a><a href='#L233'>233</a>
+<a name='L234'></a><a href='#L234'>234</a>
+<a name='L235'></a><a href='#L235'>235</a>
+<a name='L236'></a><a href='#L236'>236</a>
+<a name='L237'></a><a href='#L237'>237</a>
+<a name='L238'></a><a href='#L238'>238</a>
+<a name='L239'></a><a href='#L239'>239</a>
+<a name='L240'></a><a href='#L240'>240</a>
+<a name='L241'></a><a href='#L241'>241</a>
+<a name='L242'></a><a href='#L242'>242</a>
+<a name='L243'></a><a href='#L243'>243</a>
+<a name='L244'></a><a href='#L244'>244</a>
+<a name='L245'></a><a href='#L245'>245</a>
+<a name='L246'></a><a href='#L246'>246</a>
+<a name='L247'></a><a href='#L247'>247</a>
+<a name='L248'></a><a href='#L248'>248</a>
+<a name='L249'></a><a href='#L249'>249</a>
+<a name='L250'></a><a href='#L250'>250</a>
+<a name='L251'></a><a href='#L251'>251</a>
+<a name='L252'></a><a href='#L252'>252</a>
+<a name='L253'></a><a href='#L253'>253</a>
+<a name='L254'></a><a href='#L254'>254</a>
+<a name='L255'></a><a href='#L255'>255</a>
+<a name='L256'></a><a href='#L256'>256</a>
+<a name='L257'></a><a href='#L257'>257</a>
+<a name='L258'></a><a href='#L258'>258</a>
+<a name='L259'></a><a href='#L259'>259</a>
+<a name='L260'></a><a href='#L260'>260</a>
+<a name='L261'></a><a href='#L261'>261</a>
+<a name='L262'></a><a href='#L262'>262</a>
+<a name='L263'></a><a href='#L263'>263</a>
+<a name='L264'></a><a href='#L264'>264</a>
+<a name='L265'></a><a href='#L265'>265</a>
+<a name='L266'></a><a href='#L266'>266</a>
+<a name='L267'></a><a href='#L267'>267</a>
+<a name='L268'></a><a href='#L268'>268</a>
+<a name='L269'></a><a href='#L269'>269</a>
+<a name='L270'></a><a href='#L270'>270</a>
+<a name='L271'></a><a href='#L271'>271</a>
+<a name='L272'></a><a href='#L272'>272</a>
+<a name='L273'></a><a href='#L273'>273</a>
+<a name='L274'></a><a href='#L274'>274</a>
+<a name='L275'></a><a href='#L275'>275</a>
+<a name='L276'></a><a href='#L276'>276</a>
+<a name='L277'></a><a href='#L277'>277</a>
+<a name='L278'></a><a href='#L278'>278</a>
+<a name='L279'></a><a href='#L279'>279</a>
+<a name='L280'></a><a href='#L280'>280</a>
+<a name='L281'></a><a href='#L281'>281</a>
+<a name='L282'></a><a href='#L282'>282</a>
+<a name='L283'></a><a href='#L283'>283</a>
+<a name='L284'></a><a href='#L284'>284</a>
+<a name='L285'></a><a href='#L285'>285</a>
+<a name='L286'></a><a href='#L286'>286</a>
+<a name='L287'></a><a href='#L287'>287</a>
+<a name='L288'></a><a href='#L288'>288</a>
+<a name='L289'></a><a href='#L289'>289</a>
+<a name='L290'></a><a href='#L290'>290</a>
+<a name='L291'></a><a href='#L291'>291</a>
+<a name='L292'></a><a href='#L292'>292</a>
+<a name='L293'></a><a href='#L293'>293</a>
+<a name='L294'></a><a href='#L294'>294</a>
+<a name='L295'></a><a href='#L295'>295</a>
+<a name='L296'></a><a href='#L296'>296</a>
+<a name='L297'></a><a href='#L297'>297</a>
+<a name='L298'></a><a href='#L298'>298</a>
+<a name='L299'></a><a href='#L299'>299</a>
+<a name='L300'></a><a href='#L300'>300</a>
+<a name='L301'></a><a href='#L301'>301</a>
+<a name='L302'></a><a href='#L302'>302</a>
+<a name='L303'></a><a href='#L303'>303</a>
+<a name='L304'></a><a href='#L304'>304</a>
+<a name='L305'></a><a href='#L305'>305</a>
+<a name='L306'></a><a href='#L306'>306</a>
+<a name='L307'></a><a href='#L307'>307</a>
+<a name='L308'></a><a href='#L308'>308</a>
+<a name='L309'></a><a href='#L309'>309</a>
+<a name='L310'></a><a href='#L310'>310</a>
+<a name='L311'></a><a href='#L311'>311</a>
+<a name='L312'></a><a href='#L312'>312</a>
+<a name='L313'></a><a href='#L313'>313</a>
+<a name='L314'></a><a href='#L314'>314</a>
+<a name='L315'></a><a href='#L315'>315</a>
+<a name='L316'></a><a href='#L316'>316</a>
+<a name='L317'></a><a href='#L317'>317</a>
+<a name='L318'></a><a href='#L318'>318</a>
+<a name='L319'></a><a href='#L319'>319</a>
+<a name='L320'></a><a href='#L320'>320</a>
+<a name='L321'></a><a href='#L321'>321</a>
+<a name='L322'></a><a href='#L322'>322</a>
+<a name='L323'></a><a href='#L323'>323</a>
+<a name='L324'></a><a href='#L324'>324</a>
+<a name='L325'></a><a href='#L325'>325</a>
+<a name='L326'></a><a href='#L326'>326</a>
+<a name='L327'></a><a href='#L327'>327</a>
+<a name='L328'></a><a href='#L328'>328</a>
+<a name='L329'></a><a href='#L329'>329</a>
+<a name='L330'></a><a href='#L330'>330</a>
+<a name='L331'></a><a href='#L331'>331</a>
+<a name='L332'></a><a href='#L332'>332</a>
+<a name='L333'></a><a href='#L333'>333</a>
+<a name='L334'></a><a href='#L334'>334</a>
+<a name='L335'></a><a href='#L335'>335</a>
+<a name='L336'></a><a href='#L336'>336</a>
+<a name='L337'></a><a href='#L337'>337</a>
+<a name='L338'></a><a href='#L338'>338</a>
+<a name='L339'></a><a href='#L339'>339</a>
+<a name='L340'></a><a href='#L340'>340</a>
+<a name='L341'></a><a href='#L341'>341</a>
+<a name='L342'></a><a href='#L342'>342</a>
+<a name='L343'></a><a href='#L343'>343</a>
+<a name='L344'></a><a href='#L344'>344</a>
+<a name='L345'></a><a href='#L345'>345</a>
+<a name='L346'></a><a href='#L346'>346</a>
+<a name='L347'></a><a href='#L347'>347</a>
+<a name='L348'></a><a href='#L348'>348</a>
+<a name='L349'></a><a href='#L349'>349</a>
+<a name='L350'></a><a href='#L350'>350</a>
+<a name='L351'></a><a href='#L351'>351</a>
+<a name='L352'></a><a href='#L352'>352</a>
+<a name='L353'></a><a href='#L353'>353</a>
+<a name='L354'></a><a href='#L354'>354</a>
+<a name='L355'></a><a href='#L355'>355</a>
+<a name='L356'></a><a href='#L356'>356</a>
+<a name='L357'></a><a href='#L357'>357</a>
+<a name='L358'></a><a href='#L358'>358</a>
+<a name='L359'></a><a href='#L359'>359</a>
+<a name='L360'></a><a href='#L360'>360</a>
+<a name='L361'></a><a href='#L361'>361</a>
+<a name='L362'></a><a href='#L362'>362</a>
+<a name='L363'></a><a href='#L363'>363</a>
+<a name='L364'></a><a href='#L364'>364</a>
+<a name='L365'></a><a href='#L365'>365</a>
+<a name='L366'></a><a href='#L366'>366</a>
+<a name='L367'></a><a href='#L367'>367</a>
+<a name='L368'></a><a href='#L368'>368</a>
+<a name='L369'></a><a href='#L369'>369</a>
+<a name='L370'></a><a href='#L370'>370</a>
+<a name='L371'></a><a href='#L371'>371</a>
+<a name='L372'></a><a href='#L372'>372</a>
+<a name='L373'></a><a href='#L373'>373</a>
+<a name='L374'></a><a href='#L374'>374</a>
+<a name='L375'></a><a href='#L375'>375</a>
+<a name='L376'></a><a href='#L376'>376</a>
+<a name='L377'></a><a href='#L377'>377</a>
+<a name='L378'></a><a href='#L378'>378</a>
+<a name='L379'></a><a href='#L379'>379</a>
+<a name='L380'></a><a href='#L380'>380</a>
+<a name='L381'></a><a href='#L381'>381</a>
+<a name='L382'></a><a href='#L382'>382</a>
+<a name='L383'></a><a href='#L383'>383</a>
+<a name='L384'></a><a href='#L384'>384</a>
+<a name='L385'></a><a href='#L385'>385</a>
+<a name='L386'></a><a href='#L386'>386</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import { useCallback, useRef } from 'react';<span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ></span></span></span>
+<span class="cstat-no" title="statement not covered" >import { useNavigate } from 'react-router-dom';</span>
+<span class="cstat-no" title="statement not covered" >import { driver } from 'driver.js';</span>
+<span class="cstat-no" title="statement not covered" >import 'driver.js/dist/driver.css';</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >/**</span>
+<span class="cstat-no" title="statement not covered" > * Navega a una ruta y mueve el tour al siguiente paso luego de que React renderiza.</span>
+<span class="cstat-no" title="statement not covered" > * Usamos 500ms para dar tiempo al router + TanStack Query a renderizar la página destino.</span>
+<span class="cstat-no" title="statement not covered" > */</span>
+<span class="cstat-no" title="statement not covered" >const goTo = (navigate, path, dr) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  navigate(path);</span>
+<span class="cstat-no" title="statement not covered" >  setTimeout(() =&gt; dr.moveNext(), 500);</span>
+<span class="cstat-no" title="statement not covered" >};</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >export function useTour() {</span>
+<span class="cstat-no" title="statement not covered" >  const navigate = useNavigate();</span>
+<span class="cstat-no" title="statement not covered" >  const driverRef = useRef(null);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  const startTour = useCallback(() =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    if (driverRef.current) {</span>
+<span class="cstat-no" title="statement not covered" >      driverRef.current.destroy();</span>
+<span class="cstat-no" title="statement not covered" >    }</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    driverRef.current = driver({</span>
+<span class="cstat-no" title="statement not covered" >      showProgress: true,</span>
+<span class="cstat-no" title="statement not covered" >      progressText: '{{current}} de {{total}}',</span>
+<span class="cstat-no" title="statement not covered" >      nextBtnText: 'Siguiente →',</span>
+<span class="cstat-no" title="statement not covered" >      prevBtnText: '← Anterior',</span>
+<span class="cstat-no" title="statement not covered" >      doneBtnText: '¡Listo!',</span>
+<span class="cstat-no" title="statement not covered" >      smoothScroll: true,</span>
+<span class="cstat-no" title="statement not covered" >      overlayOpacity: 0.75,</span>
+<span class="cstat-no" title="statement not covered" >      stagePadding: 8,</span>
+<span class="cstat-no" title="statement not covered" >      stageRadius: 8,</span>
+<span class="cstat-no" title="statement not covered" >      popoverClass: 'lubricentro-tour-popover',</span>
+<span class="cstat-no" title="statement not covered" >      steps: [</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 1. Bienvenida ───────────────────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '👋 Bienvenido al Sistema Lubricentro',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Este tour te lleva por todas las secciones del sistema, explicando para qué sirve cada una y cómo crear registros.&lt;br/&gt;&lt;br/&gt;Podés cerrarlo en cualquier momento con la &lt;strong&gt;✕&lt;/strong&gt; y relanzarlo desde el ícono &lt;strong&gt;?&lt;/strong&gt; del encabezado.',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'center',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >          onNextClick: (_el, _step, { driver: dr }) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            goTo(navigate, '/dashboard', dr);</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 2. Dashboard: KPI Cards ─────────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-dashboard-kpi',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '📊 Indicadores clave (KPIs)',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Cuatro métricas en tiempo real:&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• &lt;strong&gt;Clientes atendidos&lt;/strong&gt; — mes actual vs semana.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• &lt;strong&gt;Ingresos del mes&lt;/strong&gt; — con toggle para ocultar el monto.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• &lt;strong&gt;Turnos hoy&lt;/strong&gt; — completados vs pendientes.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• &lt;strong&gt;Ticket promedio&lt;/strong&gt; — y tasa de retención de clientes.',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'bottom',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'start',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 3. Dashboard: Acciones rápidas ─────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-dashboard-quickactions',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '⚡ Acciones rápidas',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Desde aquí podés crear registros con un clic sin navegar a otra sección:&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• &lt;strong&gt;Turno&lt;/strong&gt; — agenda un nuevo turno.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• &lt;strong&gt;Atención&lt;/strong&gt; — registrá un servicio realizado.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• &lt;strong&gt;Presupuesto&lt;/strong&gt; — emití una cotización.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• &lt;strong&gt;Clientes&lt;/strong&gt; — ir al listado de clientes.',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'bottom',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'end',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 4. Dashboard: Turnos del día ───────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-dashboard-today',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '📅 Turnos del día',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Lista de citas programadas para hoy. Podés ver el estado de cada una (programado, confirmado, completado, cancelado) y acceder directamente al detalle del turno o registrar su atención.',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'top',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'start',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 5. Dashboard: Próximos turnos ──────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-dashboard-upcoming',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '🗓️ Próximos turnos y presupuestos',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Vista de los turnos más cercanos y un indicador de presupuestos pendientes de aprobación.&lt;br/&gt;&lt;br/&gt;Si hay presupuestos &lt;strong&gt;enviados&lt;/strong&gt; sin respuesta, aparecen acá para que hagas seguimiento.',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'top',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'end',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 6. Dashboard: Gráfico ──────────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-dashboard-chart',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '📈 Tendencia mensual de atenciones',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Gráfico que muestra la cantidad de servicios realizados mes a mes. Permite identificar picos de demanda y temporadas bajas para tomar decisiones de negocio.',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'top',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'start',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >          onNextClick: (_el, _step, { driver: dr }) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            goTo(navigate, '/appointments', dr);</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 7. Turnos: Calendario ──────────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-appointments-calendar',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '📆 Agenda de Turnos — Vista Calendario',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Visualizá todos los turnos del mes en formato calendario. Cada evento está coloreado por estado:&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Gris → Programado&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Violeta → Confirmado&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Verde → Completado&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Rojo → Cancelado&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              'Podés hacer clic en cualquier día para crear un turno, o en un evento para editarlo.',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'right',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'start',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 8. Turnos: Nuevo turno ─────────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-appointments-new-btn',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '➕ Crear un nuevo turno',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Al hacer clic acá se abre un formulario donde ingresás:&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Cliente y vehículo&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Fecha y hora del turno&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Notas adicionales&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              'También podés crear turnos desde el Dashboard con el botón de acción rápida.',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'bottom',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'end',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >          onNextClick: (_el, _step, { driver: dr }) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            goTo(navigate, '/service-records', dr);</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 9. Atenciones ──────────────────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-service-records-page',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '🔧 Atenciones (Service Records)',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Registro completo de cada servicio realizado a un vehículo. Cada atención incluye:&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Cliente y vehículo atendido&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Fecha del servicio y fecha sugerida del &lt;strong&gt;próximo service&lt;/strong&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Servicios y productos utilizados con sus precios&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              'Las atenciones pueden crearse manualmente o &lt;strong&gt;convertirse automáticamente desde un presupuesto aprobado&lt;/strong&gt;.',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'bottom',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'start',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >          onNextClick: (_el, _step, { driver: dr }) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            goTo(navigate, '/presupuestos', dr);</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 10. Presupuestos: Tabla ────────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-budgets-table',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '📄 Lista de Presupuestos',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Tabla con todos los presupuestos emitidos. Cada fila muestra:&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Fecha, cliente y vehículo&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Estado actual (&lt;em&gt;Borrador, Enviado, Aprobado, Rechazado&lt;/em&gt;)&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Total lista y total tarjeta&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              'Desde las acciones podés &lt;strong&gt;imprimir&lt;/strong&gt;, &lt;strong&gt;editar&lt;/strong&gt; o &lt;strong&gt;eliminar&lt;/strong&gt; cada presupuesto.',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'top',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'start',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 11. Presupuestos: Nuevo ────────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-budgets-new-btn',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '➕ Crear un Presupuesto',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'El flujo de un presupuesto es:&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '&lt;code&gt;Borrador → Enviado → Aprobado → Convertido&lt;/code&gt;&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '1. Se crea como &lt;strong&gt;Borrador&lt;/strong&gt; — podés agregar servicios y productos.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '2. Al enviarlo al cliente pasa a &lt;strong&gt;Enviado&lt;/strong&gt; (ya no editable).&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '3. Si acepta → &lt;strong&gt;Aprobado&lt;/strong&gt;. Con un clic se convierte en Atención.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '4. Si rechaza o vence (30 días) → estado final.&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              'El número es único y automático: &lt;strong&gt;B{año}-{NNNN}&lt;/strong&gt;.',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'bottom',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'end',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >          onNextClick: (_el, _step, { driver: dr }) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            goTo(navigate, '/customers', dr);</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 12. Clientes: Página ───────────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-customers-page',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '👥 Gestión de Clientes',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Directorio de todos los clientes del lubricentro. Podés buscar por nombre, email o teléfono.&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              'Cada cliente tiene un &lt;strong&gt;perfil completo&lt;/strong&gt; con sus vehículos, historial de atenciones y presupuestos asociados.&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              'El &lt;strong&gt;teléfono&lt;/strong&gt; es obligatorio (se usa para recordatorios por WhatsApp).',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'bottom',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'start',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 13. Clientes: Nuevo ────────────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-customers-new-btn',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '➕ Registrar un Cliente',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'El formulario solicita:&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• &lt;strong&gt;Nombre&lt;/strong&gt; y &lt;strong&gt;Teléfono&lt;/strong&gt; (obligatorios)&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Email (único en el sistema)&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Dirección&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              'Una vez creado el cliente, podés agregarle vehículos desde su perfil.',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'bottom',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'end',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >          onNextClick: (_el, _step, { driver: dr }) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            goTo(navigate, '/vehicles', dr);</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 14. Vehículos ──────────────────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-vehicles-page',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '🚗 Gestión de Vehículos',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Catálogo de todos los vehículos registrados. Cada vehículo pertenece a un cliente y se identifica por su &lt;strong&gt;patente única&lt;/strong&gt;.&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              'Campos registrados:&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Marca, modelo y año&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Patente (identificador único)&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Cliente propietario&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              'Desde la columna de acciones podés ver el perfil del cliente dueño del vehículo.',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'bottom',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'start',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >          onNextClick: (_el, _step, { driver: dr }) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            goTo(navigate, '/services', dr);</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 15. Servicios ──────────────────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-services-page',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '⚙️ Catálogo de Servicios',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Lista de todos los trabajos que ofrece el lubricentro: cambio de aceite, filtros, revisión de frenos, etc.&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              'Cada servicio tiene un &lt;strong&gt;precio de referencia&lt;/strong&gt; que se usa como valor inicial al armar un presupuesto o atención. El precio puede ajustarse en cada presupuesto.',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'bottom',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'start',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >          onNextClick: (_el, _step, { driver: dr }) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            goTo(navigate, '/products', dr);</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 16. Productos ──────────────────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-products-page',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '📦 Catálogo de Productos',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Insumos y repuestos usados en los servicios: aceites, filtros, pastillas, etc.&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• &lt;strong&gt;Precio de referencia&lt;/strong&gt; como punto de partida en presupuestos.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• &lt;strong&gt;Stock&lt;/strong&gt; registrado para control de inventario.&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              'Tanto servicios como productos pueden combinarse en un mismo presupuesto o atención (máximo 50 ítems en total).',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'bottom',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'start',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >          onNextClick: (_el, _step, { driver: dr }) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            goTo(navigate, '/inbox', dr);</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 17. Inbox ──────────────────────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-inbox',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '💬 Inbox Omnicanal',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Bandeja centralizada de mensajes de WhatsApp. Cuando esté activo:&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Todos los mensajes entrantes aparecen en la columna izquierda.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• El agente de IA clasifica automáticamente las conversaciones.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• Podés responder directamente desde esta pantalla.&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '&lt;em&gt;Próximamente disponible — Fase 2 del roadmap.&lt;/em&gt;',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'right',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'start',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >          onNextClick: (_el, _step, { driver: dr }) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            goTo(navigate, '/reminders', dr);</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 18. Recordatorios: Stats ───────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-reminders-stats',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '🔔 Recordatorios de Service',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'El sistema envía mensajes por WhatsApp automáticamente cuando se acerca la fecha del próximo service de un vehículo.&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              'Acá ves el resumen del mes:&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• &lt;strong&gt;Enviados&lt;/strong&gt; — notificaciones que llegaron correctamente.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• &lt;strong&gt;Pendientes&lt;/strong&gt; — en cola para enviar.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '• &lt;strong&gt;Fallidos&lt;/strong&gt; — no pudieron enviarse (revisar el número de teléfono).',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'bottom',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'start',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 19. Recordatorios: Filtros ─────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-reminders-filters',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '🔍 Filtros de Recordatorios',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Buscá recordatorios por cliente o patente, filtrá por estado (enviado/pendiente/fallido) y por rango de fechas.&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              'Desde la tabla podés navegar directamente al registro de atención que generó el recordatorio.',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'bottom',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'start',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >          onNextClick: (_el, _step, { driver: dr }) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            goTo(navigate, '/dashboard', dr);</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 20. Header: Botón tour ──────────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          element: '#tour-btn-tour',</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '🎓 ¿Necesitás repasar algo?',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Este ícono &lt;strong&gt;?&lt;/strong&gt; siempre está disponible en el encabezado. Hacé clic las veces que quieras para relanzar este tour completo desde cero.',</span>
+<span class="cstat-no" title="statement not covered" >            side: 'bottom',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'end',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        // ─── 21. Cierre ─────────────────────────────────────────────────</span>
+<span class="cstat-no" title="statement not covered" >        {</span>
+<span class="cstat-no" title="statement not covered" >          popover: {</span>
+<span class="cstat-no" title="statement not covered" >            title: '✅ ¡Ya conocés el sistema!',</span>
+<span class="cstat-no" title="statement not covered" >            description:</span>
+<span class="cstat-no" title="statement not covered" >              'Flujo habitual del día a día:&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '1. Revisá el &lt;strong&gt;Dashboard&lt;/strong&gt; al comenzar el turno.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '2. Confirmá o creá &lt;strong&gt;Turnos&lt;/strong&gt; en la agenda.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '3. Cuando el cliente llega, convertí el turno en una &lt;strong&gt;Atención&lt;/strong&gt;.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '4. Si cotizás primero, emitís un &lt;strong&gt;Presupuesto&lt;/strong&gt; y lo convertís al aprobarse.&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '5. El sistema envía &lt;strong&gt;Recordatorios&lt;/strong&gt; automáticos cuando se acerca el próximo service.&lt;br/&gt;&lt;br/&gt;' +</span>
+<span class="cstat-no" title="statement not covered" >              '¡Éxitos con el sistema!',</span>
+<span class="cstat-no" title="statement not covered" >            align: 'center',</span>
+<span class="cstat-no" title="statement not covered" >          },</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+<span class="cstat-no" title="statement not covered" >      ],</span>
+<span class="cstat-no" title="statement not covered" >    });</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    driverRef.current.drive();</span>
+<span class="cstat-no" title="statement not covered" >  }, [navigate]);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return { startTour };</span>
+<span class="cstat-no" title="statement not covered" >}</span>
+&nbsp;</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2026-04-03T16:38:21.743Z
+            </div>
+        <script src="../../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../../sorter.js"></script>
+        <script src="../../block-navigation.js"></script>
+    </body>
+</html>
+    

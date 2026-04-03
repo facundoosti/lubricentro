@@ -14,7 +14,6 @@ const CustomerForm = ({
     register,
     handleSubmit,
     formState: { errors },
-    reset
   } = useForm({
     defaultValues: initialData || {
       name: "",

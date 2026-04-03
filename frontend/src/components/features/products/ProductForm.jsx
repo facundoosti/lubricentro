@@ -5,7 +5,6 @@ import ImageUpload from '@ui/ImageUpload';
 const ProductForm = ({
   product = null,
   onSubmit,
-  loading = false,
   formId = 'product-form',
 }) => {
   const [imageFile, setImageFile] = useState(null);
@@ -13,7 +12,7 @@ const ProductForm = ({
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset
   } = useForm({
     defaultValues: {
