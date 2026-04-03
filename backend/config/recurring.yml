@@ -1,10 +1,6 @@
+# ServiceReminderJob is triggered daily by Railway Cron service (not Solid Queue).
+# See docs/DEPLOY_RAILWAY.md — service "cron" in Railway dashboard.
 production:
-  service_reminders:
-    class: ServiceReminderJob
-    queue: notifications
-    args:
-      - days_ahead: 7
-    schedule: every day at 9am
 
 # production:
 #   periodic_cleanup:
