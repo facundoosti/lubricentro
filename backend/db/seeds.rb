@@ -499,6 +499,12 @@ User.find_or_create_by!(email: 'facundoosti@gmail.com') do |user|
   user.password = 'lubri123'
   user.password_confirmation = 'lubri123'
 end
+
+User.find_or_create_by!(email: 'lubricentrokillamet@gmail.com') do |user|
+  user.name = 'Santiago Killamet'
+  user.password = 'lubricentro-killamet'
+  user.password_confirmation = 'lubricentro-killamet'
+end
 puts 'Usuario admin creado: facundoosti@gmail.com'
 
 # Crear Doorkeeper application para desarrollo
