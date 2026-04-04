@@ -14,8 +14,6 @@ minio:
   bucket: <%= ENV.fetch("MINIO_BUCKET", "lubricentro") %>
   endpoint: <%= ENV["MINIO_ENDPOINT"] %>
   force_path_style: true
-  url_options:
-    host: <%= ENV.fetch("MINIO_PUBLIC_ENDPOINT", ENV["MINIO_ENDPOINT"]) %>
 
 # Remember not to checkin your GCS keyfile to a repository
 # google:
