@@ -111,3 +111,5 @@ Thumbs.db
 *.temp
 
 docs/notes.md
+.agents/skills
+skills-lock.json
