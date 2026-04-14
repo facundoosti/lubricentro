@@ -14,7 +14,6 @@ const STATUS_BADGE = {
   bot: 'bg-tertiary/10 text-tertiary border-tertiary/20',
   needs_human: 'bg-primary/10 text-primary border-primary/20',
   supplier: 'bg-zinc-800 text-zinc-400 border-zinc-700',
-  resolved: 'bg-surface-container-high text-secondary border-outline-variant',
   archived: 'bg-zinc-900 text-zinc-600 border-zinc-800',
 };
 
@@ -22,7 +21,6 @@ const STATUS_LABEL = {
   bot: 'Bot',
   needs_human: 'Atención',
   supplier: 'Proveedor',
-  resolved: 'Resuelto',
   archived: 'Archivada',
 };
 
@@ -34,7 +32,7 @@ function ConversationItem({ conversation, isActive, onClick }) {
       })
     : null;
 
-  const badge = STATUS_BADGE[conversation.status] ?? STATUS_BADGE.resolved;
+  const badge = STATUS_BADGE[conversation.status] ?? STATUS_BADGE.archived;
   const label = STATUS_LABEL[conversation.status] ?? conversation.status;
   const displayName =
     conversation.customer_name || conversation.whatsapp_phone;

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_02_195650) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_14_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -123,6 +123,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_02_195650) do
     t.datetime "received_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "delivered_at"
+    t.datetime "read_at"
     t.index ["conversation_id"], name: "index_messages_on_conversation_id"
     t.index ["whatsapp_message_id"], name: "index_messages_on_whatsapp_message_id", unique: true, where: "(whatsapp_message_id IS NOT NULL)"
   end
@@ -266,6 +268,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_02_195650) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "solid_cable_messages", force: :cascade do |t|
+    t.binary "channel", null: false
+    t.binary "payload", null: false
+    t.datetime "created_at", null: false
+    t.bigint "channel_hash", null: false
+    t.index ["channel"], name: "index_solid_cable_messages_on_channel"
+    t.index ["channel_hash"], name: "index_solid_cable_messages_on_channel_hash"
+    t.index ["created_at"], name: "index_solid_cable_messages_on_created_at"
+  end
+
   create_table "solid_queue_blocked_executions", force: :cascade do |t|
     t.bigint "job_id", null: false
     t.string "queue_name", null: false
@@ -385,6 +397,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_02_195650) do
     t.index ["expires_at"], name: "index_solid_queue_semaphores_on_expires_at"
     t.index ["key", "value"], name: "index_solid_queue_semaphores_on_key_and_value"
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
+  end
+
+  create_table "supplier_phones", force: :cascade do |t|
+    t.string "phone", null: false
+    t.string "company_name"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["phone"], name: "index_supplier_phones_on_phone", unique: true
   end
 
   create_table "users", force: :cascade do |t|

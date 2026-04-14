@@ -22,7 +22,7 @@
 #  fk_rails_...  (customer_id => customers.id)
 #
 class Conversation < ApplicationRecord
-  STATUSES = %w[bot needs_human supplier resolved archived].freeze
+  STATUSES = %w[bot needs_human supplier archived].freeze
 
   belongs_to :customer, optional: true
   has_many :messages, dependent: :destroy
@@ -37,6 +37,5 @@ class Conversation < ApplicationRecord
   def bot?        = status == "bot"
   def needs_human? = status == "needs_human"
   def supplier?   = status == "supplier"
-  def resolved?   = status == "resolved"
   def archived?   = status == "archived"
 end

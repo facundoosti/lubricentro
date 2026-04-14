@@ -4,7 +4,9 @@
 #
 #  id                  :bigint           not null, primary key
 #  body                :text             not null
+#  delivered_at        :datetime
 #  direction           :string           not null
+#  read_at             :datetime
 #  received_at         :datetime
 #  sender_type         :string
 #  created_at          :datetime         not null
@@ -31,7 +33,7 @@ RSpec.describe MessageSerializer, type: :serializer do
   it 'includes all fields' do
     expect(result).to include(
       :id, :direction, :sender_type, :body,
-      :whatsapp_message_id, :received_at, :created_at
+      :whatsapp_message_id, :received_at, :delivered_at, :read_at, :created_at
     )
   end
 
@@ -41,5 +43,33 @@ RSpec.describe MessageSerializer, type: :serializer do
 
   it 'returns correct sender_type' do
     expect(result[:sender_type]).to eq("customer")
+  end
+
+  context 'for an outbound message with delivery status' do
+    let(:delivered_time) { 5.minutes.ago }
+    let(:read_time)      { 2.minutes.ago }
+    let(:message) do
+      create(:message, :outbound,
+        delivered_at: delivered_time,
+        read_at:      read_time)
+    end
+
+    it 'returns delivered_at' do
+      expect(result[:delivered_at]).to be_present
+    end
+
+    it 'returns read_at' do
+      expect(result[:read_at]).to be_present
+    end
+  end
+
+  context 'for a message without delivery status' do
+    it 'returns nil for delivered_at' do
+      expect(result[:delivered_at]).to be_nil
+    end
+
+    it 'returns nil for read_at' do
+      expect(result[:read_at]).to be_nil
+    end
   end
 end

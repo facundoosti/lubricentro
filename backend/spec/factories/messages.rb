@@ -4,7 +4,9 @@
 #
 #  id                  :bigint           not null, primary key
 #  body                :text             not null
+#  delivered_at        :datetime
 #  direction           :string           not null
+#  read_at             :datetime
 #  received_at         :datetime
 #  sender_type         :string
 #  created_at          :datetime         not null

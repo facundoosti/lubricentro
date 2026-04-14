@@ -4,9 +4,8 @@ Rails.application.routes.draw do
   # Health check route
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # WhatsApp webhook — no auth required
+  # Kapso webhook — signature verified inside controller
   namespace :webhooks do
-    get  "whatsapp", to: "whatsapp#verify"
     post "whatsapp", to: "whatsapp#receive"
   end
 
@@ -56,12 +55,14 @@ Rails.application.routes.draw do
 
       resources :conversations, only: [ :index, :show ] do
         member do
-          patch :resolve
           patch :assign_human
           patch :archive
+          patch :mark_as_supplier
         end
         resources :messages, only: [ :create ]
       end
+
+      resources :supplier_phones
 
       resources :service_records do
         collection do

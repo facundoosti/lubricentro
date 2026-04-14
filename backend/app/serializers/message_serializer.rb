@@ -4,7 +4,9 @@
 #
 #  id                  :bigint           not null, primary key
 #  body                :text             not null
+#  delivered_at        :datetime
 #  direction           :string           not null
+#  read_at             :datetime
 #  received_at         :datetime
 #  sender_type         :string
 #  created_at          :datetime         not null
@@ -24,5 +26,5 @@
 class MessageSerializer < Blueprinter::Base
   identifier :id
 
-  fields :direction, :sender_type, :body, :whatsapp_message_id, :received_at, :created_at
+  fields :direction, :sender_type, :body, :whatsapp_message_id, :received_at, :delivered_at, :read_at, :created_at
 end

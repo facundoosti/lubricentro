@@ -2,7 +2,7 @@ require "net/http"
 require "json"
 
 class WhatsAppService
-  BASE_URL = "https://graph.facebook.com/v19.0"
+  BASE_URL = "#{ENV.fetch("KAPSO_API_BASE_URL")}/meta/whatsapp/v24.0"
 
   REMINDER_TEMPLATE = "service_reminder_v1"
 
@@ -20,7 +20,7 @@ class WhatsAppService
     http.use_ssl = true
 
     request = Net::HTTP::Post.new(uri)
-    request["Authorization"] = "Bearer #{access_token}"
+    request["X-API-Key"]     = api_key
     request["Content-Type"]  = "application/json"
     request.body = {
       messaging_product: "whatsapp",
@@ -44,7 +44,7 @@ class WhatsAppService
     http.use_ssl = true
 
     request = Net::HTTP::Post.new(uri)
-    request["Authorization"] = "Bearer #{access_token}"
+    request["X-API-Key"]     = api_key
     request["Content-Type"]  = "application/json"
     request.body = {
       messaging_product: "whatsapp",
@@ -57,9 +57,9 @@ class WhatsAppService
           {
             type: "body",
             parameters: [
-              { type: "text", text: name },
-              { type: "text", text: vehicle },
-              { type: "text", text: due_date }
+              { type: "text", parameter_name: "name", text: name },
+              { type: "text", parameter_name: "vehicle", text: vehicle },
+              { type: "text", parameter_name: "due_date", text: due_date }
             ]
           }
         ]
@@ -78,10 +78,10 @@ class WhatsAppService
   private
 
   def phone_number_id
-    ENV.fetch("WHATSAPP_PHONE_NUMBER_ID")
+    ENV.fetch("KAPSO_PHONE_NUMBER_ID")
   end
 
-  def access_token
-    ENV.fetch("WHATSAPP_ACCESS_TOKEN")
+  def api_key
+    ENV.fetch("KAPSO_API_KEY")
   end
 end

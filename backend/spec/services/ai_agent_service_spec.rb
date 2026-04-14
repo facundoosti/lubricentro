@@ -71,7 +71,7 @@ RSpec.describe AiAgentService do
 
       it 'sends the defined TOOLS to the LLM' do
         expect(openai_client).to receive(:chat).with(
-          parameters: hash_including(tools: AiAgentService::TOOLS, tool_choice: "auto")
+          parameters: hash_including(tools: ToolRegistry.definitions, tool_choice: "auto")
         ).and_return(llm_text_response("ok"))
 
         service.process("test")
@@ -169,14 +169,14 @@ RSpec.describe AiAgentService do
         )
       end
 
-      it 'returns an appointment confirmation reply' do
+      it 'returns a pending confirmation reply when customer is not found' do
         result = service.process("Quiero un turno para el viernes")
-        expect(result[:reply]).to include("anotamos")
+        expect(result[:reply]).to include("Anotamos")
       end
 
-      it 'does not modify the conversation status' do
+      it 'transitions the conversation to needs_human when customer is not found' do
         expect { service.process("Quiero turno") }
-          .not_to change { conversation.reload.status }
+          .to change { conversation.reload.status }.to("needs_human")
       end
     end
 
@@ -284,7 +284,7 @@ RSpec.describe AiAgentService do
       let!(:svc)     { create(:service, :oil_change) }
 
       before do
-        allow_any_instance_of(described_class).to receive(:postgresql?).and_return(false)
+        allow_any_instance_of(ContextRetrievalService).to receive(:postgresql?).and_return(false)
         allow(openai_client).to receive(:chat).and_return(llm_text_response("ok"))
       end
 
@@ -317,7 +317,7 @@ RSpec.describe AiAgentService do
 
     context 'when running on PostgreSQL' do
       before do
-        allow_any_instance_of(described_class).to receive(:postgresql?).and_return(true)
+        allow_any_instance_of(ContextRetrievalService).to receive(:postgresql?).and_return(true)
       end
 
       context 'and embedding generation succeeds' do
@@ -325,8 +325,8 @@ RSpec.describe AiAgentService do
 
         before do
           allow(EmbeddingService).to receive(:generate).and_return(embedding)
-          allow(Product).to receive(:order).and_return(Product.none)
-          allow(Service).to receive(:order).and_return(Service.none)
+          allow(Product).to receive(:nearest_neighbors).and_return(Product.none)
+          allow(Service).to receive(:nearest_neighbors).and_return(Service.none)
           allow(openai_client).to receive(:chat).and_return(llm_text_response("ok"))
         end
 
@@ -335,8 +335,8 @@ RSpec.describe AiAgentService do
           service.process("¿Tienen aceite 10W40?")
         end
 
-        it 'orders products by vector proximity' do
-          expect(Product).to receive(:order).with(anything)
+        it 'queries products using vector similarity' do
+          expect(Product).to receive(:nearest_neighbors).with(:embedding, embedding, distance: "cosine")
           service.process("aceite")
         end
       end

@@ -30,6 +30,7 @@ class Service < ApplicationRecord
   scope :by_name, ->(name) { where("name ILIKE ?", "%#{name}%") }
   scope :by_price_range, ->(min, max) { where(base_price: min..max) }
   scope :active, -> { where(active: true) } # Para futuro soft delete
+  scope :nearest_by_embedding, ->(embedding) { nearest_neighbors(:embedding, embedding, distance: "cosine").limit(5) }
 
   has_neighbors :embedding
 

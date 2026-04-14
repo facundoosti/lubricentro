@@ -85,10 +85,13 @@ services:
         condition: service_started
     networks:
       - lubricentro_network
+    restart: on-failure
     command: >
       sh -c "
         echo 'Waiting for database...' &&
         while ! nc -z postgres 5432; do sleep 1; done &&
+        echo 'Running migrations...' &&
+        bundle exec rails db:migrate &&
         echo 'Starting Solid Queue worker...' &&
         bundle exec bin/jobs start
       "
@@ -102,6 +105,7 @@ services:
     environment:
       VITE_API_BASE_URL: ${VITE_API_BASE_URL}
       VITE_APP_NAME: ${VITE_APP_NAME}
+      VITE_CABLE_URL: ${VITE_CABLE_URL}
     ports:
       - "5173:5173"
     volumes:

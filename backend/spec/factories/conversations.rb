@@ -34,8 +34,8 @@ FactoryBot.define do
       status { "supplier" }
     end
 
-    trait :resolved do
-      status { "resolved" }
+    trait :archived do
+      status { "archived" }
     end
 
     trait :with_messages do

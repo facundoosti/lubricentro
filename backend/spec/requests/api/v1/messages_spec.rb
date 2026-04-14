@@ -40,8 +40,18 @@ RSpec.describe "Api::V1::Messages", type: :request do
         expect(WhatsAppService).to have_received(:send_message)
       end
 
-      it "broadcasts to inbox channel" do
-        expect(ActionCable.server).to have_received(:broadcast).with("inbox", hash_including(conversation_id: conversation.id))
+      it "broadcasts to inbox channel with new_message payload" do
+        expect(ActionCable.server).to have_received(:broadcast).with(
+          "inbox",
+          hash_including(
+            conversation_id: conversation.id,
+            new_message:     hash_including(direction: "outbound", sender_type: "agent")
+          )
+        )
+      end
+
+      it "updates last_message_at on the conversation" do
+        expect(conversation.reload.last_message_at).to be_present
       end
     end
 

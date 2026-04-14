@@ -31,9 +31,9 @@ export const useUpdateConversationStatus = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, status }) => {
-      if (status === 'resolved') return conversationsAPI.resolve(id);
       if (status === 'needs_human') return conversationsAPI.assignHuman(id);
       if (status === 'archived') return conversationsAPI.archive(id);
+      if (status === 'supplier') return conversationsAPI.markAsSupplier(id);
       throw new Error(`Unknown status: ${status}`);
     },
     onSuccess: () => {

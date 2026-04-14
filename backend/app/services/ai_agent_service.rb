@@ -1,64 +1,4 @@
 class AiAgentService
-  TOOLS = [
-    {
-      type: "function",
-      function: {
-        name: "clasificar_intencion",
-        description: "Clasifica si el mensaje es de un cliente o un proveedor.",
-        parameters: {
-          type: "object",
-          properties: {
-            tipo: { type: "string", enum: [ "cliente", "proveedor" ] }
-          },
-          required: [ "tipo" ]
-        }
-      }
-    },
-    {
-      type: "function",
-      function: {
-        name: "derivar_a_humano",
-        description: "Deriva la conversación a atención humana. Usar ante quejas, preguntas complejas o pedidos de hablar con el dueño.",
-        parameters: {
-          type: "object",
-          properties: {
-            motivo: { type: "string" }
-          },
-          required: [ "motivo" ]
-        }
-      }
-    },
-    {
-      type: "function",
-      function: {
-        name: "consultar_precios",
-        description: "Consulta precio y disponibilidad de un producto o servicio.",
-        parameters: {
-          type: "object",
-          properties: {
-            query: { type: "string" }
-          },
-          required: [ "query" ]
-        }
-      }
-    },
-    {
-      type: "function",
-      function: {
-        name: "agendar_turno",
-        description: "Registra un turno tentativo para el cliente.",
-        parameters: {
-          type: "object",
-          properties: {
-            fecha_preferida: { type: "string" },
-            vehiculo: { type: "string" }
-          },
-          required: [ "fecha_preferida" ]
-        }
-      }
-    }
-  ].freeze
-
   def initialize(conversation)
     @conversation = conversation
     @history      = build_history
@@ -82,9 +22,13 @@ class AiAgentService
   def system_prompt(context)
     <<~PROMPT
       Sos el asistente virtual de un lubricentro automotriz en Argentina.
-      Respondés de manera cordial,breve y en español rioplatense.
-      Si el cliente es un proveedor, usá la tool clasificar_intencion.
-      Si no podés resolver la consulta, usá derivar_a_humano.
+      Respondés de manera cordial, breve y en español rioplatense.
+
+      Reglas para usar las tools:
+      - Si el mensaje parece ser de un proveedor, usá clasificar_intencion.
+      - Si el cliente pregunta qué turnos hay o cuándo puede venir, usá consultar_turnos_disponibles con la fecha en formato YYYY-MM-DD.
+      - Si el cliente quiere sacar un turno, primero consultá los disponibles con consultar_turnos_disponibles y luego usá agendar_turno con fecha y hora exacta (YYYY-MM-DD HH:MM).
+      - Si no podés resolver la consulta, usá derivar_a_humano.
 
       Información de productos y servicios disponibles:
       #{context}
@@ -94,20 +38,20 @@ class AiAgentService
   def call_llm(messages)
     response = client.chat(
       parameters: {
-        model: ENV.fetch("AI_MODEL", nil),
-        messages: messages,
-        tools: TOOLS,
+        model:       ENV.fetch("AI_MODEL", nil),
+        messages:    messages,
+        tools:       ToolRegistry.definitions,
         tool_choice: "auto"
       }
     )
 
-    choice = response.dig("choices", 0, "message")
+    choice     = response.dig("choices", 0, "message")
     tool_calls = choice["tool_calls"]
 
     if tool_calls.present?
       parsed_calls = tool_calls.map do |tc|
         {
-          name: tc.dig("function", "name"),
+          name:      tc.dig("function", "name"),
           arguments: JSON.parse(tc.dig("function", "arguments")).symbolize_keys
         }
       end
@@ -124,48 +68,15 @@ class AiAgentService
     return nil unless response[:tool_calls]
 
     response[:tool_calls].each do |tool_call|
-      case tool_call[:name]
-      when "derivar_a_humano"
-        @conversation.update!(status: "needs_human")
-        broadcast_status_update
-        return { reply: "Entendido, te comunico con una persona ahora mismo. Un momento." }
-
-      when "clasificar_intencion"
-        if tool_call.dig(:arguments, :tipo) == "proveedor"
-          @conversation.update!(status: "supplier")
-          broadcast_status_update
-          return { reply: "Gracias. Tu mensaje fue recibido y lo revisamos a la brevedad." }
-        end
-
-      when "agendar_turno"
-        # Fase 2: crear turno en la BD
-        return { reply: "Perfecto, te anotamos. Te confirmamos el turno en breve." }
-      end
+      result = ToolRegistry.dispatch(tool_call, @conversation)
+      return result if result
     end
 
     nil
   end
 
   def relevant_context(query)
-    # pgvector RAG — only available on PostgreSQL
-    return fallback_context unless postgresql?
-
-    embedding = EmbeddingService.generate(query)
-    return fallback_context unless embedding
-
-    products = Product.order(Arel.sql("embedding <-> '#{embedding}'")).limit(3)
-               .map { |p| "- #{p.name}: #{p.formatted_price}" }.join("\n")
-
-    services = Service.order(Arel.sql("embedding <-> '#{embedding}'")).limit(3)
-               .map { |s| "- #{s.name}: #{s.formatted_price}" }.join("\n")
-
-    "Productos:\n#{products}\n\nServicios:\n#{services}"
-  end
-
-  def fallback_context
-    products = Product.limit(5).map { |p| "- #{p.name}: $#{p.formatted_price}" }.join("\n")
-    services = Service.limit(5).map { |s| "- #{s.name}: $#{s.formatted_price}" }.join("\n")
-    "Productos:\n#{products}\n\nServicios:\n#{services}"
+    ContextRetrievalService.call(query)
   end
 
   def build_history
@@ -175,20 +86,11 @@ class AiAgentService
     end
   end
 
-  def broadcast_status_update
-    ActionCable.server.broadcast("inbox", {
-      conversation_id: @conversation.id,
-      status: @conversation.status
-    })
-  end
-
   def client
     @client ||= OpenAI::Client.new(
-      uri_base: ENV.fetch("AI_API_URL"),
-      access_token: ENV.fetch("AI_API_KEY"))
+      uri_base:     ENV.fetch("AI_API_URL"),
+      access_token: ENV.fetch("AI_API_KEY")
+    )
   end
 
-  def postgresql?
-    ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
-  end
 end

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { User, Bot, Send, Paperclip, Smile, UserCheck, CheckCircle, Archive } from 'lucide-react';
+import { User, Bot, Send, Paperclip, Smile, UserCheck, Archive, Truck } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useMessages, useSendMessage, useUpdateConversationStatus } from '@services/inboxService';
@@ -9,7 +9,6 @@ const STATUS_BADGE = {
   bot: 'bg-tertiary/10 text-tertiary border-tertiary/20',
   needs_human: 'bg-primary/10 text-primary border-primary/20',
   supplier: 'bg-zinc-800 text-zinc-400 border-zinc-700',
-  resolved: 'bg-surface-container-high text-secondary border-outline-variant',
   archived: 'bg-zinc-900 text-zinc-600 border-zinc-800',
 };
 
@@ -17,7 +16,6 @@ const STATUS_LABEL = {
   bot: 'Bot',
   needs_human: 'Atención',
   supplier: 'Proveedor',
-  resolved: 'Resuelto',
   archived: 'Archivada',
 };
 
@@ -100,9 +98,9 @@ export function ConversationDetail({ conversation }) {
   if (!conversation) return <EmptyState />;
 
   const displayName = conversation.customer_name || conversation.whatsapp_phone;
-  const badge = STATUS_BADGE[conversation.status] ?? STATUS_BADGE.resolved;
+  const badge = STATUS_BADGE[conversation.status] ?? STATUS_BADGE.archived;
   const label = STATUS_LABEL[conversation.status] ?? conversation.status;
-  const canSend = conversation.status !== 'resolved' && conversation.status !== 'archived';
+  const canSend = conversation.status !== 'archived';
 
   const handleSend = async () => {
     const body = text.trim();
@@ -126,12 +124,12 @@ export function ConversationDetail({ conversation }) {
     updateStatus.mutate({ id: conversation.id, status: 'needs_human' });
   };
 
-  const handleResolve = () => {
-    updateStatus.mutate({ id: conversation.id, status: 'resolved' });
-  };
-
   const handleArchive = () => {
     updateStatus.mutate({ id: conversation.id, status: 'archived' });
+  };
+
+  const handleMarkAsSupplier = () => {
+    updateStatus.mutate({ id: conversation.id, status: 'supplier' });
   };
 
   return (
@@ -154,7 +152,17 @@ export function ConversationDetail({ conversation }) {
         </div>
 
         <div className="flex gap-2">
-          {conversation.status !== 'needs_human' && conversation.status !== 'resolved' && conversation.status !== 'archived' && (
+          {conversation.status !== 'supplier' && conversation.status !== 'archived' && (
+            <button
+              onClick={handleMarkAsSupplier}
+              disabled={updateStatus.isPending}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium border border-zinc-700 rounded-lg hover:bg-zinc-900 transition-all disabled:opacity-50"
+            >
+              <Truck className="w-4 h-4" />
+              Marcar proveedor
+            </button>
+          )}
+          {conversation.status !== 'needs_human' && conversation.status !== 'archived' && (
             <button
               onClick={handleDerivate}
               disabled={updateStatus.isPending}
@@ -162,16 +170,6 @@ export function ConversationDetail({ conversation }) {
             >
               <UserCheck className="w-4 h-4" />
               Derivar a humano
-            </button>
-          )}
-          {conversation.status !== 'resolved' && conversation.status !== 'archived' && (
-            <button
-              onClick={handleResolve}
-              disabled={updateStatus.isPending}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-tertiary text-on-tertiary rounded-lg hover:opacity-90 transition-all disabled:opacity-50"
-            >
-              <CheckCircle className="w-4 h-4" />
-              Marcar resuelto
             </button>
           )}
           {conversation.status !== 'archived' && (
@@ -211,7 +209,7 @@ export function ConversationDetail({ conversation }) {
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={canSend ? 'Respondé como agente...' : conversation.status === 'archived' ? 'Conversación archivada' : 'Conversación resuelta'}
+              placeholder={canSend ? 'Respondé como agente...' : 'Conversación archivada'}
               disabled={!canSend}
               rows={1}
               className="w-full bg-surface-container border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-xl py-3 px-4 pr-20 text-sm text-on-surface resize-none h-12 disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-secondary"
@@ -237,9 +235,7 @@ export function ConversationDetail({ conversation }) {
           <p className="text-[10px] text-zinc-500">
             {canSend
               ? `${displayName} verá este mensaje en su WhatsApp`
-              : conversation.status === 'archived'
-              ? 'Esta conversación está archivada'
-              : 'Esta conversación está resuelta'}
+              : 'Esta conversación está archivada'}
           </p>
         </div>
       </footer>

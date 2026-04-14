@@ -1,20 +1,29 @@
 module Webhooks
   class WhatsappController < ActionController::API
-    # GET — Meta webhook verification
-    def verify
-      if params["hub.verify_token"] == ENV["WHATSAPP_VERIFY_TOKEN"] &&
-         params["hub.mode"] == "subscribe"
-        render plain: params["hub.challenge"]
-      else
-        head :forbidden
-      end
+    # POST — incoming Kapso webhook events
+    def receive
+      raw_body = request.body.read
+      return head :unauthorized unless valid_signature?(raw_body)
+
+      payload = JSON.parse(raw_body)
+
+      # Kapso may deliver a buffered batch: { batch: true, data: [{message, conversation}, ...] }
+      # Enqueue one job per event so each message is processed independently
+      events = payload["batch"] ? payload["data"] : [ payload ]
+      events.each { |event| MessageProcessorJob.perform_later(event) }
+
+      head :ok  # Kapso requires 200 in < 10 seconds
     end
 
-    # POST — incoming messages
-    def receive
-      payload = JSON.parse(request.body.read)
-      MessageProcessorJob.perform_later(payload)
-      head :ok  # Meta requires 200 in < 5 seconds
+    private
+
+    def valid_signature?(raw_body)
+      signature = request.headers["X-Webhook-Signature"]
+      return false if signature.blank?
+
+      secret = ENV.fetch("KAPSO_WEBHOOK_SECRET")
+      expected = OpenSSL::HMAC.hexdigest("SHA256", secret, raw_body)
+      Rack::Utils.secure_compare(signature, expected)
     end
   end
 end

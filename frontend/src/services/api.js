@@ -98,9 +98,9 @@ export const serviceRecordsAPI = {
 export const conversationsAPI = {
   getAll: (params = {}) => api.get('/conversations', { params }),
   getById: (id) => api.get(`/conversations/${id}`),
-  resolve: (id) => api.patch(`/conversations/${id}/resolve`),
   assignHuman: (id) => api.patch(`/conversations/${id}/assign_human`),
   archive: (id) => api.patch(`/conversations/${id}/archive`),
+  markAsSupplier: (id) => api.patch(`/conversations/${id}/mark_as_supplier`),
 };
 
 export const messagesAPI = {
