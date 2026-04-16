@@ -81,11 +81,10 @@ const CustomerForm = ({
 
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email *
+            Email
           </label>
           <input
-            {...register("email", { 
-              required: "El email es requerido",
+            {...register("email", {
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                 message: "Ingrese un email válido"
