@@ -78,12 +78,12 @@ RSpec.describe AiAgentService do
       end
     end
 
-    # ─── derivar_a_humano ──────────────────────────────────────────────────
+    # ─── escalate_to_human ────────────────────────────────────────────────
 
-    context 'when the LLM calls derivar_a_humano' do
+    context 'when the LLM calls escalate_to_human' do
       before do
         allow(openai_client).to receive(:chat).and_return(
-          llm_tool_response("derivar_a_humano", { motivo: "queja del cliente" })
+          llm_tool_response("escalate_to_human", { reason: "queja del cliente" })
         )
       end
 
@@ -112,12 +112,12 @@ RSpec.describe AiAgentService do
       end
     end
 
-    # ─── clasificar_intencion (proveedor) ─────────────────────────────────
+    # ─── classify_intent (proveedor) ──────────────────────────────────────
 
-    context 'when the LLM calls clasificar_intencion with tipo=proveedor' do
+    context 'when the LLM calls classify_intent with type=proveedor' do
       before do
         allow(openai_client).to receive(:chat).and_return(
-          llm_tool_response("clasificar_intencion", { tipo: "proveedor" })
+          llm_tool_response("classify_intent", { type: "proveedor" })
         )
       end
 
@@ -140,12 +140,12 @@ RSpec.describe AiAgentService do
       end
     end
 
-    # ─── clasificar_intencion (cliente) ───────────────────────────────────
+    # ─── classify_intent (cliente) ────────────────────────────────────────
 
-    context 'when the LLM calls clasificar_intencion with tipo=cliente' do
+    context 'when the LLM calls classify_intent with type=cliente' do
       before do
         allow(openai_client).to receive(:chat).and_return(
-          llm_tool_response("clasificar_intencion", { tipo: "cliente" })
+          llm_tool_response("classify_intent", { type: "cliente" })
         )
       end
 
@@ -160,12 +160,12 @@ RSpec.describe AiAgentService do
       end
     end
 
-    # ─── agendar_turno ────────────────────────────────────────────────────
+    # ─── schedule_appointment ─────────────────────────────────────────────
 
-    context 'when the LLM calls agendar_turno' do
+    context 'when the LLM calls schedule_appointment' do
       before do
         allow(openai_client).to receive(:chat).and_return(
-          llm_tool_response("agendar_turno", { fecha_preferida: "2026-04-10", vehiculo: "Toyota Corolla" })
+          llm_tool_response("schedule_appointment", { preferred_date: "2026-04-10", vehicle: "Toyota Corolla" })
         )
       end
 
@@ -180,12 +180,12 @@ RSpec.describe AiAgentService do
       end
     end
 
-    # ─── consultar_precios ────────────────────────────────────────────────
+    # ─── check_prices ─────────────────────────────────────────────────────
 
-    context 'when the LLM calls consultar_precios' do
+    context 'when the LLM calls check_prices' do
       before do
         allow(openai_client).to receive(:chat).and_return(
-          llm_tool_response("consultar_precios", { query: "aceite 10W40" })
+          llm_tool_response("check_prices", { query: "aceite 10W40" })
         )
       end
 
@@ -321,7 +321,7 @@ RSpec.describe AiAgentService do
       end
 
       context 'and embedding generation succeeds' do
-        let(:embedding) { Array.new(768) { rand } }
+        let(:embedding) { Array.new(ENV.fetch("AI_EMBEDDING_DIMENSION").to_i) { rand } }
 
         before do
           allow(EmbeddingService).to receive(:generate).and_return(embedding)

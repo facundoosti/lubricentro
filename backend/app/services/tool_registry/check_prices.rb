@@ -1,9 +1,9 @@
 module ToolRegistry
-  class ConsultarPrecios < Base
+  class CheckPrices < Base
     DEFINITION = {
       type: "function",
       function: {
-        name: "consultar_precios",
+        name: "check_prices",
         description: "Consulta precio y disponibilidad de un producto o servicio.",
         parameters: {
           type: "object",
@@ -27,29 +27,28 @@ module ToolRegistry
 
     def search_prices(query)
       embedding = EmbeddingService.generate(query)
+      products  = fetch_products(embedding)
+      services  = fetch_services(embedding)
 
-      if embedding && postgresql?
-        products = relevant_neighbors(Product, embedding)
-        services = relevant_neighbors(Service, embedding)
-      else
-        products = Product.limit(5)
-        services = Service.limit(5)
-      end
-
-      lines = []
-      if products.any?
-        lines << "Productos:"
-        products.each { |p| lines << "  - #{p.name}: #{p.formatted_price}" }
-      end
-      if services.any?
-        lines << "Servicios:"
-        services.each { |s| lines << "  - #{s.name}: #{s.formatted_price}" }
-      end
-
+      lines = format_items("Productos", products) + format_items("Servicios", services)
       lines.any? ? lines.join("\n") : "No encontré productos o servicios para esa consulta."
     rescue => e
-      Rails.logger.error("[ToolRegistry::ConsultarPrecios] search_prices failed: #{e.message}")
+      Rails.logger.error("[ToolRegistry::CheckPrices] search_prices failed: #{e.message}")
       fallback_context
+    end
+
+    def fetch_products(embedding)
+      embedding && postgresql? ? relevant_neighbors(Product, embedding) : Product.limit(5)
+    end
+
+    def fetch_services(embedding)
+      embedding && postgresql? ? relevant_neighbors(Service, embedding) : Service.limit(5)
+    end
+
+    def format_items(label, items)
+      return [] unless items.any?
+
+      [ "#{label}:" ] + items.map { |i| "  - #{i.name}: #{i.formatted_price}" }
     end
 
     def relevant_neighbors(model, embedding)
@@ -60,9 +59,9 @@ module ToolRegistry
     end
 
     def fallback_context
-      products = Product.limit(5).map { |p| "- #{p.name}: $#{p.formatted_price}" }.join("\n")
-      services = Service.limit(5).map { |s| "- #{s.name}: $#{s.formatted_price}" }.join("\n")
-      "Productos:\n#{products}\n\nServicios:\n#{services}"
+      products = format_items("Productos", Product.limit(5)).join("\n")
+      services = format_items("Servicios", Service.limit(5)).join("\n")
+      "#{products}\n\n#{services}"
     end
   end
 end

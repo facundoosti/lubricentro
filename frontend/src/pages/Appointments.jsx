@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { showAppointmentSuccess, showAppointmentError } from '@services/notificationService';
 import FullCalendar from '@fullcalendar/react';
@@ -27,6 +27,54 @@ const STATUS_CONFIG = {
 const getInitials = (name = '') =>
   name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
 
+const AppointmentTooltip = ({ x, y, appointment }) => {
+  const cfg = STATUS_CONFIG[appointment.status] || STATUS_CONFIG.scheduled;
+  const time = new Date(appointment.scheduled_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  const vehicleInfo = appointment.vehicle
+    ? `${appointment.vehicle.brand || ''} ${appointment.vehicle.model || ''}`.trim()
+    : null;
+  const licensePlate = appointment.vehicle?.license_plate;
+
+  // Flip left if near right edge, flip up if near bottom edge
+  const flipX = x + 220 > window.innerWidth;
+  const flipY = y + 120 > window.innerHeight;
+
+  return (
+    <div
+      className="fixed z-[9999] pointer-events-none"
+      style={{
+        left: flipX ? x - 216 : x + 12,
+        top:  flipY ? y - 112 : y + 12,
+      }}
+    >
+      <div className={`bg-surface-container border ${cfg.badgeBorder} rounded-xl shadow-2xl p-3 min-w-[200px] max-w-[240px]`}>
+        {/* Status bar */}
+        <div className={`w-full h-0.5 rounded-full ${cfg.dot} mb-2.5`} />
+
+        {/* Time */}
+        <div className="flex items-center gap-1.5 mb-2">
+          <span className={`text-[10px] font-bold uppercase tracking-widest ${cfg.text}`}>{time}</span>
+          <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+          <span className={`text-[10px] font-bold uppercase tracking-widest ${cfg.text}`}>{cfg.label}</span>
+        </div>
+
+        {/* Customer name */}
+        <p className="text-on-surface font-semibold text-sm leading-tight truncate">
+          {appointment.customer?.name || 'Cliente no especificado'}
+        </p>
+
+        {/* Vehicle */}
+        {vehicleInfo && (
+          <p className="text-on-surface-variant text-[11px] mt-1 truncate">
+            {vehicleInfo}
+            {licensePlate && <span className="text-secondary"> · {licensePlate}</span>}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const Appointments = () => {
   const navigate = useNavigate();
   const calendarRef = useRef(null);
@@ -36,6 +84,7 @@ const Appointments = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, appointment: null });
 
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth() + 1;
@@ -114,12 +163,29 @@ const Appointments = () => {
     }
   };
 
+  const handleTooltipMouseEnter = useCallback((e, appointment) => {
+    setTooltip({ visible: true, x: e.clientX, y: e.clientY, appointment });
+  }, []);
+
+  const handleTooltipMouseMove = useCallback((e) => {
+    setTooltip(prev => prev.visible ? { ...prev, x: e.clientX, y: e.clientY } : prev);
+  }, []);
+
+  const handleTooltipMouseLeave = useCallback(() => {
+    setTooltip({ visible: false, x: 0, y: 0, appointment: null });
+  }, []);
+
   const renderEventContent = (eventInfo) => {
-    const { status } = eventInfo.event.extendedProps;
+    const { status, appointment } = eventInfo.event.extendedProps;
     const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.scheduled;
     return (
-      <div className={`${cfg.bg} border-l-2 ${cfg.border} px-1 py-0.5 rounded text-[10px] ${cfg.text} truncate font-medium`}>
-        {new Date(eventInfo.event.extendedProps.appointment.scheduled_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+      <div
+        className={`${cfg.bg} border-l-2 ${cfg.border} px-1 py-0.5 rounded text-[10px] ${cfg.text} truncate font-medium cursor-pointer`}
+        onMouseEnter={(e) => handleTooltipMouseEnter(e, appointment)}
+        onMouseMove={handleTooltipMouseMove}
+        onMouseLeave={handleTooltipMouseLeave}
+      >
+        {new Date(appointment.scheduled_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
         {' '}{eventInfo.event.title}
       </div>
     );
@@ -410,6 +476,11 @@ const Appointments = () => {
         cancelText="Cancelar"
         isLoading={deleteAppointmentMutation.isPending}
       />
+
+      {/* Appointment hover tooltip */}
+      {tooltip.visible && tooltip.appointment && (
+        <AppointmentTooltip x={tooltip.x} y={tooltip.y} appointment={tooltip.appointment} />
+      )}
     </>
   );
 };

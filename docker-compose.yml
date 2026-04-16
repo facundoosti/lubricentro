@@ -37,6 +37,7 @@ services:
       AI_API_URL: ${AI_API_URL}
       AI_MODEL: ${AI_MODEL}
       AI_MODEL_EMBEDDING: ${AI_MODEL_EMBEDDING}
+      AI_EMBEDDING_DIMENSION: ${AI_EMBEDDING_DIMENSION}
     ports:
       - "3000:3000"
     volumes:
@@ -74,6 +75,8 @@ services:
       AI_API_URL: ${AI_API_URL}
       AI_MODEL: ${AI_MODEL}
       AI_MODEL_EMBEDDING: ${AI_MODEL_EMBEDDING}
+      AI_EMBEDDING_DIMENSION: ${AI_EMBEDDING_DIMENSION}
+
     volumes:
       - ./backend:/app
       - backend_bundle:/usr/local/bundle

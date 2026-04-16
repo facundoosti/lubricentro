@@ -1,11 +1,11 @@
 module ToolRegistry
   def self.all
     [
-      ToolRegistry::ClasificarIntencion,
-      ToolRegistry::DerivarAHumano,
-      ToolRegistry::ConsultarPrecios,
-      ToolRegistry::ConsultarTurnosDisponibles,
-      ToolRegistry::AgendarTurno
+      ToolRegistry::ClassifyIntent,
+      ToolRegistry::EscalateToHuman,
+      ToolRegistry::CheckPrices,
+      ToolRegistry::CheckAvailableSlots,
+      ToolRegistry::ScheduleAppointment
     ]
   end
 

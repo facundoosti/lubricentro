@@ -1,16 +1,16 @@
 module ToolRegistry
-  class ClasificarIntencion < Base
+  class ClassifyIntent < Base
     DEFINITION = {
       type: "function",
       function: {
-        name: "clasificar_intencion",
+        name: "classify_intent",
         description: "Clasifica si el mensaje es de un cliente o un proveedor.",
         parameters: {
           type: "object",
           properties: {
-            tipo: { type: "string", enum: [ "cliente", "proveedor" ] }
+            type: { type: "string", enum: [ "cliente", "proveedor" ] }
           },
-          required: [ "tipo" ]
+          required: [ "type" ]
         }
       }
     }.freeze
@@ -18,7 +18,7 @@ module ToolRegistry
     def self.definition = DEFINITION
 
     def call
-      return nil unless @arguments[:tipo] == "proveedor"
+      return nil unless @arguments[:type] == "proveedor"
 
       @conversation.update!(status: "supplier")
       broadcast_status_update

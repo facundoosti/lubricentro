@@ -10,8 +10,9 @@ class EmbeddingService
   def generate(text)
     response = client.embeddings(
       parameters: {
-        model: ENV.fetch("AI_MODEL_EMBEDDING", nil),
-        input: text.to_s.strip
+        model:      ENV.fetch("AI_MODEL_EMBEDDING", nil),
+        input:      text.to_s.strip,
+        dimensions: ENV.fetch("AI_EMBEDDING_DIMENSION").to_i
       }
     )
     response.dig("data", 0, "embedding")
@@ -35,7 +36,12 @@ class EmbeddingService
 
   def client
     @client ||= OpenAI::Client.new(
-            uri_base: ENV.fetch("AI_API_URL"),
-            access_token: ENV.fetch("AI_API_KEY"))
+      uri_base:      ENV.fetch("AI_API_URL"),
+      access_token:  ENV.fetch("AI_API_KEY"),
+      extra_headers: {
+        "HTTP-Referer" => "https://lubricentro.app",
+        "X-Title"      => "Lubricentro"
+      }
+    )
   end
 end

@@ -25,10 +25,10 @@ class AiAgentService
       Respondés de manera cordial, breve y en español rioplatense.
 
       Reglas para usar las tools:
-      - Si el mensaje parece ser de un proveedor, usá clasificar_intencion.
-      - Si el cliente pregunta qué turnos hay o cuándo puede venir, usá consultar_turnos_disponibles con la fecha en formato YYYY-MM-DD.
-      - Si el cliente quiere sacar un turno, primero consultá los disponibles con consultar_turnos_disponibles y luego usá agendar_turno con fecha y hora exacta (YYYY-MM-DD HH:MM).
-      - Si no podés resolver la consulta, usá derivar_a_humano.
+      - Si el mensaje parece ser de un proveedor, usá classify_intent.
+      - Si el cliente pregunta qué turnos hay o cuándo puede venir, usá check_available_slots con la fecha en formato YYYY-MM-DD.
+      - Si el cliente quiere sacar un turno, primero consultá los disponibles con check_available_slots y luego usá schedule_appointment con fecha y hora exacta (YYYY-MM-DD HH:MM).
+      - Si no podés resolver la consulta, usá escalate_to_human.
 
       Información de productos y servicios disponibles:
       #{context}
@@ -45,34 +45,29 @@ class AiAgentService
       }
     )
 
-    choice     = response.dig("choices", 0, "message")
-    tool_calls = choice["tool_calls"]
-
-    if tool_calls.present?
-      parsed_calls = tool_calls.map do |tc|
-        {
-          name:      tc.dig("function", "name"),
-          arguments: JSON.parse(tc.dig("function", "arguments")).symbolize_keys
-        }
-      end
-      { tool_calls: parsed_calls }
-    else
-      { content: choice["content"] }
-    end
+    parse_llm_response(response.dig("choices", 0, "message"))
   rescue => e
     Rails.logger.error("[AiAgentService] LLM call failed: #{e.message}")
     { content: "Hubo un problema al procesar tu consulta. Un agente te va a contactar a la brevedad." }
   end
 
+  def parse_llm_response(choice)
+    tool_calls = choice["tool_calls"]
+    return { content: choice["content"] } unless tool_calls.present?
+
+    parsed_calls = tool_calls.map do |tc|
+      {
+        name:      tc.dig("function", "name"),
+        arguments: JSON.parse(tc.dig("function", "arguments")).symbolize_keys
+      }
+    end
+    { tool_calls: parsed_calls }
+  end
+
   def handle_tool_calls(response)
     return nil unless response[:tool_calls]
 
-    response[:tool_calls].each do |tool_call|
-      result = ToolRegistry.dispatch(tool_call, @conversation)
-      return result if result
-    end
-
-    nil
+    response[:tool_calls].lazy.filter_map { |tc| ToolRegistry.dispatch(tc, @conversation) }.first
   end
 
   def relevant_context(query)
@@ -81,15 +76,18 @@ class AiAgentService
 
   def build_history
     @conversation.messages.chronological.last(10).map do |m|
-      role = m.sender_type == "customer" ? "user" : "assistant"
-      { role: role, content: m.body }
+      { role: m.llm_role, content: m.body }
     end
   end
 
   def client
     @client ||= OpenAI::Client.new(
-      uri_base:     ENV.fetch("AI_API_URL"),
-      access_token: ENV.fetch("AI_API_KEY")
+      uri_base:      ENV.fetch("AI_API_URL"),
+      access_token:  ENV.fetch("AI_API_KEY"),
+      extra_headers: {
+        "HTTP-Referer" => "https://lubricentro.app",
+        "X-Title"      => "Lubricentro"
+      }
     )
   end
 

@@ -34,4 +34,8 @@ class Message < ApplicationRecord
   validates :body, presence: true
 
   scope :chronological, -> { order(:created_at) }
+
+  def llm_role
+    sender_type == "customer" ? "user" : "assistant"
+  end
 end

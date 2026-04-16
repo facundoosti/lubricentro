@@ -2,7 +2,7 @@ class AddEmbeddingToServices < ActiveRecord::Migration[8.0]
   def up
     return unless postgresql? && extension_enabled?("vector")
 
-    add_column :services, :embedding, :vector, limit: 768
+    add_column :services, :embedding, :vector, limit: ENV.fetch("AI_EMBEDDING_DIMENSION")
   end
 
   def down

@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe EmbeddingService do
-  let(:embedding_vector) { Array.new(768) { rand } }
+  let(:embedding_vector) { Array.new(ENV.fetch("AI_EMBEDDING_DIMENSION").to_i) { rand } }
   let(:openai_client) { instance_double(OpenAI::Client) }
 
   before do

@@ -1,16 +1,16 @@
 module ToolRegistry
-  class DerivarAHumano < Base
+  class EscalateToHuman < Base
     DEFINITION = {
       type: "function",
       function: {
-        name: "derivar_a_humano",
+        name: "escalate_to_human",
         description: "Deriva la conversación a atención humana. Usar ante quejas, preguntas complejas o pedidos de hablar con el dueño.",
         parameters: {
           type: "object",
           properties: {
-            motivo: { type: "string" }
+            reason: { type: "string" }
           },
-          required: [ "motivo" ]
+          required: [ "reason" ]
         }
       }
     }.freeze

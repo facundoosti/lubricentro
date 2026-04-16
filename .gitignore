@@ -112,4 +112,5 @@ Thumbs.db
 
 docs/notes.md
 .agents/skills
+backend/.agents/skills
 skills-lock.json
