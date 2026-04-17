@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+
 import {
   LayoutGrid,
   Calendar,
@@ -130,11 +131,17 @@ const NavItem = ({ name, icon, path, subItems, menuType, index, tourId }) => {
 };
 
 const Sidebar = () => {
-  const { isExpanded, isMobileOpen, isHovered, setIsHovered } =
+  const { isExpanded, isMobileOpen, isHovered, setIsHovered, toggleMobileSidebar } =
     useSidebarStore();
   const { logout } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const isVisible = isExpanded || isHovered || isMobileOpen;
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    if (isMobileOpen) toggleMobileSidebar();
+  }, [location.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLogout = () => {
     logout();
@@ -202,6 +209,15 @@ const Sidebar = () => {
   );
 
   return (
+    <>
+    {/* Backdrop overlay for mobile */}
+    {isMobileOpen && (
+      <div
+        className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+        onClick={toggleMobileSidebar}
+        aria-hidden="true"
+      />
+    )}
     <aside
       id="tour-sidebar"
       className={`fixed flex flex-col top-0 left-0 h-full bg-surface border-r border-outline-variant z-50 transition-all duration-300 ease-in-out
@@ -285,6 +301,7 @@ const Sidebar = () => {
         </div>
       </div>
     </aside>
+    </>
   );
 };
 
