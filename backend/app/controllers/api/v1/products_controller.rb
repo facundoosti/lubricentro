@@ -123,7 +123,7 @@ class Api::V1::ProductsController < ApplicationController
   end
 
   def product_params
-    params.require(:product).permit(:name, :sku, :description, :unit_price, :unit, :supplier_id, :image)
+    params.require(:product).permit(:name, :sku, :description, :unit_price, :unit, :brand, :supplier_id, :image)
   end
 
   def filtered_products_for_bulk

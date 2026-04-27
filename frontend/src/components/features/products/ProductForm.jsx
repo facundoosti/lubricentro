@@ -18,6 +18,7 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
     defaultValues: {
       name: product?.name || '',
       sku: product?.sku || '',
+      brand: product?.brand || '',
       description: product?.description || '',
       unit_price: product?.unit_price || '',
       unit: product?.unit || '',
@@ -98,6 +99,23 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
           style={{ textTransform: 'uppercase' }}
         />
         {errors.sku && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.sku.message}</p>}
+      </div>
+
+      {/* Marca */}
+      <div>
+        <label htmlFor="brand" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Marca
+        </label>
+        <input
+          type="text"
+          id="brand"
+          {...register('brand', {
+            maxLength: { value: 100, message: 'La marca no puede exceder 100 caracteres' },
+          })}
+          className={inputClass(errors.brand)}
+          placeholder="Ej: Castrol, Bosch, NGK"
+        />
+        {errors.brand && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.brand.message}</p>}
       </div>
 
       {/* Proveedor */}

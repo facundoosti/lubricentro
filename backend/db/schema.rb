@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_27_100001) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_27_100002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -181,6 +181,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_27_100001) do
     t.vector "embedding", limit: 768
     t.string "sku", limit: 50
     t.bigint "supplier_id"
+    t.string "brand", limit: 100
     t.index ["name"], name: "index_products_on_name", unique: true
     t.index ["sku"], name: "index_products_on_sku", unique: true, where: "(sku IS NOT NULL)"
     t.index ["supplier_id"], name: "index_products_on_supplier_id"

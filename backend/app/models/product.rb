@@ -3,6 +3,7 @@
 # Table name: products
 #
 #  id          :bigint           not null, primary key
+#  brand       :string(100)
 #  description :text
 #  embedding   :vector(768)
 #  name        :string(100)      not null
@@ -39,6 +40,7 @@ class Product < ApplicationRecord
   validates :description, length: { maximum: 1000 }, allow_blank: true
   validates :unit_price, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :unit, length: { maximum: 50 }, allow_blank: true
+  validates :brand, length: { maximum: 100 }, allow_blank: true
 
   attr_accessor :skip_embedding
 

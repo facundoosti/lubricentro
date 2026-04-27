@@ -3,6 +3,7 @@
 # Table name: products
 #
 #  id          :bigint           not null, primary key
+#  brand       :string(100)
 #  description :text
 #  embedding   :vector(768)
 #  name        :string(100)      not null
@@ -27,7 +28,7 @@
 class ProductSerializer < Blueprinter::Base
   identifier :id
 
-  fields :name, :sku, :description, :unit, :created_at, :updated_at
+  fields :name, :sku, :description, :unit, :brand, :created_at, :updated_at
 
   field :unit_price do |product|
     product.unit_price.to_s
