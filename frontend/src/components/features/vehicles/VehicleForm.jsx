@@ -1,9 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Loader2, Sparkles } from "lucide-react";
 import CustomerSearchInput from "@components/features/customers/CustomerSearchInput";
 import ImageUpload from '@ui/ImageUpload';
 import { lookupVehicleByPlate } from "@services/vehiclesService";
+
+const PLATE_OLD = /^[A-Z]{3}\s?[0-9]{3}$/;
+const PLATE_NEW = /^[A-Z]{2}\s?[0-9]{3}\s?[A-Z]{2}$/;
+
+const isValidArgentinePlate = (plate) =>
+  PLATE_OLD.test(plate) || PLATE_NEW.test(plate);
 
 const VehicleForm = ({
   onSubmit,
@@ -17,14 +23,14 @@ const VehicleForm = ({
   const [imageFile, setImageFile] = useState(null);
   const [isLookingUp, setIsLookingUp] = useState(false);
   const [autoFilled, setAutoFilled] = useState(false);
-  const lastLookedUpPlate = useRef("");
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-    setValue
+    setValue,
+    watch,
   } = useForm({
     defaultValues: vehicle || {
       brand: "",
@@ -35,22 +41,16 @@ const VehicleForm = ({
     }
   });
 
-  // Sincronizar el customer_id del formulario con el estado local
+  const plateValue = watch("license_plate", "");
+  const canLookup = isValidArgentinePlate(plateValue.trim().toUpperCase());
+
   useEffect(() => {
-    // Solo necesitamos sincronizar el estado local para el formulario
     const customerIdToUse = vehicle?.customer_id || customerId;
     if (customerIdToUse && customerIdToUse !== selectedCustomerId) {
       setSelectedCustomerId(customerIdToUse);
       setValue('customer_id', customerIdToUse);
     }
   }, [vehicle, customerId, selectedCustomerId, setValue]);
-
-  // Debug: Log para verificar que el cliente se está pasando correctamente
-  useEffect(() => {
-    if (vehicle?.customer) {
-      console.log('VehicleForm - Cliente cargado:', vehicle.customer);
-    }
-  }, [vehicle]);
 
   const handleFormSubmit = async (data) => {
     try {
@@ -65,30 +65,19 @@ const VehicleForm = ({
     }
   };
 
-  const currentYear = new Date().getFullYear();
-
-  const PLATE_OLD = /^[A-Z]{3}\s?[0-9]{3}$/;        // ABC123 o ABC 123
-  const PLATE_NEW = /^[A-Z]{2}\s?[0-9]{3}\s?[A-Z]{2}$/; // AC314BP o AC 314 BP
-
-  const isValidArgentinePlate = (plate) =>
-    PLATE_OLD.test(plate) || PLATE_NEW.test(plate);
-
   const handleLicensePlateChange = (e) => {
     if (e.target.value.trim() === "") {
       setValue("brand", "", { shouldValidate: false });
       setValue("model", "", { shouldValidate: false });
       setValue("year", "", { shouldValidate: false });
       setAutoFilled(false);
-      lastLookedUpPlate.current = "";
     }
   };
 
-  const handleLicensePlateBlur = async (e) => {
-    const plate = e.target.value.trim().toUpperCase();
+  const handleLookupClick = async () => {
+    const plate = plateValue.trim().toUpperCase();
+    if (!canLookup || isLookingUp) return;
 
-    if (!isValidArgentinePlate(plate) || plate === lastLookedUpPlate.current) return;
-
-    lastLookedUpPlate.current = plate;
     setIsLookingUp(true);
     setAutoFilled(false);
 
@@ -124,6 +113,8 @@ const VehicleForm = ({
     setValue('customer_id', customerId);
   };
 
+  const currentYear = new Date().getFullYear();
+
   const { onChange: plateRhfOnChange, onBlur: plateRhfOnBlur, ...plateReg } = register("license_plate", {
     required: "La patente es requerida",
     validate: (value) => {
@@ -150,18 +141,29 @@ const VehicleForm = ({
               id="license_plate"
               {...plateReg}
               onChange={(e) => { plateRhfOnChange(e); handleLicensePlateChange(e); }}
-              onBlur={(e) => { plateRhfOnBlur(e); handleLicensePlateBlur(e); }}
+              onBlur={plateRhfOnBlur}
               className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white font-mono pr-10 ${
                 errors.license_plate ? 'border-red-500' : 'border-gray-300'
               }`}
               placeholder="Ej: ABC123, AB 123 CD"
               style={{ textTransform: "uppercase" }}
             />
-            {isLookingUp && (
-              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={handleLookupClick}
+              disabled={!canLookup || isLookingUp}
+              title={canLookup ? "Completar automáticamente" : "Ingresá una patente válida primero"}
+              className={`absolute inset-y-0 right-0 flex items-center px-3 transition-colors ${
+                canLookup && !isLookingUp
+                  ? 'text-blue-500 hover:text-blue-600 cursor-pointer'
+                  : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
+              }`}
+            >
+              {isLookingUp
+                ? <Loader2 className="w-4 h-4 animate-spin" />
+                : <Sparkles className="w-4 h-4" />
+              }
+            </button>
           </div>
           {errors.license_plate && (
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -276,7 +278,7 @@ const VehicleForm = ({
           )}
         </div>
 
-        {/* Cliente - Búsqueda avanzada */}
+        {/* Cliente */}
         <div className="md:col-span-2">
           <label htmlFor="customer_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Cliente *
@@ -290,7 +292,6 @@ const VehicleForm = ({
             disabled={isLoading || !!customerId}
             initialCustomer={vehicle?.customer || initialCustomer}
           />
-          {/* Campo oculto para validación */}
           <input
             type="hidden"
             {...register("customer_id", {
