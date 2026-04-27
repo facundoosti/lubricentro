@@ -24,6 +24,7 @@ import ServiceRecordFormPage from "@pages/ServiceRecordFormPage";
 import Reminders from "@pages/Reminders";
 import Settings from "@pages/Settings";
 import Inbox from "@pages/Inbox";
+import Suppliers from "@pages/Suppliers";
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
               <Route path="vehicles" element={<Vehicles />} />
               <Route path="services" element={<Services />} />
               <Route path="products" element={<Products />} />
+              <Route path="suppliers" element={<Suppliers />} />
               <Route path="atenciones/nueva" element={<ServiceRecordFormPage />} />
               <Route path="atenciones/:id/editar" element={<ServiceRecordFormPage />} />
               <Route path="presupuestos" element={<Budgets />} />

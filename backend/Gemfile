@@ -89,3 +89,8 @@ group :development, :test do
 end
 
 gem "neighbor", "~> 0.6.0"
+
+# Excel import support
+gem "csv"
+gem "roo", "~> 2.10"
+gem "caxlsx", "~> 3.4"

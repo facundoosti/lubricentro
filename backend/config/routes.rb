@@ -32,12 +32,23 @@ Rails.application.routes.draw do
 
       # Main resource routes
       resources :vehicles do
+        collection do
+          get :lookup
+        end
         resources :appointments, only: [ :index ]
         resources :service_records, only: [ :index ]
       end
 
       resources :services
-      resources :products
+      resources :suppliers
+      resources :products do
+        collection do
+          post :import
+          get :import_template
+          post :bulk_price_preview
+          post :bulk_price_update
+        end
+      end
       resources :appointments do
         collection do
           get :upcoming

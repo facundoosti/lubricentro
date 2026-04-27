@@ -181,6 +181,7 @@ const Sidebar = () => {
       subItems: [
         { name: "Servicios", path: "/services" },
         { name: "Productos", path: "/products" },
+        { name: "Proveedores", path: "/suppliers" },
       ],
     },
   ];

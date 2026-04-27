@@ -58,6 +58,14 @@ const MESSAGES = {
     ERROR_UPDATE: "Error al actualizar el budget",
     ERROR_DELETE: "Error al eliminar el budget",
   },
+  SUPPLIER: {
+    CREATED: "Proveedor creado exitosamente",
+    UPDATED: "Proveedor actualizado exitosamente",
+    DELETED: "Proveedor eliminado exitosamente",
+    ERROR_CREATE: "Error al crear el proveedor",
+    ERROR_UPDATE: "Error al actualizar el proveedor",
+    ERROR_DELETE: "Error al eliminar el proveedor",
+  },
   SETTING: {
     UPDATED: "Configuración actualizada exitosamente",
     ERROR_UPDATE: "Error al actualizar la configuración",
@@ -126,6 +134,11 @@ export const showBudgetSuccess = (action) =>
   showSuccess(MESSAGES.PRESUPUESTO[action]);
 export const showBudgetError = (action, detail) =>
   showError(MESSAGES.PRESUPUESTO[action], detail);
+
+export const showSupplierSuccess = (action) =>
+  showSuccess(MESSAGES.SUPPLIER[action]);
+export const showSupplierError = (action, detail) =>
+  showError(MESSAGES.SUPPLIER[action], detail);
 
 export const showSettingSuccess = (action) =>
   showSuccess(MESSAGES.SETTING[action]);

@@ -1,14 +1,21 @@
+import { useState } from 'react';
+import { TrendingUp, FileSpreadsheet } from 'lucide-react';
 import { useCrudPage } from '@hooks/useCrudPage';
 import { useModalError } from '@hooks/useModalError';
 import PageHeader from '@ui/PageHeader';
 import PageError from '@ui/PageError';
 import ProductsTable from '@components/features/products/ProductsTable';
 import ProductModal from '@components/features/products/ProductModal';
+import ProductImportModal from '@components/features/products/ProductImportModal';
+import BulkPriceModal from '@components/features/products/BulkPriceModal';
 import ConfirmModal from '@ui/ConfirmModal';
 import { useProducts, useDeleteProduct } from '@services/productsService';
 import { showProductSuccess } from '@services/notificationService';
 
 const Products = () => {
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isBulkPriceOpen, setIsBulkPriceOpen] = useState(false);
+
   const {
     currentPage, searchTerm, perPage,
     isModalOpen, selectedItem,
@@ -52,7 +59,28 @@ const Products = () => {
 
   return (
     <div id="tour-products-page" className="p-6">
-      <PageHeader title="Productos" description="Gestiona el catálogo de productos del lubricentro" />
+      <PageHeader
+        title="Productos"
+        description="Gestiona el catálogo de productos del lubricentro"
+        actions={
+          <div className="flex gap-2">
+            <button
+              onClick={() => setIsBulkPriceOpen(true)}
+              className="flex items-center gap-2 px-3 py-2 text-sm bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
+            >
+              <TrendingUp className="w-4 h-4" />
+              Actualizar precios
+            </button>
+            <button
+              onClick={() => setIsImportOpen(true)}
+              className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              Importar Excel
+            </button>
+          </div>
+        }
+      />
 
       <ProductsTable
         products={products}
@@ -70,6 +98,16 @@ const Products = () => {
         onClose={handleModalClose}
         product={selectedItem}
         onSuccess={handleModalClose}
+      />
+
+      <ProductImportModal
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+      />
+
+      <BulkPriceModal
+        isOpen={isBulkPriceOpen}
+        onClose={() => setIsBulkPriceOpen(false)}
       />
 
       <ConfirmModal

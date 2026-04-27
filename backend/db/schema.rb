@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_14_000000) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_27_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -179,7 +179,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_14_000000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.vector "embedding", limit: 768
+    t.string "sku", limit: 50
+    t.bigint "supplier_id"
     t.index ["name"], name: "index_products_on_name", unique: true
+    t.index ["sku"], name: "index_products_on_sku", unique: true, where: "(sku IS NOT NULL)"
+    t.index ["supplier_id"], name: "index_products_on_supplier_id"
     t.index ["unit_price"], name: "index_products_on_unit_price"
   end
 
@@ -408,6 +412,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_14_000000) do
     t.index ["phone"], name: "index_supplier_phones_on_phone", unique: true
   end
 
+  create_table "suppliers", force: :cascade do |t|
+    t.string "name", limit: 150, null: false
+    t.string "cuit", limit: 20
+    t.string "email", limit: 100
+    t.string "phone", limit: 30
+    t.string "address", limit: 200
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["cuit"], name: "index_suppliers_on_cuit", unique: true, where: "(cuit IS NOT NULL)"
+    t.index ["name"], name: "index_suppliers_on_name", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name", null: false
     t.string "email", null: false
@@ -440,6 +457,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_14_000000) do
   add_foreign_key "messages", "conversations"
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
+  add_foreign_key "products", "suppliers"
   add_foreign_key "service_record_products", "products"
   add_foreign_key "service_record_products", "service_records"
   add_foreign_key "service_record_services", "service_records"

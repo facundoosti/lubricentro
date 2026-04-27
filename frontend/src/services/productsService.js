@@ -152,23 +152,61 @@ export const useDeleteProduct = () => {
 
   return useMutation({
     mutationFn: async (id) => {
-      console.log("useDeleteProduct - mutationFn called with id:", id);
       const response = await api.delete(`/products/${id}`);
-      console.log("useDeleteProduct - Response:", response);
       return response.data;
     },
-    onSuccess: (data, id) => {
-      console.log("useDeleteProduct - onSuccess called with:", data);
-      // Invalidar y refetch la lista de products
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
-      
-      // Remover el product del cache
       queryClient.removeQueries({ queryKey: productKeys.detail(id) });
     },
-    onError: (error) => {
-      console.error('Error deleting product:', error);
-      console.error('Error response:', error.response);
-      throw error;
+  });
+};
+
+export const useImportProducts = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (file) => {
+      const fd = new FormData();
+      fd.append('file', file);
+      const response = await api.post('/products/import', fd);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+    },
+  });
+};
+
+export const useDownloadImportTemplate = () => {
+  return async () => {
+    const response = await api.get('/products/import_template', { responseType: 'blob' });
+    const url = URL.createObjectURL(response.data);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'template_productos.xlsx';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+};
+
+export const useBulkPricePreview = () => {
+  return useMutation({
+    mutationFn: async (params) => {
+      const response = await api.post('/products/bulk_price_preview', params);
+      return response.data;
+    },
+  });
+};
+
+export const useBulkPriceUpdate = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (params) => {
+      const response = await api.post('/products/bulk_price_update', params);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
     },
   });
 };
