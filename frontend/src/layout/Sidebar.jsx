@@ -131,8 +131,13 @@ const NavItem = ({ name, icon, path, subItems, menuType, index, tourId }) => {
 };
 
 const Sidebar = () => {
-  const { isExpanded, isMobileOpen, isHovered, setIsHovered, toggleMobileSidebar } =
-    useSidebarStore();
+  const {
+    isExpanded,
+    isMobileOpen,
+    isHovered,
+    setIsHovered,
+    toggleMobileSidebar,
+  } = useSidebarStore();
   const { logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
@@ -204,104 +209,114 @@ const Sidebar = () => {
   const renderMenuItems = (items, menuType) => (
     <ul className="flex flex-col gap-0.5">
       {items.map((nav, index) => (
-        <NavItem key={nav.name} {...nav} menuType={menuType} index={index} tourId={nav.tourId} />
+        <NavItem
+          key={nav.name}
+          {...nav}
+          menuType={menuType}
+          index={index}
+          tourId={nav.tourId}
+        />
       ))}
     </ul>
   );
 
   return (
     <>
-    {/* Backdrop overlay for mobile */}
-    {isMobileOpen && (
-      <div
-        className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-        onClick={toggleMobileSidebar}
-        aria-hidden="true"
-      />
-    )}
-    <aside
-      id="tour-sidebar"
-      className={`fixed flex flex-col top-0 left-0 h-full bg-surface border-r border-outline-variant z-50 transition-all duration-300 ease-in-out
+      {/* Backdrop overlay for mobile */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={toggleMobileSidebar}
+          aria-hidden="true"
+        />
+      )}
+      <aside
+        id="tour-sidebar"
+        className={`fixed flex flex-col top-0 left-0 h-full bg-surface border-r border-outline-variant z-50 transition-all duration-300 ease-in-out
         ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
-      onMouseEnter={() => !isExpanded && setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Logo / Branding */}
-      <div
-        className={`flex items-center gap-3 px-5 h-16 border-b border-outline-variant flex-shrink-0 ${
-          !isVisible ? "lg:justify-center" : ""
-        }`}
+        onMouseEnter={() => !isExpanded && setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="flex-shrink-0 h-9 w-9 bg-primary-container rounded-lg flex items-center justify-center">
-          <Wrench className="w-5 h-5 text-on-primary" />
+        {/* Logo / Branding */}
+        <div
+          className={`flex items-center h-16 border-b border-outline-variant flex-shrink-0 ${
+            isVisible ? "px-5" : "justify-center"
+          }`}
+        >
+          {isVisible ? (
+            <img
+              src="/logo.svg"
+              alt="Killamet Lubricantes"
+              className="h-8 w-auto mix-blend-screen"
+              style={{
+                filter:
+                  "hue-rotate(240deg) saturate(1.8) brightness(1.25) drop-shadow(0 0 10px rgba(167, 139, 250, 0.7)) drop-shadow(0 0 4px rgba(124, 58, 237, 0.5))",
+              }}
+            />
+          ) : (
+            <div className="flex-shrink-0 h-9 w-9 bg-primary-container rounded-lg flex items-center justify-center">
+              <Wrench className="w-5 h-5 text-on-primary" />
+            </div>
+          )}
         </div>
-        {isVisible && (
-          <div>
-            <p className="text-sm font-black text-on-surface leading-tight">
-              Lubricentro
-            </p>
-            <p className="text-[10px] uppercase tracking-widest text-primary font-bold leading-tight">
-              Consola Admin
-            </p>
-          </div>
-        )}
-      </div>
 
-      {/* Navigation */}
-      <div className="flex flex-col flex-1 overflow-y-auto no-scrollbar px-3 py-4">
-        <nav className="flex flex-col gap-6 flex-1">
-          <div>
-            <h2
-              className={`mb-2 flex text-[10px] uppercase font-bold tracking-widest text-secondary px-2 ${
-                !isVisible ? "lg:justify-center" : "justify-start"
+        {/* Navigation */}
+        <div className="flex flex-col flex-1 overflow-y-auto no-scrollbar px-3 py-4">
+          <nav className="flex flex-col gap-6 flex-1">
+            <div>
+              <h2
+                className={`mb-2 flex text-[10px] uppercase font-bold tracking-widest text-secondary px-2 ${
+                  !isVisible ? "lg:justify-center" : "justify-start"
+                }`}
+              >
+                {isVisible ? "Menú" : <MoreHorizontal className="size-4" />}
+              </h2>
+              {renderMenuItems(mainNavItems, "main")}
+            </div>
+
+            <div>
+              <h2
+                className={`mb-2 flex text-[10px] uppercase font-bold tracking-widest text-secondary px-2 ${
+                  !isVisible ? "lg:justify-center" : "justify-start"
+                }`}
+              >
+                {isVisible ? "Sistema" : <MoreHorizontal className="size-4" />}
+              </h2>
+              {renderMenuItems(otherNavItems, "others")}
+            </div>
+          </nav>
+
+          {/* Bottom actions */}
+          <div className="mt-4 flex flex-col gap-0.5">
+            <Link
+              to="/settings"
+              className={`menu-item group menu-item-inactive ${
+                !isVisible ? "lg:justify-center" : ""
               }`}
             >
-              {isVisible ? "Menú" : <MoreHorizontal className="size-4" />}
-            </h2>
-            {renderMenuItems(mainNavItems, "main")}
+              <Settings className="w-5 h-5 flex-shrink-0 menu-item-icon-inactive" />
+              {isVisible && (
+                <span className="flex-1 text-left">Configuración</span>
+              )}
+            </Link>
           </div>
-
-          <div>
-            <h2
-              className={`mb-2 flex text-[10px] uppercase font-bold tracking-widest text-secondary px-2 ${
-                !isVisible ? "lg:justify-center" : "justify-start"
+          <div className="pt-4 border-t border-outline-variant">
+            <button
+              onClick={handleLogout}
+              className={`menu-item group w-full text-secondary hover:text-error hover:bg-error-container/20 ${
+                !isVisible ? "lg:justify-center" : ""
               }`}
             >
-              {isVisible ? "Sistema" : <MoreHorizontal className="size-4" />}
-            </h2>
-            {renderMenuItems(otherNavItems, "others")}
+              <LogOut className="w-5 h-5 flex-shrink-0" />
+              {isVisible && (
+                <span className="flex-1 text-left">Cerrar sesión</span>
+              )}
+            </button>
           </div>
-        </nav>
-
-        {/* Bottom actions */}
-        <div className="mt-4 flex flex-col gap-0.5">
-          <Link
-            to="/settings"
-            className={`menu-item group menu-item-inactive ${
-              !isVisible ? "lg:justify-center" : ""
-            }`}
-          >
-            <Settings className="w-5 h-5 flex-shrink-0 menu-item-icon-inactive" />
-            {isVisible && <span className="flex-1 text-left">Configuración</span>}
-          </Link>
         </div>
-        <div className="pt-4 border-t border-outline-variant">
-          <button
-            onClick={handleLogout}
-            className={`menu-item group w-full text-secondary hover:text-error hover:bg-error-container/20 ${
-              !isVisible ? "lg:justify-center" : ""
-            }`}
-          >
-            <LogOut className="w-5 h-5 flex-shrink-0" />
-            {isVisible && (
-              <span className="flex-1 text-left">Cerrar sesión</span>
-            )}
-          </button>
-        </div>
-      </div>
-    </aside>
+      </aside>
     </>
   );
 };
