@@ -33,6 +33,27 @@ class Api::V1::VehiclesController < ApplicationController
     render_json(@serializer)
   end
 
+  # GET /api/v1/vehicles/lookup?plate=ABC123
+  def lookup
+    plate = params[:plate].to_s.strip
+
+    if plate.length < 6
+      render_json({ errors: [ "Plate must be at least 6 characters" ] }, message: "Invalid plate", status: :bad_request)
+      return
+    end
+
+    result = VehicleLookupService.new(plate).call
+
+    case result[:status]
+    when "found"
+      render_json({ vehicle: result }, message: "Vehicle found")
+    when "not_found"
+      render_json({ vehicle: nil }, message: "Vehicle not found", status: :not_found)
+    else
+      render_json({ errors: [ result[:message] ] }, message: "Lookup failed", status: :service_unavailable)
+    end
+  end
+
   # POST /api/v1/vehicles
   def create
     @vehicle = Vehicle.new(vehicle_params)

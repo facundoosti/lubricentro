@@ -177,6 +177,12 @@ export const useDeleteVehicle = () => {
   });
 };
 
+// Lookup de vehículo por patente via clasific.ar
+export const lookupVehicleByPlate = async (plate) => {
+  const response = await api.get(`/vehicles/lookup?plate=${encodeURIComponent(plate)}`);
+  return response.data;
+};
+
 // Funciones helper para el servicio
 export const vehiclesService = {
   // Obtener todos los vehicles con filtros
