@@ -56,6 +56,7 @@ jobs:
           KAPSO_API_BASE_URL:
           KAPSO_PHONE_NUMBER_ID:
           KAPSO_WEBHOOK_SECRET:
+          AI_EMBEDDING_DIMENSION:
         run: bundle exec rails db:prepare
 
       - name: Run tests
@@ -77,6 +78,7 @@ jobs:
           KAPSO_API_BASE_URL:
           KAPSO_PHONE_NUMBER_ID:
           KAPSO_WEBHOOK_SECRET:
+          AI_EMBEDDING_DIMENSION:
         run: bundle exec rspec
 
       - name: Upload coverage reports
