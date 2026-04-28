@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Printer, Download } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import { useBudget } from "@services/budgetsService";
+import { useSetting } from "@services/settingsService";
 
 const formatCurrency = (value) => {
   const n = Number(value) || 0;
@@ -14,16 +15,20 @@ const formatDate = (iso) => {
   return { day: d, month: m, year: y };
 };
 
-const PrintSheet = ({ budget }) => {
+const PrintSheet = ({ budget, setting }) => {
   const { day, month, year } = formatDate(budget.date);
   const items = budget.items || [];
 
-  // Pad items to at least 12 rows for the print layout
   const MIN_ROWS = 12;
   const padded = [
     ...items,
     ...Array.from({ length: Math.max(0, MIN_ROWS - items.length) }, () => null),
   ];
+
+  const phone = setting?.phone || "";
+  const mobile = setting?.mobile || "";
+  const address = setting?.address || "";
+  const cuit = setting?.cuit || "";
 
   return (
     <div
@@ -39,7 +44,7 @@ const PrintSheet = ({ budget }) => {
         boxSizing: "border-box",
       }}
     >
-      {/* Top info row */}
+      {/* Top info row — client info only */}
       <div
         style={{
           display: "flex",
@@ -50,18 +55,12 @@ const PrintSheet = ({ budget }) => {
       >
         <div>
           <div>
-            <strong>CUIT:</strong> _______________
-          </div>
-          <div style={{ marginTop: "3px" }}>
-            <strong>FACT:</strong> _______________
+            <strong>NOMBRE:</strong>{" "}
+            {budget.customer?.name || budget.vehicle_description || ""}
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
           <div>
-            <strong>NOMBRE:</strong>{" "}
-            {budget.customer?.name || budget.vehicle_description || ""}
-          </div>
-          <div style={{ marginTop: "3px" }}>
             <strong>WSP:</strong> {budget.customer?.phone || ""}
           </div>
         </div>
@@ -71,35 +70,39 @@ const PrintSheet = ({ budget }) => {
       <div
         style={{
           backgroundColor: "#1a1a1a",
-          color: "#fff",
           padding: "8px 12px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "0",
           borderRadius: "4px 4px 0 0",
         }}
       >
-        <div>
-          <div
-            style={{
-              fontSize: "22px",
-              fontWeight: "900",
-              letterSpacing: "2px",
-              color: "#ffffff",
-            }}
-          >
-            KILLAMET
-          </div>
-          <div
-            style={{ fontSize: "11px", color: "#cccccc", letterSpacing: "3px" }}
-          >
-            LUBRICANTES
-          </div>
-        </div>
-        <div style={{ textAlign: "right", fontSize: "10px", color: "#cccccc" }}>
-          <div>Cel: 02245 - 459938</div>
-          <div>Cel: 02245 - 459133</div>
+        <img
+          src="/logo.webp"
+          alt="Killamet Lubricantes"
+          crossOrigin="anonymous"
+          style={{ height: "52px", objectFit: "contain" }}
+        />
+        <div
+          style={{
+            textAlign: "right",
+            fontSize: "10px",
+            color: "#cccccc",
+            lineHeight: "1.6",
+          }}
+        >
+          {cuit && (
+            <div>
+              <strong style={{ color: "#aaaaaa" }}>CUIT:</strong> {cuit}
+            </div>
+          )}
+          {phone && <div>Tel: {phone}</div>}
+          {mobile && <div>Cel: {mobile}</div>}
+          {address && (
+            <div style={{ color: "#ff6b35", marginTop: "2px" }}>
+              ● {address}
+            </div>
+          )}
         </div>
       </div>
 
@@ -112,7 +115,6 @@ const PrintSheet = ({ budget }) => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "0",
         }}
       >
         <span
@@ -269,30 +271,6 @@ const PrintSheet = ({ budget }) => {
         </tbody>
       </table>
 
-      {/* Brand logos row */}
-      <div
-        style={{
-          border: "1px solid #ccc",
-          borderTop: "none",
-          padding: "5px 8px",
-          display: "flex",
-          justifyContent: "space-around",
-          alignItems: "center",
-          fontSize: "9px",
-          color: "#555",
-          letterSpacing: "1px",
-          fontWeight: "bold",
-        }}
-      >
-        {["FRAM", "BARDAHL", "BOSCH", "MOTUL", "elf", "Shell", "ZM"].map(
-          (brand) => (
-            <span key={brand} style={{ padding: "0 4px" }}>
-              {brand}
-            </span>
-          ),
-        )}
-      </div>
-
       {/* Totals */}
       <div
         style={{
@@ -357,19 +335,25 @@ const PrintSheet = ({ budget }) => {
       </div>
 
       {/* Footer */}
-      <div
-        style={{
-          backgroundColor: "#cc2200",
-          color: "#fff",
-          padding: "4px 12px",
-          fontSize: "10px",
-          textAlign: "center",
-          borderRadius: "0 0 4px 4px",
-          marginTop: "0",
-        }}
-      >
-        santiagokilla10@gmail.com
-      </div>
+      {address && (
+        <div
+          style={{
+            backgroundColor: "#cc2200",
+            color: "#fff",
+            padding: "4px 12px",
+            fontSize: "10px",
+            textAlign: "center",
+            borderRadius: "0 0 4px 4px",
+          }}
+        >
+          {address}
+          {(phone || mobile) && (
+            <span style={{ marginLeft: "12px" }}>
+              {[phone, mobile].filter(Boolean).join(" / ")}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -378,14 +362,12 @@ const BudgetPrint = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { data, isLoading } = useBudget(id);
+  const { data: settingData } = useSetting();
   const printRef = useRef(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const budget = data?.data;
-
-  const handlePrint = () => {
-    window.print();
-  };
+  const setting = settingData?.data;
 
   const handleDownloadPDF = async () => {
     const element = document.getElementById("budget-print-sheet");
@@ -401,6 +383,7 @@ const BudgetPrint = () => {
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
+        allowTaint: false,
         backgroundColor: "#ffffff",
         logging: false,
       });
@@ -418,7 +401,7 @@ const BudgetPrint = () => {
       const finalHeight = Math.min(imgHeight, pageHeight);
 
       pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, finalHeight);
-      pdf.save(`budget-${id}.pdf`);
+      pdf.save(`presupuesto-${id}.pdf`);
     } finally {
       setIsGenerating(false);
     }
@@ -479,13 +462,6 @@ const BudgetPrint = () => {
           <Download className="w-4 h-4" />
           {isGenerating ? "Generando..." : "Descargar PDF"}
         </button>
-        <button
-          onClick={handlePrint}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant text-secondary hover:text-on-surface hover:bg-surface-container-high text-sm transition-colors"
-        >
-          <Printer className="w-4 h-4" />
-          Imprimir
-        </button>
       </div>
 
       {/* Print sheet preview */}
@@ -495,7 +471,7 @@ const BudgetPrint = () => {
         style={{ maxWidth: "210mm" }}
         ref={printRef}
       >
-        <PrintSheet budget={budget} />
+        <PrintSheet budget={budget} setting={setting} />
       </div>
     </div>
   );

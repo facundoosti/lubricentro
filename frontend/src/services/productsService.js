@@ -163,16 +163,12 @@ export const useDeleteProduct = () => {
 };
 
 export const useImportProducts = () => {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (file) => {
       const fd = new FormData();
       fd.append('file', file);
       const response = await api.post('/products/import', fd);
       return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
     },
   });
 };

@@ -42,8 +42,6 @@ class Product < ApplicationRecord
   validates :unit, length: { maximum: 50 }, allow_blank: true
   validates :brand, length: { maximum: 100 }, allow_blank: true
 
-  attr_accessor :skip_embedding
-
   before_validation :assign_sku, on: :create
 
   # Scopes
@@ -54,7 +52,7 @@ class Product < ApplicationRecord
 
   has_neighbors :embedding
 
-  after_save :generate_embedding, if: -> { embedding_text_changed? && !skip_embedding }
+  after_save { GenerateEmbeddingJob.perform_later(id) if embedding_text_changed? }
 
   def formatted_price
     "$#{unit_price.to_f}"
@@ -71,11 +69,6 @@ class Product < ApplicationRecord
       candidate = "PRD-#{SecureRandom.alphanumeric(6).upcase}"
       break candidate unless Product.exists?(sku: candidate)
     end
-  end
-
-  def generate_embedding
-    embedding = EmbeddingService.generate("#{name} #{description}")
-    update_column(:embedding, embedding) if embedding
   end
 
   def embedding_text_changed?

@@ -43,13 +43,22 @@ class Api::V1::ProductsController < ApplicationController
       return
     end
 
-    result = ProductImportService.new(params[:file]).call
+    uploaded = params[:file]
+    ext = File.extname(uploaded.original_filename).downcase
+    unless %w[.xlsx .xls].include?(ext)
+      render_json({}, message: "Formato no soportado", errors: [ "Se requiere un archivo .xlsx o .xls" ], status: :unprocessable_content)
+      return
+    end
 
-    render_json(
-      { imported: result[:imported], errors: result[:errors] },
-      message: "Importación completada: #{result[:imported]} producto(s) importados",
-      status: :ok
-    )
+    job_id = SecureRandom.uuid
+    import_dir = Rails.root.join("tmp", "imports")
+    FileUtils.mkdir_p(import_dir)
+    file_path = import_dir.join("#{job_id}#{ext}").to_s
+    FileUtils.cp(uploaded.tempfile.path, file_path)
+
+    ProductImportJob.perform_later(file_path, uploaded.original_filename, job_id)
+
+    render_json({ job_id: job_id }, message: "Importación iniciada", status: :accepted)
   end
 
   def import_template
@@ -65,12 +74,12 @@ class Api::V1::ProductsController < ApplicationController
       )
 
       sheet.add_row(
-        [ "SKU", "Nombre *", "Descripción", "Precio Unitario *", "Unidad", "Proveedor (nombre)" ],
+        [ "SKU", "Nombre *", "Descripción", "Precio Unitario *", "Unidad", "Marca", "Proveedor (nombre)" ],
         style: header_style
       )
-      sheet.add_row([ "PRD-EJEMPLO", "Aceite 5W-30", "Aceite de motor sintético", "5000.00", "litro", "Proveedor SA" ])
+      sheet.add_row([ "PRD-EJEMPLO", "Aceite 5W-30", "Aceite de motor sintético", "5000.00", "litro", "Mobil", "Proveedor SA" ])
 
-      sheet.column_widths 15, 30, 40, 18, 12, 25
+      sheet.column_widths 15, 30, 40, 18, 12, 20, 25
     end
 
     send_data package.to_stream.read,
