@@ -5,6 +5,7 @@ class Api::V1::ProductsController < ApplicationController
     @products = Product.includes(:image_attachment, :supplier)
     @products = @products.by_name(params[:search]) if params[:search].present?
     @products = @products.by_supplier(params[:supplier_id]) if params[:supplier_id].present?
+    @products = @products.by_brand(params[:brand]) if params[:brand].present?
 
     @pagy, @products = pagy(@products, items: safe_per_page(params[:per_page]))
 
@@ -137,8 +138,13 @@ class Api::V1::ProductsController < ApplicationController
 
   def filtered_products_for_bulk
     scope = Product.all
-    scope = scope.by_supplier(params[:supplier_id]) if params[:supplier_id].present?
-    scope = scope.by_name(params[:search]) if params[:search].present?
+    if params[:product_ids].present?
+      scope = scope.where(id: params[:product_ids])
+    else
+      scope = scope.by_supplier(params[:supplier_id]) if params[:supplier_id].present?
+      scope = scope.by_name(params[:search]) if params[:search].present?
+      scope = scope.by_brand(params[:brand]) if params[:brand].present?
+    end
     scope
   end
 

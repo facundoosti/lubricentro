@@ -46,6 +46,7 @@ class Product < ApplicationRecord
 
   # Scopes
   scope :by_name, ->(name) { where("name ILIKE ?", "%#{name}%") }
+  scope :by_brand, ->(brand) { where("brand ILIKE ?", "%#{brand}%") }
   scope :by_price_range, ->(min, max) { where(unit_price: min..max) }
   scope :by_supplier, ->(id) { where(supplier_id: id) }
   scope :nearest_by_embedding, ->(embedding) { nearest_neighbors(:embedding, embedding, distance: "cosine").limit(5) }

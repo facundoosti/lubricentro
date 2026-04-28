@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TrendingUp, X, ChevronRight, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import { useSuppliers } from '@services/suppliersService';
 import { useBulkPricePreview, useBulkPriceUpdate } from '@services/productsService';
@@ -7,7 +7,12 @@ import ProductSearchInput from '@components/features/products/ProductSearchInput
 
 const STEPS = { FILTER: 'filter', PREVIEW: 'preview', DONE: 'done' };
 
-const BulkPriceModal = ({ isOpen, onClose }) => {
+// target = null → modo libre (el usuario elige filtros)
+// target = { type: 'ids', ids: [1,2,3] } → productos específicos seleccionados
+// target = { type: 'filters', search, brand, supplierId } → todos los que coincidan con filtros activos
+const BulkPriceModal = ({ isOpen, onClose, target = null }) => {
+  const hasTarget = target !== null;
+
   const [step, setStep] = useState(STEPS.FILTER);
   const [supplierId, setSupplierId] = useState('');
   const [search, setSearch] = useState('');
@@ -21,26 +26,52 @@ const BulkPriceModal = ({ isOpen, onClose }) => {
   const previewMutation = useBulkPricePreview();
   const updateMutation = useBulkPriceUpdate();
 
+  useEffect(() => {
+    if (isOpen) {
+      setStep(STEPS.FILTER);
+      setSupplierId('');
+      setSearch('');
+      setAdjustmentType('percentage');
+      setAdjustmentValue('');
+      setPreviews([]);
+    }
+  }, [isOpen]);
+
   const formatARS = (value) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 }).format(value);
+
+  const buildParams = () => {
+    const base = { adjustment_type: adjustmentType, adjustment_value: adjustmentValue };
+    if (target?.type === 'ids') {
+      return { ...base, product_ids: target.ids };
+    }
+    if (target?.type === 'filters') {
+      return {
+        ...base,
+        supplier_id: target.supplierId || undefined,
+        search: target.search || undefined,
+        brand: target.brand || undefined,
+      };
+    }
+    return {
+      ...base,
+      supplier_id: supplierId || undefined,
+      search: search || undefined,
+    };
+  };
 
   const handlePreview = async () => {
     if (!adjustmentValue || parseFloat(adjustmentValue) === 0) {
       showError('Valor requerido', 'Ingresá un valor de ajuste mayor a 0');
       return;
     }
-    if (!supplierId && !search) {
+    if (!hasTarget && !supplierId && !search) {
       showError('Criterio requerido', 'Seleccioná al menos un proveedor o un criterio de búsqueda');
       return;
     }
 
     try {
-      const data = await previewMutation.mutateAsync({
-        supplier_id: supplierId || undefined,
-        search: search || undefined,
-        adjustment_type: adjustmentType,
-        adjustment_value: adjustmentValue,
-      });
+      const data = await previewMutation.mutateAsync(buildParams());
       setPreviews(data.data?.previews || []);
       setStep(STEPS.PREVIEW);
     } catch (err) {
@@ -50,12 +81,7 @@ const BulkPriceModal = ({ isOpen, onClose }) => {
 
   const handleConfirm = async () => {
     try {
-      const data = await updateMutation.mutateAsync({
-        supplier_id: supplierId || undefined,
-        search: search || undefined,
-        adjustment_type: adjustmentType,
-        adjustment_value: adjustmentValue,
-      });
+      const data = await updateMutation.mutateAsync(buildParams());
       showSuccess(`${data.data?.updated} producto(s) actualizados exitosamente`);
       setStep(STEPS.DONE);
     } catch (err) {
@@ -64,12 +90,6 @@ const BulkPriceModal = ({ isOpen, onClose }) => {
   };
 
   const handleClose = () => {
-    setStep(STEPS.FILTER);
-    setSupplierId('');
-    setSearch('');
-    setAdjustmentType('percentage');
-    setAdjustmentValue('');
-    setPreviews([]);
     onClose();
   };
 
@@ -78,6 +98,24 @@ const BulkPriceModal = ({ isOpen, onClose }) => {
   const adjustmentLabel = adjustmentType === 'percentage'
     ? `${parseFloat(adjustmentValue) >= 0 ? '+' : ''}${adjustmentValue}%`
     : `${parseFloat(adjustmentValue) >= 0 ? '+' : ''}$${adjustmentValue}`;
+
+  // Chip describing what's pre-selected (when target is set)
+  const targetDescription = () => {
+    if (target?.type === 'ids') {
+      return `${target.ids.length} producto${target.ids.length !== 1 ? 's' : ''} seleccionado${target.ids.length !== 1 ? 's' : ''}`;
+    }
+    if (target?.type === 'filters') {
+      const parts = [];
+      if (target.search) parts.push(`nombre: "${target.search}"`);
+      if (target.brand) parts.push(`marca: "${target.brand}"`);
+      if (target.supplierId) {
+        const s = suppliers.find(s => String(s.id) === String(target.supplierId));
+        if (s) parts.push(`proveedor: ${s.name}`);
+      }
+      return parts.length ? `Todos los que coinciden con ${parts.join(', ')}` : 'Todos los productos';
+    }
+    return '';
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -92,7 +130,7 @@ const BulkPriceModal = ({ isOpen, onClose }) => {
             <div>
               <h2 className="text-base font-semibold text-on-surface">Actualización de Precios por Lote</h2>
               <p className="text-xs text-secondary">
-                {step === STEPS.FILTER && 'Definí los criterios y el tipo de ajuste'}
+                {step === STEPS.FILTER && (hasTarget ? 'Definí el tipo de ajuste' : 'Definí los criterios y el tipo de ajuste')}
                 {step === STEPS.PREVIEW && `Vista previa — ${previews.length} producto(s) afectados`}
                 {step === STEPS.DONE && 'Actualización completada'}
               </p>
@@ -104,40 +142,52 @@ const BulkPriceModal = ({ isOpen, onClose }) => {
         </div>
 
         <div className="overflow-y-auto flex-1 p-6 space-y-5">
-          {/* STEP 1: Filter */}
+          {/* STEP 1: Filter / Adjust */}
           {step === STEPS.FILTER && (
             <>
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium text-on-surface-variant uppercase tracking-wide">Criterios de filtro</h3>
-
-                <div>
-                  <label className="block text-sm font-medium text-on-surface-variant mb-1.5">Proveedor</label>
-                  <select
-                    value={supplierId}
-                    onChange={(e) => setSupplierId(e.target.value)}
-                    className="w-full px-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
-                  >
-                    <option value="">Todos los proveedores</option>
-                    {suppliers.map((s) => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
+              {/* Preselected target chip */}
+              {hasTarget && (
+                <div className="flex items-center gap-2 p-3 bg-primary-container/10 border border-primary-container/30 rounded-lg text-sm">
+                  <CheckCircle className="w-4 h-4 text-primary shrink-0" />
+                  <span className="text-on-surface">{targetDescription()}</span>
                 </div>
+              )}
 
-                <div>
-                  <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-                    Buscar por nombre de producto
-                  </label>
-                  <ProductSearchInput
-                    value={search}
-                    onChange={(text) => setSearch(text)}
-                    onSelect={(product) => product && setSearch(product.name)}
-                    placeholder="Ej: aceite, filtro..."
-                  />
-                  <p className="mt-1 text-xs text-secondary">Podés combinar proveedor y nombre para filtrar mejor</p>
+              {/* Filter criteria — only shown in free mode */}
+              {!hasTarget && (
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-on-surface-variant uppercase tracking-wide">Criterios de filtro</h3>
+
+                  <div>
+                    <label className="block text-sm font-medium text-on-surface-variant mb-1.5">Proveedor</label>
+                    <select
+                      value={supplierId}
+                      onChange={(e) => setSupplierId(e.target.value)}
+                      className="w-full px-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                      <option value="">Todos los proveedores</option>
+                      {suppliers.map((s) => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
+                      Buscar por nombre de producto
+                    </label>
+                    <ProductSearchInput
+                      value={search}
+                      onChange={(text) => setSearch(text)}
+                      onSelect={(product) => product && setSearch(product.name)}
+                      placeholder="Ej: aceite, filtro..."
+                    />
+                    <p className="mt-1 text-xs text-secondary">Podés combinar proveedor y nombre para filtrar mejor</p>
+                  </div>
                 </div>
-              </div>
+              )}
 
+              {/* Adjustment type */}
               <div className="space-y-4 pt-2">
                 <h3 className="text-sm font-medium text-on-surface-variant uppercase tracking-wide">Tipo de ajuste</h3>
 
@@ -191,8 +241,14 @@ const BulkPriceModal = ({ isOpen, onClose }) => {
                 <TrendingUp className="w-4 h-4 text-primary shrink-0" />
                 <span className="text-on-surface-variant">
                   Ajuste: <span className="font-semibold text-on-surface">{adjustmentLabel}</span>
-                  {supplierId && ` · Proveedor: ${suppliers.find(s => String(s.id) === supplierId)?.name}`}
-                  {search && ` · Búsqueda: "${search}"`}
+                  {hasTarget
+                    ? ` · ${targetDescription()}`
+                    : (
+                      <>
+                        {supplierId && ` · Proveedor: ${suppliers.find(s => String(s.id) === supplierId)?.name}`}
+                        {search && ` · Búsqueda: "${search}"`}
+                      </>
+                    )}
                 </span>
               </div>
 

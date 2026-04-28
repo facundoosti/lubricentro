@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { TrendingUp, FileSpreadsheet } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { TrendingUp, FileSpreadsheet, ChevronDown } from 'lucide-react';
 import { useCrudPage } from '@hooks/useCrudPage';
 import { useModalError } from '@hooks/useModalError';
 import PageHeader from '@ui/PageHeader';
@@ -13,14 +14,48 @@ import { useProducts, useDeleteProduct } from '@services/productsService';
 import { showProductSuccess } from '@services/notificationService';
 
 const Products = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isBulkPriceOpen, setIsBulkPriceOpen] = useState(false);
+  const [bulkPriceTarget, setBulkPriceTarget] = useState(null);
+  const [isActionsOpen, setIsActionsOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [selectAllByFilter, setSelectAllByFilter] = useState(false);
+  const actionsRef = useRef(null);
+
+  const page = parseInt(searchParams.get('page') || '1', 10);
+  const search = searchParams.get('search') || '';
+  const brand = searchParams.get('brand') || '';
+  const supplierId = searchParams.get('supplier_id') || '';
+  const perPage = 10;
+
+  const setFilter = (updates) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value) next.set(key, value.toString());
+        else next.delete(key);
+      });
+      if (!('page' in updates)) next.set('page', '1');
+      return next;
+    });
+    setSelectedIds(new Set());
+    setSelectAllByFilter(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (actionsRef.current && !actionsRef.current.contains(e.target)) {
+        setIsActionsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const {
-    currentPage, searchTerm, perPage,
     isModalOpen, selectedItem,
     isDeleteModalOpen, itemToDelete,
-    handlePageChange, handleSearch,
     handleCreate, handleEdit, handleModalClose,
     handleDeleteRequest, handleDeleteModalClose,
   } = useCrudPage();
@@ -28,15 +63,18 @@ const Products = () => {
   const { handleError: handleDeleteError } = useModalError(handleDeleteModalClose);
 
   const { data: productsData, isLoading, error } = useProducts({
-    page: currentPage,
+    page,
     per_page: perPage,
-    search: searchTerm,
+    search,
+    brand,
+    supplier_id: supplierId,
   });
 
   const deleteMutation = useDeleteProduct();
 
   const products = productsData?.data?.products || [];
   const pagination = productsData?.data?.pagination || {};
+  const totalCount = pagination.total_count || 0;
 
   const handleDeleteConfirm = async () => {
     try {
@@ -48,6 +86,46 @@ const Products = () => {
     }
   };
 
+  const handleSelectProduct = (id, checked) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+    if (!checked) setSelectAllByFilter(false);
+  };
+
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      setSelectedIds(new Set(products.map(p => p.id)));
+    } else {
+      setSelectedIds(new Set());
+      setSelectAllByFilter(false);
+    }
+  };
+
+  const handleSelectAllByFilter = () => setSelectAllByFilter(true);
+
+  const handleClearSelection = () => {
+    setSelectedIds(new Set());
+    setSelectAllByFilter(false);
+  };
+
+  const handleOpenBulkPriceFromSelection = () => {
+    if (selectAllByFilter) {
+      setBulkPriceTarget({ type: 'filters', search, brand, supplierId });
+    } else {
+      setBulkPriceTarget({ type: 'ids', ids: [...selectedIds] });
+    }
+    setIsBulkPriceOpen(true);
+  };
+
+  const handleCloseBulkPrice = () => {
+    setIsBulkPriceOpen(false);
+    setBulkPriceTarget(null);
+  };
+
   if (error) {
     return (
       <PageError
@@ -57,27 +135,42 @@ const Products = () => {
     );
   }
 
+  const allPageSelected = products.length > 0 && products.every(p => selectedIds.has(p.id));
+  const someSelected = selectedIds.size > 0 || selectAllByFilter;
+
   return (
     <div id="tour-products-page" className="p-6">
       <PageHeader
         title="Productos"
         description="Gestiona el catálogo de productos del lubricentro"
         actions={
-          <div className="flex gap-2">
+          <div className="relative" ref={actionsRef}>
             <button
-              onClick={() => setIsBulkPriceOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 text-sm bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
+              onClick={() => setIsActionsOpen((v) => !v)}
+              className="flex items-center gap-2 px-3 py-2 text-sm bg-surface-container-high border border-outline-variant text-on-surface rounded-lg font-medium transition-colors hover:bg-surface-container"
             >
-              <TrendingUp className="w-4 h-4" />
-              Actualizar precios
+              Acciones
+              <ChevronDown className={`w-4 h-4 transition-transform ${isActionsOpen ? 'rotate-180' : ''}`} />
             </button>
-            <button
-              onClick={() => setIsImportOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-            >
-              <FileSpreadsheet className="w-4 h-4" />
-              Importar Excel
-            </button>
+
+            {isActionsOpen && (
+              <div className="absolute right-0 mt-1 w-48 bg-surface-container border border-outline-variant rounded-lg shadow-lg z-10 py-1">
+                <button
+                  onClick={() => { setBulkPriceTarget(null); setIsBulkPriceOpen(true); setIsActionsOpen(false); }}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-on-surface hover:bg-surface-container-high transition-colors"
+                >
+                  <TrendingUp className="w-4 h-4 text-secondary" />
+                  Actualizar precios
+                </button>
+                <button
+                  onClick={() => { setIsImportOpen(true); setIsActionsOpen(false); }}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-on-surface hover:bg-surface-container-high transition-colors"
+                >
+                  <FileSpreadsheet className="w-4 h-4 text-secondary" />
+                  Importar Excel
+                </button>
+              </div>
+            )}
           </div>
         }
       />
@@ -85,12 +178,25 @@ const Products = () => {
       <ProductsTable
         products={products}
         pagination={pagination}
-        onPageChange={handlePageChange}
-        onSearch={handleSearch}
+        loading={isLoading || deleteMutation.isPending}
+        search={search}
+        brand={brand}
+        supplierId={supplierId}
+        onFilterChange={setFilter}
+        onPageChange={(p) => setFilter({ page: p })}
         onEdit={handleEdit}
         onDelete={handleDeleteRequest}
         onCreate={handleCreate}
-        loading={isLoading || deleteMutation.isPending}
+        selectedIds={selectedIds}
+        selectAllByFilter={selectAllByFilter}
+        allPageSelected={allPageSelected}
+        someSelected={someSelected}
+        totalCount={totalCount}
+        onSelectProduct={handleSelectProduct}
+        onSelectAll={handleSelectAll}
+        onSelectAllByFilter={handleSelectAllByFilter}
+        onClearSelection={handleClearSelection}
+        onBulkPriceSelected={handleOpenBulkPriceFromSelection}
       />
 
       <ProductModal
@@ -107,7 +213,8 @@ const Products = () => {
 
       <BulkPriceModal
         isOpen={isBulkPriceOpen}
-        onClose={() => setIsBulkPriceOpen(false)}
+        onClose={handleCloseBulkPrice}
+        target={bulkPriceTarget}
       />
 
       <ConfirmModal
