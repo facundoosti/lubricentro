@@ -182,7 +182,7 @@ RSpec.describe "Api::V1::Products", type: :request do
       before do
         FileUtils.mkdir_p(Rails.root.join("spec/fixtures/files"))
         package = Axlsx::Package.new
-        package.workbook.add_worksheet(name: "Productos") { |s| s.add_row(["SKU", "Nombre"]) }
+        package.workbook.add_worksheet(name: "Productos") { |s| s.add_row([ "SKU", "Nombre" ]) }
         package.serialize(Rails.root.join("spec/fixtures/files/test.xlsx").to_s)
         allow(ProductImportJob).to receive(:perform_later)
       end
@@ -243,7 +243,7 @@ RSpec.describe "Api::V1::Products", type: :request do
     it "filters by product_ids" do
       target = products.first
       post bulk_price_preview_api_v1_products_url,
-           params: { product_ids: [target.id], adjustment_type: "percentage", adjustment_value: "5" },
+           params: { product_ids: [ target.id ], adjustment_type: "percentage", adjustment_value: "5" },
            headers: auth_headers(user)
 
       expect(json_response[:data][:previews].size).to eq(1)
@@ -274,7 +274,7 @@ RSpec.describe "Api::V1::Products", type: :request do
     it "updates prices for specific product_ids" do
       target = products.first
       post bulk_price_update_api_v1_products_url,
-           params: { product_ids: [target.id], adjustment_type: "fixed", adjustment_value: "200" },
+           params: { product_ids: [ target.id ], adjustment_type: "fixed", adjustment_value: "200" },
            headers: auth_headers(user)
 
       expect(json_response[:data][:updated]).to eq(1)
@@ -283,7 +283,7 @@ RSpec.describe "Api::V1::Products", type: :request do
 
     it "returns error when no products match" do
       post bulk_price_update_api_v1_products_url,
-           params: { product_ids: [999999], adjustment_type: "percentage", adjustment_value: "10" },
+           params: { product_ids: [ 999999 ], adjustment_type: "percentage", adjustment_value: "10" },
            headers: auth_headers(user)
 
       expect(response).to have_http_status(:unprocessable_content)

@@ -90,5 +90,4 @@ class AiAgentService
       }
     )
   end
-
 end

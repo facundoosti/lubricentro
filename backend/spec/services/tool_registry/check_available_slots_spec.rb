@@ -73,7 +73,7 @@ RSpec.describe ToolRegistry::CheckAvailableSlots do
       let(:vehicle) { create(:vehicle, customer: customer) }
 
       before do
-        [8, 11, 14].each do |hour|
+        [ 8, 11, 14 ].each do |hour|
           create(:appointment,
             customer: customer,
             vehicle: vehicle,

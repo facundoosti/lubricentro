@@ -20,9 +20,9 @@ RSpec.describe ProductImportService do
       let(:spreadsheet_double) { instance_double(Roo::Excelx) }
       let(:rows) do
         [
-          ["SKU",    "Nombre *", "Descripción", "Precio Unitario *", "Unidad", "Marca",       "Proveedor"],
-          ["PR-001", "Aceite 5W-30", "Aceite sintético", "5000.50", "L", "Mobil", nil],
-          [nil,      "Filtro Aire",  "Filtro de aire",   "1200",    "unit", nil,   "Proveedor SA"]
+          [ "SKU",    "Nombre *", "Descripción", "Precio Unitario *", "Unidad", "Marca",       "Proveedor" ],
+          [ "PR-001", "Aceite 5W-30", "Aceite sintético", "5000.50", "L", "Mobil", nil ],
+          [ nil,      "Filtro Aire",  "Filtro de aire",   "1200",    "unit", nil,   "Proveedor SA" ]
         ]
       end
 
@@ -54,8 +54,8 @@ RSpec.describe ProductImportService do
       context 'when a row has a blank name' do
         let(:rows) do
           [
-            ["SKU", "Nombre *", "Descripción", "Precio Unitario *", "Unidad", "Marca", "Proveedor"],
-            [nil,   "",         nil,            "5000",             "L",      nil,      nil]
+            [ "SKU", "Nombre *", "Descripción", "Precio Unitario *", "Unidad", "Marca", "Proveedor" ],
+            [ nil,   "",         nil,            "5000",             "L",      nil,      nil ]
           ]
         end
 
@@ -69,8 +69,8 @@ RSpec.describe ProductImportService do
       context 'when a row has a nil price' do
         let(:rows) do
           [
-            ["SKU", "Nombre *", "Descripción", "Precio Unitario *", "Unidad", "Marca", "Proveedor"],
-            [nil,   "Producto", "descripción", nil,                 "L",      nil,     nil]
+            [ "SKU", "Nombre *", "Descripción", "Precio Unitario *", "Unidad", "Marca", "Proveedor" ],
+            [ nil,   "Producto", "descripción", nil,                 "L",      nil,     nil ]
           ]
         end
 

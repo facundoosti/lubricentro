@@ -13,10 +13,10 @@ RSpec.describe "Webhooks::Whatsapp", type: :request do
   def kapso_post(payload, signature: :valid)
     body = payload.to_json
     sig  = case signature
-           when :valid   then OpenSSL::HMAC.hexdigest("SHA256", secret, body)
-           when :missing then nil
-           else signature
-           end
+    when :valid   then OpenSSL::HMAC.hexdigest("SHA256", secret, body)
+    when :missing then nil
+    else signature
+    end
 
     headers = { "CONTENT_TYPE" => "application/json" }
     headers["X-Webhook-Signature"] = sig unless sig.nil?
