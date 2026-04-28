@@ -249,6 +249,86 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
     end
   end
 
+  describe 'GET /api/v1/vehicles/lookup' do
+    let(:plate) { "ABC123" }
+
+    context 'when vehicle is found' do
+      before do
+        allow(VehicleLookupService).to receive(:new).and_return(
+          instance_double(VehicleLookupService, call: { status: "found", make: "Toyota", model: "Corolla", year: 2020, plate: plate, province: "Buenos Aires" })
+        )
+        get "/api/v1/vehicles/lookup", params: { plate: plate }, headers: auth_headers(user)
+      end
+
+      it 'returns ok with vehicle data' do
+        expect(response).to have_http_status(:ok)
+        expect(json_response[:data][:vehicle][:make]).to eq("Toyota")
+      end
+    end
+
+    context 'when vehicle is not found' do
+      before do
+        allow(VehicleLookupService).to receive(:new).and_return(
+          instance_double(VehicleLookupService, call: { status: "not_found" })
+        )
+        get "/api/v1/vehicles/lookup", params: { plate: plate }, headers: auth_headers(user)
+      end
+
+      it 'returns not_found' do
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context 'when the lookup service returns an error' do
+      before do
+        allow(VehicleLookupService).to receive(:new).and_return(
+          instance_double(VehicleLookupService, call: { status: "error", message: "API key inválida" })
+        )
+        get "/api/v1/vehicles/lookup", params: { plate: plate }, headers: auth_headers(user)
+      end
+
+      it 'returns service_unavailable' do
+        expect(response).to have_http_status(:service_unavailable)
+      end
+    end
+
+    context 'when plate is too short' do
+      before { get "/api/v1/vehicles/lookup", params: { plate: "AB1" }, headers: auth_headers(user) }
+
+      it 'returns bad_request' do
+        expect(response).to have_http_status(:bad_request)
+      end
+    end
+
+    context 'with view=with_customer filter' do
+      before { create_list(:vehicle, 2, customer: customer) }
+
+      it 'returns vehicles with customer data' do
+        get '/api/v1/vehicles', params: { view: 'with_customer' }, headers: auth_headers(user)
+        expect(response).to have_http_status(:ok)
+        expect(json_response[:data][:vehicles].first).to include(:customer)
+      end
+    end
+
+    context 'with brand filter' do
+      let!(:honda_vehicle) { create(:vehicle, brand: 'Honda', customer: customer) }
+
+      before { get '/api/v1/vehicles', params: { brand: 'Honda' }, headers: auth_headers(user) }
+
+      it 'filters by brand' do
+        brands = json_response[:data][:vehicles].map { |v| v[:brand] }
+        expect(brands).to all(eq('Honda'))
+      end
+    end
+
+    context 'without authentication' do
+      it 'returns unauthorized' do
+        get "/api/v1/vehicles/lookup", params: { plate: plate }
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
+
   private
 
   def json_response

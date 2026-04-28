@@ -24,7 +24,7 @@ class Api::V1::SupplierPhonesController < ApplicationController
     else
       render_json({ errors: supplier_phone.errors.full_messages },
                   message: "No se pudo registrar el número",
-                  status: :unprocessable_entity)
+                  status: :unprocessable_content)
     end
   end
 
@@ -36,7 +36,7 @@ class Api::V1::SupplierPhonesController < ApplicationController
     else
       render_json({ errors: @supplier_phone.errors.full_messages },
                   message: "No se pudo actualizar",
-                  status: :unprocessable_entity)
+                  status: :unprocessable_content)
     end
   end
 

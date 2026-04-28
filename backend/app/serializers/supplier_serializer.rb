@@ -23,7 +23,7 @@ class SupplierSerializer < Blueprinter::Base
   fields :name, :cuit, :email, :phone, :address, :notes, :created_at, :updated_at
 
   field :products_count do |supplier|
-    supplier.respond_to?(:products_count) ? supplier.products_count : supplier.products.size
+    supplier.respond_to?(:products_count) ? supplier.products_count : supplier.products.count
   end
 
   view :summary do

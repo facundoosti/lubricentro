@@ -28,6 +28,6 @@ class Supplier < ApplicationRecord
   validates :phone, length: { maximum: 30 }, allow_blank: true
   validates :address, length: { maximum: 200 }, allow_blank: true
 
-  scope :by_name, ->(name) { where("name ILIKE ?", "%#{name}%") }
-  scope :ordered, -> { order(:name) }
+  scope :by_name, ->(name) { where("suppliers.name ILIKE ?", "%#{name}%") }
+  scope :ordered, -> { order("suppliers.name") }
 end

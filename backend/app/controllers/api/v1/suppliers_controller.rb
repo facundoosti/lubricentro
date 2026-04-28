@@ -2,7 +2,9 @@ class Api::V1::SuppliersController < ApplicationController
   before_action :set_supplier, only: [ :show, :update, :destroy ]
 
   def index
-    @suppliers = Supplier.all
+    @suppliers = Supplier.left_joins(:products)
+                         .group("suppliers.id")
+                         .select("suppliers.*, COUNT(products.id) AS products_count")
     @suppliers = @suppliers.by_name(params[:search]) if params[:search].present?
     @suppliers = @suppliers.ordered
 

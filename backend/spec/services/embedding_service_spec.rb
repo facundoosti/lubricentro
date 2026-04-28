@@ -9,6 +9,10 @@ RSpec.describe EmbeddingService do
   end
 
   describe '.generate (class method)' do
+    before do
+      allow(EmbeddingService).to receive(:generate).and_call_original
+    end
+
     it 'delegates to an instance and returns the embedding' do
       allow(openai_client).to receive(:embeddings).and_return(
         { "data" => [ { "embedding" => embedding_vector } ] }

@@ -126,4 +126,70 @@ RSpec.describe 'Api::V1::Auth', type: :request do
       end
     end
   end
+
+  describe 'POST /api/v1/auth/login' do
+    let!(:user) { create(:user, email: 'login@example.com', password: 'secret123', password_confirmation: 'secret123') }
+
+    context 'with valid credentials' do
+      it 'returns a token and user data' do
+        post '/api/v1/auth/login', params: { auth: { email: 'login@example.com', password: 'secret123' } }
+
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response['success']).to be true
+        expect(json_response['message']).to eq('Login exitoso')
+        expect(json_response['data']['user']['email']).to eq('login@example.com')
+        expect(json_response['data']['token']).to be_present
+        expect(json_response['data']['token_type']).to eq('Bearer')
+      end
+    end
+
+    context 'with wrong password' do
+      it 'returns unauthorized' do
+        post '/api/v1/auth/login', params: { auth: { email: 'login@example.com', password: 'wrongpass' } }
+
+        expect(response).to have_http_status(:unauthorized)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response['success']).to be false
+        expect(json_response['errors']).to include('Email o contraseña incorrectos')
+      end
+    end
+
+    context 'with non-existent email' do
+      it 'returns unauthorized' do
+        post '/api/v1/auth/login', params: { auth: { email: 'nobody@example.com', password: 'secret123' } }
+
+        expect(response).to have_http_status(:unauthorized)
+        json_response = JSON.parse(response.body)
+        expect(json_response['success']).to be false
+      end
+    end
+  end
+
+  describe 'GET /api/v1/auth/verify' do
+    include ApiHelper
+    let(:user) { create(:user) }
+
+    context 'with a valid token' do
+      it 'returns user data' do
+        get '/api/v1/auth/verify', headers: auth_headers(user)
+
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response['success']).to be true
+        expect(json_response['message']).to eq('Token válido')
+        expect(json_response['data']['user']['id']).to eq(user.id)
+      end
+    end
+
+    context 'without a token' do
+      it 'returns unauthorized' do
+        get '/api/v1/auth/verify'
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
 end

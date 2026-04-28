@@ -5,9 +5,10 @@
 
 Rails.application.configure do
   config.after_initialize do
-    Bullet.enable        = true
-    Bullet.bullet_logger = true
-    Bullet.raise         = true # raise an error if n+1 query occurs
+    Bullet.enable               = true
+    Bullet.bullet_logger        = true
+    Bullet.raise                = true  # raise an error if n+1 query occurs
+    Bullet.counter_cache_enable = false # counter_cache requires schema changes; disable check in tests
   end
 
   # Settings specified here will take precedence over those in config/application.rb.
@@ -56,4 +57,8 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # Use the test adapter so perform_later enqueues jobs in memory instead of Solid Queue.
+  # This allows have_enqueued_job matchers and prevents silent job loss in specs.
+  config.active_job.queue_adapter = :test
 end
