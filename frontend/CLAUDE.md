@@ -139,4 +139,4 @@ Test setup lives in `src/test/`: `setup.js` (global config) and `utils.jsx` (exp
 import { renderWithProviders } from '@/test/utils'
 ```
 
-CI: Vitest + coverage on push/PR. Deploy target: **Vercel**.
+CI: Vitest + coverage on push/PR. Deploy target: **Railway**.

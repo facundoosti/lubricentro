@@ -52,6 +52,10 @@ jobs:
           SECRET_KEY_BASE: test_secret_key_base_for_ci_only
           JWT_SECRET: test_jwt_secret_for_ci_only
           ALLOWED_ORIGINS: http://localhost:5173
+          KAPSO_API_KEY:
+          KAPSO_API_BASE_URL:
+          KAPSO_PHONE_NUMBER_ID:
+          KAPSO_WEBHOOK_SECRET:
         run: bundle exec rails db:prepare
 
       - name: Run tests
@@ -69,12 +73,17 @@ jobs:
           AI_API_KEY: test_api_key_for_ci_only
           AI_MODEL: test-model
           AI_MODEL_EMBEDDING: test-embedding-model
+          KAPSO_API_KEY:
+          KAPSO_API_BASE_URL:
+          KAPSO_PHONE_NUMBER_ID:
+          KAPSO_WEBHOOK_SECRET:
         run: bundle exec rspec
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
         if: always()
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           file: ./backend/coverage/.resultset.json
           flags: backend
           name: backend-coverage
@@ -109,7 +118,7 @@ jobs:
 
       - name: Run Brakeman
         working-directory: backend
-        run: bundle exec brakeman --no-pager --format json --output brakeman-report.json || [ $? -eq 3 ]
+        run: bundle exec brakeman --no-pager --format json --output brakeman-report.json
 
       - name: Upload Brakeman results
         uses: actions/upload-artifact@v4
