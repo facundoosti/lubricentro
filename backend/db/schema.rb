@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_27_100002) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_29_100002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -88,6 +88,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_27_100002) do
     t.index ["date"], name: "index_budgets_on_date"
     t.index ["status"], name: "index_budgets_on_status"
     t.index ["vehicle_id"], name: "index_budgets_on_vehicle_id"
+  end
+
+  create_table "categories", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.bigint "parent_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_categories_on_name", unique: true
+    t.index ["parent_id"], name: "index_categories_on_parent_id"
   end
 
   create_table "conversations", force: :cascade do |t|
@@ -182,6 +192,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_27_100002) do
     t.string "sku", limit: 50
     t.bigint "supplier_id"
     t.string "brand", limit: 100
+    t.bigint "category_id"
+    t.integer "stock", default: 0, null: false
+    t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["name"], name: "index_products_on_name", unique: true
     t.index ["sku"], name: "index_products_on_sku", unique: true, where: "(sku IS NOT NULL)"
     t.index ["supplier_id"], name: "index_products_on_supplier_id"
@@ -454,10 +467,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_27_100002) do
   add_foreign_key "budget_items", "budgets"
   add_foreign_key "budgets", "customers"
   add_foreign_key "budgets", "vehicles"
+  add_foreign_key "categories", "categories", column: "parent_id"
   add_foreign_key "conversations", "customers"
   add_foreign_key "messages", "conversations"
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
+  add_foreign_key "products", "categories"
   add_foreign_key "products", "suppliers"
   add_foreign_key "service_record_products", "products"
   add_foreign_key "service_record_products", "service_records"

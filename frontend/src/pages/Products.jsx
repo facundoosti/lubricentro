@@ -25,16 +25,26 @@ const Products = () => {
 
   const page = parseInt(searchParams.get('page') || '1', 10);
   const search = searchParams.get('search') || '';
-  const brand = searchParams.get('brand') || '';
-  const supplierId = searchParams.get('supplier_id') || '';
+  const brandsParam = searchParams.get('brand') || '';
+  const supplierIdsParam = searchParams.get('supplier_id') || '';
+  const categoryIdsParam = searchParams.get('category_id') || '';
+  const brands = brandsParam ? brandsParam.split(',').filter(Boolean) : [];
+  const supplierIds = supplierIdsParam ? supplierIdsParam.split(',').filter(Boolean) : [];
+  const categoryIds = categoryIdsParam ? categoryIdsParam.split(',').filter(Boolean) : [];
   const perPage = 10;
 
   const setFilter = (updates) => {
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
       Object.entries(updates).forEach(([key, value]) => {
-        if (value) next.set(key, value.toString());
-        else next.delete(key);
+        if (Array.isArray(value)) {
+          if (value.length > 0) next.set(key, value.join(','));
+          else next.delete(key);
+        } else if (value) {
+          next.set(key, value.toString());
+        } else {
+          next.delete(key);
+        }
       });
       if (!('page' in updates)) next.set('page', '1');
       return next;
@@ -66,8 +76,9 @@ const Products = () => {
     page,
     per_page: perPage,
     search,
-    brand,
-    supplier_id: supplierId,
+    brand: brandsParam,
+    supplier_id: supplierIdsParam,
+    category_id: categoryIdsParam,
   });
 
   const deleteMutation = useDeleteProduct();
@@ -114,7 +125,7 @@ const Products = () => {
 
   const handleOpenBulkPriceFromSelection = () => {
     if (selectAllByFilter) {
-      setBulkPriceTarget({ type: 'filters', search, brand, supplierId });
+      setBulkPriceTarget({ type: 'filters', search, brand: brandsParam, supplierId: supplierIdsParam, categoryId: categoryIdsParam });
     } else {
       setBulkPriceTarget({ type: 'ids', ids: [...selectedIds] });
     }
@@ -180,8 +191,9 @@ const Products = () => {
         pagination={pagination}
         loading={isLoading || deleteMutation.isPending}
         search={search}
-        brand={brand}
-        supplierId={supplierId}
+        brands={brands}
+        supplierIds={supplierIds}
+        categoryIds={categoryIds}
         onFilterChange={setFilter}
         onPageChange={(p) => setFilter({ page: p })}
         onEdit={handleEdit}

@@ -13,6 +13,8 @@
 
 puts "🌱 Iniciando seeds para Sistema Lubricentro..."
 
+load Rails.root.join("db/seeds/categories.rb")
+
 # Limpiar datos existentes (solo en development)
 if Rails.env.development?
   puts "🧹 Limpiando datos existentes..."

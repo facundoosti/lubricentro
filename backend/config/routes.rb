@@ -39,6 +39,7 @@ Rails.application.routes.draw do
         resources :service_records, only: [ :index ]
       end
 
+      resources :categories, only: [ :index ]
       resources :services
       resources :suppliers
       resources :products do
@@ -47,6 +48,7 @@ Rails.application.routes.draw do
           get :import_template
           post :bulk_price_preview
           post :bulk_price_update
+          get :brands
         end
       end
       resources :appointments do

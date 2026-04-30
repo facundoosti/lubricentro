@@ -1,10 +1,30 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@ui/Table";
 import Pagination from "@ui/Pagination";
+import MultiSelectSearch from "@ui/MultiSelectSearch";
 import { useSuppliers } from '@services/suppliersService';
+import { useProductBrands } from '@services/productsService';
+import { useCategories } from '@services/categoriesService';
 import {
-  Search, Plus, Edit, Trash2, Eye, Package, X, TrendingUp, ChevronDown,
+  Search, Plus, Edit, Trash2, Eye, Package, X, TrendingUp,
 } from "lucide-react";
+
+const buildCategoryOptions = (categories) => {
+  const byParent = {};
+  categories.forEach((c) => {
+    const key = c.parent_id ?? 'root';
+    if (!byParent[key]) byParent[key] = [];
+    byParent[key].push(c);
+  });
+  const flatten = (parentId, depth) => {
+    const children = byParent[parentId] || [];
+    return children.flatMap((c) => [
+      { value: String(c.id), label: c.name, depth },
+      ...flatten(c.id, depth + 1),
+    ]);
+  };
+  return flatten('root', 0);
+};
 
 const ProductsTable = ({
   products = [],
@@ -17,8 +37,9 @@ const ProductsTable = ({
   loading = false,
   // Filters (URL-controlled)
   search = '',
-  brand = '',
-  supplierId = '',
+  brands = [],
+  supplierIds = [],
+  categoryIds = [],
   onFilterChange,
   // Bulk selection
   selectedIds = new Set(),
@@ -33,15 +54,26 @@ const ProductsTable = ({
   onBulkPriceSelected,
 }) => {
   const [localSearch, setLocalSearch] = useState(search);
-  const [localBrand, setLocalBrand] = useState(brand);
+  const [brandSearch, setBrandSearch] = useState('');
+  const [supplierSearch, setSupplierSearch] = useState('');
+  const [categorySearch, setCategorySearch] = useState('');
   const headerCheckRef = useRef(null);
+  const searchDebounceRef = useRef(null);
 
-  const { data: suppliersData } = useSuppliers({ per_page: 200 });
-  const suppliers = suppliersData?.data?.suppliers || [];
+  const { data: brandsData, isLoading: brandsLoading } = useProductBrands(brandSearch);
+  const brandOptions = (brandsData?.data?.brands || []).map((b) => ({ value: b, label: b }));
 
-  // Sync local inputs when URL params change externally (browser back/forward)
+  const { data: suppliersData, isLoading: suppliersLoading } = useSuppliers({ search: supplierSearch, per_page: 50 });
+  const supplierOptions = (suppliersData?.data?.suppliers || []).map((s) => ({
+    value: String(s.id),
+    label: s.name,
+  }));
+
+  const { data: categoriesData, isLoading: categoriesLoading } = useCategories(categorySearch);
+  const categoryOptions = buildCategoryOptions(categoriesData?.data?.categories || []);
+
+  // Sync local search when URL param changes externally (browser back/forward)
   useEffect(() => { setLocalSearch(search); }, [search]);
-  useEffect(() => { setLocalBrand(brand); }, [brand]);
 
   // Indeterminate state on header checkbox
   useEffect(() => {
@@ -51,21 +83,27 @@ const ProductsTable = ({
     }
   }, [products, selectedIds, allPageSelected]);
 
-  const applyTextFilters = () => {
-    onFilterChange({ search: localSearch, brand: localBrand });
+  // Debounced search on input change
+  const handleSearchChange = useCallback((e) => {
+    const val = e.target.value;
+    setLocalSearch(val);
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      onFilterChange({ search: val });
+    }, 300);
+  }, [onFilterChange]);
+
+  const handleClearSearch = () => {
+    setLocalSearch('');
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    onFilterChange({ search: '' });
   };
 
-  const handleSearchKeyDown = (e) => {
-    if (e.key === 'Enter') applyTextFilters();
-  };
+  const removeBrand = (b) => onFilterChange({ brand: brands.filter((v) => v !== b) });
+  const removeSupplierId = (id) => onFilterChange({ supplier_id: supplierIds.filter((v) => v !== id) });
+  const removeCategoryId = (id) => onFilterChange({ category_id: categoryIds.filter((v) => v !== id) });
 
-  const handleClearFilter = (key) => {
-    if (key === 'search') { setLocalSearch(''); onFilterChange({ search: '' }); }
-    if (key === 'brand') { setLocalBrand(''); onFilterChange({ brand: '' }); }
-    if (key === 'supplier_id') onFilterChange({ supplier_id: '' });
-  };
-
-  const hasActiveFilters = search || brand || supplierId;
+  const hasActiveFilters = search || brands.length > 0 || supplierIds.length > 0 || categoryIds.length > 0;
 
   const getProductIcon = (name) => {
     const productColors = {
@@ -107,50 +145,48 @@ const ProductsTable = ({
             type="text"
             placeholder="Buscar por nombre..."
             value={localSearch}
-            onChange={(e) => setLocalSearch(e.target.value)}
-            onKeyDown={handleSearchKeyDown}
-            onBlur={applyTextFilters}
+            onChange={handleSearchChange}
             className="w-full pl-9 pr-8 py-2 text-sm bg-surface-variant border border-outline-variant rounded-lg text-on-surface placeholder:text-secondary focus:ring-2 focus:ring-primary focus:border-transparent"
           />
           {localSearch && (
-            <button onClick={() => handleClearFilter('search')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface">
+            <button onClick={handleClearSearch} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface">
               <X className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
 
-        {/* Brand */}
-        <div className="relative sm:w-44">
-          <input
-            type="text"
-            placeholder="Marca..."
-            value={localBrand}
-            onChange={(e) => setLocalBrand(e.target.value)}
-            onKeyDown={handleSearchKeyDown}
-            onBlur={applyTextFilters}
-            className="w-full px-3 pr-8 py-2 text-sm bg-surface-variant border border-outline-variant rounded-lg text-on-surface placeholder:text-secondary focus:ring-2 focus:ring-primary focus:border-transparent"
-          />
-          {localBrand && (
-            <button onClick={() => handleClearFilter('brand')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
+        {/* Brand multi-select */}
+        <MultiSelectSearch
+          className="flex-1 min-w-0"
+          placeholder="Marcas..."
+          options={brandOptions}
+          value={brands}
+          onChange={(val) => onFilterChange({ brand: val })}
+          onSearch={setBrandSearch}
+          loading={brandsLoading}
+        />
 
-        {/* Supplier */}
-        <div className="relative sm:w-52">
-          <select
-            value={supplierId}
-            onChange={(e) => onFilterChange({ supplier_id: e.target.value })}
-            className="w-full px-3 py-2 text-sm bg-surface-variant border border-outline-variant rounded-lg text-on-surface focus:ring-2 focus:ring-primary focus:border-transparent appearance-none"
-          >
-            <option value="">Todos los proveedores</option>
-            {suppliers.map((s) => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary pointer-events-none" />
-        </div>
+        {/* Supplier multi-select */}
+        <MultiSelectSearch
+          className="flex-1 min-w-0"
+          placeholder="Proveedores..."
+          options={supplierOptions}
+          value={supplierIds}
+          onChange={(val) => onFilterChange({ supplier_id: val })}
+          onSearch={setSupplierSearch}
+          loading={suppliersLoading}
+        />
+
+        {/* Category multi-select */}
+        <MultiSelectSearch
+          className="flex-1 min-w-0"
+          placeholder="Categorías..."
+          options={categoryOptions}
+          value={categoryIds}
+          onChange={(val) => onFilterChange({ category_id: val })}
+          onSearch={setCategorySearch}
+          loading={categoriesLoading}
+        />
 
         {/* Nuevo producto */}
         <button
@@ -169,21 +205,27 @@ const ProductsTable = ({
           {search && (
             <span className="flex items-center gap-1 px-2 py-0.5 bg-primary-container/15 text-primary border border-primary-container/30 rounded-full text-xs">
               Nombre: {search}
-              <button onClick={() => handleClearFilter('search')}><X className="w-3 h-3" /></button>
+              <button onClick={handleClearSearch}><X className="w-3 h-3" /></button>
             </span>
           )}
-          {brand && (
-            <span className="flex items-center gap-1 px-2 py-0.5 bg-primary-container/15 text-primary border border-primary-container/30 rounded-full text-xs">
-              Marca: {brand}
-              <button onClick={() => handleClearFilter('brand')}><X className="w-3 h-3" /></button>
+          {brands.map((b) => (
+            <span key={b} className="flex items-center gap-1 px-2 py-0.5 bg-primary-container/15 text-primary border border-primary-container/30 rounded-full text-xs">
+              Marca: {b}
+              <button onClick={() => removeBrand(b)}><X className="w-3 h-3" /></button>
             </span>
-          )}
-          {supplierId && (
-            <span className="flex items-center gap-1 px-2 py-0.5 bg-primary-container/15 text-primary border border-primary-container/30 rounded-full text-xs">
-              Proveedor: {suppliers.find(s => String(s.id) === supplierId)?.name || supplierId}
-              <button onClick={() => handleClearFilter('supplier_id')}><X className="w-3 h-3" /></button>
+          ))}
+          {supplierIds.map((id) => (
+            <span key={id} className="flex items-center gap-1 px-2 py-0.5 bg-primary-container/15 text-primary border border-primary-container/30 rounded-full text-xs">
+              Proveedor: {supplierOptions.find(s => s.value === id)?.label || id}
+              <button onClick={() => removeSupplierId(id)}><X className="w-3 h-3" /></button>
             </span>
-          )}
+          ))}
+          {categoryIds.map((id) => (
+            <span key={id} className="flex items-center gap-1 px-2 py-0.5 bg-primary-container/15 text-primary border border-primary-container/30 rounded-full text-xs">
+              Categoría: {categoryOptions.find(c => c.value === id)?.label || id}
+              <button onClick={() => removeCategoryId(id)}><X className="w-3 h-3" /></button>
+            </span>
+          ))}
         </div>
       )}
 
@@ -244,7 +286,10 @@ const ProductsTable = ({
                   Precio
                 </TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-secondary text-start text-xs uppercase tracking-wide">
-                  Unidad
+                  Categoría
+                </TableCell>
+                <TableCell isHeader className="px-5 py-3 font-medium text-secondary text-start text-xs uppercase tracking-wide">
+                  Proveedor
                 </TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-secondary text-start text-xs uppercase tracking-wide">
                   Acciones
@@ -255,23 +300,24 @@ const ProductsTable = ({
             <TableBody className="divide-y divide-outline-variant">
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="px-5 py-8 text-center text-secondary">
+                  <TableCell colSpan={7} className="px-5 py-8 text-center text-secondary">
                     Cargando productos...
                   </TableCell>
                 </TableRow>
               ) : products.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="px-5 py-8 text-center text-secondary">
+                  <TableCell colSpan={7} className="px-5 py-8 text-center text-secondary">
                     No se encontraron productos
                   </TableCell>
                 </TableRow>
               ) : (
                 products.map((product) => {
                   const isSelected = selectAllByFilter || selectedIds.has(product.id);
+                  const inStock = (product.stock ?? 0) > 0;
                   return (
                     <TableRow
                       key={product.id}
-                      className={`transition-colors ${isSelected ? 'bg-primary-container/5' : 'hover:bg-surface-container-high/50'}`}
+                      className={`transition-colors ${isSelected ? 'bg-primary-container/5' : 'hover:bg-surface-container-high/50'} ${!inStock ? 'opacity-60' : ''}`}
                     >
                       <TableCell className="px-4 py-3 w-10">
                         <input
@@ -290,17 +336,17 @@ const ProductsTable = ({
                               alt={product.name}
                               className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                               style={{
-                                outline: `2px solid ${product.available !== false ? '#12b76a' : '#ef4444'}`,
+                                outline: `2px solid ${inStock ? '#12b76a' : '#ef4444'}`,
                                 outlineOffset: '2px',
-                                boxShadow: `0 0 8px 2px ${product.available !== false ? '#12b76a66' : '#ef444466'}`,
+                                boxShadow: `0 0 8px 2px ${inStock ? '#12b76a66' : '#ef444466'}`,
                               }}
                             />
                           ) : (
                             <div
                               style={{
-                                outline: `2px solid ${product.available !== false ? '#12b76a' : '#ef4444'}`,
+                                outline: `2px solid ${inStock ? '#12b76a' : '#ef4444'}`,
                                 outlineOffset: '2px',
-                                boxShadow: `0 0 8px 2px ${product.available !== false ? '#12b76a66' : '#ef444466'}`,
+                                boxShadow: `0 0 8px 2px ${inStock ? '#12b76a66' : '#ef444466'}`,
                                 borderRadius: '9999px',
                               }}
                             >
@@ -314,6 +360,11 @@ const ProductsTable = ({
                             <span className="block text-secondary text-xs font-mono">
                               {product.sku || '—'}
                             </span>
+                            {!inStock && (
+                              <span className="inline-block mt-0.5 px-1.5 py-0.5 text-[10px] font-medium bg-error-container text-on-error-container rounded">
+                                Sin stock
+                              </span>
+                            )}
                           </div>
                         </div>
                       </TableCell>
@@ -327,7 +378,11 @@ const ProductsTable = ({
                       </TableCell>
 
                       <TableCell className="px-4 py-3 text-start">
-                        <span className="text-on-surface text-sm">{product.unit || '—'}</span>
+                        <span className="text-on-surface text-sm">{product.category_name || '—'}</span>
+                      </TableCell>
+
+                      <TableCell className="px-4 py-3 text-start">
+                        <span className="text-on-surface text-sm">{product.supplier_name || '—'}</span>
                       </TableCell>
 
                       <TableCell className="px-4 py-3 text-start">

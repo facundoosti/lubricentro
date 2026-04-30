@@ -8,14 +8,17 @@
 #  embedding   :vector(768)
 #  name        :string(100)      not null
 #  sku         :string(50)
+#  stock       :integer          default(0), not null
 #  unit        :string(50)
 #  unit_price  :decimal(10, 2)   not null
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
+#  category_id :bigint
 #  supplier_id :bigint
 #
 # Indexes
 #
+#  index_products_on_category_id  (category_id)
 #  index_products_on_name         (name) UNIQUE
 #  index_products_on_sku          (sku) UNIQUE WHERE (sku IS NOT NULL)
 #  index_products_on_supplier_id  (supplier_id)
@@ -23,6 +26,7 @@
 #
 # Foreign Keys
 #
+#  fk_rails_...  (category_id => categories.id)
 #  fk_rails_...  (supplier_id => suppliers.id)
 #
 
@@ -40,6 +44,7 @@ RSpec.describe Product, type: :model do
     it { should validate_presence_of(:unit_price) }
     it { should validate_numericality_of(:unit_price).is_greater_than_or_equal_to(0) }
     it { should validate_length_of(:unit).is_at_most(50) }
+    it { should validate_numericality_of(:stock).only_integer.is_greater_than_or_equal_to(0) }
   end
 
   describe 'scopes' do

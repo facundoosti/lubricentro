@@ -56,6 +56,19 @@ export const useProducts = (filters = {}) => {
   });
 };
 
+export const useProductBrands = (search = "") => {
+  return useQuery({
+    queryKey: ["product-brands", search],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (search) params.append("search", search);
+      const response = await api.get(`/products/brands?${params}`);
+      return response.data;
+    },
+    staleTime: 10 * 60 * 1000,
+  });
+};
+
 export const useProduct = (id) => {
   return useQuery({
     queryKey: productKeys.detail(id),

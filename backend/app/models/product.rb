@@ -8,14 +8,17 @@
 #  embedding   :vector(768)
 #  name        :string(100)      not null
 #  sku         :string(50)
+#  stock       :integer          default(0), not null
 #  unit        :string(50)
 #  unit_price  :decimal(10, 2)   not null
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
+#  category_id :bigint
 #  supplier_id :bigint
 #
 # Indexes
 #
+#  index_products_on_category_id  (category_id)
 #  index_products_on_name         (name) UNIQUE
 #  index_products_on_sku          (sku) UNIQUE WHERE (sku IS NOT NULL)
 #  index_products_on_supplier_id  (supplier_id)
@@ -23,12 +26,14 @@
 #
 # Foreign Keys
 #
+#  fk_rails_...  (category_id => categories.id)
 #  fk_rails_...  (supplier_id => suppliers.id)
 #
 
 class Product < ApplicationRecord
   # Relaciones
   belongs_to :supplier, optional: true
+  belongs_to :category, optional: true
   has_many :service_record_products, dependent: :destroy
   has_many :service_records, through: :service_record_products
   has_one_attached :image
@@ -41,14 +46,27 @@ class Product < ApplicationRecord
   validates :unit_price, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :unit, length: { maximum: 50 }, allow_blank: true
   validates :brand, length: { maximum: 100 }, allow_blank: true
+  validates :stock, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
   before_validation :assign_sku, on: :create
 
   # Scopes
   scope :by_name, ->(name) { where("name ILIKE ?", "%#{name}%") }
-  scope :by_brand, ->(brand) { where("brand ILIKE ?", "%#{brand}%") }
+  scope :by_brand, ->(brand) {
+    brands = Array(brand).flat_map { |b| b.to_s.split(",") }.map(&:strip).reject(&:blank?)
+    next all if brands.empty?
+    conditions = brands.map { "brand ILIKE ?" }.join(" OR ")
+    where(conditions, *brands.map { |b| "%#{b}%" })
+  }
   scope :by_price_range, ->(min, max) { where(unit_price: min..max) }
-  scope :by_supplier, ->(id) { where(supplier_id: id) }
+  scope :by_supplier, ->(id) {
+    ids = Array(id).flat_map { |i| i.to_s.split(",") }.map(&:strip).reject(&:blank?)
+    where(supplier_id: ids)
+  }
+  scope :by_category, ->(id) {
+    ids = Array(id).flat_map { |i| i.to_s.split(",") }.map(&:strip).reject(&:blank?)
+    where(category_id: ids)
+  }
   scope :nearest_by_embedding, ->(embedding) { nearest_neighbors(:embedding, embedding, distance: "cosine").limit(5) }
 
   has_neighbors :embedding

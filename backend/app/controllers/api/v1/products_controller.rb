@@ -2,10 +2,11 @@ class Api::V1::ProductsController < ApplicationController
   before_action :set_product, only: [ :show, :update, :destroy ]
 
   def index
-    @products = Product.includes(:image_attachment, :supplier)
+    @products = Product.includes(:image_attachment, :supplier, :category)
     @products = @products.by_name(params[:search]) if params[:search].present?
     @products = @products.by_supplier(params[:supplier_id]) if params[:supplier_id].present?
     @products = @products.by_brand(params[:brand]) if params[:brand].present?
+    @products = @products.by_category(params[:category_id]) if params[:category_id].present?
 
     @pagy, @products = pagy(@products, items: safe_per_page(params[:per_page]))
 
@@ -36,6 +37,12 @@ class Api::V1::ProductsController < ApplicationController
   def destroy
     @product.destroy
     render_json({}, message: "Product deleted successfully")
+  end
+
+  def brands
+    brands = Product.where.not(brand: [ nil, "" ]).distinct.pluck(:brand).sort
+    brands = brands.select { |b| b.downcase.include?(params[:search].downcase) } if params[:search].present?
+    render_json({ brands: brands })
   end
 
   def import
@@ -75,12 +82,12 @@ class Api::V1::ProductsController < ApplicationController
       )
 
       sheet.add_row(
-        [ "SKU", "Nombre *", "Descripción", "Precio Unitario *", "Unidad", "Marca", "Proveedor (nombre)" ],
+        [ "SKU", "Nombre *", "Descripción", "Precio Unitario *", "Unidad", "Marca", "Proveedor (nombre)", "Stock" ],
         style: header_style
       )
-      sheet.add_row([ "PRD-EJEMPLO", "Aceite 5W-30", "Aceite de motor sintético", "5000.00", "litro", "Mobil", "Proveedor SA" ])
+      sheet.add_row([ "PRD-EJEMPLO", "Aceite 5W-30", "Aceite de motor sintético", "5000.00", "litro", "Mobil", "Proveedor SA", "10" ])
 
-      sheet.column_widths 15, 30, 40, 18, 12, 20, 25
+      sheet.column_widths 15, 30, 40, 18, 12, 20, 25, 10
     end
 
     send_data package.to_stream.read,
@@ -133,7 +140,7 @@ class Api::V1::ProductsController < ApplicationController
   end
 
   def product_params
-    params.require(:product).permit(:name, :sku, :description, :unit_price, :unit, :brand, :supplier_id, :image)
+    params.require(:product).permit(:name, :sku, :description, :unit_price, :unit, :brand, :stock, :supplier_id, :category_id, :image)
   end
 
   def filtered_products_for_bulk

@@ -1,6 +1,12 @@
 import { useEffect } from 'react';
 import { X } from 'lucide-react';
 
+const SIZE_CLASSES = {
+  md: 'max-w-md',
+  lg: 'max-w-lg',
+  xl: 'max-w-xl',
+};
+
 const SlideOver = ({
   isOpen,
   onClose,
@@ -10,6 +16,7 @@ const SlideOver = ({
   formId,
   submitLabel = 'Guardar Cambios',
   isLoading = false,
+  size = 'md',
   children,
 }) => {
   useEffect(() => {
@@ -29,7 +36,7 @@ const SlideOver = ({
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-end">
       <div className="fixed inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-md bg-surface-container border-l border-outline-variant h-full flex flex-col shadow-2xl">
+      <div className={`relative w-full ${SIZE_CLASSES[size] ?? SIZE_CLASSES.md} bg-surface-container border-l border-outline-variant h-full flex flex-col shadow-2xl`}>
         {/* Header */}
         <div className="p-6 border-b border-outline-variant flex items-center justify-between bg-surface-container-high/30">
           <div className="flex items-center gap-3">

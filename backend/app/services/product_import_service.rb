@@ -8,7 +8,8 @@ class ProductImportService
     unit_price: 4,
     unit: 5,
     brand: 6,
-    supplier_name: 7
+    supplier_name: 7,
+    stock: 8
   }.freeze
 
   def initialize(file_path, original_filename, job_id = nil)
@@ -56,6 +57,7 @@ class ProductImportService
     unit          = row[COLUMNS[:unit] - 1].to_s.strip.presence
     brand         = row[COLUMNS[:brand] - 1].to_s.strip.presence
     supplier_name = row[COLUMNS[:supplier_name] - 1].to_s.strip.presence
+    stock         = row[COLUMNS[:stock] - 1].to_s.strip.presence&.to_i || 0
 
     if name.blank?
       @errors << { row: row_number, message: "El nombre es requerido" }
@@ -79,6 +81,7 @@ class ProductImportService
       unit_price: unit_price,
       unit: unit,
       brand: brand,
+      stock: stock,
       supplier: supplier
     )
     product.sku = sku if sku.present?

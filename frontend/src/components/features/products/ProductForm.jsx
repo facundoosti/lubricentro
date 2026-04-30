@@ -1,17 +1,45 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import ImageUpload from '@ui/ImageUpload';
+import SingleSelectSearch from '@ui/SingleSelectSearch';
 import { useSuppliers } from '@services/suppliersService';
+import { useCategories } from '@services/categoriesService';
+
+const buildCategoryOptions = (categories) => {
+  const byParent = {};
+  categories.forEach((c) => {
+    const key = c.parent_id ?? 'root';
+    if (!byParent[key]) byParent[key] = [];
+    byParent[key].push(c);
+  });
+
+  const flatten = (parentId, depth) => {
+    const children = byParent[parentId] || [];
+    return children.flatMap((c) => [
+      { value: String(c.id), label: c.name, depth },
+      ...flatten(c.id, depth + 1),
+    ]);
+  };
+
+  return flatten('root', 0);
+};
 
 const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
   const [imageFile, setImageFile] = useState(null);
+  const [categorySearch, setCategorySearch] = useState('');
 
   const { data: suppliersData } = useSuppliers({ per_page: 200 });
   const suppliers = suppliersData?.data?.suppliers || [];
 
+  const { data: categoriesData } = useCategories(categorySearch);
+  const rawCategories = categoriesData?.data?.categories || [];
+
+  const categoryOptions = buildCategoryOptions(rawCategories);
+
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
     reset,
   } = useForm({
@@ -22,7 +50,9 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
       description: product?.description || '',
       unit_price: product?.unit_price || '',
       unit: product?.unit || '',
+      stock: product?.stock ?? 0,
       supplier_id: product?.supplier_id || '',
+      category_id: product?.category_id ? String(product.category_id) : null,
     },
   });
 
@@ -31,7 +61,9 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
       const formData = {
         ...data,
         unit_price: parseFloat(data.unit_price),
+        stock: parseInt(data.stock, 10) || 0,
         supplier_id: data.supplier_id || null,
+        category_id: data.category_id || null,
       };
       if (imageFile) formData.image = imageFile;
       await onSubmit(formData);
@@ -61,10 +93,10 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
   ];
 
   return (
-    <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       {/* Nombre */}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
           Nombre del Producto *
         </label>
         <input
@@ -80,71 +112,92 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
         {errors.name && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name.message}</p>}
       </div>
 
-      {/* SKU */}
-      <div>
-        <label htmlFor="sku" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          SKU
-          <span className="ml-2 text-xs text-gray-500 font-normal">
-            (se genera automáticamente si se deja vacío)
-          </span>
-        </label>
-        <input
-          type="text"
-          id="sku"
-          {...register('sku', {
-            maxLength: { value: 50, message: 'El SKU no puede exceder 50 caracteres' },
-          })}
-          className={`${inputClass(errors.sku)} font-mono uppercase`}
-          placeholder="Ej: PRD-ABC123"
-          style={{ textTransform: 'uppercase' }}
-        />
-        {errors.sku && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.sku.message}</p>}
+      {/* SKU + Marca */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="sku" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            SKU
+            <span className="ml-1.5 text-xs text-gray-500 font-normal">(auto si vacío)</span>
+          </label>
+          <input
+            type="text"
+            id="sku"
+            {...register('sku', {
+              maxLength: { value: 50, message: 'El SKU no puede exceder 50 caracteres' },
+            })}
+            className={`${inputClass(errors.sku)} font-mono uppercase`}
+            placeholder="PRD-ABC123"
+            style={{ textTransform: 'uppercase' }}
+          />
+          {errors.sku && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.sku.message}</p>}
+        </div>
+
+        <div>
+          <label htmlFor="brand" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            Marca
+          </label>
+          <input
+            type="text"
+            id="brand"
+            {...register('brand', {
+              maxLength: { value: 100, message: 'La marca no puede exceder 100 caracteres' },
+            })}
+            className={inputClass(errors.brand)}
+            placeholder="Ej: Castrol, Bosch"
+          />
+          {errors.brand && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.brand.message}</p>}
+        </div>
       </div>
 
-      {/* Marca */}
-      <div>
-        <label htmlFor="brand" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Marca
-        </label>
-        <input
-          type="text"
-          id="brand"
-          {...register('brand', {
-            maxLength: { value: 100, message: 'La marca no puede exceder 100 caracteres' },
-          })}
-          className={inputClass(errors.brand)}
-          placeholder="Ej: Castrol, Bosch, NGK"
-        />
-        {errors.brand && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.brand.message}</p>}
-      </div>
+      {/* Proveedor + Categoría */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="supplier_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            Proveedor
+          </label>
+          <select
+            id="supplier_id"
+            {...register('supplier_id')}
+            className={inputClass(false)}
+          >
+            <option value="">Sin proveedor</option>
+            {suppliers.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      {/* Proveedor */}
-      <div>
-        <label htmlFor="supplier_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Proveedor
-        </label>
-        <select
-          id="supplier_id"
-          {...register('supplier_id')}
-          className={inputClass(false)}
-        >
-          <option value="">Sin proveedor</option>
-          {suppliers.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            Categoría
+          </label>
+          <Controller
+            name="category_id"
+            control={control}
+            render={({ field }) => (
+              <SingleSelectSearch
+                options={categoryOptions}
+                value={field.value}
+                onChange={field.onChange}
+                onSearch={setCategorySearch}
+                placeholder="Seleccionar..."
+                clearable
+              />
+            )}
+          />
+        </div>
       </div>
 
       {/* Descripción */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
           Descripción
         </label>
         <textarea
           id="description"
-          rows={3}
+          rows={2}
           {...register('description', {
             maxLength: { value: 1000, message: 'La descripción no puede exceder 1000 caracteres' },
           })}
@@ -154,10 +207,10 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
         {errors.description && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.description.message}</p>}
       </div>
 
-      {/* Precio + Unidad */}
+      {/* Precio + Unidad + Stock */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="unit_price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label htmlFor="unit_price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
             Precio Unitario (ARS) *
           </label>
           <div className="relative">
@@ -180,7 +233,7 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
         </div>
 
         <div>
-          <label htmlFor="unit" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label htmlFor="unit" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
             Unidad
           </label>
           <select
@@ -195,6 +248,28 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
             ))}
           </select>
           {errors.unit && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.unit.message}</p>}
+        </div>
+      </div>
+
+      {/* Stock */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="stock" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            Stock
+          </label>
+          <input
+            type="number"
+            id="stock"
+            min="0"
+            step="1"
+            {...register('stock', {
+              min: { value: 0, message: 'El stock no puede ser negativo' },
+              validate: (v) => Number.isInteger(Number(v)) || 'El stock debe ser un número entero',
+            })}
+            className={inputClass(errors.stock)}
+            placeholder="0"
+          />
+          {errors.stock && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.stock.message}</p>}
         </div>
       </div>
 

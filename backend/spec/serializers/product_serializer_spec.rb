@@ -8,14 +8,17 @@
 #  embedding   :vector(768)
 #  name        :string(100)      not null
 #  sku         :string(50)
+#  stock       :integer          default(0), not null
 #  unit        :string(50)
 #  unit_price  :decimal(10, 2)   not null
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
+#  category_id :bigint
 #  supplier_id :bigint
 #
 # Indexes
 #
+#  index_products_on_category_id  (category_id)
 #  index_products_on_name         (name) UNIQUE
 #  index_products_on_sku          (sku) UNIQUE WHERE (sku IS NOT NULL)
 #  index_products_on_supplier_id  (supplier_id)
@@ -23,6 +26,7 @@
 #
 # Foreign Keys
 #
+#  fk_rails_...  (category_id => categories.id)
 #  fk_rails_...  (supplier_id => suppliers.id)
 #
 require 'rails_helper'
@@ -35,8 +39,8 @@ RSpec.describe ProductSerializer do
 
     it 'includes all the required fields' do
       expect(serialized.keys).to contain_exactly(
-        :id, :name, :sku, :brand, :description, :unit_price, :unit, :image_url,
-        :supplier_id, :supplier_name, :created_at, :updated_at
+        :id, :name, :sku, :brand, :description, :unit_price, :unit, :stock, :image_url,
+        :supplier_id, :supplier_name, :category_id, :category_name, :created_at, :updated_at
       )
     end
 
@@ -50,7 +54,8 @@ RSpec.describe ProductSerializer do
 
     it 'includes only the summary fields' do
       expect(serialized.keys).to contain_exactly(
-        :id, :name, :sku, :brand, :unit_price, :unit, :image_url, :supplier_id, :supplier_name
+        :id, :name, :sku, :brand, :unit_price, :unit, :stock, :image_url,
+        :supplier_id, :supplier_name, :category_id, :category_name
       )
     end
   end
