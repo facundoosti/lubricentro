@@ -65,6 +65,7 @@ class Product < ApplicationRecord
     ids = Array(id).flat_map { |i| i.to_s.split(",") }.map(&:strip).reject(&:blank?)
     where(supplier_id: ids)
   }
+  scope :by_active, ->(val) { where(active: val.to_s == "true") }
   scope :by_category, ->(id) {
     ids = Array(id).flat_map { |i| i.to_s.split(",") }.map(&:strip).reject(&:blank?)
     where(category_id: ids)

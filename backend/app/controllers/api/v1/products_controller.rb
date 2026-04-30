@@ -7,6 +7,7 @@ class Api::V1::ProductsController < ApplicationController
     @products = @products.by_supplier(params[:supplier_id]) if params[:supplier_id].present?
     @products = @products.by_brand(params[:brand]) if params[:brand].present?
     @products = @products.by_category(params[:category_id]) if params[:category_id].present?
+    @products = @products.by_active(params[:active]) if params[:active].present?
 
     @pagy, @products = pagy(@products, items: safe_per_page(params[:per_page]))
 

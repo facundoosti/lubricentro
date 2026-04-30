@@ -28,6 +28,7 @@ const Products = () => {
   const brandsParam = searchParams.get('brand') || '';
   const supplierIdsParam = searchParams.get('supplier_id') || '';
   const categoryIdsParam = searchParams.get('category_id') || '';
+  const activeFilter = searchParams.get('active') || '';
   const brands = brandsParam ? brandsParam.split(',').filter(Boolean) : [];
   const supplierIds = supplierIdsParam ? supplierIdsParam.split(',').filter(Boolean) : [];
   const categoryIds = categoryIdsParam ? categoryIdsParam.split(',').filter(Boolean) : [];
@@ -79,6 +80,7 @@ const Products = () => {
     brand: brandsParam,
     supplier_id: supplierIdsParam,
     category_id: categoryIdsParam,
+    active: activeFilter,
   });
 
   const deleteMutation = useDeleteProduct();
@@ -194,6 +196,7 @@ const Products = () => {
         brands={brands}
         supplierIds={supplierIds}
         categoryIds={categoryIds}
+        activeFilter={activeFilter}
         onFilterChange={setFilter}
         onPageChange={(p) => setFilter({ page: p })}
         onEdit={handleEdit}

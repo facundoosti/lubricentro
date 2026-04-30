@@ -40,6 +40,7 @@ const ProductsTable = ({
   brands = [],
   supplierIds = [],
   categoryIds = [],
+  activeFilter = '',
   onFilterChange,
   // Bulk selection
   selectedIds = new Set(),
@@ -103,7 +104,7 @@ const ProductsTable = ({
   const removeSupplierId = (id) => onFilterChange({ supplier_id: supplierIds.filter((v) => v !== id) });
   const removeCategoryId = (id) => onFilterChange({ category_id: categoryIds.filter((v) => v !== id) });
 
-  const hasActiveFilters = search || brands.length > 0 || supplierIds.length > 0 || categoryIds.length > 0;
+  const hasActiveFilters = search || brands.length > 0 || supplierIds.length > 0 || categoryIds.length > 0 || activeFilter;
 
   const getProductIcon = (name) => {
     const productColors = {
@@ -188,6 +189,17 @@ const ProductsTable = ({
           loading={categoriesLoading}
         />
 
+        {/* Filtro activo */}
+        <select
+          value={activeFilter}
+          onChange={(e) => onFilterChange({ active: e.target.value })}
+          className="px-3 py-2 text-sm bg-surface-variant border border-outline-variant rounded-lg text-on-surface focus:ring-2 focus:ring-primary focus:border-transparent shrink-0"
+        >
+          <option value="">Estado...</option>
+          <option value="true">Con stock</option>
+          <option value="false">Sin stock</option>
+        </select>
+
         {/* Nuevo producto */}
         <button
           onClick={onCreate}
@@ -226,6 +238,12 @@ const ProductsTable = ({
               <button onClick={() => removeCategoryId(id)}><X className="w-3 h-3" /></button>
             </span>
           ))}
+          {activeFilter && (
+            <span className="flex items-center gap-1 px-2 py-0.5 bg-primary-container/15 text-primary border border-primary-container/30 rounded-full text-xs">
+              {activeFilter === 'true' ? 'Con stock' : 'Sin stock'}
+              <button onClick={() => onFilterChange({ active: '' })}><X className="w-3 h-3" /></button>
+            </span>
+          )}
         </div>
       )}
 
@@ -280,6 +298,9 @@ const ProductsTable = ({
                   Producto
                 </TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-secondary text-start text-xs uppercase tracking-wide">
+                  Stock
+                </TableCell>
+                <TableCell isHeader className="px-5 py-3 font-medium text-secondary text-start text-xs uppercase tracking-wide">
                   Marca
                 </TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-secondary text-start text-xs uppercase tracking-wide">
@@ -300,13 +321,13 @@ const ProductsTable = ({
             <TableBody className="divide-y divide-outline-variant">
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="px-5 py-8 text-center text-secondary">
+                  <TableCell colSpan={8} className="px-5 py-8 text-center text-secondary">
                     Cargando productos...
                   </TableCell>
                 </TableRow>
               ) : products.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="px-5 py-8 text-center text-secondary">
+                  <TableCell colSpan={8} className="px-5 py-8 text-center text-secondary">
                     No se encontraron productos
                   </TableCell>
                 </TableRow>
@@ -367,6 +388,12 @@ const ProductsTable = ({
                             )}
                           </div>
                         </div>
+                      </TableCell>
+
+                      <TableCell className="px-4 py-3 text-start">
+                        <span className={`text-sm font-medium ${(product.stock ?? 0) === 0 ? 'text-error' : 'text-on-surface'}`}>
+                          {product.stock ?? 0}
+                        </span>
                       </TableCell>
 
                       <TableCell className="px-4 py-3 text-start">
