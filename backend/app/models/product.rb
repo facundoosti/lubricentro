@@ -3,6 +3,7 @@
 # Table name: products
 #
 #  id          :bigint           not null, primary key
+#  active      :boolean          default(TRUE), not null
 #  brand       :string(100)
 #  description :text
 #  embedding   :vector(768)
@@ -49,6 +50,7 @@ class Product < ApplicationRecord
   validates :stock, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
   before_validation :assign_sku, on: :create
+  before_save :sync_active_from_stock
 
   # Scopes
   scope :by_name, ->(name) { where("name ILIKE ?", "%#{name}%") }
@@ -78,6 +80,10 @@ class Product < ApplicationRecord
   end
 
   private
+
+  def sync_active_from_stock
+    self.active = stock > 0
+  end
 
   def assign_sku
     self.sku = generate_unique_sku if sku.blank?

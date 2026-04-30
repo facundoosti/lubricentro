@@ -3,6 +3,7 @@
 # Table name: products
 #
 #  id          :bigint           not null, primary key
+#  active      :boolean          default(TRUE), not null
 #  brand       :string(100)
 #  description :text
 #  embedding   :vector(768)

@@ -313,11 +313,11 @@ const ProductsTable = ({
               ) : (
                 products.map((product) => {
                   const isSelected = selectAllByFilter || selectedIds.has(product.id);
-                  const inStock = (product.stock ?? 0) > 0;
+                  const isActive = product.active !== false;
                   return (
                     <TableRow
                       key={product.id}
-                      className={`transition-colors ${isSelected ? 'bg-primary-container/5' : 'hover:bg-surface-container-high/50'} ${!inStock ? 'opacity-60' : ''}`}
+                      className={`transition-colors ${isSelected ? 'bg-primary-container/5' : 'hover:bg-surface-container-high/50'} ${!isActive ? 'opacity-60' : ''}`}
                     >
                       <TableCell className="px-4 py-3 w-10">
                         <input
@@ -336,17 +336,17 @@ const ProductsTable = ({
                               alt={product.name}
                               className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                               style={{
-                                outline: `2px solid ${inStock ? '#12b76a' : '#ef4444'}`,
+                                outline: `2px solid ${isActive ? '#12b76a' : '#ef4444'}`,
                                 outlineOffset: '2px',
-                                boxShadow: `0 0 8px 2px ${inStock ? '#12b76a66' : '#ef444466'}`,
+                                boxShadow: `0 0 8px 2px ${isActive ? '#12b76a66' : '#ef444466'}`,
                               }}
                             />
                           ) : (
                             <div
                               style={{
-                                outline: `2px solid ${inStock ? '#12b76a' : '#ef4444'}`,
+                                outline: `2px solid ${isActive ? '#12b76a' : '#ef4444'}`,
                                 outlineOffset: '2px',
-                                boxShadow: `0 0 8px 2px ${inStock ? '#12b76a66' : '#ef444466'}`,
+                                boxShadow: `0 0 8px 2px ${isActive ? '#12b76a66' : '#ef444466'}`,
                                 borderRadius: '9999px',
                               }}
                             >
@@ -360,9 +360,9 @@ const ProductsTable = ({
                             <span className="block text-secondary text-xs font-mono">
                               {product.sku || '—'}
                             </span>
-                            {!inStock && (
+                            {!isActive && (
                               <span className="inline-block mt-0.5 px-1.5 py-0.5 text-[10px] font-medium bg-error-container text-on-error-container rounded">
-                                Sin stock
+                                Sin stock ({product.stock ?? 0})
                               </span>
                             )}
                           </div>
