@@ -96,7 +96,9 @@ RSpec.describe DashboardStatsService do
     it 'calculates services_current for the month' do
       customer = create(:customer)
       vehicle  = create(:vehicle, customer: customer)
-      2.times { create(:service_record, customer: customer, vehicle: vehicle) }
+      travel_to Date.current.beginning_of_month + 1.day do
+        2.times { create(:service_record, customer: customer, vehicle: vehicle) }
+      end
 
       expect(described_class.calculate_goals[:services_current]).to eq(2)
     end

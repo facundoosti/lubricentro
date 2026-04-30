@@ -40,7 +40,7 @@ RSpec.describe ProductSerializer do
 
     it 'includes all the required fields' do
       expect(serialized.keys).to contain_exactly(
-        :id, :name, :sku, :brand, :description, :unit_price, :unit, :stock, :image_url,
+        :id, :name, :sku, :brand, :description, :unit_price, :unit, :stock, :active, :image_url,
         :supplier_id, :supplier_name, :category_id, :category_name, :created_at, :updated_at
       )
     end
@@ -55,7 +55,7 @@ RSpec.describe ProductSerializer do
 
     it 'includes only the summary fields' do
       expect(serialized.keys).to contain_exactly(
-        :id, :name, :sku, :brand, :unit_price, :unit, :stock, :image_url,
+        :id, :name, :sku, :brand, :unit_price, :unit, :stock, :active, :image_url,
         :supplier_id, :supplier_name, :category_id, :category_name
       )
     end
