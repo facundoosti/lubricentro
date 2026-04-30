@@ -114,3 +114,4 @@ docs/notes.md
 .agents/skills
 backend/.agents/skills
 skills-lock.json
+.claude/commands/*

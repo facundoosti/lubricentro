@@ -133,7 +133,6 @@ const ProductsTable = ({
   const formatPrice = (price) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 }).format(parseFloat(price));
 
-  const selectionCount = selectAllByFilter ? totalCount : selectedIds.size;
 
   return (
     <div className="space-y-4">

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { createConsumer } from '@rails/actioncable';
 
 const consumer = createConsumer(import.meta.env.VITE_CABLE_URL);
