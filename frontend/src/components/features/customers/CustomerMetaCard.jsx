@@ -1,6 +1,6 @@
-import { Edit, Phone, Mail } from "lucide-react";
+import { Edit, Phone, Mail, ClipboardList } from "lucide-react";
 
-const CustomerMetaCard = ({ customer, onEdit }) => {
+const CustomerMetaCard = ({ customer, onEdit, onViewServiceRecords }) => {
   const getInitials = (name) => {
     return name
       .split(' ')
@@ -68,14 +68,25 @@ const CustomerMetaCard = ({ customer, onEdit }) => {
           </div>
         </div>
 
-        {/* Botón editar */}
-        <button
-          onClick={onEdit}
-          className="flex w-full items-center justify-center gap-2 rounded border border-outline-variant bg-surface-container-high px-4 py-2.5 text-sm font-medium text-on-surface hover:bg-surface-variant transition-colors lg:inline-flex lg:w-auto"
-        >
-          <Edit className="w-4 h-4" />
-          Editar
-        </button>
+        {/* Botones de acción */}
+        <div className="flex w-full gap-2 lg:w-auto">
+          {onViewServiceRecords && (
+            <button
+              onClick={onViewServiceRecords}
+              className="flex flex-1 items-center justify-center gap-2 rounded border border-primary/30 bg-primary-container/10 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary-container/20 transition-colors lg:flex-none"
+            >
+              <ClipboardList className="w-4 h-4" />
+              Atenciones
+            </button>
+          )}
+          <button
+            onClick={onEdit}
+            className="flex flex-1 items-center justify-center gap-2 rounded border border-outline-variant bg-surface-container-high px-4 py-2.5 text-sm font-medium text-on-surface hover:bg-surface-variant transition-colors lg:flex-none"
+          >
+            <Edit className="w-4 h-4" />
+            Editar
+          </button>
+        </div>
       </div>
     </div>
   );

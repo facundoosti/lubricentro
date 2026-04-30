@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { X } from "lucide-react";
 import ServiceRecordsTable from "@components/features/service-records/ServiceRecordsTable";
 import { useServiceRecords, useDeleteServiceRecord } from "@services/serviceRecordsService";
 import { showServiceRecordSuccess, showServiceRecordError } from "@services/notificationService";
@@ -9,6 +10,9 @@ import ConfirmModal from "@ui/ConfirmModal";
 
 const ServiceRecords = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const customerId = searchParams.get("customer_id");
+
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [perPage] = useState(10);
@@ -19,6 +23,7 @@ const ServiceRecords = () => {
     page: currentPage,
     per_page: perPage,
     search: searchTerm,
+    ...(customerId && { customer_id: customerId }),
   });
 
   const deleteServiceRecordMutation = useDeleteServiceRecord();
@@ -30,6 +35,11 @@ const ServiceRecords = () => {
 
   const handleSearch = (term) => {
     setSearchTerm(term);
+    setCurrentPage(1);
+  };
+
+  const handleClearCustomerFilter = () => {
+    setSearchParams({});
     setCurrentPage(1);
   };
 
@@ -65,6 +75,19 @@ const ServiceRecords = () => {
   return (
     <div id="tour-service-records-page" className="space-y-6">
       <PageHeader title="Atenciones" description="Gestiona todas las atenciones y servicios realizados" />
+
+      {customerId && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary-container/10 border border-primary/20 text-sm text-primary w-fit">
+          <span>Filtrando por cliente</span>
+          <button
+            onClick={handleClearCustomerFilter}
+            className="flex items-center justify-center w-4 h-4 rounded-full hover:bg-primary/20 transition-colors"
+            title="Quitar filtro"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      )}
 
       <ServiceRecordsTable
         serviceRecords={records}

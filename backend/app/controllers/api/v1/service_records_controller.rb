@@ -11,7 +11,7 @@ class Api::V1::ServiceRecordsController < ApplicationController
     # Búsqueda por cliente o vehículo
     if params[:search].present?
       @service_records = @service_records.joins(:customer, :vehicle)
-        .where("customers.nombre ILIKE ? OR vehicles.patente ILIKE ? OR vehicles.marca ILIKE ? OR vehicles.modelo ILIKE ?",
+        .where("customers.name ILIKE ? OR vehicles.license_plate ILIKE ? OR vehicles.brand ILIKE ? OR vehicles.model ILIKE ?",
                "%#{params[:search]}%", "%#{params[:search]}%", "%#{params[:search]}%", "%#{params[:search]}%")
     end
 

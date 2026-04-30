@@ -1,13 +1,17 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User } from 'lucide-react';
-import { useCustomer, useUpdateCustomer } from '@services/customersService';
-import { useVehicles, useCreateVehicle, useUpdateVehicle } from '@services/vehiclesService';
-import CustomerMetaCard from '@components/features/customers/CustomerMetaCard';
-import CustomerInfoCard from '@components/features/customers/CustomerInfoCard';
-import CustomerVehiclesCard from '@components/features/customers/CustomerVehiclesCard';
-import CustomerModal from '@components/features/customers/CustomerModal';
-import VehicleModal from '@components/features/vehicles/VehicleModal';
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, User } from "lucide-react";
+import { useCustomer, useUpdateCustomer } from "@services/customersService";
+import {
+  useVehicles,
+  useCreateVehicle,
+  useUpdateVehicle,
+} from "@services/vehiclesService";
+import CustomerMetaCard from "@components/features/customers/CustomerMetaCard";
+import CustomerInfoCard from "@components/features/customers/CustomerInfoCard";
+import CustomerVehiclesCard from "@components/features/customers/CustomerVehiclesCard";
+import CustomerModal from "@components/features/customers/CustomerModal";
+import VehicleModal from "@components/features/vehicles/VehicleModal";
 
 const CustomerProfile = () => {
   const { id } = useParams();
@@ -21,8 +25,15 @@ const CustomerProfile = () => {
   const [isEditVehicleModalOpen, setIsEditVehicleModalOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
 
-  const { data: customerData, isLoading: customerLoading, error: customerError, refetch: refetchCustomer } = useCustomer(id);
-  const { data: vehiclesData, isLoading: vehiclesLoading } = useVehicles({ customer_id: id });
+  const {
+    data: customerData,
+    isLoading: customerLoading,
+    error: customerError,
+    refetch: refetchCustomer,
+  } = useCustomer(id);
+  const { data: vehiclesData, isLoading: vehiclesLoading } = useVehicles({
+    customer_id: id,
+  });
 
   const updateCustomerMutation = useUpdateCustomer();
   const createVehicleMutation = useCreateVehicle();
@@ -57,13 +68,18 @@ const CustomerProfile = () => {
 
   const handleEditCustomerSubmit = async (data) => {
     try {
-      await updateCustomerMutation.mutateAsync({ id: displayCustomer.id, customerData: data });
-      setLocalCustomer(prev => ({ ...prev, ...data }));
+      await updateCustomerMutation.mutateAsync({
+        id: displayCustomer.id,
+        customerData: data,
+      });
+      setLocalCustomer((prev) => ({ ...prev, ...data }));
       await refetchCustomer();
       setIsEditCustomerModalOpen(false);
     } catch (error) {
       console.error("Error al actualizar cliente:", error);
-      alert(`Error al actualizar cliente: ${error.response?.data?.message || error.message}`);
+      alert(
+        `Error al actualizar cliente: ${error.response?.data?.message || error.message}`,
+      );
     }
   };
 
@@ -73,18 +89,25 @@ const CustomerProfile = () => {
       setIsAddVehicleModalOpen(false);
     } catch (error) {
       console.error("Error al crear vehículo:", error);
-      alert(`Error al crear vehículo: ${error.response?.data?.message || error.message}`);
+      alert(
+        `Error al crear vehículo: ${error.response?.data?.message || error.message}`,
+      );
     }
   };
 
   const handleEditVehicleSubmit = async (data) => {
     try {
-      await updateVehicleMutation.mutateAsync({ id: selectedVehicle.id, vehicleData: data });
+      await updateVehicleMutation.mutateAsync({
+        id: selectedVehicle.id,
+        vehicleData: data,
+      });
       setIsEditVehicleModalOpen(false);
       setSelectedVehicle(null);
     } catch (error) {
       console.error("Error al actualizar vehículo:", error);
-      alert(`Error al actualizar vehículo: ${error.response?.data?.message || error.message}`);
+      alert(
+        `Error al actualizar vehículo: ${error.response?.data?.message || error.message}`,
+      );
     }
   };
 
@@ -100,7 +123,9 @@ const CustomerProfile = () => {
         </button>
         <div className="flex flex-col items-center py-16 gap-4">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-outline-variant border-t-primary" />
-          <p className="text-sm text-secondary">Cargando perfil del cliente...</p>
+          <p className="text-sm text-secondary">
+            Cargando perfil del cliente...
+          </p>
         </div>
       </div>
     );
@@ -120,8 +145,12 @@ const CustomerProfile = () => {
           <div className="w-16 h-16 rounded-full bg-error-container flex items-center justify-center">
             <User className="w-8 h-8 text-on-error-container" />
           </div>
-          <h3 className="text-base font-semibold text-on-surface">Cliente no encontrado</h3>
-          <p className="text-sm text-secondary">El cliente que buscas no existe o ha sido eliminado.</p>
+          <h3 className="text-base font-semibold text-on-surface">
+            Cliente no encontrado
+          </h3>
+          <p className="text-sm text-secondary">
+            El cliente que buscas no existe o ha sido eliminado.
+          </p>
         </div>
       </div>
     );
@@ -140,7 +169,7 @@ const CustomerProfile = () => {
         </button>
         <span className="text-outline-variant">/</span>
         <button
-          onClick={() => navigate('/customers')}
+          onClick={() => navigate("/customers")}
           className="text-secondary hover:text-on-surface transition-colors"
         >
           Clientes
@@ -150,16 +179,30 @@ const CustomerProfile = () => {
       </div>
 
       {/* Page title */}
-      <h2 className="text-xl font-semibold text-on-surface mb-6">Perfil del Cliente</h2>
+      <h2 className="text-xl font-semibold text-on-surface mb-6">
+        Perfil del Cliente
+      </h2>
 
       {/* Cards */}
       <div className="space-y-4">
-        <CustomerMetaCard customer={displayCustomer} onEdit={() => setIsEditCustomerModalOpen(true)} />
-        <CustomerInfoCard customer={displayCustomer} onEdit={() => setIsEditCustomerModalOpen(true)} />
+        <CustomerMetaCard
+          customer={displayCustomer}
+          onEdit={() => setIsEditCustomerModalOpen(true)}
+          onViewServiceRecords={() =>
+            navigate(`/service-records?customer_id=${displayCustomer.id}`)
+          }
+        />
+        <CustomerInfoCard
+          customer={displayCustomer}
+          onEdit={() => setIsEditCustomerModalOpen(true)}
+        />
         <CustomerVehiclesCard
           vehicles={vehicles}
           onAddVehicle={() => setIsAddVehicleModalOpen(true)}
-          onEditVehicle={(v) => { setSelectedVehicle(v); setIsEditVehicleModalOpen(true); }}
+          onEditVehicle={(v) => {
+            setSelectedVehicle(v);
+            setIsEditVehicleModalOpen(true);
+          }}
         />
       </div>
 
@@ -183,7 +226,10 @@ const CustomerProfile = () => {
 
       <VehicleModal
         isOpen={isEditVehicleModalOpen}
-        onClose={() => { setIsEditVehicleModalOpen(false); setSelectedVehicle(null); }}
+        onClose={() => {
+          setIsEditVehicleModalOpen(false);
+          setSelectedVehicle(null);
+        }}
         onSubmit={handleEditVehicleSubmit}
         vehicle={selectedVehicle}
         customerId={displayCustomer.id}
