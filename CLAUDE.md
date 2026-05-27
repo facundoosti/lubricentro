@@ -37,3 +37,18 @@ make health           # Check service connectivity
 | Frontend | http://localhost:5173  | Vite HMR                     |
 | Backend  | http://localhost:3000  | Rails API, health at `/up`   |
 | Postgres | localhost:5432         | DB: `lubricentro_development` |
+
+## Code Search
+
+Use [codegraph](https://github.com/colbymchenry/codegraph) for indexed semantic searches instead of `grep`. Prefer it for:
+
+- Locating symbols, models, controllers, or components when the exact file is unknown
+- OpenSpec operations: exploring scope before proposing or applying a change
+- Any broad codebase search spanning multiple directories
+
+```bash
+codegraph search "<query>"   # semantic search across the indexed codebase
+codegraph index              # re-index after large changes
+```
+
+Fall back to `grep` only for exact string matches where a literal pattern is known.
