@@ -6,6 +6,9 @@ RSpec.describe EmbeddingService do
 
   before do
     allow(OpenAI::Client).to receive(:new).and_return(openai_client)
+    allow(ENV).to receive(:fetch).and_call_original
+    allow(ENV).to receive(:fetch).with("AI_EMBEDDING_URL").and_return("https://api-atlas.nomic.ai/v1")
+    allow(ENV).to receive(:fetch).with("AI_EMBEDDING_KEY").and_return("test-embedding-key")
   end
 
   describe '.generate (class method)' do
@@ -90,11 +93,10 @@ RSpec.describe EmbeddingService do
       end
     end
 
-    context 'when AI_API_URL env var is missing' do
+    context 'when AI_EMBEDDING_URL env var is missing' do
       before do
         allow(OpenAI::Client).to receive(:new).and_call_original
-        allow(ENV).to receive(:fetch).with("AI_API_URL").and_raise(KeyError, "key not found: AI_API_URL")
-        allow(ENV).to receive(:fetch).with("AI_API_KEY").and_return("test-key")
+        allow(ENV).to receive(:fetch).with("AI_EMBEDDING_URL").and_raise(KeyError, "key not found: AI_EMBEDDING_URL")
         allow(Rails.logger).to receive(:error)
       end
 

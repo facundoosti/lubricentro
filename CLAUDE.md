@@ -38,6 +38,10 @@ make health           # Check service connectivity
 | Backend  | http://localhost:3000  | Rails API, health at `/up`   |
 | Postgres | localhost:5432         | DB: `lubricentro_development` |
 
+## OpenSpec
+
+Todos los artefactos generados por OpenSpec (diseño, especificación, tareas) deben estar escritos **en español**. Esto incluye títulos, descripciones, criterios de aceptación, tareas de implementación y cualquier otro contenido de los archivos de change.
+
 ## Code Search
 
 Use [codegraph](https://github.com/colbymchenry/codegraph) for indexed semantic searches instead of `grep`. Prefer it for:

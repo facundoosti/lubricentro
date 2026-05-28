@@ -36,8 +36,8 @@ class EmbeddingService
 
   def client
     @client ||= OpenAI::Client.new(
-      uri_base:      ENV.fetch("AI_API_URL"),
-      access_token:  ENV.fetch("AI_API_KEY"),
+      uri_base:      ENV.fetch("AI_EMBEDDING_URL"),
+      access_token:  ENV.fetch("AI_EMBEDDING_KEY"),
       extra_headers: {
         "HTTP-Referer" => "https://lubricentro.app",
         "X-Title"      => "Lubricentro"
