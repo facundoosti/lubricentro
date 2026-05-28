@@ -27,7 +27,7 @@ class VehicleLookupService
     http.read_timeout = 10
 
     request = Net::HTTP::Get.new(uri)
-    request["Authorization"] = "Bearer #{ENV.fetch('CLASIFIC_API_KEY', '')}"
+    request["x-api-key"] = ENV.fetch('CLASIFIC_API_KEY', '')
     request["Accept"] = "application/json"
 
     http.request(request)
