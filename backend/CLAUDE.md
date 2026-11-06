@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Stack
 
-Rails 8.0.2 API-only · PostgreSQL + pgvector (all environments) · Ruby 3.4.3  
+Rails 8.1 API-only · PostgreSQL + pgvector (all environments) · Ruby 3.4.3  
 Auth: Devise + Doorkeeper (OAuth2) + JWT  
 Serialization: Blueprinter · Pagination: Pagy · Background jobs: Solid Queue
 
