@@ -22,6 +22,8 @@ COPY . ./
 # Aquí expongo el ARG y defino el ENV
 ARG VITE_API_BASE_URL
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ARG VITE_CABLE_URL
+ENV VITE_CABLE_URL=$VITE_CABLE_URL
 
 # Build the app.
 RUN npm run build

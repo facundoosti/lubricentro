@@ -43,6 +43,9 @@ Rails.application.configure do
   # Don't log any deprecations.
   config.active_support.report_deprecations = false
 
+  # Action Cable: el frontend vive en otro dominio (ALLOWED_ORIGINS), hay que permitirlo explícitamente.
+  config.action_cable.allowed_request_origins = ENV.fetch("ALLOWED_ORIGINS", "").split(",").map(&:strip)
+
   # Replace the default in-process memory cache store with a durable alternative.
   config.cache_store = :solid_cache_store
 
