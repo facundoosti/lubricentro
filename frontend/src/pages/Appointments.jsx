@@ -18,10 +18,10 @@ import {
 } from '@services/appointmentsService';
 
 const STATUS_CONFIG = {
-  scheduled:  { label: 'Programado',  bg: 'bg-[#27272a]/60',  text: 'text-[#a1a1aa]',  border: 'border-[#71717a]',  dot: 'bg-[#71717a]',  badgeBg: 'bg-[#71717a]/10',  badgeBorder: 'border-[#71717a]/30' },
-  confirmed:  { label: 'Confirmado',  bg: 'bg-[#a78bfa]/10',  text: 'text-[#a78bfa]',  border: 'border-[#a78bfa]', dot: 'bg-[#a78bfa]', badgeBg: 'bg-[#a78bfa]/10', badgeBorder: 'border-[#a78bfa]/30' },
-  completed:  { label: 'Completado',  bg: 'bg-[#34d399]/10',  text: 'text-[#34d399]',  border: 'border-[#34d399]', dot: 'bg-[#34d399]', badgeBg: 'bg-[#34d399]/10', badgeBorder: 'border-[#34d399]/30' },
-  cancelled:  { label: 'Cancelado',   bg: 'bg-[#ef4444]/10',  text: 'text-[#ef4444]',  border: 'border-[#ef4444]', dot: 'bg-[#ef4444]', badgeBg: 'bg-[#ef4444]/10', badgeBorder: 'border-[#ef4444]/30' },
+  scheduled:  { label: 'Programado',  bg: 'bg-secondary-container/60', text: 'text-on-surface-variant', border: 'border-secondary', dot: 'bg-secondary', badgeBg: 'bg-secondary/10', badgeBorder: 'border-secondary/30' },
+  confirmed:  { label: 'Confirmado',  bg: 'bg-primary/10',  text: 'text-primary',  border: 'border-primary',  dot: 'bg-primary',  badgeBg: 'bg-primary/10',  badgeBorder: 'border-primary/30' },
+  completed:  { label: 'Completado',  bg: 'bg-tertiary/10', text: 'text-tertiary', border: 'border-tertiary', dot: 'bg-tertiary', badgeBg: 'bg-tertiary/10', badgeBorder: 'border-tertiary/30' },
+  cancelled:  { label: 'Cancelado',   bg: 'bg-error/10',    text: 'text-error',    border: 'border-error',    dot: 'bg-error',    badgeBg: 'bg-error/10',    badgeBorder: 'border-error/30' },
 };
 
 const getInitials = (name = '') =>

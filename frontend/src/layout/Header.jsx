@@ -11,8 +11,11 @@ import {
   Menu,
   X,
   CircleHelp,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useTour } from "@hooks/useTour";
+import { useThemeStore } from "@stores/useThemeStore";
 
 const Header = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } =
@@ -21,6 +24,8 @@ const Header = () => {
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { startTour } = useTour();
+  const { theme, toggleTheme } = useThemeStore();
+  const isDark = theme === "dark";
 
   const handleToggle = () => {
     if (window.innerWidth >= 1024) {
@@ -89,6 +94,24 @@ const Header = () => {
           title="Configuración"
         >
           <Settings className="w-5 h-5" />
+        </button>
+
+        <button
+          type="button"
+          role="switch"
+          aria-checked={isDark}
+          aria-label="Modo oscuro"
+          title={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+          onClick={toggleTheme}
+          className="relative mx-1 inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full border border-outline-variant bg-surface-container-high transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <span
+            className={`inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary-container text-on-primary shadow-theme-xs transition-transform duration-200 ${
+              isDark ? "translate-x-6" : "translate-x-1"
+            }`}
+          >
+            {isDark ? <Moon className="h-2.5 w-2.5" /> : <Sun className="h-2.5 w-2.5" />}
+          </span>
         </button>
 
         <div className="h-6 w-px bg-outline-variant mx-1" />

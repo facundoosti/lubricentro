@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Stack
 
 React 19 · Vite 6 · Tailwind CSS v4 · TanStack Query v5 · React Router v7  
-State: **Zustand** (auth + sidebar stores) · Forms: React Hook Form + Yup  
+State: **Zustand** (auth + sidebar + theme stores) · Forms: React Hook Form + Yup  
 HTTP: Axios · Icons: Lucide React · Alerts/Toasts: **Sileo**  
 Calendar: FullCalendar · Charts: ApexCharts
 
@@ -80,7 +80,7 @@ const { user, login, logout } = useAuthStore();
 
 ## UI Guidelines
 
-Dark-only design system (`docs/DESIGN_SYSTEM.md`). Tokens and component patterns live in `.claude/rules/frontend-ui.md` (auto-loaded when editing `.jsx`/`.css`).
+Light/dark design system (`docs/DESIGN_SYSTEM.md`); theme toggled via `useThemeStore` (`.dark` class on `<html>`). Tokens and component patterns live in `.claude/rules/frontend-ui.md` (auto-loaded when editing `.jsx`/`.css`).
 
 Always design mobile-first and scale up with Tailwind breakpoints.  
 Always handle `isLoading` and `isError` states when consuming React Query hooks.  

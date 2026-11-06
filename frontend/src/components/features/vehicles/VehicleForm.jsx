@@ -132,7 +132,7 @@ const VehicleForm = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Patente */}
         <div className="md:col-span-2">
-          <label htmlFor="license_plate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label htmlFor="license_plate" className="block text-sm font-medium text-on-surface mb-2">
             Patente *
           </label>
           <div className="relative">
@@ -142,8 +142,8 @@ const VehicleForm = ({
               {...plateReg}
               onChange={(e) => { plateRhfOnChange(e); handleLicensePlateChange(e); }}
               onBlur={plateRhfOnBlur}
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white font-mono pr-10 ${
-                errors.license_plate ? 'border-red-500' : 'border-gray-300'
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent font-mono pr-10 ${
+                errors.license_plate ? 'border-error' : 'border-outline-variant'
               }`}
               placeholder="Ej: ABC123, AB 123 CD"
               style={{ textTransform: "uppercase" }}
@@ -155,8 +155,8 @@ const VehicleForm = ({
               title={canLookup ? "Completar automáticamente" : "Ingresá una patente válida primero"}
               className={`absolute inset-y-0 right-0 flex items-center px-3 transition-colors ${
                 canLookup && !isLookingUp
-                  ? 'text-blue-500 hover:text-blue-600 cursor-pointer'
-                  : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                  ? 'text-primary hover:text-primary cursor-pointer'
+                  : 'text-on-surface-variant cursor-not-allowed'
               }`}
             >
               {isLookingUp
@@ -166,12 +166,12 @@ const VehicleForm = ({
             </button>
           </div>
           {errors.license_plate && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+            <p className="mt-1 text-sm text-error">
               {errors.license_plate.message}
             </p>
           )}
           {!errors.license_plate && isLookingUp && (
-            <p className="mt-1 text-sm text-blue-500 dark:text-blue-400">
+            <p className="mt-1 text-sm text-primary">
               Buscando información del vehículo...
             </p>
           )}
@@ -179,15 +179,15 @@ const VehicleForm = ({
 
         {/* Marca */}
         <div className="relative">
-          <label htmlFor="brand" className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label htmlFor="brand" className="flex items-center gap-1.5 text-sm font-medium text-on-surface mb-2">
             Marca *
             {autoFilled && !isLookingUp && (
-              <span className="inline-flex items-center gap-1 text-xs font-normal text-blue-500 dark:text-blue-400">
+              <span className="inline-flex items-center gap-1 text-xs font-normal text-primary">
                 <Sparkles className="w-3 h-3" /> Autocompletado
               </span>
             )}
             {isLookingUp && (
-              <Loader2 className="w-3 h-3 animate-spin text-blue-500" />
+              <Loader2 className="w-3 h-3 animate-spin text-primary" />
             )}
           </label>
           <input
@@ -199,27 +199,27 @@ const VehicleForm = ({
               minLength: { value: 2, message: "La marca debe tener al menos 2 caracteres" },
               maxLength: { value: 50, message: "La marca no puede exceder 50 caracteres" }
             })}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-opacity ${
-              errors.brand ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-opacity ${
+              errors.brand ? 'border-error' : 'border-outline-variant'
             } ${isLookingUp ? 'opacity-50 cursor-not-allowed' : ''}`}
             placeholder="Ej: Toyota, Ford, Honda..."
           />
           {errors.brand && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.brand.message}</p>
+            <p className="mt-1 text-sm text-error">{errors.brand.message}</p>
           )}
         </div>
 
         {/* Modelo */}
         <div className="relative">
-          <label htmlFor="model" className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label htmlFor="model" className="flex items-center gap-1.5 text-sm font-medium text-on-surface mb-2">
             Modelo *
             {autoFilled && !isLookingUp && (
-              <span className="inline-flex items-center gap-1 text-xs font-normal text-blue-500 dark:text-blue-400">
+              <span className="inline-flex items-center gap-1 text-xs font-normal text-primary">
                 <Sparkles className="w-3 h-3" /> Autocompletado
               </span>
             )}
             {isLookingUp && (
-              <Loader2 className="w-3 h-3 animate-spin text-blue-500" />
+              <Loader2 className="w-3 h-3 animate-spin text-primary" />
             )}
           </label>
           <input
@@ -231,27 +231,27 @@ const VehicleForm = ({
               minLength: { value: 2, message: "El modelo debe tener al menos 2 caracteres" },
               maxLength: { value: 50, message: "El modelo no puede exceder 50 caracteres" }
             })}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-opacity ${
-              errors.model ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-opacity ${
+              errors.model ? 'border-error' : 'border-outline-variant'
             } ${isLookingUp ? 'opacity-50 cursor-not-allowed' : ''}`}
             placeholder="Ej: Corolla, Focus, Civic..."
           />
           {errors.model && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.model.message}</p>
+            <p className="mt-1 text-sm text-error">{errors.model.message}</p>
           )}
         </div>
 
         {/* Año */}
         <div className="relative">
-          <label htmlFor="year" className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label htmlFor="year" className="flex items-center gap-1.5 text-sm font-medium text-on-surface mb-2">
             Año *
             {autoFilled && !isLookingUp && (
-              <span className="inline-flex items-center gap-1 text-xs font-normal text-blue-500 dark:text-blue-400">
+              <span className="inline-flex items-center gap-1 text-xs font-normal text-primary">
                 <Sparkles className="w-3 h-3" /> Autocompletado
               </span>
             )}
             {isLookingUp && (
-              <Loader2 className="w-3 h-3 animate-spin text-blue-500" />
+              <Loader2 className="w-3 h-3 animate-spin text-primary" />
             )}
           </label>
           <select
@@ -264,8 +264,8 @@ const VehicleForm = ({
                 return (year >= 1990 && year <= currentYear) || "El año debe estar entre 1990 y el año actual";
               }
             })}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-opacity ${
-              errors.year ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-opacity ${
+              errors.year ? 'border-error' : 'border-outline-variant'
             } ${isLookingUp ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <option value="">Seleccionar año</option>
@@ -274,13 +274,13 @@ const VehicleForm = ({
             ))}
           </select>
           {errors.year && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.year.message}</p>
+            <p className="mt-1 text-sm text-error">{errors.year.message}</p>
           )}
         </div>
 
         {/* Cliente */}
         <div className="md:col-span-2">
-          <label htmlFor="customer_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label htmlFor="customer_id" className="block text-sm font-medium text-on-surface mb-2">
             Cliente *
           </label>
           <CustomerSearchInput

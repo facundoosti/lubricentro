@@ -68,15 +68,15 @@ const ServiceRecordForm = ({
   };
 
   const inputClass = (hasError) =>
-    `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white ${
-      hasError ? 'border-red-500' : 'border-gray-300'
+    `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+      hasError ? 'border-error' : 'border-outline-variant'
     }`;
 
   return (
     <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Cliente */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-on-surface mb-2">
           Cliente *
         </label>
         <CustomerSearchInput
@@ -89,10 +89,10 @@ const ServiceRecordForm = ({
 
       {/* Vehículo */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-on-surface mb-2">
           Vehículo *
           {vehiclesLoading && selectedCustomerId && (
-            <span className="ml-2 text-xs text-gray-500">(Cargando...)</span>
+            <span className="ml-2 text-xs text-on-surface-variant">(Cargando...)</span>
           )}
         </label>
         <select
@@ -116,14 +116,14 @@ const ServiceRecordForm = ({
           ))}
         </select>
         {errors.vehicle_id && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.vehicle_id.message}</p>
+          <p className="mt-1 text-sm text-error">{errors.vehicle_id.message}</p>
         )}
       </div>
 
       {/* Fecha de atención y Kilometraje */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-on-surface mb-2">
             Fecha de atención *
           </label>
           <input
@@ -132,12 +132,12 @@ const ServiceRecordForm = ({
             className={inputClass(errors.service_date)}
           />
           {errors.service_date && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.service_date.message}</p>
+            <p className="mt-1 text-sm text-error">{errors.service_date.message}</p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-on-surface mb-2">
             Kilometraje
           </label>
           <input
@@ -150,7 +150,7 @@ const ServiceRecordForm = ({
             placeholder="Ej: 85000"
           />
           {errors.mileage && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.mileage.message}</p>
+            <p className="mt-1 text-sm text-error">{errors.mileage.message}</p>
           )}
         </div>
       </div>
@@ -158,11 +158,11 @@ const ServiceRecordForm = ({
       {/* Total y Próximo servicio */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-on-surface mb-2">
             Total (ARS)
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">$</span>
             <input
               type="number"
               step="0.01"
@@ -175,12 +175,12 @@ const ServiceRecordForm = ({
             />
           </div>
           {errors.total_amount && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.total_amount.message}</p>
+            <p className="mt-1 text-sm text-error">{errors.total_amount.message}</p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-on-surface mb-2">
             Próximo servicio
           </label>
           <input
@@ -193,7 +193,7 @@ const ServiceRecordForm = ({
 
       {/* Notas */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-on-surface mb-2">
           Notas
         </label>
         <textarea

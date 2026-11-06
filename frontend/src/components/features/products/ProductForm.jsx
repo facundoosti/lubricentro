@@ -75,8 +75,8 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
   };
 
   const inputClass = (hasError) =>
-    `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white ${
-      hasError ? 'border-red-500' : 'border-gray-300'
+    `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+      hasError ? 'border-error' : 'border-outline-variant'
     }`;
 
   const commonUnits = [
@@ -96,7 +96,7 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
     <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       {/* Nombre */}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+        <label htmlFor="name" className="block text-sm font-medium text-on-surface mb-1.5">
           Nombre del Producto *
         </label>
         <input
@@ -109,15 +109,15 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
           className={inputClass(errors.name)}
           placeholder="Ej: Aceite de Motor 5W-30"
         />
-        {errors.name && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name.message}</p>}
+        {errors.name && <p className="mt-1 text-sm text-error">{errors.name.message}</p>}
       </div>
 
       {/* SKU + Marca */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="sku" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label htmlFor="sku" className="block text-sm font-medium text-on-surface mb-1.5">
             SKU
-            <span className="ml-1.5 text-xs text-gray-500 font-normal">(auto si vacío)</span>
+            <span className="ml-1.5 text-xs text-on-surface-variant font-normal">(auto si vacío)</span>
           </label>
           <input
             type="text"
@@ -129,11 +129,11 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
             placeholder="PRD-ABC123"
             style={{ textTransform: 'uppercase' }}
           />
-          {errors.sku && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.sku.message}</p>}
+          {errors.sku && <p className="mt-1 text-sm text-error">{errors.sku.message}</p>}
         </div>
 
         <div>
-          <label htmlFor="brand" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label htmlFor="brand" className="block text-sm font-medium text-on-surface mb-1.5">
             Marca
           </label>
           <input
@@ -145,14 +145,14 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
             className={inputClass(errors.brand)}
             placeholder="Ej: Castrol, Bosch"
           />
-          {errors.brand && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.brand.message}</p>}
+          {errors.brand && <p className="mt-1 text-sm text-error">{errors.brand.message}</p>}
         </div>
       </div>
 
       {/* Proveedor + Categoría */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="supplier_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label htmlFor="supplier_id" className="block text-sm font-medium text-on-surface mb-1.5">
             Proveedor
           </label>
           <select
@@ -170,7 +170,7 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label className="block text-sm font-medium text-on-surface mb-1.5">
             Categoría
           </label>
           <Controller
@@ -192,7 +192,7 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
 
       {/* Descripción */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+        <label htmlFor="description" className="block text-sm font-medium text-on-surface mb-1.5">
           Descripción
         </label>
         <textarea
@@ -204,17 +204,17 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
           className={inputClass(errors.description)}
           placeholder="Descripción opcional del producto..."
         />
-        {errors.description && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.description.message}</p>}
+        {errors.description && <p className="mt-1 text-sm text-error">{errors.description.message}</p>}
       </div>
 
       {/* Precio + Unidad + Stock */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="unit_price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label htmlFor="unit_price" className="block text-sm font-medium text-on-surface mb-1.5">
             Precio Unitario (ARS) *
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">$</span>
             <input
               type="number"
               id="unit_price"
@@ -229,11 +229,11 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
               placeholder="0.00"
             />
           </div>
-          {errors.unit_price && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.unit_price.message}</p>}
+          {errors.unit_price && <p className="mt-1 text-sm text-error">{errors.unit_price.message}</p>}
         </div>
 
         <div>
-          <label htmlFor="unit" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label htmlFor="unit" className="block text-sm font-medium text-on-surface mb-1.5">
             Unidad
           </label>
           <select
@@ -247,14 +247,14 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
               <option key={u.value} value={u.value}>{u.label}</option>
             ))}
           </select>
-          {errors.unit && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.unit.message}</p>}
+          {errors.unit && <p className="mt-1 text-sm text-error">{errors.unit.message}</p>}
         </div>
       </div>
 
       {/* Stock */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="stock" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label htmlFor="stock" className="block text-sm font-medium text-on-surface mb-1.5">
             Stock
           </label>
           <input
@@ -269,7 +269,7 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
             className={inputClass(errors.stock)}
             placeholder="0"
           />
-          {errors.stock && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.stock.message}</p>}
+          {errors.stock && <p className="mt-1 text-sm text-error">{errors.stock.message}</p>}
         </div>
       </div>
 

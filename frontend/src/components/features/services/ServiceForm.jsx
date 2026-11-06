@@ -38,7 +38,7 @@ const ServiceForm = ({
     <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Nombre */}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label htmlFor="name" className="block text-sm font-medium text-on-surface mb-2">
           Nombre del Servicio *
         </label>
         <input
@@ -51,13 +51,13 @@ const ServiceForm = ({
               message: 'El nombre no puede exceder 100 caracteres'
             }
           })}
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white ${
-            errors.name ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+            errors.name ? 'border-error' : 'border-outline-variant'
           }`}
           placeholder="Ej: Cambio de Aceite, Alineación, Frenos..."
         />
         {errors.name && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+          <p className="mt-1 text-sm text-error">
             {errors.name.message}
           </p>
         )}
@@ -65,7 +65,7 @@ const ServiceForm = ({
 
       {/* Descripción */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label htmlFor="description" className="block text-sm font-medium text-on-surface mb-2">
           Descripción
         </label>
         <textarea
@@ -77,13 +77,13 @@ const ServiceForm = ({
               message: 'La descripción no puede exceder 1000 caracteres'
             }
           })}
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white ${
-            errors.description ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+            errors.description ? 'border-error' : 'border-outline-variant'
           }`}
           placeholder="Descripción detallada del servicio..."
         />
         {errors.description && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+          <p className="mt-1 text-sm text-error">
             {errors.description.message}
           </p>
         )}
@@ -91,11 +91,11 @@ const ServiceForm = ({
 
       {/* Precio Base */}
       <div>
-        <label htmlFor="base_price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label htmlFor="base_price" className="block text-sm font-medium text-on-surface mb-2">
           Precio Base (ARS) *
         </label>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant">
             $
           </span>
           <input
@@ -114,14 +114,14 @@ const ServiceForm = ({
                 return !isNaN(price) && price > 0 || 'Precio inválido';
               }
             })}
-            className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white ${
-              errors.base_price ? 'border-red-500' : 'border-gray-300'
+            className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+              errors.base_price ? 'border-error' : 'border-outline-variant'
             }`}
             placeholder="0.00"
           />
         </div>
         {errors.base_price && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+          <p className="mt-1 text-sm text-error">
             {errors.base_price.message}
           </p>
         )}

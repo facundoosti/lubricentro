@@ -154,7 +154,7 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
     <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Cliente */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+        <label className="mb-1.5 block text-sm font-medium text-on-surface">
           Cliente *
         </label>
         <CustomerSearchInput
@@ -168,17 +168,17 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
 
       {/* Vehículo */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+        <label className="mb-1.5 block text-sm font-medium text-on-surface">
           Vehículo *
           {vehiclesLoading && selectedCustomerId && (
-            <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+            <span className="ml-2 text-xs text-on-surface-variant">
               (Cargando...)
             </span>
           )}
         </label>
         <select
           {...register('vehicle_id', { required: 'Vehículo es requerido' })}
-          className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+          className="h-11 w-full rounded-lg border border-outline-variant bg-transparent px-4 py-2.5 text-sm text-on-surface shadow-theme-xs placeholder:text-secondary focus:border-primary focus:outline-hidden focus:ring-3 focus:ring-primary/10"
           disabled={vehiclesLoading || !selectedCustomerId}
         >
           <option value="">
@@ -200,7 +200,7 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
           ))}
         </select>
         {errors.vehicle_id && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+          <p className="mt-1 text-sm text-error">
             {errors.vehicle_id.message}
           </p>
         )}
@@ -210,16 +210,16 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Fecha */}
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+          <label className="mb-1.5 block text-sm font-medium text-on-surface">
             Fecha *
           </label>
           <input
             type="date"
             {...register('scheduled_date', { required: 'Fecha es requerida' })}
-            className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+            className="h-11 w-full rounded-lg border border-outline-variant bg-transparent px-4 py-2.5 text-sm text-on-surface shadow-theme-xs placeholder:text-secondary focus:border-primary focus:outline-hidden focus:ring-3 focus:ring-primary/10"
           />
           {errors.scheduled_date && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+            <p className="mt-1 text-sm text-error">
               {errors.scheduled_date.message}
             </p>
           )}
@@ -227,12 +227,12 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
 
         {/* Hora */}
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+          <label className="mb-1.5 block text-sm font-medium text-on-surface">
             Hora *
           </label>
           <select
             {...register('scheduled_time', { required: 'Hora es requerida' })}
-            className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+            className="h-11 w-full rounded-lg border border-outline-variant bg-transparent px-4 py-2.5 text-sm text-on-surface shadow-theme-xs placeholder:text-secondary focus:border-primary focus:outline-hidden focus:ring-3 focus:ring-primary/10"
           >
             <option value="">Seleccionar hora</option>
             {timeSlots.map((time) => (
@@ -242,7 +242,7 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
             ))}
           </select>
           {errors.scheduled_time && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+            <p className="mt-1 text-sm text-error">
               {errors.scheduled_time.message}
             </p>
           )}
@@ -251,12 +251,12 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
 
       {/* Estado */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+        <label className="mb-1.5 block text-sm font-medium text-on-surface">
           Estado
         </label>
         <select
           {...register('status')}
-          className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+          className="h-11 w-full rounded-lg border border-outline-variant bg-transparent px-4 py-2.5 text-sm text-on-surface shadow-theme-xs placeholder:text-secondary focus:border-primary focus:outline-hidden focus:ring-3 focus:ring-primary/10"
         >
           {statusOptions.map((option) => (
             <option key={option.value} value={option.value}>
@@ -268,7 +268,7 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
 
       {/* Notas */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+        <label className="mb-1.5 block text-sm font-medium text-on-surface">
           Notas
         </label>
         <TextArea

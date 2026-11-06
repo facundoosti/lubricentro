@@ -249,7 +249,7 @@ const Sidebar = () => {
             <img
               src="/logo.svg"
               alt="Killamet Lubricantes"
-              className="h-8 w-auto mix-blend-screen"
+              className="h-8 w-auto dark:mix-blend-screen"
               style={{
                 filter:
                   "hue-rotate(240deg) saturate(1.8) brightness(1.25) drop-shadow(0 0 10px rgba(167, 139, 250, 0.7)) drop-shadow(0 0 4px rgba(124, 58, 237, 0.5))",

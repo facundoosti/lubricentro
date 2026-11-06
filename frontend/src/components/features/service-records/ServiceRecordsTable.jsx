@@ -93,13 +93,13 @@ const ServiceRecordsTable = ({
         <div className="flex-1 max-w-md">
           <form onSubmit={handleSearch} className="relative">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-secondary" />
               <input
                 type="text"
                 placeholder="Buscar atenciones..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                className="w-full pl-10 pr-4 py-2 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
           </form>
@@ -115,78 +115,78 @@ const ServiceRecordsTable = ({
       </div>
 
       {/* Tabla */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+      <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container">
         <div className="max-w-full overflow-x-auto">
           <Table>
-            <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+            <TableHeader className="border-b border-outline-variant">
               <TableRow>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-on-surface-variant text-start text-xs"
                 >
                   Fecha
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-on-surface-variant text-start text-xs"
                 >
                   Cliente
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-on-surface-variant text-start text-xs"
                 >
                   Vehículo
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-on-surface-variant text-start text-xs"
                 >
                   Kilometraje
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-on-surface-variant text-start text-xs"
                 >
                   Total
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-on-surface-variant text-start text-xs"
                 >
                   Estado
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-on-surface-variant text-start text-xs"
                 >
                   Próximo Servicio
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-on-surface-variant text-start text-xs"
                 >
                   Acciones
                 </TableCell>
               </TableRow>
             </TableHeader>
 
-            <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+            <TableBody className="divide-y divide-outline-variant">
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="px-5 py-8 text-center text-gray-500">
+                  <TableCell colSpan={8} className="px-5 py-8 text-center text-on-surface-variant">
                     Cargando atenciones...
                   </TableCell>
                 </TableRow>
               ) : !records || records.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="px-5 py-8 text-center text-gray-500">
+                  <TableCell colSpan={8} className="px-5 py-8 text-center text-on-surface-variant">
                     {!records ? 'Error al cargar datos' : 'No se encontraron atenciones'}
                   </TableCell>
                 </TableRow>
               ) : (
                 records.map((record) => (
-                  <TableRow key={record.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                  <TableRow key={record.id} className="hover:bg-surface-container-high">
                     <TableCell className="px-5 py-4 sm:px-6 text-start">
                       <div className="flex items-center gap-3">
                         {record.photos_urls?.length > 0 ? (
@@ -197,21 +197,21 @@ const ServiceRecordsTable = ({
                               className="w-10 h-10 rounded-full object-cover"
                             />
                             {record.photos_urls.length > 1 && (
-                              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center text-white text-[9px] font-bold">
+                              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-primary-container rounded-full flex items-center justify-center text-white text-[9px] font-bold">
                                 {record.photos_urls.length}
                               </span>
                             )}
                           </div>
                         ) : (
-                          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
-                            <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                            <Calendar className="w-5 h-5 text-primary" />
                           </div>
                         )}
                         <div>
-                          <span className="block font-medium text-gray-800 text-sm dark:text-white/90">
+                          <span className="block font-medium text-on-surface text-sm">
                             {formatDate(record.service_date)}
                           </span>
-                          <span className="block text-gray-500 text-xs dark:text-gray-400">
+                          <span className="block text-on-surface-variant text-xs">
                             {record.photos_urls?.length > 0
                               ? `${record.photos_urls.length} foto${record.photos_urls.length > 1 ? 's' : ''}`
                               : `ID: ${record.id}`}
@@ -222,16 +222,16 @@ const ServiceRecordsTable = ({
                     
                     <TableCell className="px-4 py-3 text-start">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                          <span className="text-green-600 dark:text-green-400 font-medium text-xs">
+                        <div className="w-8 h-8 bg-tertiary/10 rounded-full flex items-center justify-center">
+                          <span className="text-tertiary font-medium text-xs">
                             {getInitials(record.customer?.name)}
                           </span>
                         </div>
                         <div>
-                          <span className="block font-medium text-gray-800 text-sm dark:text-white/90">
+                          <span className="block font-medium text-on-surface text-sm">
                             {record.customer?.name || 'Cliente no encontrado'}
                           </span>
-                          <span className="block text-gray-500 text-xs dark:text-gray-400">
+                          <span className="block text-on-surface-variant text-xs">
                             {record.customer?.phone || 'Sin teléfono'}
                           </span>
                         </div>
@@ -240,14 +240,14 @@ const ServiceRecordsTable = ({
                     
                     <TableCell className="px-4 py-3 text-start">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
-                          <Car className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                        <div className="w-8 h-8 bg-orange-500/15 rounded-full flex items-center justify-center">
+                          <Car className="w-4 h-4 text-orange-500" />
                         </div>
                         <div>
-                          <span className="block font-medium text-gray-800 text-sm dark:text-white/90">
+                          <span className="block font-medium text-on-surface text-sm">
                             {record.vehicle?.brand} {record.vehicle?.model}
                           </span>
-                          <span className="block text-gray-500 text-xs dark:text-gray-400">
+                          <span className="block text-on-surface-variant text-xs">
                             {record.vehicle?.license_plate || 'Sin patente'}
                           </span>
                         </div>
@@ -255,14 +255,14 @@ const ServiceRecordsTable = ({
                     </TableCell>
                     
                     <TableCell className="px-4 py-3 text-start">
-                      <div className="text-gray-800 text-sm dark:text-white/90">
+                      <div className="text-on-surface text-sm">
                         {record.mileage ? `${record.mileage.toLocaleString()} km` : '-'}
                       </div>
                     </TableCell>
                     
                     <TableCell className="px-4 py-3 text-start">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-gray-800 text-sm dark:text-white/90">
+                        <span className="font-medium text-on-surface text-sm">
                           {formatCurrency(record.total_amount)}
                         </span>
                       </div>
@@ -278,11 +278,11 @@ const ServiceRecordsTable = ({
                     </TableCell>
                     
                     <TableCell className="px-4 py-3 text-start">
-                      <div className="text-gray-800 text-sm dark:text-white/90">
+                      <div className="text-on-surface text-sm">
                         {formatDate(record.next_service_date)}
                       </div>
                       {record.days_until_next_service !== undefined && (
-                        <div className="text-gray-500 text-xs dark:text-gray-400">
+                        <div className="text-on-surface-variant text-xs">
                           {record.days_until_next_service > 0 
                             ? `En ${record.days_until_next_service} días`
                             : `Hace ${Math.abs(record.days_until_next_service)} días`
@@ -295,21 +295,21 @@ const ServiceRecordsTable = ({
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => onView(record)}
-                          className="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                          className="p-1 text-secondary hover:text-primary"
                           title="Ver detalles"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => onEdit(record)}
-                          className="p-1 text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400"
+                          className="p-1 text-secondary hover:text-yellow-500"
                           title="Editar"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => onDelete(record)}
-                          className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+                          className="p-1 text-secondary hover:text-error"
                           title="Eliminar"
                         >
                           <Trash2 className="w-4 h-4" />

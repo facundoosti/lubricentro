@@ -38,7 +38,7 @@ const Login = () => {
           <img
             src="/logo.svg"
             alt="Killamet Lubricantes"
-            className="h-20 w-auto mix-blend-screen"
+            className="h-20 w-auto dark:mix-blend-screen"
             style={{
               filter:
                 "hue-rotate(240deg) saturate(1.5) brightness(1.1) drop-shadow(0 0 18px rgba(167, 139, 250, 0.55)) drop-shadow(0 0 6px rgba(124, 58, 237, 0.4))",
