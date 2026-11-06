@@ -45,10 +45,12 @@ Features and non-trivial changes follow the OpenSpec flow. Artifacts are written
 1. `/openspec-explore` — think through scope (optional)
 2. `/openspec-propose <idea>` — creates proposal, specs, design, tasks under `openspec/changes/`
 3. `/openspec-apply-change` — implement tasks one by one; tests + lint before checking each task
-4. `rails-reviewer` / `react-reviewer` subagents on the diff, then `spec-verifier`
-5. `/openspec-archive-change` — merge specs into `openspec/specs/`
+4. `rails-reviewer` / `react-reviewer` subagents on the diff
+5. **QA visual** (`/qa-visual`) when the change has visual impact on the frontend: write scenarios in `openspec/changes/<change>/qa.md`, run them in local Brave via the `chrome-devtools` MCP (`qa-visual-runner` subagent), review every scenario, audit + fix failures and re-run
+6. `spec-verifier`
+7. `/openspec-archive-change` — merge specs into `openspec/specs/`
 
-Small fixes (typos, one-line bugs) can skip OpenSpec.
+Small fixes (typos, one-line bugs) can skip OpenSpec. Visual changes outside OpenSpec still go through `/qa-visual` (scenarios in `docs/qa/`).
 
 ## Code Search
 

@@ -23,12 +23,15 @@ rules:
     - Agrupá las tareas por app (Backend / Frontend).
     - Cada tarea de código incluye su test (request/service/model spec o test de Vitest).
     - Tareas chicas (≤ 2 horas); la última tarea es correr lint y tests completos de las apps tocadas.
+    - Si el change tiene impacto visual en frontend, agregá una sección "QA visual" con tareas para escribir los escenarios en qa.md, ejecutarlos con /qa-visual (Brave + DevTools) y corregir los hallazgos.
 
 operations:
   apply:
     guidance:
       - Antes de marcar una tarea como hecha, corré los tests afectados y el linter de la app.
       - Al terminar todas las tareas, usá los subagentes rails-reviewer / react-reviewer sobre el diff.
+      - Si hay impacto visual en frontend, después de los reviewers ejecutá el skill qa-visual (escenarios → ejecución en Brave → revisión → auditoría y fix de errores).
   archive:
     guidance:
       - Antes de archivar, corré el subagente spec-verifier y `openspec validate` sobre el change.
+      - Si el change tiene qa.md, todos los escenarios deben estar en ✅ (o ⚠️ aceptados por el usuario).
