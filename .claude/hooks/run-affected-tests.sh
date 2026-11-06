@@ -40,12 +40,14 @@ existing=()
 for s in "${specs[@]:-}"; do [[ -n "$s" && -f "backend/$s" ]] && existing+=("$s"); done
 if (( ${#existing[@]} > 0 )); then
   uniq_specs=$(printf '%s\n' "${existing[@]}" | sort -u | tr '\n' ' ')
-  out=$(cd backend && bundle exec rspec $uniq_specs --format progress 2>&1)
+  # Postgres de test con pgvector en Docker (make test-db-local); se puede sobreescribir con TEST_DATABASE_URL.
+  test_db="${TEST_DATABASE_URL:-postgresql://postgres:postgres@localhost:5435/lubricentro_test}"
+  out=$(cd backend && RAILS_ENV=test DATABASE_URL="$test_db" bundle exec rspec $uniq_specs --format progress 2>&1)
   if [[ $? -ne 0 ]]; then
     # Problemas de entorno (DB de test sin migrar / sin conexión): avisar al usuario sin bloquear.
     if grep -Eq 'PendingMigrationError|could not connect|NoDatabaseError|connection to server' <<<"$out"; then
       env_warning=1
-      jq -n --arg m "⚠️ RSpec no pudo correr por el entorno (DB de test). Ejecutá: cd backend && RAILS_ENV=test bin/rails db:prepare" '{systemMessage: $m}'
+      jq -n --arg m "⚠️ RSpec no pudo correr por el entorno (DB de test). Ejecutá: make test-db-local" '{systemMessage: $m}'
     else
       failures+=$'\n### RSpec ('"$uniq_specs"$')\n'"$(echo "$out" | tail -60)"
     fi
