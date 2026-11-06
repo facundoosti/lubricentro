@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.0.2"
+gem "rails", "~> 8.1.0"
 # Use sqlite3 as the database for Active Record
 gem "sqlite3", ">= 2.1"
 # Use PostgreSQL as the database for production
@@ -58,7 +58,7 @@ gem "doorkeeper", "~> 5.6"
 gem "doorkeeper-jwt", "~> 0.4"
 
 # Authentication solution for Rails
-gem "devise", "~> 4.9"
+gem "devise", "~> 5.0"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -92,5 +92,5 @@ gem "neighbor", "~> 0.6.0"
 
 # Excel import support
 gem "csv"
-gem "roo", "~> 2.10"
-gem "caxlsx", "~> 3.4"
+gem "roo", "~> 3.0"
+gem "caxlsx", "~> 4.0"

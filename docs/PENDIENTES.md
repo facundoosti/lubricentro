@@ -25,6 +25,11 @@ Detalle y evidencia en [`docs/qa/2026-11-06-tema-claro-oscuro.md`](qa/2026-11-06
 - [ ] Subtítulo de Presupuestos dice "budgets" (sin traducir).
 - [ ] Título de pestaña en `/login` queda "Dashboard - …".
 
+## Backend
+
+- [ ] **Spec dependiente de la zona horaria** — `spec/services/tool_registry/check_available_slots_spec.rb:86` falla con TZ local −03 (pasa en UTC/CI): usa `date.to_time.change(hour:)` (zona del sistema) en vez de `Time.zone`. Fijar `config.time_zone` y usar `date.in_time_zone.change(hour:)`.
+- [ ] Evaluar `config.load_defaults 8.1` tras el upgrade a Rails 8.1 (hoy sigue en 8.0).
+
 ## Seguridad
 
 - [ ] `backend/db/seeds.rb` versiona contraseñas en texto plano de usuarios reales (admin incluido). Moverlas a variables de entorno y rotarlas si se usan en producción.
