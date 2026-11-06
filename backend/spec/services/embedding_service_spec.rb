@@ -25,6 +25,18 @@ RSpec.describe EmbeddingService do
       expect(result).to eq(embedding_vector)
     end
 
+    context 'when AI_EMBEDDINGS_ENABLED is "false"' do
+      before do
+        allow(ENV).to receive(:fetch).with("AI_EMBEDDINGS_ENABLED", "true").and_return("false")
+        allow(openai_client).to receive(:embeddings)
+      end
+
+      it 'returns nil without calling the API' do
+        expect(described_class.generate("oil change")).to be_nil
+        expect(openai_client).not_to have_received(:embeddings)
+      end
+    end
+
     it 'returns nil when the API raises an error' do
       allow(openai_client).to receive(:embeddings).and_raise(StandardError, "timeout")
       allow(Rails.logger).to receive(:error)

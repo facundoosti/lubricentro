@@ -1,4 +1,9 @@
 class EmbeddingService
+  # Interruptor: AI_EMBEDDINGS_ENABLED=false corta toda llamada a la API de embeddings
+  def self.enabled?
+    ENV.fetch("AI_EMBEDDINGS_ENABLED", "true") != "false"
+  end
+
   def self.generate(text)
     new.generate(text)
   end
@@ -8,6 +13,8 @@ class EmbeddingService
   end
 
   def generate(text)
+    return nil unless self.class.enabled?
+
     response = client.embeddings(
       parameters: {
         model:      ENV.fetch("AI_MODEL_EMBEDDING", nil),

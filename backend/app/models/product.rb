@@ -74,7 +74,7 @@ class Product < ApplicationRecord
 
   has_neighbors :embedding
 
-  after_save { GenerateEmbeddingJob.perform_later(id) if embedding_text_changed? }
+  after_save { GenerateEmbeddingJob.perform_later(id) if EmbeddingService.enabled? && embedding_text_changed? }
 
   def formatted_price
     "$#{unit_price.to_f}"
