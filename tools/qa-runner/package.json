@@ -1,0 +1,12 @@
+{
+  "name": "lubricentro-qa-runner",
+  "private": true,
+  "type": "module",
+  "description": "Ejecuta escenarios de QA visual con Playwright (Brave headless) y devuelve un resumen compacto.",
+  "scripts": {
+    "qa": "node run.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "1.65.0"
+  }
+}

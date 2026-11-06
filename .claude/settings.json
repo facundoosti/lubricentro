@@ -15,6 +15,7 @@
       "Bash(npm run build)",
       "Bash(npx vitest run*)",
       "Bash(npm test -- --run*)",
+      "Bash(node tools/qa-runner/run.mjs*)",
       "Bash(git status*)",
       "Bash(git diff*)",
       "Bash(git log*)",

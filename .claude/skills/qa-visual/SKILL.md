@@ -1,11 +1,13 @@
 ---
 name: qa-visual
-description: QA visual en el navegador (Brave local vía Chrome DevTools MCP) para features que cambian UI. Crea escenarios y casos de uso, los ejecuta con DevTools, revisa cada escenario y audita/corrige los errores. Usar al terminar de implementar cualquier cambio con impacto visual en frontend/ (pantallas, componentes, estilos, temas, responsive), o cuando el usuario pida "QA", "probar en el navegador" o "revisión visual".
+description: QA visual en el navegador para features que cambian UI. Clasifica el riesgo, arma casos TC-XX, automatiza lo posible (Vitest o Playwright con scripts) y usa Chrome DevTools MCP solo para lo exploratorio. Revisa cada caso y audita/corrige los errores. Usar al terminar de implementar cualquier cambio con impacto visual en frontend/ (pantallas, componentes, estilos, temas, responsive), o cuando el usuario pida "QA", "probar en el navegador" o "revisión visual".
 ---
 
 # QA visual
 
-Flujo obligatorio para cambios con impacto visual. No se da por terminada la feature hasta que todos los escenarios pasen o el usuario acepte explícitamente un fallo.
+Flujo obligatorio para cambios con impacto visual. La feature no termina hasta que todos los casos **must** pasen o el usuario acepte explícitamente un fallo.
+
+**Principio:** el navegador es la herramienta más cara. Primero se decide **cuánto** probar (riesgo), después **dónde** (Vitest > script Playwright > DevTools MCP) y recién al final se abre el navegador.
 
 ## ¿Cuándo aplica?
 
@@ -14,67 +16,92 @@ No aplica a: cambios solo de backend sin efecto en UI, tests, docs, refactors si
 
 ## Requisitos previos
 
-1. App corriendo: `make dev` (o `make dev-local` + backend/frontend locales). Verificá con `curl -sf http://localhost:5173 >/dev/null && curl -sf http://localhost:3000/up >/dev/null`.
-   Si no está arriba, pedile al usuario que la levante; no la levantes en background por tu cuenta.
-2. MCP `chrome-devtools` conectado (usa Brave con el perfil persistente `~/.cache/chrome-devtools-mcp/brave-qa`). Si no aparecen las tools `mcp__chrome-devtools__*`, avisá al usuario que corra `/mcp`.
-3. Credenciales de QA: leelas de `CLAUDE.local.md` (`QA_EMAIL` / `QA_PASSWORD`, git-ignored). Si no están, pedíselas al usuario. **Nunca** las escribas en archivos versionados ni en el reporte.
+1. App corriendo: `curl -sf http://localhost:5173 >/dev/null && curl -sf http://localhost:3000/up >/dev/null`. Si no está arriba, pedile al usuario que la levante (`make dev`); no la levantes en background por tu cuenta.
+2. Runner Playwright instalado: `tools/qa-runner/node_modules` existe (si no: `cd tools/qa-runner && npm install`). Usa el Brave instalado, sin descargar navegadores.
+3. Credenciales de QA en `CLAUDE.local.md` (`QA_EMAIL` / `QA_PASSWORD`, git-ignored). Si no están, pedíselas al usuario. Se pasan **solo como variables de entorno** en el comando; **nunca** en archivos versionados ni en el reporte.
+4. DevTools MCP (`mcp__chrome-devtools__*`) solo si hay casos exploratorios. Si no aparecen las tools, avisá al usuario que corra `/mcp`.
 
-## Paso 1 — Escenarios y casos de uso
+## Paso 0 — Riesgo (decide el alcance)
 
-Escribí el plan en:
-- Change de OpenSpec activo → `openspec/changes/<change>/qa.md`
-- Sin OpenSpec → `docs/qa/<AAAA-MM-DD>-<slug>.md`
+Clasificá el cambio **por impacto, no por tamaño del diff**. Ante la duda, el nivel más alto.
 
-Derivá los escenarios de: specs del change (GIVEN/WHEN/THEN), el diff (`git diff --stat` + componentes tocados) y el blast radius (`codegraph impact <símbolo>`): incluí las pantallas que reutilizan los componentes modificados.
+| Riesgo | Cuándo | Alcance del QA |
+|---|---|---|
+| **Bajo** | Ajuste visual acotado a 1 componente, reversible, sin lógica | 1–3 casos · solo `desktop-dark` · sin regresión salvo vecino directo |
+| **Medio** | Cambia comportamiento o una pantalla completa; componente compartido | Casos de la spec + 1 regresión por consumidor (`codegraph impact`) · matriz **solo en la dimensión tocada** (temas si tocó colores/tokens; viewports si tocó layout/responsive) |
+| **Alto** | Layout global (sidebar, header, `Layout`), tema/tokens globales, flujos de datos (alta/edición/borrado, importaciones), auth | Matriz completa `desktop/mobile × dark/light` en los casos must + regresión de pantallas vecinas |
 
-Cobertura mínima por feature:
-- **Camino feliz** del caso de uso principal.
-- **Estados**: cargando, vacío, error (API caída o 4xx/5xx), validaciones de formulario.
-- **Temas**: modo oscuro y modo claro (switch del header).
-- **Responsive**: mobile 375×812 y desktop 1440×900.
-- **Regresión**: 1 escenario por pantalla vecina afectada según `codegraph impact`.
-- **Consola y red**: sin errores en consola ni requests 4xx/5xx inesperadas.
+Escribí el nivel y una frase de justificación al principio del plan.
 
-Plantilla (un bloque por escenario):
+## Paso 1 — Casos `TC-XX`
+
+Archivo del plan:
+- Change de OpenSpec activo → `openspec/changes/<change>/qa.md` (+ `qa.mjs` si hay casos de script)
+- Sin OpenSpec → `docs/qa/<AAAA-MM-DD>-<slug>.md` (+ `docs/qa/<AAAA-MM-DD>-<slug>.qa.mjs`)
+
+**Reglas:**
+- **No transcribas la spec.** Cada `#### Scenario:` del change es un caso: citá su origen (`spec: <capability> › <Requirement> › <Scenario>`) y resumí el `THEN` en una frase. Sin spec, derivá del diff y marcá `origen: diff`.
+- QA aporta lo que la spec no cubre: **regresión** (consumidores del componente según `codegraph impact`) y **bordes** (vacío, uno, muchos, error de API, permisos).
+- Cada caso ejecuta una regla observable; nada de casos triviales.
+- Prioridad: **must** (criterio de la spec o riesgo real) / **should** (cosmético, exploratorio). Los must se corren primero.
+
+**Ejecutor por caso** — elegí el más barato que pueda observar la regla:
+
+| Ejecutor | Para qué | Costo |
+|---|---|---|
+| `vitest` | Estados (cargando, vacío, error 4xx/5xx), validaciones de formulario, lógica de render. Test con Testing Library + mock del service | Mínimo, y queda como regresión permanente |
+| `script` | Layout, tema, responsive, persistencia, flujos repetibles. Va en el `.qa.mjs` y lo corre `tools/qa-runner/run.mjs` | Bajo: una llamada de Bash para toda la matriz |
+| `mcp` | Exploratorio o algo que no se puede escribir de antemano (hover fino, drag, revisar visualmente un layout nuevo) | Alto: usar con moderación |
+| `manual` | Lo que requiere al usuario (impresión física, WhatsApp real) | Lo ejecuta el usuario; registrás lo que reporte |
+
+**Formato** (una línea por caso, detalle solo si hace falta):
 
 ```markdown
-### QA-01 · <título corto>
-- **Pantalla**: /ruta
-- **Precondición**: datos/estado necesarios
-- **Pasos**: 1) … 2) …
-- **Resultado esperado**: qué se ve (layout, textos, colores/tokens, contraste, estados)
-- **Viewports / temas**: desktop+mobile · oscuro+claro
-- **Estado**: ⏳ pendiente
+## Riesgo: medio — cambia el sidebar compartido por todas las pantallas
+
+- [ ] **TC-01** · must · script · desktop-dark,desktop-light · Colapsar/expandir: el ancho pasa de 290 a 90 y vuelve — *spec: layout › Sidebar › Colapsar*
+- [ ] **TC-02** · must · vitest · Lista vacía muestra el estado vacío — *borde*
+- [ ] **TC-03** · should · mcp · desktop-dark · Hover del rail se ve como overlay — *origen: diff*
+- [ ] **TC-04** · must · script · desktop-dark · Regresión: /appointments recalcula el calendario al colapsar — *regresión: Appointments*
 ```
 
-Mostrale al usuario la lista de escenarios (solo títulos) antes de ejecutar.
+Mostrale al usuario la lista (IDs + títulos + ejecutor) antes de ejecutar.
 
-## Paso 2 — Ejecución con DevTools
+## Paso 2 — Ejecución (de lo más barato a lo más caro)
 
-Delegá la ejecución al subagente **`qa-visual-runner`** (mantiene screenshots y snapshots fuera del contexto principal). Pasale: ruta del `qa.md`, URL base `http://localhost:5173`, credenciales y la carpeta de evidencia `tmp/qa/<slug>/` (git-ignored).
-Para re-ejecutar después de un fix, pasale solo los IDs de los escenarios a correr.
+1. **`vitest`**: escribí/ajustá el test junto al componente y corré `npx vitest run <ruta>` (siguiendo `frontend/CLAUDE.md` y `.claude/rules/`).
+2. **`script`**: escribí el `.qa.mjs` (ver `tools/qa-runner/example.qa.mjs`) y corré:
+   ```bash
+   QA_EMAIL=… QA_PASSWORD=… node tools/qa-runner/run.mjs <archivo.qa.mjs> [--only TC-01,TC-04]
+   ```
+   - El `check` devuelve `{ pass, reason, facts }`. `facts` es un **JSON chico con lo medido** (rects, estilos computados, `localStorage`, textos): es la evidencia, no la captura.
+   - El runner ya revisa errores de consola y requests ≥ 400 (usá `allowStatus` para los esperados) y guarda capturas jpeg en `tmp/qa/<slug>/`.
+   - Salida: una línea por caso × combinación + detalle solo de los fallos. Exit 1 si algo falló.
+3. **`mcp`**: delegá en el subagente **`qa-visual-runner`** pasándole la ruta del plan, los IDs `mcp`, la URL base y la carpeta `tmp/qa/<slug>/`. Si el subagente no está disponible, seguí su protocolo vos mismo.
 
-Si el subagente no está disponible, ejecutá vos mismo siguiendo el protocolo de `.claude/agents/qa-visual-runner.md`.
+**Reuso de resultados:** un caso ✅ no se vuelve a correr si desde ese resultado no cambiaron los archivos que ejercita (`git diff --stat <sha-del-resultado>`). Tras un fix, re-ejecutá solo los casos afectados (`--only`).
 
-## Paso 3 — Revisión de cada escenario
+**Resultados válidos:** `pass` ✅ · `fail` ❌ · `blocked` 🚧 (falta app/datos/credenciales) · `not-run` ⏭️ (con motivo). **Nunca** marques ✅ algo que no se ejecutó.
 
-Con el reporte del runner:
-1. Abrí (Read) las capturas de los escenarios ❌ y ⚠️, y al menos una ✅ por pantalla, para validar con tu propio criterio que el resultado coincide con lo esperado (no confíes solo en el veredicto del runner).
-2. Actualizá el **Estado** de cada escenario en `qa.md` (✅ pasa · ❌ falla · ⚠️ observación) con una línea de evidencia (`tmp/qa/<slug>/QA-01-desktop-dark.png`, mensaje de consola, request fallida).
+## Paso 3 — Revisión
 
-## Paso 4 — Auditoría y corrección de errores
+1. Abrí (Read) **solo las capturas de los ❌** y de los casos `mcp` cuyo veredicto dependa de lo visual. Para los ✅ de script alcanza con los `facts`.
+2. Actualizá cada caso en el plan: `[x]` + resultado + SHA corto + evidencia en una línea (`facts` relevante o ruta de la captura).
+
+## Paso 4 — Auditoría y corrección
 
 Por cada ❌:
-1. **Auditar**: causa raíz con evidencia (consola, red, `get_css_styles` del elemento, componente y token involucrado). Nada de fixes a ciegas.
-2. **Corregir** en el código respetando `frontend/CLAUDE.md` y `.claude/rules/frontend-ui.md` (tokens semánticos, sin `dark:` ni hex).
+1. **Auditar**: causa raíz con evidencia (consola, red, estilos computados, componente y token involucrado). Nada de fixes a ciegas.
+2. **Corregir** respetando `frontend/CLAUDE.md` y `.claude/rules/frontend-ui.md` (tokens semánticos, sin `dark:` ni hex).
 3. Correr tests + lint de la app tocada.
-4. **Re-ejecutar** el escenario fallido + sus regresiones.
-5. Registrar en `qa.md` una sección `## Hallazgos` con: ID, síntoma, causa raíz, fix (`archivo:línea`), estado.
+4. **Re-ejecutar** solo el caso fallido + sus regresiones (`--only`).
+5. Registrar en `## Hallazgos`: ID, síntoma, causa raíz, fix (`archivo:línea`), estado.
 
-Máximo 3 ciclos por escenario; si sigue fallando, frená y escalá al usuario con la evidencia.
+Máximo 3 ciclos por caso; si sigue fallando, frená y escalá al usuario con la evidencia.
 Los ⚠️ (cosméticos o fuera de alcance) se reportan al usuario, no se corrigen sin preguntar.
+Si un caso descubre un comportamiento que **debería estar en la spec y no está**, anotalo como **gap de spec** (no lo entierres como un caso más).
 
 ## Cierre
 
-Resumen al usuario: escenarios ✅/❌/⚠️, hallazgos corregidos, pendientes y ruta al `qa.md`.
+Resumen al usuario: riesgo, casos ✅/❌/🚧/⏭️ por ejecutor, hallazgos corregidos, gaps de spec, pendientes y ruta al plan.
 En un change de OpenSpec, el QA visual va **después** de `react-reviewer` y **antes** de `spec-verifier`.
