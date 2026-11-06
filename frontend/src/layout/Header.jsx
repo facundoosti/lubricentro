@@ -18,22 +18,13 @@ import { useTour } from "@hooks/useTour";
 import { useThemeStore } from "@stores/useThemeStore";
 
 const Header = () => {
-  const { isMobileOpen, toggleSidebar, toggleMobileSidebar } =
-    useSidebarStore();
+  const { isMobileOpen, toggleMobileSidebar } = useSidebarStore();
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { startTour } = useTour();
   const { theme, toggleTheme } = useThemeStore();
   const isDark = theme === "dark";
-
-  const handleToggle = () => {
-    if (window.innerWidth >= 1024) {
-      toggleSidebar();
-    } else {
-      toggleMobileSidebar();
-    }
-  };
 
   const handleLogout = () => {
     logout();
@@ -53,12 +44,14 @@ const Header = () => {
 
   return (
     <header className="fixed top-0 w-full z-50 flex items-center justify-between px-4 lg:px-6 h-16 bg-surface border-b border-outline-variant">
-      {/* Left: toggle */}
+      {/* Left: toggle del drawer en mobile (en desktop se colapsa desde el sidebar) */}
       <div className="flex items-center gap-3">
         <button
-          onClick={handleToggle}
-          aria-label="Toggle Sidebar"
-          className="p-2 text-secondary hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-colors"
+          onClick={toggleMobileSidebar}
+          aria-label={isMobileOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={isMobileOpen}
+          aria-controls="tour-sidebar"
+          className="lg:hidden p-2 text-secondary hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-colors"
         >
           {isMobileOpen ? (
             <X className="w-5 h-5" />

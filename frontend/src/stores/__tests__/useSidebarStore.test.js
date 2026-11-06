@@ -51,6 +51,18 @@ describe('useSidebarStore', () => {
       useSidebarStore.getState().toggleSidebar()
       expect(useSidebarStore.getState().isExpanded).toBe(true)
     })
+
+    it('resets isHovered so the sidebar collapses right away', () => {
+      useSidebarStore.setState({ isHovered: true })
+      useSidebarStore.getState().toggleSidebar()
+      expect(useSidebarStore.getState().isHovered).toBe(false)
+    })
+
+    it('persists only isExpanded in localStorage', () => {
+      useSidebarStore.getState().toggleSidebar()
+      const stored = JSON.parse(localStorage.getItem('sidebar'))
+      expect(stored.state).toEqual({ isExpanded: false })
+    })
   })
 
   describe('toggleMobileSidebar', () => {

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useSidebarStore } from "@stores/useSidebarStore";
 import { useAuthStore } from "@stores/useAuthStore";
+import SidebarCollapseToggle from "@layout/SidebarCollapseToggle";
 
 const NavItem = ({ name, icon, path, subItems, menuType, index, tourId }) => {
   const { isExpanded, isMobileOpen, isHovered, openSubmenu, toggleSubmenu } =
@@ -230,6 +231,7 @@ const Sidebar = () => {
           aria-hidden="true"
         />
       )}
+      <SidebarCollapseToggle />
       <aside
         id="tour-sidebar"
         className={`fixed flex flex-col top-0 left-0 h-full bg-surface border-r border-outline-variant z-50 transition-all duration-300 ease-in-out
@@ -263,7 +265,7 @@ const Sidebar = () => {
         </div>
 
         {/* Navigation */}
-        <div className="flex flex-col flex-1 overflow-y-auto no-scrollbar px-3 py-4">
+        <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden no-scrollbar px-3 py-4">
           <nav className="flex flex-col gap-6 flex-1">
             <div>
               <h2
