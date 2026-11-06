@@ -40,19 +40,37 @@ make health           # Check service connectivity
 
 ## OpenSpec
 
-Todos los artefactos generados por OpenSpec (diseño, especificación, tareas) deben estar escritos **en español**. Esto incluye títulos, descripciones, criterios de aceptación, tareas de implementación y cualquier otro contenido de los archivos de change.
+Features and non-trivial changes follow the OpenSpec flow. Artifacts are written **in Spanish** (enforced via `openspec/config.yaml`).
+
+1. `/openspec-explore` — think through scope (optional)
+2. `/openspec-propose <idea>` — creates proposal, specs, design, tasks under `openspec/changes/`
+3. `/openspec-apply-change` — implement tasks one by one; tests + lint before checking each task
+4. `rails-reviewer` / `react-reviewer` subagents on the diff, then `spec-verifier`
+5. `/openspec-archive-change` — merge specs into `openspec/specs/`
+
+Small fixes (typos, one-line bugs) can skip OpenSpec.
 
 ## Code Search
 
-Use [codegraph](https://github.com/colbymchenry/codegraph) for indexed semantic searches instead of `grep`. Prefer it for:
+Use [codegraph](https://github.com/colbymchenry/codegraph) (MCP server `codegraph` in `.mcp.json`, or CLI) instead of `grep` for:
 
 - Locating symbols, models, controllers, or components when the exact file is unknown
-- OpenSpec operations: exploring scope before proposing or applying a change
+- Measuring the blast radius of a change before proposing or applying it
 - Any broad codebase search spanning multiple directories
 
 ```bash
-codegraph search "<query>"   # semantic search across the indexed codebase
-codegraph index              # re-index after large changes
+codegraph query "<search>"        # find symbols
+codegraph callers <symbol>        # who calls it
+codegraph impact <symbol>         # what is affected by changing it
+codegraph context "<task>"        # build markdown context for a task
+codegraph sync                    # incremental re-index (runs automatically on SessionStart)
 ```
 
 Fall back to `grep` only for exact string matches where a literal pattern is known.
+
+## Guardrails (`.claude/`)
+
+- **Permissions** (`settings.json`): `.env*` and Rails keys are unreadable; `schema.rb` is not editable; `db:drop`/`db:reset`/force-push are denied; `git push` and `db:migrate` ask first.
+- **Hooks** (`.claude/hooks/`): block edits to generated/secret files, auto-fix with RuboCop/ESLint after each edit, run affected RSpec/Vitest tests when Claude stops (failures make it keep working).
+- **Path-scoped rules** in `.claude/rules/` load only when touching matching files (specs, migrations, UI, frontend tests).
+- Personal overrides go in `.claude/settings.local.json` or `CLAUDE.local.md` (both git-ignored).

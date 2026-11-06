@@ -34,7 +34,7 @@ export default [
           patterns: [
             {
               group: ['../*', './*'],
-              message: 'Usa alias de importación (@ui, @services, @components, etc.) en lugar de rutas relativas. Ver .cursorrules para más detalles.',
+              message: 'Usa alias de importación (@ui, @services, @components, etc.) en lugar de rutas relativas. Ver frontend/CLAUDE.md.',
             },
           ],
         },
