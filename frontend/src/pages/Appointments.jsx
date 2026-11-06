@@ -78,6 +78,15 @@ const AppointmentTooltip = ({ x, y, appointment }) => {
 const Appointments = () => {
   const navigate = useNavigate();
   const calendarRef = useRef(null);
+
+  // FullCalendar solo recalcula su tamaño en window.resize; el contenedor también
+  // cambia de ancho al colapsar/expandir el sidebar.
+  const observeCalendarSize = useCallback((node) => {
+    if (!node || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => calendarRef.current?.getApi().updateSize());
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
   const [view, setView] = useState('calendar'); // 'calendar' | 'list'
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
@@ -256,7 +265,7 @@ const Appointments = () => {
                   </div>
                 ))}
               </div>
-              <div className="appointments-calendar">
+              <div ref={observeCalendarSize} className="appointments-calendar">
                 <FullCalendar
                   ref={calendarRef}
                   plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}

@@ -6,7 +6,7 @@ import Sidebar from '@layout/Sidebar';
 import TokenExpiredHandler from '@common/TokenExpiredHandler';
 
 const Layout = () => {
-  const { isExpanded, isHovered, setIsMobile } = useSidebarStore();
+  const { isExpanded, setIsMobile } = useSidebarStore();
 
   useEffect(() => {
     const handleResize = () => {
@@ -25,7 +25,8 @@ const Layout = () => {
         <Sidebar />
         <div
           className={`relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out ${
-            isExpanded || isHovered ? 'lg:ml-[290px]' : 'lg:ml-[90px]'
+            // El hover expande el sidebar por encima del contenido, sin moverlo
+            isExpanded ? 'lg:ml-[290px]' : 'lg:ml-[90px]'
           }`}
         >
           <main className="pt-16 min-h-screen bg-background">

@@ -197,7 +197,7 @@ input[type="checkbox"]:indeterminate::after {
 
 /* ── Utilidades de menú (sidebar) ───────────────────────────────── */
 @utility menu-item {
-  @apply relative flex items-center w-full gap-3 px-3 py-2.5 font-medium rounded-lg text-theme-sm transition-colors duration-150;
+  @apply relative flex items-center w-full gap-3 px-3 py-2.5 font-medium rounded-lg text-theme-sm whitespace-nowrap overflow-hidden transition-colors duration-150;
 }
 @utility menu-item-active {
   @apply bg-surface-container-high text-primary;
@@ -223,7 +223,7 @@ input[type="checkbox"]:indeterminate::after {
   @apply text-secondary group-hover:text-on-surface;
 }
 @utility menu-dropdown-item {
-  @apply relative flex items-center gap-3 rounded-lg px-3 py-2 text-theme-sm font-medium transition-colors duration-150;
+  @apply relative flex items-center gap-3 rounded-lg px-3 py-2 text-theme-sm font-medium whitespace-nowrap overflow-hidden transition-colors duration-150;
 }
 @utility menu-dropdown-item-active {
   @apply text-primary bg-surface-container-high;
