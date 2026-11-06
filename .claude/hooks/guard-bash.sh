@@ -17,7 +17,8 @@ if grep -Eq 'master\.key|credentials/[^ ]*\.key' <<<"$cmd"; then
 fi
 
 # Commits/push directo a main.
-if grep -Eq 'git push( [^ ]+)* (origin )?main\b' <<<"$cmd"; then
+# Se evalúa cada segmento (&&, ||, ;, |) por separado para no confundir con `gh pr create --base main`.
+if sed -E 's/(&&|\|\||;|\|)/\n/g' <<<"$cmd" | grep -Eq '^[[:space:]]*git push( [^ ]+)* (origin )?(HEAD:)?main([[:space:]]|$)'; then
   echo "Bloqueado: no se pushea directo a main. Usá una rama y abrí un PR." >&2
   exit 2
 fi
