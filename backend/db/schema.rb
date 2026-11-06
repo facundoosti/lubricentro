@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_29_100003) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_06_204242) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -179,6 +179,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_29_100003) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["uid"], name: "index_oauth_applications_on_uid", unique: true
+  end
+
+  create_table "product_imports", force: :cascade do |t|
+    t.string "job_id", null: false
+    t.string "status", default: "queued", null: false
+    t.integer "processed", default: 0, null: false
+    t.integer "total", default: 0, null: false
+    t.integer "imported", default: 0, null: false
+    t.integer "errors_count", default: 0, null: false
+    t.jsonb "error_details", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["job_id"], name: "index_product_imports_on_job_id", unique: true
   end
 
   create_table "products", force: :cascade do |t|

@@ -26,7 +26,8 @@ class ProductImportService
     process_rows(spreadsheet, total)
     { imported: @imported, errors: @errors }
   rescue Roo::Error, StandardError => e
-    { imported: 0, errors: [ "Error al leer el archivo: #{e.message}" ] }
+    # fatal: el job lo publica como "failed" (las filas ya guardadas se informan igual)
+    { imported: @imported, errors: @errors + [ { row: nil, message: "Error al leer el archivo: #{e.message}" } ], fatal: true }
   end
 
   private
@@ -89,16 +90,22 @@ class ProductImportService
     @errors << { row: row_number, message: "Error inesperado: #{e.message}" }
   end
 
+  PROGRESS_EVERY = 20
+
   def broadcast_progress(processed, total)
     return unless @job_id
+    return unless processed == total || (processed % PROGRESS_EVERY).zero?
 
-    ActionCable.server.broadcast("import_#{@job_id}", {
+    ProductImportStatus.publish(@job_id, {
       type: "progress",
       processed: processed,
       total: total,
       imported: @imported,
       errors_count: @errors.size
     })
+  rescue StandardError => e
+    # El progreso es informativo: si falla, la importación sigue
+    Rails.logger.warn("[ProductImportService] no se pudo publicar progreso de #{@job_id}: #{e.message}")
   end
 
   # Acepta números (celdas numéricas de Excel) y texto en formato argentino

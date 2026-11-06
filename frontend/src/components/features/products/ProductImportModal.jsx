@@ -1,10 +1,11 @@
-import { useState, useRef } from 'react';
-import { Upload, Download, FileSpreadsheet, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
-import { useImportProducts, useDownloadImportTemplate } from '@services/productsService';
-import { useImportCable } from '@hooks/useImportCable';
+import { useState, useRef, useEffect } from 'react';
+import { Upload, Download, FileSpreadsheet, X, Loader2 } from 'lucide-react';
+import { useImportProducts, useDownloadImportTemplate, productKeys } from '@services/productsService';
+import { useImportProgress } from '@hooks/useImportProgress';
 import { useQueryClient } from '@tanstack/react-query';
-import { productKeys } from '@services/productsService';
-import { showSuccess, showError } from '@services/notificationService';
+import { showError } from '@services/notificationService';
+import ProductImportResult from '@components/features/products/ProductImportResult';
+import { notifyImportResult } from '@components/features/products/importResult';
 
 const ProductImportModal = ({ isOpen, onClose }) => {
   const [file, setFile] = useState(null);
@@ -17,15 +18,13 @@ const ProductImportModal = ({ isOpen, onClose }) => {
   const importMutation = useImportProducts();
   const downloadTemplate = useDownloadImportTemplate();
 
-  useImportCable(jobId, {
+  useImportProgress(jobId, {
     onProgress: (data) => setProgress(data),
     onComplete: (data) => {
       setJobId(null);
       setResult(data);
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
-      if (data.imported > 0) {
-        showSuccess(`${data.imported} producto(s) importados exitosamente`);
-      }
+      notifyImportResult(data);
     },
   });
 
@@ -52,13 +51,27 @@ const ProductImportModal = ({ isOpen, onClose }) => {
     }
   };
 
+  // Cerrar durante una importación no la cancela: el seguimiento sigue
+  // (el modal queda montado en /products) y el resultado llega como toast.
   const handleClose = () => {
-    setFile(null);
-    setJobId(null);
-    setProgress(null);
-    setResult(null);
+    if (!jobId) {
+      setFile(null);
+      setProgress(null);
+      setResult(null);
+    }
     onClose();
   };
+
+  const isUploading = importMutation.isPending;
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape' && !isUploading) handleClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  });
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -69,7 +82,7 @@ const ProductImportModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const isImporting = !!jobId || importMutation.isPending;
+  const isImporting = !!jobId || isUploading;
   const progressPercent = progress?.total > 0
     ? Math.round((progress.processed / progress.total) * 100)
     : 0;
@@ -78,8 +91,13 @@ const ProductImportModal = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={!isImporting ? handleClose : undefined} />
-      <div className="relative bg-surface-container border border-outline-variant rounded-xl shadow-2xl w-full max-w-lg">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={!isUploading ? handleClose : undefined} />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="product-import-title"
+        className="relative bg-surface-container border border-outline-variant rounded-xl shadow-2xl w-full max-w-lg"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-outline-variant">
           <div className="flex items-center gap-3">
@@ -87,13 +105,15 @@ const ProductImportModal = ({ isOpen, onClose }) => {
               <FileSpreadsheet className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-on-surface">Importar Productos</h2>
+              <h2 id="product-import-title" className="text-base font-semibold text-on-surface">Importar Productos</h2>
               <p className="text-xs text-secondary">Cargá un archivo Excel con productos</p>
             </div>
           </div>
           <button
+            type="button"
+            aria-label="Cerrar"
             onClick={handleClose}
-            disabled={isImporting}
+            disabled={isUploading}
             className="p-1.5 rounded-md text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <X className="w-4 h-4" />
@@ -151,8 +171,8 @@ const ProductImportModal = ({ isOpen, onClose }) => {
           {/* Progress */}
           {isImporting && (
             <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-primary-container/10 border border-primary/20 rounded-lg">
-                <Loader2 className="w-4 h-4 text-primary animate-spin shrink-0" />
+              <div role="status" aria-live="polite" className="flex items-center gap-3 p-3 bg-primary-container/10 border border-primary/20 rounded-lg">
+                <Loader2 className="w-4 h-4 text-primary animate-spin shrink-0" aria-hidden="true" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-on-surface">
                     {progress
@@ -170,56 +190,41 @@ const ProductImportModal = ({ isOpen, onClose }) => {
                 )}
               </div>
               {progress?.total > 0 && (
-                <div className="h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+                <div
+                  role="progressbar"
+                  aria-label="Progreso de la importación"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={progressPercent}
+                  className="h-1.5 bg-surface-container-high rounded-full overflow-hidden"
+                >
                   <div
                     className="h-full bg-primary rounded-full transition-all duration-200"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
               )}
+              {jobId && (
+                <p className="text-xs text-on-surface-variant">
+                  Podés cerrar esta ventana: la importación sigue en el servidor y te avisamos al terminar.
+                </p>
+              )}
             </div>
           )}
 
           {/* Result */}
-          {result && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 p-3 bg-tertiary-container/10 border border-tertiary/20 rounded-lg">
-                <CheckCircle className="w-4 h-4 text-tertiary shrink-0" />
-                <p className="text-sm text-on-surface">
-                  <span className="font-semibold text-tertiary">{result.imported}</span> producto(s) importados correctamente
-                </p>
-              </div>
-
-              {result.errors?.length > 0 && (
-                <div className="p-3 bg-error-container/10 border border-error/20 rounded-lg space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-error shrink-0" />
-                    <p className="text-sm font-medium text-on-error-container">
-                      {result.errors.length} fila(s) con errores
-                    </p>
-                  </div>
-                  <ul className="text-xs text-secondary space-y-1 max-h-32 overflow-y-auto">
-                    {result.errors.map((e, i) => (
-                      <li key={i} className="flex gap-2">
-                        <span className="text-error font-mono shrink-0">Fila {e.row}:</span>
-                        <span>{e.message}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
+          {result && <ProductImportResult result={result} />}
         </div>
 
         {/* Footer */}
         <div className="flex justify-end gap-3 p-6 pt-0">
           <button
+            type="button"
             onClick={handleClose}
-            disabled={isImporting}
+            disabled={isUploading}
             className="px-4 py-2 text-sm bg-surface-container-high border border-outline-variant text-on-surface rounded-lg hover:brightness-110 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {result ? 'Cerrar' : 'Cancelar'}
+            {result || isImporting ? 'Cerrar' : 'Cancelar'}
           </button>
           {!result && !isImporting && (
             <button

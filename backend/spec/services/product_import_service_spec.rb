@@ -9,10 +9,11 @@ RSpec.describe ProductImportService do
 
   describe '#call' do
     context 'with an unsupported file format' do
-      it 'returns an error' do
+      it 'returns a fatal error' do
         result = call_service("/tmp/file.csv", "products.csv")
         expect(result[:imported]).to eq(0)
-        expect(result[:errors].first).to include("Error al leer el archivo")
+        expect(result[:fatal]).to be true
+        expect(result[:errors].first[:message]).to include("Error al leer el archivo")
       end
     end
 
@@ -162,6 +163,14 @@ RSpec.describe ProductImportService do
       context 'with a job_id for progress broadcast' do
         let(:job_id) { "test-job-123" }
 
+        it 'keeps importing when publishing progress fails' do
+          allow(ProductImportStatus).to receive(:publish).and_raise(ActiveRecord::ConnectionTimeoutError)
+          allow(Rails.logger).to receive(:warn)
+          result = call_service("/tmp/file.xlsx", "products.xlsx")
+          expect(result[:imported]).to eq(2)
+          expect(result[:fatal]).to be_nil
+        end
+
         it 'broadcasts progress via ActionCable' do
           expect(ActionCable.server).to receive(:broadcast).with(
             "import_#{job_id}",
@@ -178,10 +187,11 @@ RSpec.describe ProductImportService do
         allow(Roo::Excelx).to receive(:new).and_raise(Roo::Error, "corrupt file")
       end
 
-      it 'returns an error result' do
+      it 'returns a fatal error result' do
         result = call_service("/tmp/file.xlsx", "products.xlsx")
         expect(result[:imported]).to eq(0)
-        expect(result[:errors].first).to include("corrupt file")
+        expect(result[:fatal]).to be true
+        expect(result[:errors].first[:message]).to include("corrupt file")
       end
     end
   end

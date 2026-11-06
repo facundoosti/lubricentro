@@ -60,14 +60,31 @@ class Api::V1::ProductsController < ApplicationController
     end
 
     job_id = SecureRandom.uuid
-    import_dir = Rails.root.join("tmp", "imports")
-    FileUtils.mkdir_p(import_dir)
-    file_path = import_dir.join("#{job_id}#{ext}").to_s
-    FileUtils.cp(uploaded.tempfile.path, file_path)
+    # Ruta relativa a Rails.root: el worker puede correr en otro proceso/contenedor
+    relative_path = File.join("tmp", "imports", "#{job_id}#{ext}")
+    FileUtils.mkdir_p(Rails.root.join("tmp", "imports"))
+    FileUtils.cp(uploaded.tempfile.path, Rails.root.join(relative_path))
 
-    ProductImportJob.perform_later(file_path, uploaded.original_filename, job_id)
+    begin
+      ProductImportStatus.publish(job_id, { type: "queued" })
+      ProductImportJob.perform_later(relative_path, uploaded.original_filename, job_id)
+    rescue StandardError => e
+      Rails.logger.error("[ProductsController#import] no se pudo encolar #{job_id}: #{e.message}")
+      FileUtils.rm_f(Rails.root.join(relative_path))
+      render_json({}, message: "No se pudo iniciar la importación", errors: [ "Intentá de nuevo en unos minutos" ], status: :service_unavailable)
+      return
+    end
 
     render_json({ job_id: job_id }, message: "Importación iniciada", status: :accepted)
+  end
+
+  def import_status
+    status = ProductImportStatus.read(params[:job_id])
+    if status
+      render_json({ import: status })
+    else
+      render_json({}, message: "Importación no encontrada", errors: [ "No hay una importación con ese id" ], status: :not_found)
+    end
   end
 
   def import_template

@@ -186,6 +186,29 @@ export const useImportProducts = () => {
   });
 };
 
+export const IMPORT_STATUS_POLL_MS = 2500;
+
+// Estado de una importación (respaldo de Action Cable): se consulta
+// periódicamente mientras la importación está en curso.
+export const useImportStatus = (jobId, { enabled = true } = {}) => {
+  return useQuery({
+    queryKey: [...productKeys.all, 'import-status', jobId],
+    queryFn: async () => {
+      const response = await api.get(`/products/import_status/${jobId}`);
+      return response.data?.data?.import ?? null;
+    },
+    enabled: !!jobId && enabled,
+    // 404 al principio es una carrera normal (el estado todavía no se escribió):
+    // se reintenta unas veces; ante error persistente se deja de consultar.
+    retry: (failureCount, error) => failureCount < (error?.response?.status === 404 ? 6 : 2),
+    retryDelay: IMPORT_STATUS_POLL_MS,
+    refetchInterval: (query) => (query.state.status === 'error' ? false : IMPORT_STATUS_POLL_MS),
+    refetchIntervalInBackground: true,
+    staleTime: 0,
+    gcTime: 0,
+  });
+};
+
 export const useDownloadImportTemplate = () => {
   return async () => {
     const response = await api.get('/products/import_template', { responseType: 'blob' });

@@ -46,6 +46,7 @@ Rails.application.routes.draw do
         collection do
           post :import
           get :import_template
+          get "import_status/:job_id", action: :import_status, as: :import_status
           post :bulk_price_preview
           post :bulk_price_update
           get :brands

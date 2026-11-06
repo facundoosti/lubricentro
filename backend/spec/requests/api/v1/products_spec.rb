@@ -192,11 +192,67 @@ RSpec.describe "Api::V1::Products", type: :request do
         expect(response).to have_http_status(:accepted)
         expect(json_response[:data][:job_id]).to be_present
       end
+
+      it "enqueues the job with a path relative to Rails.root" do
+        post import_api_v1_products_url, params: { file: file }, headers: auth_headers(user)
+        job_id = json_response[:data][:job_id]
+        expect(ProductImportJob).to have_received(:perform_later).with("tmp/imports/#{job_id}.xlsx", "test.xlsx", job_id)
+      end
+
+      it "returns service_unavailable and cleans up when the job cannot be enqueued" do
+        allow(ProductImportJob).to receive(:perform_later).and_raise(StandardError, "queue down")
+        expect {
+          post import_api_v1_products_url, params: { file: file }, headers: auth_headers(user)
+        }.not_to change { Dir.glob(Rails.root.join("tmp/imports/*.xlsx")).size }
+        expect(response).to have_http_status(:service_unavailable)
+        expect(json_response[:success]).to be false
+      end
+
+      it "stores the queued status for the job" do
+        allow(ProductImportStatus).to receive(:publish)
+        post import_api_v1_products_url, params: { file: file }, headers: auth_headers(user)
+        expect(ProductImportStatus).to have_received(:publish).with(json_response[:data][:job_id], { type: "queued" })
+      end
     end
 
     context "without authentication" do
       it "returns unauthorized" do
         post import_api_v1_products_url
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
+
+  describe "GET /api/v1/products/import_status/:job_id" do
+    let(:job_id) { SecureRandom.uuid }
+
+    context "when the import exists" do
+      before do
+        ProductImportStatus.publish(job_id, { type: "complete", imported: 3, errors: [ { row: 2, message: "falla" } ] })
+      end
+
+      it "returns the stored status" do
+        get import_status_api_v1_products_url(job_id: job_id), headers: auth_headers(user)
+        expect(response).to have_http_status(:ok)
+        expect(json_response[:success]).to be true
+        expect(json_response[:data][:import]).to include(type: "complete", imported: 3, job_id: job_id)
+        expect(json_response[:data][:import][:errors_count]).to eq(1)
+        expect(json_response[:data][:import][:errors].first).to include(row: 2, message: "falla")
+      end
+    end
+
+    context "when the import does not exist" do
+      it "returns not_found" do
+        get import_status_api_v1_products_url(job_id: "no-existe"), headers: auth_headers(user)
+        expect(response).to have_http_status(:not_found)
+        expect(json_response[:success]).to be false
+        expect(json_response[:errors]).to be_present
+      end
+    end
+
+    context "without authentication" do
+      it "returns unauthorized" do
+        get import_status_api_v1_products_url(job_id: job_id)
         expect(response).to have_http_status(:unauthorized)
       end
     end
