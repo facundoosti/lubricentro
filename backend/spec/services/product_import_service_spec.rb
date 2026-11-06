@@ -97,6 +97,68 @@ RSpec.describe ProductImportService do
         end
       end
 
+      context 'with prices in Argentine format' do
+        let(:rows) do
+          [
+            [ "SKU", "Nombre *", "Descripción", "Precio Unitario *", "Unidad", "Marca", "Proveedor" ],
+            [ "AR-1", "Aceite caja", nil, "$90.174,29",    nil, nil, nil ],
+            [ "AR-2", "Aceite tambor", nil, "2.227.470,71", nil, nil, nil ],
+            [ "AR-3", "Aceite balde", nil, 188_934.42,     nil, nil, nil ],
+            [ "AR-4", "Aceite miles", nil, "13.886",       nil, nil, nil ]
+          ]
+        end
+
+        before do
+          allow(spreadsheet_double).to receive(:each_with_index) do |&block|
+            rows.each_with_index(&block)
+          end
+        end
+
+        it 'parses thousands and decimal separators correctly' do
+          call_service("/tmp/file.xlsx", "products.xlsx")
+          prices = Product.where(sku: %w[AR-1 AR-2 AR-3 AR-4]).order(:sku).pluck(:unit_price)
+          expect(prices).to eq([ 90_174.29, 2_227_470.71, 188_934.42, 13_886 ].map { |p| BigDecimal(p.to_s) })
+        end
+      end
+
+      context 'when the price cell is a dash' do
+        let(:rows) do
+          [
+            [ "SKU", "Nombre *", "Descripción", "Precio Unitario *", "Unidad", "Marca", "Proveedor" ],
+            [ "NP-1", "Sin precio", nil, "-", nil, nil, nil ]
+          ]
+        end
+
+        it 'skips the row instead of importing it at $0' do
+          result = call_service("/tmp/file.xlsx", "products.xlsx")
+          expect(result[:imported]).to eq(0)
+          expect(result[:errors].first[:message]).to include("precio unitario es inválido")
+        end
+      end
+
+      context 'when updating an existing product with blank optional cells' do
+        let(:supplier) { create(:supplier) }
+        let!(:existing_product) do
+          create(:product, sku: "UP-1", name: "Filtro viejo", description: "desc", brand: "FRAM",
+                           unit: "unidad", stock: 7, supplier: supplier)
+        end
+        let(:rows) do
+          [
+            [ "SKU", "Nombre *", "Descripción", "Precio Unitario *", "Unidad", "Marca", "Proveedor", "Stock" ],
+            [ "UP-1", "Filtro nuevo", nil, "1.500,00", nil, nil, nil, nil ]
+          ]
+        end
+
+        it 'updates name and price but keeps stock, supplier and other data' do
+          call_service("/tmp/file.xlsx", "products.xlsx")
+          existing_product.reload
+          expect(existing_product).to have_attributes(
+            name: "Filtro nuevo", unit_price: 1500, stock: 7, supplier_id: supplier.id,
+            description: "desc", brand: "FRAM", unit: "unidad"
+          )
+        end
+      end
+
       context 'with a job_id for progress broadcast' do
         let(:job_id) { "test-job-123" }
 

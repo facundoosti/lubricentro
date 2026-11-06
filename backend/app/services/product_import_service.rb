@@ -57,7 +57,7 @@ class ProductImportService
     unit          = row[COLUMNS[:unit] - 1].to_s.strip.presence
     brand         = row[COLUMNS[:brand] - 1].to_s.strip.presence
     supplier_name = row[COLUMNS[:supplier_name] - 1].to_s.strip.presence
-    stock         = row[COLUMNS[:stock] - 1].to_s.strip.presence&.to_i || 0
+    stock         = row[COLUMNS[:stock] - 1].to_s.strip.presence&.to_i
 
     if name.blank?
       @errors << { row: row_number, message: "El nombre es requerido" }
@@ -75,15 +75,9 @@ class ProductImportService
     product ||= Product.find_by("name ILIKE ?", name)
     product ||= Product.new
 
-    product.assign_attributes(
-      name: name,
-      description: description,
-      unit_price: unit_price,
-      unit: unit,
-      brand: brand,
-      stock: stock,
-      supplier: supplier
-    )
+    # Las celdas opcionales vacías no pisan datos de productos existentes
+    optional = { description: description, unit: unit, brand: brand, supplier: supplier, stock: stock }.compact
+    product.assign_attributes(optional.merge(name: name, unit_price: unit_price))
     product.sku = sku if sku.present?
 
     if product.save
@@ -107,12 +101,22 @@ class ProductImportService
     })
   end
 
+  # Acepta números (celdas numéricas de Excel) y texto en formato argentino
+  # ("$90.174,29", "2.227.470,71") o con punto decimal ("5000.50").
   def parse_price(value)
-    return nil if value.nil?
-    cleaned = value.to_s.gsub(/[^0-9.,]/, "").gsub(",", ".")
-    price = cleaned.to_f
-    price >= 0 ? price : nil
-  rescue
+    return value.to_d if value.is_a?(Numeric)
+
+    cleaned = value.to_s.gsub(/[^0-9.,]/, "")
+    return nil unless cleaned.match?(/\d/)
+
+    if cleaned.include?(",")
+      cleaned = cleaned.delete(".").tr(",", ".")
+    elsif cleaned.match?(/\A\d{1,3}(\.\d{3})+\z/)
+      cleaned = cleaned.delete(".")
+    end
+
+    BigDecimal(cleaned)
+  rescue ArgumentError
     nil
   end
 
