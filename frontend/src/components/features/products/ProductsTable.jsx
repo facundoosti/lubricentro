@@ -108,18 +108,18 @@ const ProductsTable = ({
 
   const getProductIcon = (name) => {
     const productColors = {
-      'aceite': 'bg-blue-100 text-blue-600',
-      'filtro': 'bg-green-100 text-green-600',
-      'bujía': 'bg-red-100 text-red-600',
-      'frenos': 'bg-yellow-100 text-yellow-600',
-      'batería': 'bg-purple-100 text-purple-600',
-      'neumático': 'bg-gray-100 text-gray-600',
-      'lubricante': 'bg-indigo-100 text-indigo-600',
-      'refrigerante': 'bg-cyan-100 text-cyan-600',
-      'aditivo': 'bg-orange-100 text-orange-600',
+      'aceite': 'bg-primary/10 text-primary',
+      'filtro': 'bg-tertiary/10 text-tertiary',
+      'bujía': 'bg-error/10 text-error',
+      'frenos': 'bg-yellow-500/15 text-yellow-500',
+      'batería': 'bg-purple-500/15 text-purple-500',
+      'neumático': 'bg-surface-container-high text-on-surface-variant',
+      'lubricante': 'bg-indigo-500/15 text-indigo-500',
+      'refrigerante': 'bg-cyan-500/15 text-cyan-500',
+      'aditivo': 'bg-orange-500/15 text-orange-500',
     };
     const productName = name.toLowerCase();
-    let colorClass = 'bg-gray-100 text-gray-600';
+    let colorClass = 'bg-surface-container-high text-on-surface-variant';
     for (const [type, color] of Object.entries(productColors)) {
       if (productName.includes(type)) { colorClass = color; break; }
     }
@@ -356,17 +356,17 @@ const ProductsTable = ({
                               alt={product.name}
                               className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                               style={{
-                                outline: `2px solid ${isActive ? '#12b76a' : '#ef4444'}`,
+                                outline: `2px solid ${isActive ? 'var(--color-success-500)' : 'var(--color-error)'}`,
                                 outlineOffset: '2px',
-                                boxShadow: `0 0 8px 2px ${isActive ? '#12b76a66' : '#ef444466'}`,
+                                boxShadow: `0 0 8px 2px color-mix(in srgb, ${isActive ? 'var(--color-success-500)' : 'var(--color-error)'} 40%, transparent)`,
                               }}
                             />
                           ) : (
                             <div
                               style={{
-                                outline: `2px solid ${isActive ? '#12b76a' : '#ef4444'}`,
+                                outline: `2px solid ${isActive ? 'var(--color-success-500)' : 'var(--color-error)'}`,
                                 outlineOffset: '2px',
-                                boxShadow: `0 0 8px 2px ${isActive ? '#12b76a66' : '#ef444466'}`,
+                                boxShadow: `0 0 8px 2px color-mix(in srgb, ${isActive ? 'var(--color-success-500)' : 'var(--color-error)'} 40%, transparent)`,
                                 borderRadius: '9999px',
                               }}
                             >

@@ -27,7 +27,8 @@ config/master.key
 # dotenv, dotenv-rails
 # TODO Comment out these rules if environment variables can be committed
 .env
-.env*.local
+.env.*
+!.env.example
 
 ## Environment normalization:
 /.bundle
@@ -114,4 +115,6 @@ docs/notes.md
 .agents/skills
 backend/.agents/skills
 skills-lock.json
-.claude/commands/*
+.claude/projects/
+.claude/settings.local.json
+CLAUDE.local.md

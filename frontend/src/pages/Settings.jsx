@@ -269,7 +269,7 @@ const Settings = () => {
                       }`}
                     >
                       <span
-                        className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                        className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-surface-container shadow-sm transition-transform duration-200 ${
                           day.open ? "translate-x-5" : "translate-x-0"
                         }`}
                       />

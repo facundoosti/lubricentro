@@ -102,6 +102,15 @@ test-backend: ## Ejecutar tests del backend
 test-frontend: ## Ejecutar tests del frontend
 	docker-compose exec $(FRONTEND_SERVICE) npm test
 
+TEST_DATABASE_URL ?= postgresql://postgres:postgres@localhost:5435/lubricentro_test
+
+test-db-local: ## Levantar Postgres de test (pgvector, :5435) y preparar el schema
+	docker-compose --profile test up -d --wait postgres_test
+	cd backend && RAILS_ENV=test DATABASE_URL=$(TEST_DATABASE_URL) bin/rails db:prepare
+
+test-backend-local: ## Ejecutar RSpec localmente contra Postgres de test (:5435)
+	cd backend && RAILS_ENV=test DATABASE_URL=$(TEST_DATABASE_URL) bundle exec rspec
+
 test: ## Ejecutar todos los tests
 	@echo "🧪 Ejecutando tests del backend..."
 	docker-compose exec -e RAILS_ENV=test -e DATABASE_URL=postgresql://lubricentro:lubricentro123@postgres:5432/lubricentro_test $(BACKEND_SERVICE) bundle exec rspec

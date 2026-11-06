@@ -38,14 +38,14 @@ Una aplicación web moderna que digitaliza y optimiza las operaciones de un lubr
 lubricentro/
 ├── backend/              # Rails API
 ├── frontend/             # React App
-├── .cursorrules          # 🧠 Reglas de desarrollo para Cursor
+├── CLAUDE.md             # 🧠 Reglas para Claude Code (+ .claude/, openspec/)
 ├── DOCKER_README.md      # 🚀 Guía de deployment
 └── README.md
 ```
 
 ## 📚 **Documentación Técnica**
 
-- **`.cursorrules`** - Patrones y reglas del proyecto (LEER ANTES DE DESARROLLAR)
+- **`CLAUDE.md`** - Patrones y reglas del proyecto (LEER ANTES DE DESARROLLAR)
 - **`backend/BLUEPRINT_GUIDE.md`** - Guía técnica completa del backend
 - **`frontend/IMPORT_RULES.md`** - Reglas de importación y alias
 - **`DOCKER_README.md`** - Guía de deployment y producción
@@ -149,13 +149,13 @@ Frontend (React) ↔ HTTP/JSON API ↔ Backend (Rails) ↔ Database
 2. **Semana 2**: Testing frontend con Vitest
 3. **Semana 3**: Deploy y optimización final
 
-## 🧠 **Desarrollo con Cursor**
+## 🧠 **Desarrollo con Claude Code**
 
-Este proyecto está optimizado para desarrollo con **Cursor AI**:
+Este proyecto está configurado para desarrollo con **Claude Code** + OpenSpec + codegraph:
 
-### **Cursor Rules**
+### **Reglas**
 
-- Lee `.cursor/*` para entender patrones específicos
+- Lee `CLAUDE.md` y `.claude/rules/` para entender patrones específicos
 - Sigue las convenciones establecidas
 - Usa los patrones de arquitectura definidos
 - Consulta documentación técnica según necesites
@@ -196,7 +196,7 @@ El proyecto está configurado para deploy en Railway con GitHub Actions.
 
 ## 🤝 **Contribución**
 
-1. Lee `.cursorrules` para patrones del proyecto
+1. Lee `CLAUDE.md` para patrones del proyecto
 2. Revisa documentación técnica según corresponda
 3. Crea feature branch desde `main`
 4. Implementa siguiendo patrones establecidos
@@ -238,7 +238,7 @@ docker-compose exec frontend npm test
 
 ## 📚 **Documentación Adicional**
 
-- **[Cursor Rules](./.cursorrules)** - Patrones y reglas del proyecto
+- **[CLAUDE.md](./CLAUDE.md)** - Patrones y reglas del proyecto
 - **[Backend Technical Guide](./backend/BLUEPRINT_GUIDE.md)** - Guía técnica del backend
 - **[Frontend Import Rules](./frontend/IMPORT_RULES.md)** - Reglas de importación
 - **[Docker & Deployment](./DOCKER_README.md)** - Guía de deployment
@@ -249,4 +249,4 @@ docker-compose exec frontend npm test
 **Desarrollado para Sistema Lubricentro** 🚗
 
 **Última actualización**: Diciembre 2025
-**Versión**: 3.0 - Optimizado para Cursor AI
+**Versión**: 3.0 - Configurado para Claude Code

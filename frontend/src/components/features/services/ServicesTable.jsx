@@ -35,21 +35,21 @@ const ServicesTable = ({
   const getServiceIcon = (name) => {
     // Mapear tipos de servicios a colores específicos
     const serviceColors = {
-      'aceite': 'bg-blue-100 text-blue-600',
-      'filtro': 'bg-green-100 text-green-600',
-      'frenos': 'bg-red-100 text-red-600',
-      'batería': 'bg-yellow-100 text-yellow-600',
-      'neumático': 'bg-purple-100 text-purple-600',
-      'lubricación': 'bg-indigo-100 text-indigo-600',
-      'diagnóstico': 'bg-cyan-100 text-cyan-600',
-      'limpieza': 'bg-orange-100 text-orange-600',
-      'reparación': 'bg-pink-100 text-pink-600',
-      'mantenimiento': 'bg-teal-100 text-teal-600',
+      'aceite': 'bg-primary/10 text-primary',
+      'filtro': 'bg-tertiary/10 text-tertiary',
+      'frenos': 'bg-error/10 text-error',
+      'batería': 'bg-yellow-500/15 text-yellow-500',
+      'neumático': 'bg-purple-500/15 text-purple-500',
+      'lubricación': 'bg-indigo-500/15 text-indigo-500',
+      'diagnóstico': 'bg-cyan-500/15 text-cyan-500',
+      'limpieza': 'bg-orange-500/15 text-orange-500',
+      'reparación': 'bg-pink-500/15 text-pink-500',
+      'mantenimiento': 'bg-teal-500/15 text-teal-500',
     };
 
     // Buscar coincidencias en el nombre del servicio
     const serviceName = name.toLowerCase();
-    let colorClass = 'bg-gray-100 text-gray-600'; // Default
+    let colorClass = 'bg-surface-container-high text-on-surface-variant'; // Default
 
     for (const [type, color] of Object.entries(serviceColors)) {
       if (serviceName.includes(type)) {
@@ -106,13 +106,13 @@ const ServicesTable = ({
         <div className="flex-1 max-w-md">
           <form onSubmit={handleSearch} className="relative">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-secondary" />
               <input
                 type="text"
                 placeholder="Buscar servicios..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                className="w-full pl-10 pr-4 py-2 border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
           </form>
@@ -120,7 +120,7 @@ const ServicesTable = ({
         
         <Button
           onClick={onCreate}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+          className="flex items-center gap-2 bg-primary-container hover:bg-primary-container/90 text-white"
         >
           <Plus className="w-4 h-4" />
           Nuevo Servicio
@@ -128,74 +128,74 @@ const ServicesTable = ({
       </div>
 
       {/* Tabla */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+      <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container">
         <div className="max-w-full overflow-x-auto">
           <Table>
-            <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+            <TableHeader className="border-b border-outline-variant">
               <TableRow>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-on-surface-variant text-start text-xs"
                 >
                   Servicio
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-on-surface-variant text-start text-xs"
                 >
                   Descripción
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-on-surface-variant text-start text-xs"
                 >
                   Precio Base
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-on-surface-variant text-start text-xs"
                 >
                   Estado
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-on-surface-variant text-start text-xs"
                 >
                   Creado
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-gray-500 text-start text-xs dark:text-gray-400"
+                  className="px-5 py-3 font-medium text-on-surface-variant text-start text-xs"
                 >
                   Acciones
                 </TableCell>
               </TableRow>
             </TableHeader>
 
-            <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+            <TableBody className="divide-y divide-outline-variant">
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="px-5 py-8 text-center text-gray-500">
+                  <TableCell colSpan={6} className="px-5 py-8 text-center text-on-surface-variant">
                     Cargando servicios...
                   </TableCell>
                 </TableRow>
               ) : services.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="px-5 py-8 text-center text-gray-500">
+                  <TableCell colSpan={6} className="px-5 py-8 text-center text-on-surface-variant">
                     No se encontraron servicios
                   </TableCell>
                 </TableRow>
               ) : (
                 services.map((service) => (
-                  <TableRow key={service.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                  <TableRow key={service.id} className="hover:bg-surface-container-high">
                     <TableCell className="px-5 py-4 sm:px-6 text-start">
                       <div className="flex items-center gap-3">
                         {getServiceIcon(service.name)}
                         <div>
-                          <span className="block font-medium text-gray-800 text-sm dark:text-white/90">
+                          <span className="block font-medium text-on-surface text-sm">
                             {service.name}
                           </span>
-                          <span className="block text-gray-500 text-xs dark:text-gray-400">
+                          <span className="block text-on-surface-variant text-xs">
                             ID: {service.id}
                           </span>
                         </div>
@@ -203,14 +203,14 @@ const ServicesTable = ({
                     </TableCell>
                     
                     <TableCell className="px-4 py-3 text-start">
-                      <div className="text-gray-800 text-sm dark:text-white/90 max-w-xs">
+                      <div className="text-on-surface text-sm max-w-xs">
                         {truncateDescription(service.description)}
                       </div>
                     </TableCell>
                     
                     <TableCell className="px-4 py-3 text-start">
                       <div className="flex items-center gap-1">
-                        <span className="text-gray-800 text-sm dark:text-white/90 font-medium">
+                        <span className="text-on-surface text-sm font-medium">
                           {formatPrice(service.base_price)}
                         </span>
                       </div>
@@ -227,8 +227,8 @@ const ServicesTable = ({
                     
                     <TableCell className="px-4 py-3 text-start">
                       <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-gray-400" />
-                        <span className="text-gray-600 text-xs dark:text-gray-400">
+                        <Clock className="w-3 h-3 text-secondary" />
+                        <span className="text-on-surface-variant text-xs">
                           {formatDate(service.created_at)}
                         </span>
                       </div>
@@ -238,21 +238,21 @@ const ServicesTable = ({
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => onView(service)}
-                          className="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                          className="p-1 text-secondary hover:text-primary"
                           title="Ver detalles"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => onEdit(service)}
-                          className="p-1 text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400"
+                          className="p-1 text-secondary hover:text-yellow-500"
                           title="Editar"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => onDelete(service)}
-                          className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+                          className="p-1 text-secondary hover:text-error"
                           title="Eliminar"
                         >
                           <Trash2 className="w-4 h-4" />

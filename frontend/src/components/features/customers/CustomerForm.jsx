@@ -36,7 +36,7 @@ const CustomerForm = ({
     <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="name" className="block text-sm font-medium text-on-surface mb-1">
             Nombre completo *
           </label>
           <input
@@ -49,16 +49,16 @@ const CustomerForm = ({
             })}
             type="text"
             id="name"
-            className="w-full h-11 rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full h-11 rounded-lg border border-outline-variant px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             placeholder="Ingrese el nombre completo"
           />
           {errors.name && (
-            <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>
+            <p className="mt-1 text-xs text-error">{errors.name.message}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="phone" className="block text-sm font-medium text-on-surface mb-1">
             Teléfono *
           </label>
           <input
@@ -71,16 +71,16 @@ const CustomerForm = ({
             })}
             type="text"
             id="phone"
-            className="w-full h-11 rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full h-11 rounded-lg border border-outline-variant px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             placeholder="Ingrese el teléfono"
           />
           {errors.phone && (
-            <p className="mt-1 text-xs text-red-500">{errors.phone.message}</p>
+            <p className="mt-1 text-xs text-error">{errors.phone.message}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="email" className="block text-sm font-medium text-on-surface mb-1">
             Email
           </label>
           <input
@@ -92,16 +92,16 @@ const CustomerForm = ({
             })}
             type="email"
             id="email"
-            className="w-full h-11 rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full h-11 rounded-lg border border-outline-variant px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             placeholder="Ingrese el email"
           />
           {errors.email && (
-            <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
+            <p className="mt-1 text-xs text-error">{errors.email.message}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="address" className="block text-sm font-medium text-on-surface mb-1">
             Dirección *
           </label>
           <input
@@ -110,11 +110,11 @@ const CustomerForm = ({
             })}
             type="text"
             id="address"
-            className="w-full h-11 rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full h-11 rounded-lg border border-outline-variant px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             placeholder="Ingrese la dirección"
           />
           {errors.address && (
-            <p className="mt-1 text-xs text-red-500">{errors.address.message}</p>
+            <p className="mt-1 text-xs text-error">{errors.address.message}</p>
           )}
         </div>
       </div>

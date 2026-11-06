@@ -236,7 +236,7 @@ const CustomerSearchInput = ({
       {/* Input principal */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-gray-400" />
+          <Search className="h-5 w-5 text-secondary" />
         </div>
         
         <input
@@ -247,8 +247,8 @@ const CustomerSearchInput = ({
           onKeyDown={handleKeyDown}
           placeholder={isLoading ? "Cargando cliente..." : placeholder}
           disabled={disabled || isLoadingInitialCustomer}
-          className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white ${
-            error ? 'border-red-500' : selectedCustomer ? 'border-green-500' : 'border-gray-300'
+          className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+            error ? 'border-error' : selectedCustomer ? 'border-tertiary' : 'border-outline-variant'
           } ${disabled || isLoadingInitialCustomer ? 'opacity-50 cursor-not-allowed' : ''}`}
         />
         
@@ -257,7 +257,7 @@ const CustomerSearchInput = ({
             <button
               type="button"
               onClick={handleClear}
-              className="p-1 mr-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="p-1 mr-1 text-secondary hover:text-on-surface-variant"
               aria-label="Limpiar selección"
             >
               <X className="h-4 w-4" />
@@ -269,7 +269,7 @@ const CustomerSearchInput = ({
               setIsOpen(!isOpen);
               setHighlightedIndex(-1);
             }}
-            className="p-1 mr-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="p-1 mr-2 text-secondary hover:text-on-surface-variant"
             aria-label="Mostrar/ocultar opciones"
           >
             <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -279,9 +279,9 @@ const CustomerSearchInput = ({
 
       {/* Dropdown de resultados */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-50 w-full mt-1 bg-surface-container border border-outline-variant rounded-lg shadow-lg max-h-60 overflow-auto">
           {isLoadingSearch ? (
-            <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">Buscando...</div>
+            <div className="px-4 py-2 text-sm text-on-surface-variant">Buscando...</div>
           ) : customers.length > 0 ? (
             <div>
               {customers.map((customer, index) => (
@@ -291,18 +291,18 @@ const CustomerSearchInput = ({
                   onClick={() => handleCustomerSelect(customer)}
                   className={`w-full px-4 py-2 text-left focus:outline-none transition-colors ${
                     index === highlightedIndex
-                      ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100'
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700'
+                      ? 'bg-primary/10 text-on-surface'
+                      : 'hover:bg-surface-container-high focus:bg-surface-container-high'
                   }`}
                   onMouseEnter={() => setHighlightedIndex(index)}
                 >
-                  <div className="font-medium text-gray-900 dark:text-white">{customer.name}</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">{customer.email || customer.phone || 'Sin contacto'}</div>
+                  <div className="font-medium text-on-surface">{customer.name}</div>
+                  <div className="text-sm text-on-surface-variant">{customer.email || customer.phone || 'Sin contacto'}</div>
                 </button>
               ))}
             </div>
           ) : (
-            <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+            <div className="px-4 py-2 text-sm text-on-surface-variant">
               {debouncedSearchTerm ? 'No se encontraron clientes' : 'Escribe para buscar'}
             </div>
           )}
@@ -311,7 +311,7 @@ const CustomerSearchInput = ({
 
       {/* Mensaje de error */}
       {error && (
-        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="mt-1 text-sm text-error">{error}</p>
       )}
     </div>
   );

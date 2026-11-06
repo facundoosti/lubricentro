@@ -52,7 +52,7 @@ const Pagination = ({
   return (
     <div className={`flex items-center justify-between ${className}`}>
       {/* Info de items */}
-      <div className="text-sm text-gray-500 dark:text-gray-400">
+      <div className="text-sm text-on-surface-variant">
         Mostrando {startItem} a {endItem} de {totalItems} resultados
       </div>
 
@@ -62,7 +62,7 @@ const Pagination = ({
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="flex items-center justify-center w-8 h-8 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+          className="flex items-center justify-center w-8 h-8 text-sm font-medium text-on-surface-variant bg-surface-container border border-outline-variant rounded-md hover:bg-surface-container-high hover:text-on-surface disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
@@ -71,7 +71,7 @@ const Pagination = ({
         {getPageNumbers().map((page, index) => (
           <React.Fragment key={index}>
             {page === '...' ? (
-              <span className="flex items-center justify-center w-8 h-8 text-sm font-medium text-gray-500 dark:text-gray-400">
+              <span className="flex items-center justify-center w-8 h-8 text-sm font-medium text-on-surface-variant">
                 ...
               </span>
             ) : (
@@ -79,8 +79,8 @@ const Pagination = ({
                 onClick={() => onPageChange(page)}
                 className={`flex items-center justify-center w-8 h-8 text-sm font-medium rounded-md ${
                   currentPage === page
-                    ? 'text-white bg-blue-600 border border-blue-600'
-                    : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300'
+                    ? 'text-white bg-primary-container border border-primary'
+                    : 'text-on-surface-variant bg-surface-container border border-outline-variant hover:bg-surface-container-high hover:text-on-surface'
                 }`}
               >
                 {page}
@@ -93,7 +93,7 @@ const Pagination = ({
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="flex items-center justify-center w-8 h-8 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+          className="flex items-center justify-center w-8 h-8 text-sm font-medium text-on-surface-variant bg-surface-container border border-outline-variant rounded-md hover:bg-surface-container-high hover:text-on-surface disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ChevronRight className="w-4 h-4" />
         </button>

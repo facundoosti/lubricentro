@@ -8,8 +8,8 @@ import { showError } from '@services/notificationService';
 const STATUS_BADGE = {
   bot: 'bg-tertiary/10 text-tertiary border-tertiary/20',
   needs_human: 'bg-primary/10 text-primary border-primary/20',
-  supplier: 'bg-zinc-800 text-zinc-400 border-zinc-700',
-  archived: 'bg-zinc-900 text-zinc-600 border-zinc-800',
+  supplier: 'bg-surface-container-high text-on-surface-variant border-outline',
+  archived: 'bg-surface-container-high text-secondary border-outline-variant',
 };
 
 const STATUS_LABEL = {
@@ -46,7 +46,7 @@ function MessageBubble({ message }) {
         </div>
         <div className="flex items-center gap-1 mt-1 mr-1">
           {isBot && <Bot className="w-3 h-3 text-tertiary" />}
-          <span className="text-[10px] text-zinc-500">
+          <span className="text-[10px] text-secondary">
             {time} · {isAgentMsg ? 'Agente (Vos)' : 'Bot Automático'}
           </span>
         </div>
@@ -57,10 +57,10 @@ function MessageBubble({ message }) {
   // inbound / customer → left side
   return (
     <div className="flex flex-col max-w-[70%]">
-      <div className="bg-zinc-800 p-4 rounded-xl rounded-tl-none border border-zinc-700">
+      <div className="bg-surface-container-high p-4 rounded-xl rounded-tl-none border border-outline">
         <p className="text-sm text-on-surface leading-relaxed">{message.body}</p>
       </div>
-      <span className="text-[10px] text-zinc-500 mt-1 ml-1">
+      <span className="text-[10px] text-secondary mt-1 ml-1">
         {time} · Cliente
       </span>
     </div>
@@ -69,7 +69,7 @@ function MessageBubble({ message }) {
 
 function EmptyState() {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center gap-3 text-zinc-600">
+    <div className="flex-1 flex flex-col items-center justify-center gap-3 text-secondary">
       <div className="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center">
         <User className="w-8 h-8" />
       </div>
@@ -133,12 +133,12 @@ export function ConversationDetail({ conversation }) {
   };
 
   return (
-    <section className="flex-1 flex flex-col bg-zinc-950 min-w-0">
+    <section className="flex-1 flex flex-col bg-surface-container-lowest min-w-0">
       {/* Chat Header */}
-      <header className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/80 backdrop-blur-md flex-shrink-0">
+      <header className="p-4 border-b border-outline-variant flex items-center justify-between bg-background/80 backdrop-blur-md flex-shrink-0">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-surface-container-highest border border-zinc-700 flex items-center justify-center flex-shrink-0">
-            <User className="w-5 h-5 text-zinc-400" />
+          <div className="w-10 h-10 rounded-full bg-surface-container-highest border border-outline flex items-center justify-center flex-shrink-0">
+            <User className="w-5 h-5 text-on-surface-variant" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -147,7 +147,7 @@ export function ConversationDetail({ conversation }) {
                 {label}
               </span>
             </div>
-            <p className="text-xs text-zinc-500">{conversation.whatsapp_phone}</p>
+            <p className="text-xs text-secondary">{conversation.whatsapp_phone}</p>
           </div>
         </div>
 
@@ -156,7 +156,7 @@ export function ConversationDetail({ conversation }) {
             <button
               onClick={handleMarkAsSupplier}
               disabled={updateStatus.isPending}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium border border-zinc-700 rounded-lg hover:bg-zinc-900 transition-all disabled:opacity-50"
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium border border-outline rounded-lg hover:bg-surface-container-high transition-all disabled:opacity-50"
             >
               <Truck className="w-4 h-4" />
               Marcar proveedor
@@ -166,7 +166,7 @@ export function ConversationDetail({ conversation }) {
             <button
               onClick={handleDerivate}
               disabled={updateStatus.isPending}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium border border-zinc-700 rounded-lg hover:bg-zinc-900 transition-all disabled:opacity-50"
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium border border-outline rounded-lg hover:bg-surface-container-high transition-all disabled:opacity-50"
             >
               <UserCheck className="w-4 h-4" />
               Derivar a humano
@@ -176,7 +176,7 @@ export function ConversationDetail({ conversation }) {
             <button
               onClick={handleArchive}
               disabled={updateStatus.isPending}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium border border-zinc-700 rounded-lg hover:bg-zinc-900 transition-all disabled:opacity-50"
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium border border-outline rounded-lg hover:bg-surface-container-high transition-all disabled:opacity-50"
             >
               <Archive className="w-4 h-4" />
               Archivar
@@ -202,7 +202,7 @@ export function ConversationDetail({ conversation }) {
       </div>
 
       {/* Input */}
-      <footer className="p-4 border-t border-zinc-800 bg-zinc-950 flex-shrink-0">
+      <footer className="p-4 border-t border-outline-variant bg-surface-container-lowest flex-shrink-0">
         <div className="relative flex items-center gap-3">
           <div className="flex-1 relative">
             <textarea
@@ -215,10 +215,10 @@ export function ConversationDetail({ conversation }) {
               className="w-full bg-surface-container border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-xl py-3 px-4 pr-20 text-sm text-on-surface resize-none h-12 disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-secondary"
             />
             <div className="absolute right-3 top-2.5 flex items-center gap-2">
-              <button className="text-zinc-500 hover:text-zinc-300" disabled={!canSend}>
+              <button className="text-secondary hover:text-on-surface-variant" disabled={!canSend}>
                 <Paperclip className="w-4 h-4" />
               </button>
-              <button className="text-zinc-500 hover:text-zinc-300" disabled={!canSend}>
+              <button className="text-secondary hover:text-on-surface-variant" disabled={!canSend}>
                 <Smile className="w-4 h-4" />
               </button>
             </div>
@@ -232,7 +232,7 @@ export function ConversationDetail({ conversation }) {
           </button>
         </div>
         <div className="mt-2 flex items-center justify-center">
-          <p className="text-[10px] text-zinc-500">
+          <p className="text-[10px] text-secondary">
             {canSend
               ? `${displayName} verá este mensaje en su WhatsApp`
               : 'Esta conversación está archivada'}

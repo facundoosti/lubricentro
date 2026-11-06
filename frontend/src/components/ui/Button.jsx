@@ -22,9 +22,9 @@ const Button = ({
     outline: "border border-outline text-on-surface bg-transparent hover:bg-surface-container-high focus:ring-outline",
     ghost: "text-on-surface hover:bg-surface-container-high focus:ring-outline-variant",
     danger: "bg-error text-white hover:brightness-90 focus:ring-error",
-    success: "bg-[var(--color-success-500)] text-white hover:brightness-90 focus:ring-[var(--color-success-500)]",
+    success: "bg-success-500 text-white hover:brightness-90 focus:ring-success-500",
     error: "bg-error text-white hover:brightness-90 focus:ring-error",
-    warning: "bg-[var(--color-warning-500)] text-white hover:brightness-90 focus:ring-[var(--color-warning-500)]",
+    warning: "bg-warning-500 text-white hover:brightness-90 focus:ring-warning-500",
   };
 
   const sizes = {

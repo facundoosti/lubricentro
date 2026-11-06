@@ -65,7 +65,7 @@ const PhotosUpload = ({
               onClick={() => removeNewFile(i)}
               className="absolute top-1 right-1 w-5 h-5 bg-error rounded-full flex items-center justify-center hover:brightness-110 transition-all"
             >
-              <X className="w-3 h-3 text-white" />
+              <X className="w-3 h-3 text-on-surface" />
             </button>
           </div>
         ))}

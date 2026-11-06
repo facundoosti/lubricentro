@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Stack
 
 React 19 · Vite 6 · Tailwind CSS v4 · TanStack Query v5 · React Router v7  
-State: **Zustand** (auth + sidebar stores) · Forms: React Hook Form + Yup  
+State: **Zustand** (auth + sidebar + theme stores) · Forms: React Hook Form + Yup  
 HTTP: Axios · Icons: Lucide React · Alerts/Toasts: **Sileo**  
 Calendar: FullCalendar · Charts: ApexCharts
 
@@ -80,52 +80,7 @@ const { user, login, logout } = useAuthStore();
 
 ## UI Guidelines
 
-**Design system:** Dark-only. See `docs/DESIGN_SYSTEM.md` for full token reference.  
-Tailwind CSS v4 — prefer utility classes over custom CSS. Font: **Geist**.
-
-**Semantic color tokens (use these, not raw hex):**
-```
-Fondos:
-  bg-background          #09090b   → fondo general
-  bg-surface             #0c0c0f   → sidebar, base de cards
-  bg-surface-container   #121215   → cards, tablas
-  bg-surface-container-high #18181b → hover, header activo
-
-Texto:
-  text-on-surface        #fafafa   → texto principal
-  text-secondary         #71717a   → texto secundario, placeholders
-  text-on-surface-variant #a1a1aa  → texto levemente secundario
-
-Primario (violeta):
-  text-primary / bg-primary         #a78bfa  → accent, activo, íconos
-  bg-primary-container              #7c3aed  → botones CTA, logo bg
-  text-on-primary                   #0a0012  → texto sobre primary-container
-
-Terciario (verde):
-  text-tertiary          #34d399   → tendencias positivas, éxito
-
-Bordes:
-  border-outline-variant #27272a   → bordes sutiles (cards, dividers)
-  border-outline         #52525b   → bordes prominentes
-
-Error:
-  text-error / bg-error             #ef4444
-  bg-error-container                #3b1111
-  text-on-error-container           #fca5a5
-
-Estados semánticos:
-  --color-success-500    #12b76a
-  --color-warning-500    #f79009
-```
-
-**Patrones de componentes:**
-- Card: `bg-surface-container border border-outline-variant rounded-lg`
-- Botón CTA: `bg-primary-container text-on-primary rounded font-bold hover:brightness-110`
-- Botón secondary: `bg-surface-container-high border border-outline-variant text-on-surface rounded`
-- Badge activo: `bg-primary-container/20 text-primary`
-- Badge éxito: `bg-tertiary-container text-on-tertiary-container`
-- Badge error: `bg-error-container text-on-error-container`
-- Input: `bg-surface-variant border border-outline-variant text-on-surface placeholder:text-secondary`
+Light/dark design system (`docs/DESIGN_SYSTEM.md`); theme toggled via `useThemeStore` (`.dark` class on `<html>`). Tokens and component patterns live in `.claude/rules/frontend-ui.md` (auto-loaded when editing `.jsx`/`.css`).
 
 Always design mobile-first and scale up with Tailwind breakpoints.  
 Always handle `isLoading` and `isError` states when consuming React Query hooks.  

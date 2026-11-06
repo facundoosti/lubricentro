@@ -1,20 +1,37 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Sistema Lubricentro: gestión de un taller de servicios automotores (clientes, vehículos,
+  turnos, atenciones, presupuestos, productos/servicios, inbox de WhatsApp con IA).
+  Monorepo: backend Rails 8 API-only (PostgreSQL + pgvector, Devise + Doorkeeper/JWT,
+  Blueprinter, Pagy, Solid Queue, RSpec) y frontend React 19 + Vite (TanStack Query,
+  Zustand, Tailwind v4, Vitest). IA: OpenAI (gpt-4o + text-embedding-3-small).
+  Las respuestas de la API siempre son { success, data, message } o { success: false, errors, message }.
+  Escribí TODOS los artefactos en español (títulos, descripciones, escenarios, tareas).
+  Usá codegraph (`codegraph query`, `codegraph impact`) para explorar el alcance antes de proponer.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - Incluí una sección "Fuera de alcance".
+    - Indicá qué apps se tocan (backend, frontend o ambas) y si hay migraciones.
+  specs:
+    - Cada requerimiento tiene al menos un escenario GIVEN/WHEN/THEN verificable con un test.
+  design:
+    - Si hay cambios de DB, describí la migración (columnas, índices, backfill) y que sea reversible.
+    - Si hay endpoints nuevos, documentá ruta, params y forma de la respuesta.
+  tasks:
+    - Agrupá las tareas por app (Backend / Frontend).
+    - Cada tarea de código incluye su test (request/service/model spec o test de Vitest).
+    - Tareas chicas (≤ 2 horas); la última tarea es correr lint y tests completos de las apps tocadas.
+    - Si el change tiene impacto visual en frontend, agregá una sección "QA visual" con tareas para escribir los escenarios en qa.md, ejecutarlos con /qa-visual (Brave + DevTools) y corregir los hallazgos.
+
+operations:
+  apply:
+    guidance:
+      - Antes de marcar una tarea como hecha, corré los tests afectados y el linter de la app.
+      - Al terminar todas las tareas, usá los subagentes rails-reviewer / react-reviewer sobre el diff.
+      - Si hay impacto visual en frontend, después de los reviewers ejecutá el skill qa-visual (escenarios → ejecución en Brave → revisión → auditoría y fix de errores).
+  archive:
+    guidance:
+      - Antes de archivar, corré el subagente spec-verifier y `openspec validate` sobre el change.
+      - Si el change tiene qa.md, todos los escenarios deben estar en ✅ (o ⚠️ aceptados por el usuario).

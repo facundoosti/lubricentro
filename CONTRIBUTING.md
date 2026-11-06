@@ -3,7 +3,7 @@
 ## 🎯 Antes de Empezar
 
 ### 1. Lee la Documentación
-- **`.cursorrules`** - Patrones y reglas del proyecto (OBLIGATORIO)
+- **`CLAUDE.md`** - Patrones y reglas del proyecto (OBLIGATORIO)
 - **`backend/BLUEPRINT_GUIDE.md`** - Si trabajas en backend
 - **`frontend/IMPORT_RULES.md`** - Si trabajas en frontend
 - **`DOCKER_README.md`** - Para deployment y Docker
@@ -34,7 +34,7 @@ git checkout -b feature/nombre-descriptivo
 ```
 
 ### 2. Desarrollar
-- Sigue los patrones de `.cursorrules`
+- Sigue los patrones de `CLAUDE.md`
 - Usa alias de importación en frontend (`@ui`, `@services`, etc.)
 - Mantén componentes <300 líneas
 - Usa Tailwind CSS v4 exclusivamente
@@ -189,7 +189,7 @@ test('useCustomers hook', () => {
 - ❌ Controllers sin validación de params
 
 ### SIEMPRE hacer:
-- ✅ Usar patrones de `.cursorrules`
+- ✅ Usar patrones de `CLAUDE.md`
 - ✅ Validar datos en backend Y frontend
 - ✅ Manejar estados de loading y error
 - ✅ Mobile-first responsive design
@@ -267,7 +267,7 @@ chore: update dependencies
 ## 🔍 Code Review
 
 ### Checklist para PRs:
-- [ ] Sigue patrones de `.cursorrules`
+- [ ] Sigue patrones de `CLAUDE.md`
 - [ ] Usa alias de importación en frontend
 - [ ] Tests pasan (`make test`)
 - [ ] No hay linter errors
@@ -285,14 +285,14 @@ chore: update dependencies
 
 ## 🆘 Ayuda
 
-### Con Cursor AI:
-- Usa `@` para referenciar archivos: `@README.md`, `@.cursorrules`
-- Cmd+K para editar con contexto
-- Cmd+L para chat con contexto del archivo actual
+### Con Claude Code:
+- Usa `@` para referenciar archivos: `@README.md`, `@CLAUDE.md`
+- `/openspec-propose` para features nuevas, `/openspec-apply-change` para implementarlas
+- Subagentes `rails-reviewer` / `react-reviewer` para revisar el diff
 - Cmd+I para Composer (editar múltiples archivos)
 
 ### Documentación:
-- **Patrones**: `.cursorrules`
+- **Patrones**: `CLAUDE.md`
 - **Backend**: `backend/BLUEPRINT_GUIDE.md`
 - **Frontend**: `frontend/IMPORT_RULES.md`
 - **Deploy**: `DOCKER_README.md`

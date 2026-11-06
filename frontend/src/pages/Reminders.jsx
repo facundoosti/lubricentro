@@ -222,7 +222,7 @@ const Reminders = () => {
                 const vehicle = reminder.vehicle || {};
                 const serviceRecord = reminder.service_record || {};
                 return (
-                  <tr key={reminder.id} className="hover:bg-zinc-900/30 transition-colors group">
+                  <tr key={reminder.id} className="hover:bg-surface-container-high/30 transition-colors group">
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant font-black text-xs flex-shrink-0">

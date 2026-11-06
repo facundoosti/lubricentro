@@ -21,6 +21,26 @@ services:
       timeout: 5s
       retries: 5
 
+  # PostgreSQL para tests locales (bundle exec rspec fuera de Docker)
+  # Uso: make test-db-local
+  postgres_test:
+    image: pgvector/pgvector:pg15
+    container_name: lubricentro_postgres_test
+    profiles: ["test"]
+    environment:
+      POSTGRES_DB: lubricentro_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d lubricentro_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   # Backend Rails API
   backend:
     build:
@@ -142,6 +162,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  postgres_test_data:
     driver: local
   backend_bundle:
     driver: local
