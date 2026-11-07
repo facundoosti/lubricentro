@@ -50,6 +50,10 @@ Features and non-trivial changes follow the OpenSpec flow. Artifacts are written
 6. `spec-verifier`
 7. `/openspec-archive-change` — merge specs into `openspec/specs/`
 
+`/orquestar <idea|change>` runs steps 2–7 end to end: delegates each stage to a subagent (the agent that writes code never reviews it) and stops with AskUserQuestion after the proposal, the reviews, QA visual and before commit/push.
+
+Bugs: `/bugbuster` diagnoses without touching code (Railway logs read-only, writes `docs/fixes/<date>-<slug>-diagnostico.md`); `/quick-fix` fixes a bounded bug (≤ ~5 prod files, no migration or API contract change) test-first, logged in `docs/fixes/`. `/handoff` emits a copyable block to continue in a new conversation. These skills are adapted from Rankmi's RMAD.
+
 Small fixes (typos, one-line bugs) can skip OpenSpec. Visual changes outside OpenSpec still go through `/qa-visual` (scenarios in `docs/qa/`).
 
 ## Code Search
