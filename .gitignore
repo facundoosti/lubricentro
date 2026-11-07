@@ -118,3 +118,10 @@ skills-lock.json
 .claude/projects/
 .claude/settings.local.json
 CLAUDE.local.md
+
+# Symlinks locales a .agents/skills (ignorado)
+.claude/skills/accessibility
+.claude/skills/bash-defensive-patterns
+.claude/skills/frontend-design
+.claude/skills/nodejs-backend-patterns
+.claude/skills/nodejs-best-practices
