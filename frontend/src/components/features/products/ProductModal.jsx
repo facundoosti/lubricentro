@@ -1,5 +1,5 @@
 import { Package } from "lucide-react";
-import SlideOver from "@ui/SlideOver";
+import FormDialog from "@ui/FormDialog";
 import ProductForm from "@components/features/products/ProductForm";
 import { useCreateProduct, useUpdateProduct } from "@services/productsService";
 import {
@@ -35,7 +35,7 @@ const ProductModal = ({ isOpen, onClose, product = null, onSuccess }) => {
   };
 
   return (
-    <SlideOver
+    <FormDialog
       isOpen={isOpen}
       onClose={onClose}
       title={isEditing ? "Editar Producto" : "Nuevo Producto"}
@@ -46,7 +46,6 @@ const ProductModal = ({ isOpen, onClose, product = null, onSuccess }) => {
       formId={FORM_ID}
       submitLabel={isEditing ? "Guardar Cambios" : "Crear Producto"}
       isLoading={isLoading}
-      size="xl"
     >
       <ProductForm
         product={product}
@@ -54,7 +53,7 @@ const ProductModal = ({ isOpen, onClose, product = null, onSuccess }) => {
         loading={isLoading}
         formId={FORM_ID}
       />
-    </SlideOver>
+    </FormDialog>
   );
 };
 

@@ -130,10 +130,18 @@ const SingleSelectSearch = ({
     onChange?.(null);
   };
 
+  // Escape con la lista abierta cierra solo la lista (el diálogo contenedor lo ignora)
+  const handleKeyDown = (e) => {
+    if (e.key === "Escape" && isOpen) {
+      e.preventDefault();
+      setIsOpen(false);
+    }
+  };
+
   const selectedLabel = options.find((o) => String(o.value) === String(value))?.label;
 
   return (
-    <div ref={containerRef} className={`relative ${className}`}>
+    <div ref={containerRef} className={`relative ${className}`} onKeyDown={handleKeyDown}>
       <button
         type="button"
         onClick={() => setIsOpen((o) => !o)}

@@ -1,5 +1,5 @@
 import { Calendar } from 'lucide-react';
-import SlideOver from '@ui/SlideOver';
+import FormDialog from '@ui/FormDialog';
 import AppointmentForm from '@components/features/appointments/AppointmentForm';
 
 const FORM_ID = 'appointment-form';
@@ -18,7 +18,7 @@ const AppointmentModal = ({
     : 'Agenda un nuevo turno para un cliente y vehículo';
 
   return (
-    <SlideOver
+    <FormDialog
       isOpen={isOpen}
       onClose={onClose}
       title={isEditing ? 'Editar Turno' : 'Nuevo Turno'}
@@ -34,7 +34,7 @@ const AppointmentModal = ({
         isLoading={isLoading}
         formId={FORM_ID}
       />
-    </SlideOver>
+    </FormDialog>
   );
 };
 

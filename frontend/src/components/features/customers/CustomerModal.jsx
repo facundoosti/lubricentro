@@ -1,5 +1,5 @@
 import { Users } from 'lucide-react';
-import SlideOver from '@ui/SlideOver';
+import FormDialog from '@ui/FormDialog';
 import CustomerForm from '@components/features/customers/CustomerForm';
 
 const CustomerModal = ({
@@ -14,7 +14,7 @@ const CustomerModal = ({
   const isEditing = !!initialData?.id;
 
   return (
-    <SlideOver
+    <FormDialog
       isOpen={isOpen}
       onClose={onClose}
       title={isEditing ? 'Editar Cliente' : 'Nuevo Cliente'}
@@ -25,7 +25,7 @@ const CustomerModal = ({
       isLoading={isLoading}
     >
       <CustomerForm onSubmit={onSubmit} initialData={initialData} formId={formId} />
-    </SlideOver>
+    </FormDialog>
   );
 };
 

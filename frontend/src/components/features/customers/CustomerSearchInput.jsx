@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useCustomers, useCustomer } from '@services/customersService';
 import { Search, ChevronDown, X, UserPlus } from 'lucide-react';
 
@@ -31,6 +32,30 @@ import { Search, ChevronDown, X, UserPlus } from 'lucide-react';
  *   initialCustomer={vehicle.customer}
  * />
  */
+// Altura máxima de la lista (max-h-60 = 15rem = 240px) y separación con el input
+const LIST_MAX_HEIGHT = 240;
+const LIST_GAP = 4;
+// Por encima de cualquier FormDialog apilado (50 + nivel * 10), igual que SearchableSelect
+const LIST_Z_INDEX = 9999;
+
+// Posición fija de la lista según el input: abajo, o arriba si abajo no entra y arriba hay más lugar
+const calcListStyle = (anchor) => {
+  if (!anchor) return {};
+  const rect = anchor.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - rect.bottom - LIST_GAP;
+  const spaceAbove = rect.top - LIST_GAP;
+  const openUp = spaceBelow < LIST_MAX_HEIGHT && spaceAbove > spaceBelow;
+  return {
+    position: 'fixed',
+    left: rect.left,
+    width: rect.width,
+    zIndex: LIST_Z_INDEX,
+    ...(openUp
+      ? { bottom: window.innerHeight - rect.top + LIST_GAP }
+      : { top: rect.bottom + LIST_GAP }),
+  };
+};
+
 const formatCustomerDisplay = (customer) => {
   if (!customer) return '';
   return `${customer.name} - ${customer.email || customer.phone || 'Sin contacto'}`;
@@ -53,7 +78,11 @@ const CustomerSearchInput = ({
   const [selectedCustomer, setSelectedCustomer] = useState(initialCustomer);
   const [highlightedIndex, setHighlightedIndex] = useState(-1); // Para navegación con teclado
   
+  const [listStyle, setListStyle] = useState({});
+
   const wrapperRef = useRef(null);
+  const anchorRef = useRef(null);
+  const listRef = useRef(null);
   const debounceTimeoutRef = useRef(null);
 
   // --- DATA FETCHING ---
@@ -119,10 +148,12 @@ const CustomerSearchInput = ({
     };
   }, []);
   
-  // Efecto para cerrar el dropdown al hacer clic fuera
+  // Efecto para cerrar el dropdown al hacer clic fuera (la lista vive en un portal, fuera del wrapper)
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+      const inWrapper = wrapperRef.current?.contains(event.target);
+      const inList = listRef.current?.contains(event.target);
+      if (wrapperRef.current && !inWrapper && !inList) {
         setIsOpen(false);
         setHighlightedIndex(-1);
       }
@@ -132,6 +163,19 @@ const CustomerSearchInput = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Posicionar la lista (portal con position: fixed) y seguir al input en scroll/resize
+  useLayoutEffect(() => {
+    if (!isOpen) return undefined;
+    const update = () => setListStyle(calcListStyle(anchorRef.current));
+    update();
+    window.addEventListener('scroll', update, true);
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update, true);
+      window.removeEventListener('resize', update);
+    };
+  }, [isOpen]);
 
   // Resetear índice destacado cuando cambian los resultados
   useEffect(() => {
@@ -210,6 +254,8 @@ const CustomerSearchInput = ({
   const handleKeyDown = useCallback((e) => {
     if (!isOpen) return;
     if (e.key === 'Escape') {
+      // Cierra solo la lista: el diálogo contenedor ignora un Escape ya atendido
+      e.preventDefault();
       setIsOpen(false);
       setHighlightedIndex(-1);
       return;
@@ -250,7 +296,7 @@ const CustomerSearchInput = ({
   return (
     <div ref={wrapperRef} className="relative">
       {/* Input principal */}
-      <div className="relative">
+      <div ref={anchorRef} className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Search className="h-5 w-5 text-secondary" />
         </div>
@@ -294,9 +340,14 @@ const CustomerSearchInput = ({
         </div>
       </div>
 
-      {/* Dropdown de resultados */}
-      {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-surface-container border border-outline-variant rounded-lg shadow-lg max-h-60 overflow-auto">
+      {/* Dropdown de resultados — portal al body para que el overflow del diálogo no lo recorte */}
+      {isOpen && createPortal(
+        <div
+          ref={listRef}
+          style={listStyle}
+          data-testid="customer-search-results"
+          className="bg-surface-container border border-outline-variant rounded-lg shadow-lg max-h-60 overflow-auto"
+        >
           {isLoadingSearch ? (
             <div className="px-4 py-2 text-sm text-on-surface-variant">Buscando...</div>
           ) : customers.length > 0 ? (
@@ -336,7 +387,8 @@ const CustomerSearchInput = ({
               <span className="truncate">+ Crear cliente "{searchText}"</span>
             </button>
           )}
-        </div>
+        </div>,
+        document.body,
       )}
 
       {/* Mensaje de error */}

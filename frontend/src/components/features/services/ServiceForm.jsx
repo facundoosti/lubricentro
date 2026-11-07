@@ -35,7 +35,7 @@ const ServiceForm = ({
   };
 
   return (
-    <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-6">
       {/* Nombre */}
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-on-surface mb-2">
@@ -59,32 +59,6 @@ const ServiceForm = ({
         {errors.name && (
           <p className="mt-1 text-sm text-error">
             {errors.name.message}
-          </p>
-        )}
-      </div>
-
-      {/* Descripción */}
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-on-surface mb-2">
-          Descripción
-        </label>
-        <textarea
-          id="description"
-          rows={3}
-          {...register('description', {
-            maxLength: {
-              value: 1000,
-              message: 'La descripción no puede exceder 1000 caracteres'
-            }
-          })}
-          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-            errors.description ? 'border-error' : 'border-outline-variant'
-          }`}
-          placeholder="Descripción detallada del servicio..."
-        />
-        {errors.description && (
-          <p className="mt-1 text-sm text-error">
-            {errors.description.message}
           </p>
         )}
       </div>
@@ -127,6 +101,31 @@ const ServiceForm = ({
         )}
       </div>
 
+      {/* Descripción: ancho completo */}
+      <div className="md:col-span-2">
+        <label htmlFor="description" className="block text-sm font-medium text-on-surface mb-2">
+          Descripción
+        </label>
+        <textarea
+          id="description"
+          rows={3}
+          {...register('description', {
+            maxLength: {
+              value: 1000,
+              message: 'La descripción no puede exceder 1000 caracteres'
+            }
+          })}
+          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
+            errors.description ? 'border-error' : 'border-outline-variant'
+          }`}
+          placeholder="Descripción detallada del servicio..."
+        />
+        {errors.description && (
+          <p className="mt-1 text-sm text-error">
+            {errors.description.message}
+          </p>
+        )}
+      </div>
     </form>
   );
 };

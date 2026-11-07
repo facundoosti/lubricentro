@@ -2,6 +2,7 @@ import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderWithProviders } from '@/test/utils';
 import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
+import FormDialog from '@ui/FormDialog';
 import { useCustomers, useCustomer } from '@services/customersService';
 
 vi.mock('@services/customersService', () => ({
@@ -90,5 +91,112 @@ describe('CustomerSearchInput — botón de limpiar', () => {
     expect(screen.getByRole('button', { name: 'Limpiar selección' })).toBeInTheDocument();
     expect(input.className).toMatch(/\bpr-16\b/);
     expect(input.className).not.toMatch(/\bpr-10\b/);
+  });
+});
+
+describe('CustomerSearchInput — Escape dentro de un diálogo', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useCustomers.mockReturnValue({ data: { data: { customers: [] } }, isLoading: false });
+  });
+
+  it('con la lista abierta, Escape cierra solo la lista; con la lista cerrada, cierra el diálogo', () => {
+    const close = vi.fn();
+    renderWithProviders(
+      <FormDialog isOpen onClose={close} title="Nuevo turno">
+        <CustomerSearchInput value="" />
+      </FormDialog>,
+    );
+    const input = screen.getByRole('textbox');
+    fireEvent.change(input, { target: { value: 'Carlos' } });
+    expect(screen.getByText('Escribe para buscar')).toBeInTheDocument();
+
+    fireEvent.keyDown(input, { key: 'Escape' });
+    expect(screen.queryByText('Escribe para buscar')).not.toBeInTheDocument();
+    expect(close).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(input, { key: 'Escape' });
+    expect(close).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('CustomerSearchInput — lista en portal (no la recorta el cuerpo del diálogo)', () => {
+  const customer = { id: 3, name: 'Ana Gómez', phone: '1144440000' };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useCustomers.mockReturnValue({ data: { data: { customers: [customer] } }, isLoading: false });
+  });
+
+  const openListInDialog = (props = {}) => {
+    const close = vi.fn();
+    renderWithProviders(
+      <FormDialog isOpen onClose={close} title="Nuevo Vehículo">
+        <CustomerSearchInput value="" {...props} />
+      </FormDialog>,
+    );
+    const input = screen.getByRole('textbox');
+    fireEvent.change(input, { target: { value: 'Ana' } });
+    return { input, close };
+  };
+
+  it('renderiza la lista en document.body, fuera del diálogo, con position fixed y z-index alto', () => {
+    openListInDialog();
+    const list = screen.getByTestId('customer-search-results');
+    expect(list.parentElement).toBe(document.body);
+    expect(screen.getByRole('dialog')).not.toContainElement(list);
+    expect(list.style.position).toBe('fixed');
+    expect(Number(list.style.zIndex)).toBeGreaterThan(50);
+  });
+
+  it('click en una opción selecciona el cliente (el mousedown en la lista no la cierra antes)', () => {
+    const onSelect = vi.fn();
+    const onChange = vi.fn();
+    const { input } = openListInDialog({ onSelect, onChange });
+    const option = screen.getByRole('button', { name: /Ana Gómez/ });
+
+    fireEvent.mouseDown(option);
+    expect(screen.getByTestId('customer-search-results')).toBeInTheDocument();
+
+    fireEvent.click(option);
+    expect(onSelect).toHaveBeenCalledWith(customer);
+    expect(onChange).toHaveBeenCalledWith(3);
+    expect(input).toHaveValue('Ana Gómez - 1144440000');
+    expect(screen.queryByTestId('customer-search-results')).not.toBeInTheDocument();
+  });
+
+  it('click afuera de input y lista cierra la lista', () => {
+    openListInDialog();
+    fireEvent.mouseDown(screen.getByRole('heading', { name: 'Nuevo Vehículo' }));
+    expect(screen.queryByTestId('customer-search-results')).not.toBeInTheDocument();
+  });
+
+  it('navegación con teclado + Enter selecciona desde la lista en portal', () => {
+    const onSelect = vi.fn();
+    const { input } = openListInDialog({ onSelect });
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(onSelect).toHaveBeenCalledWith(customer);
+  });
+
+  it('Escape cierra solo la lista, no el diálogo', () => {
+    const { input, close } = openListInDialog();
+    fireEvent.keyDown(input, { key: 'Escape' });
+    expect(screen.queryByTestId('customer-search-results')).not.toBeInTheDocument();
+    expect(close).not.toHaveBeenCalled();
+  });
+
+  it('abre hacia arriba si abajo no hay lugar para la lista', () => {
+    const rectSpy = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      top: window.innerHeight - 60, bottom: window.innerHeight - 16, left: 100, right: 500,
+      width: 400, height: 44, x: 100, y: window.innerHeight - 60,
+    });
+    openListInDialog();
+    const list = screen.getByTestId('customer-search-results');
+    expect(list.style.top).toBe('');
+    expect(list.style.bottom).toBe('64px');
+    expect(list.style.left).toBe('100px');
+    expect(list.style.width).toBe('400px');
+    rectSpy.mockRestore();
   });
 });
