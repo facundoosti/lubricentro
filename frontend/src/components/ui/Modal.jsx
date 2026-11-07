@@ -1,6 +1,14 @@
-import React, { useRef, useEffect, useId } from "react";
+import React, { useId } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
+import { useDialogLayer } from "@hooks/useDialogLayer";
 
+/**
+ * Diálogo genérico (confirmaciones, informativos). Comparte la pila de diálogos con el resto
+ * (useDialogLayer): Escape cierra solo el de arriba, foco atrapado y devuelto, fondo inerte.
+ *
+ * @param {boolean} [closeOnBackdrop=true] - false en diálogos con datos cargados.
+ */
 const Modal = ({
   isOpen,
   onClose,
@@ -10,37 +18,10 @@ const Modal = ({
   isFullscreen = false,
   title,
   ariaLabel,
+  closeOnBackdrop = true,
 }) => {
-  const modalRef = useRef(null);
   const titleId = useId();
-
-  useEffect(() => {
-    const handleEscape = (event) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [isOpen, onClose]);
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
+  const { panelRef, layerRef, zIndex } = useDialogLayer({ isOpen, onClose });
 
   if (!isOpen) return null;
 
@@ -48,21 +29,27 @@ const Modal = ({
     ? "w-full h-full"
     : "relative w-full max-w-2xl rounded-3xl bg-surface-container";
 
-  return (
-    <div className="fixed inset-0 flex items-center justify-center overflow-y-auto modal z-99999">
+  return createPortal(
+    <div
+      ref={layerRef}
+      className="fixed inset-0 flex items-center justify-center overflow-y-auto modal"
+      style={{ zIndex }}
+    >
       {!isFullscreen && (
         <div
+          data-testid="modal-backdrop"
           className="fixed inset-0 h-full w-full bg-black/50 backdrop-blur-[32px]"
-          onClick={onClose}
+          onClick={closeOnBackdrop ? onClose : undefined}
         ></div>
       )}
       <div
-        ref={modalRef}
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
         aria-label={title ? undefined : ariaLabel}
-        className={`${contentClasses} ${className}`}
+        tabIndex={-1}
+        className={`${contentClasses} outline-none ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         {showCloseButton && (
@@ -86,8 +73,9 @@ const Modal = ({
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 
-export default Modal; 
+export default Modal;

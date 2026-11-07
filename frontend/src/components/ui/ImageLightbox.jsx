@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
+import { useDialogLayer } from "@hooks/useDialogLayer";
 
 const ZOOM_SCALE = 2.5;
 
@@ -18,12 +19,11 @@ const ImageLightbox = ({ images = [], index, onClose, onIndexChange }) => {
   const [zoomedAt, setZoomedAt] = useState(null);
   const [origin, setOrigin] = useState("50% 50%");
   const thumbsRef = useRef(null);
-  const dialogRef = useRef(null);
   const closeBtnRef = useRef(null);
   // Caja de la imagen sin escalar: el pan se calcula sobre ella (la caja escalada se mueve con el origen).
   const baseRectRef = useRef(null);
 
-  const isOpen = index !== null && index !== undefined && images[index];
+  const isOpen = index !== null && index !== undefined && Boolean(images[index]);
   const total = images.length;
   const hasMany = total > 1;
   const zoomed = zoomedAt === index;
@@ -36,47 +36,19 @@ const ImageLightbox = ({ images = [], index, onClose, onIndexChange }) => {
     [hasMany, index, total, onIndexChange],
   );
 
-  // Teclado: Esc, flechas y Tab atrapado dentro del diálogo
+  // Pila de diálogos, Escape, foco (inicial en Cerrar, trampa de Tab y retorno), inert y scroll lock
+  const { panelRef, zIndex, isTop } = useDialogLayer({ isOpen, onClose, initialFocusRef: closeBtnRef });
+
+  // ← / → navegan (solo si el visor es el diálogo de arriba)
   useEffect(() => {
-    if (!isOpen) return undefined;
+    if (!isOpen || !isTop) return undefined;
     const onKey = (e) => {
-      if (e.key === "Escape") onClose();
-      else if (e.key === "ArrowLeft") go(-1);
+      if (e.key === "ArrowLeft") go(-1);
       else if (e.key === "ArrowRight") go(1);
-      else if (e.key === "Tab" && dialogRef.current) {
-        const focusables = [...dialogRef.current.querySelectorAll("button:not([disabled])")];
-        if (focusables.length === 0) return;
-        const first = focusables[0];
-        const last = focusables[focusables.length - 1];
-        const inside = dialogRef.current.contains(document.activeElement);
-        if (e.shiftKey && (document.activeElement === first || !inside)) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && (document.activeElement === last || !inside)) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [isOpen, onClose, go]);
-
-  // Foco: al abrir va al botón Cerrar; al cerrar vuelve a quien abrió el visor
-  useEffect(() => {
-    if (!isOpen) return undefined;
-    const opener = document.activeElement;
-    closeBtnRef.current?.focus();
-    return () => { if (opener?.isConnected) opener.focus(); };
-  }, [isOpen]);
-
-  // Bloquear scroll del fondo
-  useEffect(() => {
-    if (!isOpen) return undefined;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
-  }, [isOpen]);
+  }, [isOpen, isTop, go]);
 
   // Mantener visible la miniatura activa
   useEffect(() => {
@@ -127,11 +99,13 @@ const ImageLightbox = ({ images = [], index, onClose, onIndexChange }) => {
 
   return createPortal(
     <div
-      ref={dialogRef}
+      ref={panelRef}
       role="dialog"
       aria-modal="true"
       aria-label={`Imagen de ${current.title || current.alt || "producto"}`}
-      className="fixed inset-0 z-99999 flex flex-col bg-black/90 backdrop-blur-sm"
+      tabIndex={-1}
+      className="fixed inset-0 flex flex-col bg-black/90 backdrop-blur-sm outline-none"
+      style={{ zIndex }}
       onClick={handleOverlayClick}
     >
       {/* Barra superior */}

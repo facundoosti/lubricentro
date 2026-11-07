@@ -74,4 +74,15 @@ describe('BulkIvaModal', () => {
     await waitFor(() => expect(mocks.showError).toHaveBeenCalledWith('Error al cambiar el IVA', 'detalle'));
     expect(onClose).not.toHaveBeenCalled();
   });
+
+  it('click en el fondo no cierra; Escape sí', () => {
+    const onClose = vi.fn();
+    renderWithProviders(<BulkIvaModal isOpen onClose={onClose} count={2} target={{ type: 'ids', ids: [1, 2] }} />);
+    fireEvent.click(screen.getByTestId('modal-backdrop'));
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByRole('dialog', { name: 'Cambiar IVA' })).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
 });
+

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { TrendingUp, X, ChevronRight, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import { useSuppliers } from '@services/suppliersService';
 import { useBulkPricePreview, useBulkPriceUpdate } from '@services/productsService';
 import { showSuccess, showError } from '@services/notificationService';
 import ProductSearchInput from '@components/features/products/ProductSearchInput';
+import { useDialogLayer } from '@hooks/useDialogLayer';
 
 const STEPS = { FILTER: 'filter', PREVIEW: 'preview', DONE: 'done' };
 
@@ -93,6 +95,9 @@ const BulkPriceModal = ({ isOpen, onClose, target = null }) => {
     onClose();
   };
 
+  // Pila de diálogos, Escape, foco, inert y scroll lock. El fondo no cierra (hay datos cargados).
+  const { panelRef, layerRef, zIndex } = useDialogLayer({ isOpen, onClose: handleClose });
+
   if (!isOpen) return null;
 
   const adjustmentLabel = adjustmentType === 'percentage'
@@ -117,14 +122,16 @@ const BulkPriceModal = ({ isOpen, onClose, target = null }) => {
     return '';
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
+  return createPortal(
+    <div ref={layerRef} className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex }}>
+      <div data-testid="bulk-price-backdrop" className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
+        ref={panelRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby="bulk-price-title"
-        className="relative bg-surface-container border border-outline-variant rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+        className="relative bg-surface-container border border-outline-variant rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col outline-none"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-outline-variant shrink-0">
@@ -352,7 +359,8 @@ const BulkPriceModal = ({ isOpen, onClose, target = null }) => {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 

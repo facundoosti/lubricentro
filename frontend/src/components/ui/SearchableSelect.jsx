@@ -85,6 +85,14 @@ const SearchableSelect = ({ options = [], value, onChange, placeholder = 'Selecc
     onChange('');
   };
 
+  // Escape con la lista abierta cierra solo la lista (el diálogo contenedor lo ignora)
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape' && isOpen) {
+      e.preventDefault();
+      setIsOpen(false);
+    }
+  };
+
   const baseClass =
     'w-full flex items-center gap-2 px-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-sm transition-colors focus:outline-none focus:border-primary';
 
@@ -95,6 +103,7 @@ const SearchableSelect = ({ options = [], value, onChange, placeholder = 'Selecc
         ref={triggerRef}
         type="button"
         onClick={handleOpen}
+        onKeyDown={handleKeyDown}
         disabled={disabled}
         className={`${baseClass} justify-between ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-outline cursor-pointer'} ${isOpen ? 'border-primary' : ''}`}
       >
@@ -121,6 +130,7 @@ const SearchableSelect = ({ options = [], value, onChange, placeholder = 'Selecc
         <div
           ref={dropdownRef}
           style={dropdownStyle}
+          onKeyDown={handleKeyDown}
           className="bg-surface-container border border-outline-variant rounded-lg shadow-xl overflow-hidden"
         >
           {/* Search input */}

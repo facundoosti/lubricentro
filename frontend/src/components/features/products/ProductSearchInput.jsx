@@ -66,6 +66,14 @@ const ProductSearchInput = ({ value = '', onChange, onSelect, placeholder = 'Bus
     onSelect?.(null);
   }, [onChange, onSelect]);
 
+  // Escape con la lista abierta cierra solo la lista (el diálogo contenedor lo ignora)
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape' && isOpen) {
+      e.preventDefault();
+      setIsOpen(false);
+    }
+  };
+
   const formatPrice = (price) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(Number(price));
 
@@ -78,6 +86,7 @@ const ProductSearchInput = ({ value = '', onChange, onSelect, placeholder = 'Bus
           value={inputValue}
           onChange={handleChange}
           onFocus={() => inputValue && setIsOpen(true)}
+          onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className="w-full pl-9 pr-8 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface placeholder:text-secondary text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
         />

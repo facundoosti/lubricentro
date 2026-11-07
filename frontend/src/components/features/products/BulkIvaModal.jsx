@@ -43,7 +43,7 @@ const BulkIvaModal = ({ isOpen, onClose, target, count, onDone }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="max-w-md!" title="Cambiar IVA">
+    <Modal isOpen={isOpen} onClose={onClose} className="max-w-md!" title="Cambiar IVA" closeOnBackdrop={false}>
       <div className="space-y-5">
         <p className="text-sm text-on-surface-variant">
           Se cambia solo la alícuota de <strong className="text-on-surface">{plural(count)}</strong>.

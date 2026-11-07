@@ -31,4 +31,14 @@ describe('CustomerCreatedDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: /Ver perfil/ }));
     expect(mockNavigate).toHaveBeenCalledWith('/customers/5');
   });
+
+  it('es un diálogo con nombre accesible que cierra con click en el fondo y con Escape', () => {
+    const onClose = vi.fn();
+    renderWithProviders(<CustomerCreatedDialog customer={{ id: 5, name: 'Carlos Ruiz' }} onClose={onClose} />);
+    expect(screen.getByRole('dialog', { name: 'Cliente creado' })).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('modal-backdrop'));
+    expect(onClose).toHaveBeenCalledTimes(1);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(2);
+  });
 });

@@ -1,6 +1,12 @@
+import { useState } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import Modal from '@ui/Modal'
+import FormDialog from '@ui/FormDialog'
+
+afterEach(() => {
+  document.body.style.overflow = ''
+})
 
 const onClose = vi.fn()
 
@@ -50,11 +56,17 @@ describe('Modal', () => {
 
     it('llama onClose al hacer click en el backdrop', () => {
       const handleClose = vi.fn()
-      const { container } = render(<Modal isOpen onClose={handleClose}>Contenido</Modal>)
-      // El backdrop es el div con clase backdrop-blur
-      const backdrop = container.querySelector('.backdrop-blur-\\[32px\\]')
-      fireEvent.click(backdrop)
+      render(<Modal isOpen onClose={handleClose}>Contenido</Modal>)
+      fireEvent.click(screen.getByTestId('modal-backdrop'))
       expect(handleClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('con closeOnBackdrop=false el click en el backdrop no cierra', () => {
+      const handleClose = vi.fn()
+      render(<Modal isOpen onClose={handleClose} closeOnBackdrop={false}>Contenido</Modal>)
+      fireEvent.click(screen.getByTestId('modal-backdrop'))
+      expect(handleClose).not.toHaveBeenCalled()
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
     })
 
     it('no llama onClose al hacer click dentro del contenido', () => {
@@ -85,10 +97,18 @@ describe('Modal', () => {
       expect(document.body.style.overflow).toBe('hidden')
     })
 
-    it('restaura el scroll del body al desmontarse', () => {
+    it('restaura el overflow previo del body al desmontarse', () => {
+      document.body.style.overflow = 'scroll'
       const { unmount } = render(<Modal isOpen onClose={onClose}>Contenido</Modal>)
+      expect(document.body.style.overflow).toBe('hidden')
       unmount()
-      expect(document.body.style.overflow).toBe('unset')
+      expect(document.body.style.overflow).toBe('scroll')
+    })
+
+    it('se renderiza en un portal a document.body', () => {
+      const { container } = render(<Modal isOpen onClose={onClose} title="T">Contenido</Modal>)
+      expect(container).not.toContainElement(screen.getByRole('dialog'))
+      expect(screen.getByTestId('modal-backdrop').parentElement.parentElement).toBe(document.body)
     })
   })
 })
@@ -107,3 +127,45 @@ describe('Modal — accesibilidad', () => {
     expect(close).toHaveBeenCalled();
   });
 });
+
+describe('Modal — pila de diálogos', () => {
+  it('abierto sobre un FormDialog queda encima y Escape cierra solo el Modal', () => {
+    const closeForm = vi.fn()
+    const closeModal = vi.fn()
+    render(
+      <>
+        <FormDialog isOpen onClose={closeForm} title="Formulario">contenido</FormDialog>
+        <Modal isOpen onClose={closeModal} title="Confirmar">¿Seguro?</Modal>
+      </>,
+    )
+    const formLayer = screen.getByTestId('form-dialog-backdrop')
+    const modalLayer = screen.getByTestId('modal-backdrop').parentElement
+    expect(Number(modalLayer.style.zIndex)).toBeGreaterThan(Number(formLayer.style.zIndex))
+    expect(formLayer).toHaveAttribute('inert')
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(closeModal).toHaveBeenCalledTimes(1)
+    expect(closeForm).not.toHaveBeenCalled()
+  })
+
+  it('enfoca el diálogo al abrir y devuelve el foco al botón que lo abrió', () => {
+    const Harness = () => {
+      const [open, setOpen] = useState(false)
+      return (
+        <>
+          <button type="button" onClick={() => setOpen(true)}>Eliminar</button>
+          <Modal isOpen={open} onClose={() => setOpen(false)} title="Confirmar">¿Seguro?</Modal>
+        </>
+      )
+    }
+    render(<Harness />)
+    const trigger = screen.getByRole('button', { name: 'Eliminar' })
+    trigger.focus()
+    fireEvent.click(trigger)
+    expect(screen.getByRole('dialog', { name: 'Confirmar' })).toHaveFocus()
+
+    fireEvent.click(screen.getByTestId('modal-backdrop'))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(trigger).toHaveFocus()
+  })
+})

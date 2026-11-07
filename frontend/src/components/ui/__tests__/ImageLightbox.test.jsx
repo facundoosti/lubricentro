@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import ImageLightbox from '@ui/ImageLightbox';
+import Modal from '@ui/Modal';
 
 const images = [
   { src: '/a.jpg', alt: 'Aceite', title: 'Aceite', subtitle: 'A1' },
@@ -97,4 +98,31 @@ describe('ImageLightbox', () => {
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(opener).toHaveFocus();
   });
+
+  it('Shift+Tab desde el primer botón va al último', () => {
+    render(<Harness />);
+    const buttons = within(screen.getByRole('dialog')).getAllByRole('button');
+    buttons[0].focus();
+    fireEvent.keyDown(buttons[0], { key: 'Tab', shiftKey: true });
+    expect(buttons[buttons.length - 1]).toHaveFocus();
+  });
+
+  it('con otro diálogo encima, las flechas y Escape no actúan sobre el visor', () => {
+    const onClose = vi.fn();
+    const closeModal = vi.fn();
+    render(
+      <>
+        <Harness onClose={onClose} />
+        <Modal isOpen onClose={closeModal} title="Encima">contenido</Modal>
+      </>,
+    );
+    const viewer = screen.getByRole('dialog', { name: 'Imagen de Aceite' });
+    expect(viewer).toHaveAttribute('inert');
+    fireEvent.keyDown(document, { key: 'ArrowRight' });
+    expect(within(viewer).getByText('1 / 3')).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(closeModal).toHaveBeenCalledTimes(1);
+    expect(onClose).not.toHaveBeenCalled();
+  });
 });
+

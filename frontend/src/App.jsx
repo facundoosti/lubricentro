@@ -38,47 +38,51 @@ function App() {
           roundness: 10,
         }}
       />
-      <QueryProvider>
-        <Router>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      {/* Contenido de la app: queda inert con un diálogo abierto (useDialogLayer). El Toaster va fuera
+          para seguir clickeable; `isolate` mantiene los z-index de la app por debajo de los diálogos. */}
+      <div data-app-content className="isolate">
+        <QueryProvider>
+          <Router>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Layout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="appointments" element={<Appointments />} />
-              <Route path="service-records" element={<ServiceRecords />} />
-              <Route path="customers" element={<Customers />} />
-              <Route path="customers/:id" element={<CustomerProfile />} />
-              <Route path="vehicles" element={<Vehicles />} />
-              <Route path="services" element={<Services />} />
-              <Route path="products" element={<Products />} />
-              <Route path="suppliers" element={<Suppliers />} />
-              <Route path="service-records/new" element={<ServiceRecordFormPage />} />
-              <Route path="service-records/:id/edit" element={<ServiceRecordFormPage />} />
-              <Route path="budgets" element={<Budgets />} />
-              <Route path="budgets/new" element={<BudgetForm />} />
-              <Route path="budgets/:id/edit" element={<BudgetForm />} />
               <Route
-                path="budgets/:id/print"
-                element={<BudgetPrint />}
-              />
-              <Route path="inbox" element={<Inbox />} />
-              <Route path="reminders" element={<Reminders />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Layout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="appointments" element={<Appointments />} />
+                <Route path="service-records" element={<ServiceRecords />} />
+                <Route path="customers" element={<Customers />} />
+                <Route path="customers/:id" element={<CustomerProfile />} />
+                <Route path="vehicles" element={<Vehicles />} />
+                <Route path="services" element={<Services />} />
+                <Route path="products" element={<Products />} />
+                <Route path="suppliers" element={<Suppliers />} />
+                <Route path="service-records/new" element={<ServiceRecordFormPage />} />
+                <Route path="service-records/:id/edit" element={<ServiceRecordFormPage />} />
+                <Route path="budgets" element={<Budgets />} />
+                <Route path="budgets/new" element={<BudgetForm />} />
+                <Route path="budgets/:id/edit" element={<BudgetForm />} />
+                <Route
+                  path="budgets/:id/print"
+                  element={<BudgetPrint />}
+                />
+                <Route path="inbox" element={<Inbox />} />
+                <Route path="reminders" element={<Reminders />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
 
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </Router>
-      </QueryProvider>
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </Router>
+        </QueryProvider>
+      </div>
     </>
   );
 }

@@ -1,6 +1,7 @@
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { useId } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { useDialogLayer } from '@hooks/useDialogLayer';
 
 const SIZE_CLASSES = {
   md: 'max-w-2xl',
@@ -9,12 +10,6 @@ const SIZE_CLASSES = {
 
 // Un diálogo apilado sobre otro (nivel ≥ 1) es más angosto, para que se note que está encima.
 const STACKED_SIZE_CLASS = 'max-w-xl';
-const BASE_Z_INDEX = 50;
-
-// Diálogos abiertos, el último es el de arriba (permite apilar uno sobre otro).
-const openStack = [];
-// overflow del body antes de abrir el primer diálogo de la pila; se restaura al cerrar el último
-let previousBodyOverflow = '';
 
 const FormDialog = ({
   isOpen,
@@ -32,55 +27,8 @@ const FormDialog = ({
   const dialogId = useId();
   const titleId = `${dialogId}-title`;
   const subtitleId = `${dialogId}-subtitle`;
-  const panelRef = useRef(null);
-  // Profundidad en la pila al abrir: 0 = diálogo base, ≥ 1 = apilado encima de otro
-  const [level, setLevel] = useState(0);
-  // Elemento con foco antes de abrir. Se captura durante el render en que isOpen pasa a true:
-  // React aplica el autoFocus de un hijo en el commit, antes que cualquier efecto del diálogo.
-  const [wasOpen, setWasOpen] = useState(false);
-  const [returnFocusTo, setReturnFocusTo] = useState(null);
-  if (isOpen !== wasOpen) {
-    setWasOpen(isOpen);
-    if (isOpen) setReturnFocusTo(document.activeElement);
-  }
-
-  // Layout effect: el nivel se conoce antes de pintar, así el apilado no parpadea
-  useLayoutEffect(() => {
-    if (!isOpen) return undefined;
-    setLevel(openStack.length);
-    if (openStack.length === 0) previousBodyOverflow = document.body.style.overflow;
-    openStack.push(dialogId);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      openStack.splice(openStack.indexOf(dialogId), 1);
-      if (openStack.length === 0) document.body.style.overflow = previousBodyOverflow;
-      // Al cerrar vuelve al nivel base: la próxima apertura no renderiza con el nivel viejo
-      setLevel(0);
-    };
-  }, [isOpen, dialogId]);
-
-  // Foco: al abrir va al diálogo (salvo que un campo ya lo haya tomado, ej. autoFocus);
-  // al cerrar vuelve al elemento que lo tenía antes de abrir.
-  useEffect(() => {
-    if (!isOpen) return undefined;
-    if (panelRef.current && !panelRef.current.contains(document.activeElement)) {
-      panelRef.current.focus();
-    }
-    return () => {
-      if (returnFocusTo instanceof HTMLElement && returnFocusTo.isConnected) returnFocusTo.focus();
-    };
-  }, [isOpen, returnFocusTo]);
-
-  useEffect(() => {
-    if (!isOpen) return undefined;
-    // Solo el diálogo de arriba responde al Escape, y no si un hijo ya lo atendió (ej. cerrar un dropdown)
-    const handleEscape = (e) => {
-      if (e.key !== 'Escape' || e.defaultPrevented) return;
-      if (openStack.at(-1) === dialogId) onClose();
-    };
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose, dialogId]);
+  // Pila, z-index, Escape del de arriba, foco, trampa de Tab, inert y scroll lock
+  const { panelRef, layerRef, level, zIndex } = useDialogLayer({ isOpen, onClose });
 
   if (!isOpen) return null;
 
@@ -92,9 +40,10 @@ const FormDialog = ({
   // El fondo no cierra: solo ✕, Cancelar o Escape (evita perder lo cargado por un click afuera).
   return createPortal(
     <div
+      ref={layerRef}
       data-testid="form-dialog-backdrop"
       className={`fixed inset-0 ${backdropClass} flex items-center justify-center p-4`}
-      style={{ zIndex: BASE_Z_INDEX + level * 10 }}
+      style={{ zIndex }}
     >
       <div
         ref={panelRef}

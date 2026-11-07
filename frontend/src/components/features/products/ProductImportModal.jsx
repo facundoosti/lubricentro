@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Upload, Download, FileSpreadsheet, X, Loader2 } from 'lucide-react';
 import { useImportProducts, useDownloadImportTemplate, productKeys } from '@services/productsService';
 import { useImportProgress } from '@hooks/useImportProgress';
@@ -6,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { showError } from '@services/notificationService';
 import ProductImportResult from '@components/features/products/ProductImportResult';
 import { notifyImportResult } from '@components/features/products/importResult';
+import { useDialogLayer } from '@hooks/useDialogLayer';
 
 const ProductImportModal = ({ isOpen, onClose }) => {
   const [file, setFile] = useState(null);
@@ -64,13 +66,12 @@ const ProductImportModal = ({ isOpen, onClose }) => {
 
   const isUploading = importMutation.isPending;
 
-  useEffect(() => {
-    if (!isOpen) return undefined;
-    const onKeyDown = (e) => {
-      if (e.key === 'Escape' && !isUploading) handleClose();
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+  // Pila de diálogos, foco, inert y scroll lock. Mientras sube el archivo no cierra con Escape
+  // (✕ y Cancelar también quedan deshabilitados); el fondo nunca cierra.
+  const { panelRef, layerRef, zIndex } = useDialogLayer({
+    isOpen,
+    onClose: handleClose,
+    closeOnEscape: !isUploading,
   });
 
   const handleDrop = (e) => {
@@ -89,14 +90,16 @@ const ProductImportModal = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={!isUploading ? handleClose : undefined} />
+  return createPortal(
+    <div ref={layerRef} className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex }}>
+      <div data-testid="product-import-backdrop" className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
+        ref={panelRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby="product-import-title"
-        className="relative bg-surface-container border border-outline-variant rounded-xl shadow-2xl w-full max-w-lg"
+        className="relative bg-surface-container border border-outline-variant rounded-xl shadow-2xl w-full max-w-lg outline-none"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-outline-variant">
@@ -238,7 +241,8 @@ const ProductImportModal = ({ isOpen, onClose }) => {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 

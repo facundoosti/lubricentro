@@ -131,13 +131,21 @@ const MultiSelectSearch = ({
     onChange?.(value.filter((item) => item !== v));
   };
 
+  // Escape con la lista abierta cierra solo la lista (el diálogo contenedor lo ignora)
+  const handleKeyDown = (e) => {
+    if (e.key === "Escape" && isOpen) {
+      e.preventDefault();
+      setIsOpen(false);
+    }
+  };
+
   const getLabelForValue = (v) =>
     options.find((o) => String(o.value) === String(v))?.label ?? v;
 
   const hasSelection = value.length > 0;
 
   return (
-    <div ref={containerRef} className={`relative ${className}`}>
+    <div ref={containerRef} className={`relative ${className}`} onKeyDown={handleKeyDown}>
       {/* Trigger button */}
       <button
         type="button"

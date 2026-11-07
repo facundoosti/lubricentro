@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen, waitFor, act } from '@testing-library/react';
+import { screen, waitFor, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
 import ProductImportModal from '@components/features/products/ProductImportModal';
 
 const mocks = vi.hoisted(() => ({
   mutateAsync: vi.fn(),
+  isPending: false,
   importStatus: { data: undefined },
   cableHandlers: {},
   showSuccess: vi.fn(),
@@ -15,7 +16,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@services/productsService', () => ({
   productKeys: { lists: () => ['products', 'list'] },
-  useImportProducts: () => ({ mutateAsync: mocks.mutateAsync, isPending: false }),
+  useImportProducts: () => ({ mutateAsync: mocks.mutateAsync, isPending: mocks.isPending }),
   useDownloadImportTemplate: () => vi.fn(),
   useImportStatus: () => mocks.importStatus,
 }));
@@ -49,6 +50,7 @@ describe('ProductImportModal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.importStatus = { data: undefined };
+    mocks.isPending = false;
     mocks.mutateAsync.mockResolvedValue({ data: { job_id: 'job-1' } });
   });
 
@@ -153,5 +155,32 @@ describe('ProductImportModal', () => {
     await user.click(screen.getByRole('button', { name: /importar$/i }));
 
     await waitFor(() => expect(mocks.showError).toHaveBeenCalledWith('Error al importar', 'Formato no soportado'));
+  });
+
+  describe('cierre', () => {
+    it('Escape cierra cuando no está subiendo', () => {
+      const onClose = vi.fn();
+      renderWithProviders(<ProductImportModal isOpen onClose={onClose} />);
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('Escape no cierra mientras sube el archivo (✕ y Cancelar deshabilitados)', () => {
+      mocks.isPending = true;
+      const onClose = vi.fn();
+      renderWithProviders(<ProductImportModal isOpen onClose={onClose} />);
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      screen.getAllByRole('button', { name: /^(cerrar|cancelar)$/i }).forEach((b) => expect(b).toBeDisabled());
+    });
+
+    it('click en el fondo no cierra', () => {
+      const onClose = vi.fn();
+      renderWithProviders(<ProductImportModal isOpen onClose={onClose} />);
+      fireEvent.click(screen.getByTestId('product-import-backdrop'));
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
   });
 });
