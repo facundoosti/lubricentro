@@ -14,17 +14,14 @@ Script: `docs/qa/2026-11-06-pendientes-quick-fix.qa.mjs` · evidencia: `tmp/qa/p
 - [x] **TC-07** · must · script · dark · Turno vacío: "Cliente es requerido" y bordes rojos en cliente y vehículo. ✅ los dos en `rgb(239,68,68)`. *(H-07)*
 - [x] **TC-08** · must · script · dark · /service-records/new vacío: buscadores de cliente y vehículo en rojo. ✅ *(H-07)*
 - [x] **TC-09** · should · script · light · Autocomplete con texto largo: el texto termina antes de la X. ✅ el texto termina en 1352 y la X empieza en 1356. *(bug autocomplete)*
-- [ ] **TC-10** · must · script · dark · El tooltip de un turno se oculta al cambiar de mes. 🚧 bloqueado: en dev no hay turnos en los últimos 6 meses. Lo cubre `Appointments.test.jsx` (vitest, con FullCalendar reemplazado por un doble). *(tooltip)*
+- [x] **TC-10** · must · script · dark · El tooltip de un turno se oculta al cambiar de mes. ✅ tooltip antes 1, después 0. Se corrió con un turno de prueba en dev que después se borró. También lo cubre `Appointments.test.jsx`. *(tooltip)*
 - [x] **TC-11** · must · script · dark,light · Configuración: 7 switches de día con `aria-checked`. ✅ *(a11y)*
 - [x] **TC-12** · must · script · dark,light · Regresión del Inbox: filtro activo con contraste ≥ 4.5. ✅ 5.7:1 (antes era `bg-primary`). *(regresión H-09)*
 - [x] **TC-13** · must · vitest · Modal y SlideOver: `role=dialog` con nombre y X "Cerrar". ✅ `Modal.test.jsx`, `SlideOver.test.jsx`.
 
-**Resultado:** 12 ✅ · 0 ❌ · 1 🚧 (TC-10, faltan datos).
+**Resultado:** 13 ✅ · 0 ❌ · 0 🚧.
 
 ## Hallazgos
 - **TC-02 (1.ª corrida), falso negativo del script**: `waitForURL` resuelve con el `pushState`, antes de que React desmonte el Dashboard. Se agregó una espera a un elemento de /settings. Verificado con un `MutationObserver` del `<title>`: `Dashboard - …` pasa a `Sistema Lubricentro`.
 - **TC-11 (1.ª corrida), error del script**: contaba también el switch "Modo oscuro" del header. Ahora filtra solo los días.
 - **Revisión visual en claro** (`TC-04-desktop-light.jpg`, `TC-11-desktop-light.jpg`): con `--color-outline: #71717a` los checkboxes se distinguen y no aparecen bordes duros en tablas ni inputs.
-
-## Pendiente
-- TC-10 en navegador real: hace falta un turno en el mes actual. Si querés, lo creo en dev y lo corro con `--only TC-10`.
