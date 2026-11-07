@@ -112,7 +112,7 @@ export function ConversationList({
                 onClick={() => onFilterChange(f.value)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
                   active
-                    ? 'bg-primary text-on-primary'
+                    ? 'bg-primary-container text-on-primary'
                     : 'bg-surface-variant text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
                 }`}
               >

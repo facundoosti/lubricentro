@@ -41,7 +41,7 @@
 
   --color-primary: #a78bfa;
   --color-primary-container: #7c3aed;
-  --color-on-primary: #0a0012;
+  --color-on-primary: #ffffff; /* blanco sobre primary-container: 5.7:1 (H-09) */
 
   --color-secondary: #71717a;
   --color-secondary-container: #27272a;
@@ -49,7 +49,7 @@
   --color-tertiary: #34d399;
   --color-tertiary-container: #065f46;
 
-  --color-outline: #52525b;
+  --color-outline: #71717a; /* ≥ 3:1 sobre surface-container (borde del checkbox) */
   --color-outline-variant: #27272a;
 
   --color-error: #ef4444;
@@ -92,7 +92,7 @@
   --color-tertiary: #059669;
   --color-tertiary-container: #d1fae5;
 
-  --color-outline: #a1a1aa;
+  --color-outline: #71717a; /* ≥ 3:1 sobre blanco (borde del checkbox, H-10) */
   --color-outline-variant: #e4e4e7;
 
   --color-error: #dc2626;
@@ -449,14 +449,14 @@ input[type="checkbox"]:indeterminate::after {
   color: var(--color-on-surface);
 }
 .lubricentro-tour-popover .driver-popover-arrow-side-left.driver-popover-arrow {
-  border-left-color: var(--color-outline-variant);
+  border-left-color: var(--color-surface-container);
 }
 .lubricentro-tour-popover .driver-popover-arrow-side-right.driver-popover-arrow {
-  border-right-color: var(--color-outline-variant);
+  border-right-color: var(--color-surface-container);
 }
 .lubricentro-tour-popover .driver-popover-arrow-side-top.driver-popover-arrow {
-  border-top-color: var(--color-outline-variant);
+  border-top-color: var(--color-surface-container);
 }
 .lubricentro-tour-popover .driver-popover-arrow-side-bottom.driver-popover-arrow {
-  border-bottom-color: var(--color-outline-variant);
+  border-bottom-color: var(--color-surface-container);
 }

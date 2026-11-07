@@ -204,7 +204,7 @@ const SingleSelectSearch = ({
                     <div
                       className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                         isSelected
-                          ? "bg-primary border-2 border-primary"
+                          ? "bg-primary-container border-2 border-primary-container"
                           : "bg-surface-container-high border-2 border-outline"
                       }`}
                     >

@@ -225,7 +225,7 @@ const MultiSelectSearch = ({
                     <div
                       className={`w-4 h-4 rounded flex items-center justify-center shrink-0 transition-colors ${
                         selected
-                          ? "bg-primary border-2 border-primary"
+                          ? "bg-primary-container border-2 border-primary-container"
                           : "bg-surface-container-high border-2 border-outline"
                       }`}
                     >

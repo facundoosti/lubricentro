@@ -245,7 +245,7 @@ const ServicesTable = ({
                         </button>
                         <button
                           onClick={() => onEdit(service)}
-                          className="p-1 text-secondary hover:text-yellow-500"
+                          className="p-1 text-secondary hover:text-primary"
                           title="Editar"
                         >
                           <Edit className="w-4 h-4" />

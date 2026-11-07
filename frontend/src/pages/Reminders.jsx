@@ -294,7 +294,7 @@ const Reminders = () => {
                   onClick={() => setCurrentPage(page)}
                   className={`w-8 h-8 rounded flex items-center justify-center text-xs font-black ${
                     page === currentPage
-                      ? "bg-primary text-on-primary"
+                      ? "bg-primary-container text-on-primary"
                       : "border border-outline-variant text-on-surface-variant hover:bg-surface-container-high"
                   }`}
                 >

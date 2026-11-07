@@ -146,7 +146,7 @@ const SuppliersTable = ({
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => onEdit(supplier)}
-                          className="p-1 text-secondary hover:text-yellow-500"
+                          className="p-1 text-secondary hover:text-primary"
                           title="Editar"
                         >
                           <Edit className="w-4 h-4" />

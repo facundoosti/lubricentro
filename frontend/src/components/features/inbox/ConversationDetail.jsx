@@ -35,7 +35,7 @@ function MessageBubble({ message }) {
       <div className="flex flex-col max-w-[70%] self-end items-end">
         <div className={`p-4 rounded-xl rounded-tr-none border shadow-lg ${
           isAgentMsg
-            ? 'bg-primary border-primary-container shadow-primary/5'
+            ? 'bg-primary-container border-primary-container shadow-primary/5'
             : 'bg-tertiary/10 border-tertiary/20 shadow-tertiary/5'
         }`}>
           <p className={`text-sm font-medium leading-relaxed ${
@@ -226,7 +226,7 @@ export function ConversationDetail({ conversation }) {
           <button
             onClick={handleSend}
             disabled={!canSend || !text.trim() || sendMessage.isPending}
-            className="bg-primary text-on-primary h-12 w-12 rounded-xl flex items-center justify-center hover:scale-[0.98] active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-primary-container text-on-primary h-12 w-12 rounded-xl flex items-center justify-center hover:scale-[0.98] active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-4 h-4" />
           </button>
