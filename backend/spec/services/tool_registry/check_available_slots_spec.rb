@@ -77,7 +77,7 @@ RSpec.describe ToolRegistry::CheckAvailableSlots do
           create(:appointment,
             customer: customer,
             vehicle: vehicle,
-            scheduled_at: date.to_time.change(hour: hour),
+            scheduled_at: date.in_time_zone.change(hour: hour),
             status: "scheduled"
           )
         end
