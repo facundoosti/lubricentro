@@ -1,14 +1,22 @@
+import { useEffect } from 'react';
+
 const PageMeta = ({
   title,
   description,
 }) => {
-  // Update document title
-  if (title) {
+  // Título de la pestaña: al desmontar se restaura el anterior,
+  // así las páginas sin PageMeta (ej. /login) no heredan "Dashboard - …"
+  useEffect(() => {
+    if (!title) return undefined;
+    const previousTitle = document.title;
     document.title = title;
-  }
-  
-  // Update meta description
-  if (description) {
+    return () => {
+      document.title = previousTitle;
+    };
+  }, [title]);
+
+  useEffect(() => {
+    if (!description) return;
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute('content', description);
@@ -18,9 +26,9 @@ const PageMeta = ({
       meta.content = description;
       document.head.appendChild(meta);
     }
-  }
-  
-  return null; // This component doesn't render anything
+  }, [description]);
+
+  return null;
 };
 
 export default PageMeta;

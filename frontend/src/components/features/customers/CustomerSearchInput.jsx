@@ -263,7 +263,8 @@ const CustomerSearchInput = ({
           onKeyDown={handleKeyDown}
           placeholder={isLoading ? "Cargando cliente..." : placeholder}
           disabled={disabled || isLoadingInitialCustomer}
-          className={`w-full h-11 pl-10 pr-10 rounded-lg bg-surface-variant border text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
+          aria-invalid={!!error}
+          className={`w-full h-11 pl-10 ${inputValue ? 'pr-16' : 'pr-10'} rounded-lg bg-surface-variant border text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
             error ? 'border-error' : selectedCustomer ? 'border-tertiary' : 'border-outline-variant'
           } ${disabled || isLoadingInitialCustomer ? 'opacity-50 cursor-not-allowed' : ''}`}
         />

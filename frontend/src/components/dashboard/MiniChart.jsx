@@ -13,7 +13,8 @@ const MiniChart = ({ data = [] }) => {
 
   const maxServices = Math.max(...chartData.map(d => d.services || 0), 1);
   const totalServices = chartData.reduce((s, d) => s + (d.services || 0), 0);
-  const totalRevenue = chartData.reduce((s, d) => s + (d.revenue || 0), 0);
+  // La API serializa los decimales como string ("1500.0"): sin Number() el reduce concatena y da NaN
+  const totalRevenue = chartData.reduce((s, d) => s + (Number(d.revenue) || 0), 0);
 
   return (
     <div className="bg-surface-container border border-outline-variant rounded-xl px-4 py-3">
@@ -43,7 +44,7 @@ const MiniChart = ({ data = [] }) => {
               <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:flex flex-col items-center z-10 pointer-events-none">
                 <div className="bg-surface-container-high border border-outline-variant rounded-lg px-2 py-1.5 text-xs whitespace-nowrap shadow-lg">
                   <p className="text-on-surface font-semibold">{item.services} atenciones</p>
-                  <p className="text-tertiary">{formatCurrency(item.revenue || 0)}</p>
+                  <p className="text-tertiary">{formatCurrency(Number(item.revenue) || 0)}</p>
                 </div>
                 <div className="w-2 h-2 bg-surface-container-high border-r border-b border-outline-variant rotate-45 -mt-1" />
               </div>

@@ -80,3 +80,15 @@ describe('CustomerSearchInput — crear cliente', () => {
     await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue('Juan Pérez - 1155551234'));
   });
 });
+
+describe('CustomerSearchInput — botón de limpiar', () => {
+  it('deja lugar para la X y la flecha cuando hay texto (el texto no queda debajo)', () => {
+    renderWithProviders(<CustomerSearchInput value="" />);
+    const input = screen.getByRole('textbox');
+    expect(input.className).toMatch(/\bpr-10\b/);
+    fireEvent.change(input, { target: { value: 'Carlos' } });
+    expect(screen.getByRole('button', { name: 'Limpiar selección' })).toBeInTheDocument();
+    expect(input.className).toMatch(/\bpr-16\b/);
+    expect(input.className).not.toMatch(/\bpr-10\b/);
+  });
+});
