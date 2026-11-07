@@ -6,8 +6,9 @@ import { useSuppliers } from '@services/suppliersService';
 import { useProductBrands } from '@services/productsService';
 import { useCategories } from '@services/categoriesService';
 import {
-  Search, Plus, Edit, Trash2, Eye, Package, X, TrendingUp,
+  Search, Plus, Edit, Trash2, Eye, Package, X, TrendingUp, Percent,
 } from "lucide-react";
+import ProductPriceCell from '@components/features/products/ProductPriceCell';
 
 const buildCategoryOptions = (categories) => {
   const byParent = {};
@@ -53,6 +54,7 @@ const ProductsTable = ({
   onSelectAllByFilter,
   onClearSelection,
   onBulkPriceSelected,
+  onBulkIvaSelected,
 }) => {
   const [localSearch, setLocalSearch] = useState(search);
   const [brandSearch, setBrandSearch] = useState('');
@@ -129,9 +131,6 @@ const ProductsTable = ({
       </div>
     );
   };
-
-  const formatPrice = (price) =>
-    new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 }).format(parseFloat(price));
 
 
   return (
@@ -270,6 +269,15 @@ const ProductsTable = ({
               <TrendingUp className="w-3.5 h-3.5" />
               Actualizar precios
             </button>
+            {onBulkIvaSelected && (
+              <button
+                onClick={onBulkIvaSelected}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-high border border-outline-variant text-on-surface rounded-md text-xs font-medium hover:bg-surface-variant transition-colors"
+              >
+                <Percent className="w-3.5 h-3.5" />
+                Cambiar IVA
+              </button>
+            )}
             <button onClick={onClearSelection} className="text-secondary hover:text-on-surface p-1">
               <X className="w-4 h-4" />
             </button>
@@ -303,7 +311,7 @@ const ProductsTable = ({
                   Marca
                 </TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-secondary text-start text-xs uppercase tracking-wide">
-                  Precio
+                  Precio s/IVA · c/IVA
                 </TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-secondary text-start text-xs uppercase tracking-wide">
                   Categoría
@@ -400,7 +408,7 @@ const ProductsTable = ({
                       </TableCell>
 
                       <TableCell className="px-4 py-3 text-start">
-                        <span className="text-on-surface text-sm font-medium">{formatPrice(product.unit_price)}</span>
+                        <ProductPriceCell product={product} />
                       </TableCell>
 
                       <TableCell className="px-4 py-3 text-start">

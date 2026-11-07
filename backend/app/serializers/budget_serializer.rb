@@ -7,7 +7,9 @@
 #  date                      :date             not null
 #  notes                     :text
 #  status                    :string(20)       default("draft"), not null
+#  subtotal_net              :decimal(12, 2)   default(0.0)
 #  total_card                :decimal(12, 2)   default(0.0)
+#  total_iva                 :decimal(12, 2)   default(0.0)
 #  total_list                :decimal(12, 2)   default(0.0)
 #  vehicle_description       :string(200)
 #  created_at                :datetime         not null
@@ -38,6 +40,8 @@ class BudgetSerializer < Blueprinter::Base
   field :vehicle_description
   field :notes
   field :card_surcharge_percentage
+  field :subtotal_net
+  field :total_iva
   field :total_list
   field :total_card
   field :customer_id
@@ -60,6 +64,13 @@ class BudgetSerializer < Blueprinter::Base
     field :vehicle_id
     field :created_at
     field :updated_at
+
+    field :exempt_total do |obj|
+      obj.exempt_total.to_d.to_s
+    end
+    field :iva_breakdown do |obj|
+      obj.iva_breakdown.map { |row| row.transform_values { |v| v.to_d.to_s } }
+    end
 
     association :items, blueprint: BudgetItemSerializer
     association :customer, blueprint: CustomerSerializer, view: :summary

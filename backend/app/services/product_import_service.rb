@@ -9,7 +9,8 @@ class ProductImportService
     unit: 5,
     brand: 6,
     supplier_name: 7,
-    stock: 8
+    stock: 8,
+    iva: 9
   }.freeze
 
   def initialize(file_path, original_filename, job_id = nil)
@@ -59,6 +60,8 @@ class ProductImportService
     brand         = row[COLUMNS[:brand] - 1].to_s.strip.presence
     supplier_name = row[COLUMNS[:supplier_name] - 1].to_s.strip.presence
     stock         = row[COLUMNS[:stock] - 1].to_s.strip.presence&.to_i
+    iva_cell      = row[COLUMNS[:iva] - 1]
+    iva_rate      = parse_iva(iva_cell)
 
     if name.blank?
       @errors << { row: row_number, message: "El nombre es requerido" }
@@ -70,6 +73,11 @@ class ProductImportService
       return
     end
 
+    if iva_cell.to_s.strip.present? && iva_rate.nil?
+      @errors << { row: row_number, message: "El IVA es inválido para '#{name}' (usá 21 o 10,5)" }
+      return
+    end
+
     supplier = find_or_create_supplier(supplier_name) if supplier_name.present?
 
     product = sku.present? ? Product.find_by(sku: sku) : nil
@@ -77,7 +85,7 @@ class ProductImportService
     product ||= Product.new
 
     # Las celdas opcionales vacías no pisan datos de productos existentes
-    optional = { description: description, unit: unit, brand: brand, supplier: supplier, stock: stock }.compact
+    optional = { description: description, unit: unit, brand: brand, supplier: supplier, stock: stock, iva_rate: iva_rate }.compact
     product.assign_attributes(optional.merge(name: name, unit_price: unit_price))
     product.sku = sku if sku.present?
 
@@ -125,6 +133,23 @@ class ProductImportService
     BigDecimal(cleaned)
   rescue ArgumentError
     nil
+  end
+
+  # Acepta 21, "21%", "10,5", "10.5", "10,5%" y celdas numéricas (0.21 / 0.105 si la
+  # celda tiene formato de porcentaje). Devuelve nil si está vacía o es inválida.
+  def parse_iva(value)
+    return nil if value.to_s.strip.blank?
+
+    rate = if value.is_a?(Numeric)
+      value.to_d
+    else
+      cleaned = value.to_s.strip.delete("%").tr(",", ".").strip
+      return nil unless cleaned.match?(/\A\d+(\.\d+)?\z/)
+
+      BigDecimal(cleaned)
+    end
+    rate *= 100 if rate.positive? && rate < 1
+    Product::IVA_RATES.find { |r| r == rate }
   end
 
   def find_or_create_supplier(name)

@@ -7,6 +7,7 @@
 #  brand       :string(100)
 #  description :text
 #  embedding   :vector(768)
+#  iva_rate    :decimal(4, 2)    default(21.0), not null
 #  name        :string(100)      not null
 #  sku         :string(50)
 #  stock       :integer          default(0), not null
@@ -39,6 +40,8 @@ class Product < ApplicationRecord
   has_many :service_records, through: :service_record_products
   has_one_attached :image
 
+  IVA_RATES = [ BigDecimal("21"), BigDecimal("10.5") ].freeze
+
   # Validaciones
   validates :name, presence: true, length: { maximum: 100 }, uniqueness: { case_sensitive: false }
   validates :sku, length: { maximum: 50 }, allow_blank: true,
@@ -48,6 +51,7 @@ class Product < ApplicationRecord
   validates :unit, length: { maximum: 50 }, allow_blank: true
   validates :brand, length: { maximum: 100 }, allow_blank: true
   validates :stock, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+  validates :iva_rate, presence: true, inclusion: { in: IVA_RATES, message: "debe ser 21 o 10,5" }
 
   before_validation :assign_sku, on: :create
   before_save :sync_active_from_stock
@@ -78,6 +82,13 @@ class Product < ApplicationRecord
 
   def formatted_price
     "$#{unit_price.to_f}"
+  end
+
+  # Precio final: unit_price se guarda sin IVA.
+  def unit_price_with_iva
+    return nil if unit_price.nil? || iva_rate.nil?
+
+    (unit_price * (1 + iva_rate / 100)).round(2)
   end
 
   private

@@ -7,7 +7,9 @@
 #  date                      :date             not null
 #  notes                     :text
 #  status                    :string(20)       default("draft"), not null
+#  subtotal_net              :decimal(12, 2)   default(0.0)
 #  total_card                :decimal(12, 2)   default(0.0)
+#  total_iva                 :decimal(12, 2)   default(0.0)
 #  total_list                :decimal(12, 2)   default(0.0)
 #  vehicle_description       :string(200)
 #  created_at                :datetime         not null
@@ -46,7 +48,7 @@ RSpec.describe BudgetSerializer, type: :serializer do
     it 'includes core fields' do
       expect(result).to include(
         :id, :status, :status_label, :date, :notes,
-        :card_surcharge_percentage, :total_list, :total_card,
+        :card_surcharge_percentage, :subtotal_net, :total_iva, :total_list, :total_card,
         :customer_id, :vehicle_id
       )
     end

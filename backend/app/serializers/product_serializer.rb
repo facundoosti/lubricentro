@@ -7,6 +7,7 @@
 #  brand       :string(100)
 #  description :text
 #  embedding   :vector(768)
+#  iva_rate    :decimal(4, 2)    default(21.0), not null
 #  name        :string(100)      not null
 #  sku         :string(50)
 #  stock       :integer          default(0), not null
@@ -37,6 +38,14 @@ class ProductSerializer < Blueprinter::Base
 
   field :unit_price do |product|
     product.unit_price.to_s
+  end
+
+  field :iva_rate do |product|
+    product.iva_rate.to_s
+  end
+
+  field :unit_price_with_iva do |product|
+    product.unit_price_with_iva.to_s
   end
 
   field :image_url do |product|

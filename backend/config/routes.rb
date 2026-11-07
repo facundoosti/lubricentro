@@ -49,6 +49,7 @@ Rails.application.routes.draw do
           get "import_status/:job_id", action: :import_status, as: :import_status
           post :bulk_price_preview
           post :bulk_price_update
+          post :bulk_iva_update
           get :brands
         end
       end
@@ -63,7 +64,11 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :budgets
+      resources :budgets do
+        member do
+          post :duplicate
+        end
+      end
 
       resource :setting, only: [ :show, :update ]
 

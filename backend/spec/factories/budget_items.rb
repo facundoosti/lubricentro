@@ -4,6 +4,7 @@
 #
 #  id          :bigint           not null, primary key
 #  description :string(300)      not null
+#  iva_rate    :decimal(4, 2)
 #  position    :integer          default(0), not null
 #  quantity    :decimal(10, 2)   default(1.0), not null
 #  total       :decimal(12, 2)   default(0.0), not null

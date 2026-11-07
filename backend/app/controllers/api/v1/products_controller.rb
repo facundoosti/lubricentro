@@ -100,12 +100,12 @@ class Api::V1::ProductsController < ApplicationController
       )
 
       sheet.add_row(
-        [ "SKU", "Nombre *", "Descripción", "Precio Unitario *", "Unidad", "Marca", "Proveedor (nombre)", "Stock" ],
+        [ "SKU", "Nombre *", "Descripción", "Precio Unitario *", "Unidad", "Marca", "Proveedor (nombre)", "Stock", "IVA (21 o 10,5)" ],
         style: header_style
       )
-      sheet.add_row([ "PRD-EJEMPLO", "Aceite 5W-30", "Aceite de motor sintético", "5000.00", "litro", "Mobil", "Proveedor SA", "10" ])
+      sheet.add_row([ "PRD-EJEMPLO", "Aceite 5W-30", "Aceite de motor sintético", "5000.00", "litro", "Mobil", "Proveedor SA", "10", "21" ])
 
-      sheet.column_widths 15, 30, 40, 18, 12, 20, 25, 10
+      sheet.column_widths 15, 30, 40, 18, 12, 20, 25, 10, 16
     end
 
     send_data package.to_stream.read,
@@ -149,7 +149,47 @@ class Api::V1::ProductsController < ApplicationController
     render_json({ updated: updated }, message: "#{updated} producto(s) actualizados exitosamente")
   end
 
+  # POST /api/v1/products/bulk_iva_update
+  # Cambia solo la alícuota de IVA; no toca precios ni regenera embeddings.
+  def bulk_iva_update
+    iva_rate = parse_iva_rate(params[:iva_rate])
+    unless iva_rate
+      render_json({}, message: "Alícuota inválida", errors: [ "La alícuota debe ser 21 o 10,5" ], status: :unprocessable_content)
+      return
+    end
+
+    unless bulk_target_given?
+      render_json({}, message: "Indicá qué productos cambiar", errors: [ "Enviá product_ids, algún filtro o all=true" ], status: :unprocessable_content)
+      return
+    end
+
+    products = filtered_products_for_bulk
+    unless products.exists?
+      render_json({}, message: "No se encontraron productos con los criterios dados", errors: [ "Sin productos" ], status: :unprocessable_content)
+      return
+    end
+
+    updated = products.update_all(iva_rate: iva_rate, updated_at: Time.current)
+    render_json({ updated: updated }, message: "Alícuota actualizada en #{updated} producto(s)")
+  end
+
   private
+
+  BULK_FILTER_KEYS = %i[product_ids supplier_id search brand category_id active].freeze
+
+  # Evita cambiar todo el catálogo por un request sin criterios.
+  def bulk_target_given?
+    params[:all].to_s == "true" || BULK_FILTER_KEYS.any? { |key| params[key].present? }
+  end
+
+  def parse_iva_rate(value)
+    return nil if value.blank?
+
+    rate = BigDecimal(value.to_s.tr(",", ".").delete("%").strip)
+    Product::IVA_RATES.include?(rate) ? rate : nil
+  rescue ArgumentError
+    nil
+  end
 
   def set_product
     @product = Product.find(params[:id])
@@ -158,7 +198,7 @@ class Api::V1::ProductsController < ApplicationController
   end
 
   def product_params
-    params.require(:product).permit(:name, :sku, :description, :unit_price, :unit, :brand, :stock, :supplier_id, :category_id, :image)
+    params.require(:product).permit(:name, :sku, :description, :unit_price, :unit, :brand, :stock, :supplier_id, :category_id, :image, :iva_rate)
   end
 
   def filtered_products_for_bulk
@@ -169,6 +209,8 @@ class Api::V1::ProductsController < ApplicationController
       scope = scope.by_supplier(params[:supplier_id]) if params[:supplier_id].present?
       scope = scope.by_name(params[:search]) if params[:search].present?
       scope = scope.by_brand(params[:brand]) if params[:brand].present?
+      scope = scope.by_category(params[:category_id]) if params[:category_id].present?
+      scope = scope.by_active(params[:active]) if params[:active].present?
     end
     scope
   end

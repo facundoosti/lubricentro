@@ -4,6 +4,8 @@ import ImageUpload from '@ui/ImageUpload';
 import SingleSelectSearch from '@ui/SingleSelectSearch';
 import { useSuppliers } from '@services/suppliersService';
 import { useCategories } from '@services/categoriesService';
+import { ivaRateToOption, DEFAULT_IVA_RATE } from '@utils/iva';
+import ProductIvaField from '@components/features/products/ProductIvaField';
 
 const buildCategoryOptions = (categories) => {
   const byParent = {};
@@ -42,6 +44,7 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
     control,
     formState: { errors },
     reset,
+    watch,
   } = useForm({
     defaultValues: {
       name: product?.name || '',
@@ -51,6 +54,7 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
       unit_price: product?.unit_price || '',
       unit: product?.unit || '',
       stock: product?.stock ?? 0,
+      iva_rate: ivaRateToOption(product?.iva_rate ?? DEFAULT_IVA_RATE),
       supplier_id: product?.supplier_id || '',
       category_id: product?.category_id ? String(product.category_id) : null,
     },
@@ -62,6 +66,7 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
         ...data,
         unit_price: parseFloat(data.unit_price),
         stock: parseInt(data.stock, 10) || 0,
+        iva_rate: parseFloat(data.iva_rate),
         supplier_id: data.supplier_id || null,
         category_id: data.category_id || null,
       };
@@ -211,7 +216,7 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="unit_price" className="block text-sm font-medium text-on-surface mb-1.5">
-            Precio Unitario (ARS) *
+            Precio sin IVA (ARS) *
           </label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">$</span>
@@ -271,6 +276,13 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
           />
           {errors.stock && <p className="mt-1 text-sm text-error">{errors.stock.message}</p>}
         </div>
+
+        <ProductIvaField
+          register={register}
+          unitPrice={watch('unit_price')}
+          ivaRate={watch('iva_rate')}
+          className={inputClass(false)}
+        />
       </div>
 
       {/* Imagen */}

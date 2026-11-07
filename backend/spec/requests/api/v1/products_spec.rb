@@ -41,6 +41,23 @@ RSpec.describe "Api::V1::Products", type: :request do
       expect(json_response[:data][:id]).to eq(product.id)
     end
 
+    context "con IVA" do
+      let(:product) { create(:product, unit_price: 10_000, iva_rate: 10.5) }
+
+      it "devuelve la alícuota y el precio con IVA" do
+        expect(json_response[:data][:iva_rate]).to eq("10.5")
+        expect(json_response[:data][:unit_price_with_iva]).to eq("11050.0")
+      end
+    end
+
+    context "when the product does not exist" do
+      it "returns not found" do
+        get api_v1_product_url(id: 999_999), headers: auth_headers(user)
+        expect(response).to have_http_status(:not_found)
+        expect(json_response[:success]).to be(false)
+      end
+    end
+
     context "without authentication" do
       it "returns unauthorized" do
         get api_v1_product_url(product)
@@ -61,6 +78,26 @@ RSpec.describe "Api::V1::Products", type: :request do
         post api_v1_products_url, params: { product: valid_attributes }, headers: auth_headers(user)
         expect(response).to have_http_status(:created)
         expect(json_response[:data][:name]).to eq(valid_attributes[:name])
+      end
+    end
+
+    context "con alícuota de IVA" do
+      it "usa 21% si no se envía" do
+        post api_v1_products_url, params: { product: valid_attributes }, headers: auth_headers(user)
+        expect(json_response[:data][:iva_rate]).to eq("21.0")
+      end
+
+      it "guarda 10,5%" do
+        post api_v1_products_url, params: { product: valid_attributes.merge(iva_rate: "10.5") }, headers: auth_headers(user)
+        expect(response).to have_http_status(:created)
+        expect(Product.last.iva_rate).to eq(10.5)
+      end
+
+      it "rechaza una alícuota inválida" do
+        post api_v1_products_url, params: { product: valid_attributes.merge(iva_rate: "15") }, headers: auth_headers(user)
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(json_response[:success]).to be(false)
+        expect(json_response[:errors]).to be_present
       end
     end
 
@@ -99,6 +136,11 @@ RSpec.describe "Api::V1::Products", type: :request do
     it "returns a successful response" do
       patch api_v1_product_url(product), params: { product: new_attributes }, headers: auth_headers(user)
       expect(response).to be_successful
+    end
+
+    it "actualiza la alícuota de IVA" do
+      patch api_v1_product_url(product), params: { product: { iva_rate: "10.5" } }, headers: auth_headers(user)
+      expect(product.reload.iva_rate).to eq(10.5)
     end
 
     context "without authentication" do
@@ -258,6 +300,21 @@ RSpec.describe "Api::V1::Products", type: :request do
     end
   end
 
+  describe "GET /api/v1/products/import_template (columna IVA)" do
+    it "incluye la columna IVA en la plantilla" do
+      get import_template_api_v1_products_url, headers: auth_headers(user)
+
+      file = Tempfile.new([ "template", ".xlsx" ])
+      file.binmode
+      file.write(response.body)
+      file.close
+      header = Roo::Excelx.new(file.path).row(1)
+      expect(header.last).to eq("IVA (21 o 10,5)")
+    ensure
+      file&.unlink
+    end
+  end
+
   describe "GET /api/v1/products/import_template" do
     it "returns an xlsx file" do
       get import_template_api_v1_products_url, headers: auth_headers(user)
@@ -348,6 +405,92 @@ RSpec.describe "Api::V1::Products", type: :request do
     context "without authentication" do
       it "returns unauthorized" do
         post bulk_price_update_api_v1_products_url
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
+
+  describe "POST /api/v1/products/bulk_iva_update" do
+    let(:supplier) { create(:supplier) }
+    let!(:p1) { create(:product, supplier: supplier, unit_price: 1000) }
+    let!(:p2) { create(:product, supplier: supplier) }
+    let!(:p3) { create(:product) }
+
+    it "cambia la alícuota de los productos seleccionados" do
+      post bulk_iva_update_api_v1_products_url,
+           params: { product_ids: [ p1.id, p2.id ], iva_rate: "10.5" },
+           headers: auth_headers(user)
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response[:success]).to be(true)
+      expect(json_response[:data][:updated]).to eq(2)
+      expect(p1.reload.iva_rate).to eq(10.5)
+      expect(p2.reload.iva_rate).to eq(10.5)
+      expect(p3.reload.iva_rate).to eq(21)
+    end
+
+    it "no modifica el precio" do
+      post bulk_iva_update_api_v1_products_url,
+           params: { product_ids: [ p1.id ], iva_rate: "10,5" },
+           headers: auth_headers(user)
+
+      expect(p1.reload.unit_price).to eq(1000)
+    end
+
+    it "filtra por proveedor" do
+      post bulk_iva_update_api_v1_products_url,
+           params: { supplier_id: supplier.id, iva_rate: "10.5" },
+           headers: auth_headers(user)
+
+      expect(json_response[:data][:updated]).to eq(2)
+      expect(p3.reload.iva_rate).to eq(21)
+    end
+
+    it "respeta el filtro de categoría" do
+      category = Category.create!(name: "Neumáticos")
+      p1.update!(category: category)
+      post bulk_iva_update_api_v1_products_url,
+           params: { category_id: category.id.to_s, iva_rate: "10.5" },
+           headers: auth_headers(user)
+
+      expect(json_response[:data][:updated]).to eq(1)
+      expect(p2.reload.iva_rate).to eq(21)
+    end
+
+    it "rechaza una alícuota inválida" do
+      post bulk_iva_update_api_v1_products_url,
+           params: { product_ids: [ p1.id ], iva_rate: "27" },
+           headers: auth_headers(user)
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(json_response[:success]).to be(false)
+      expect(p1.reload.iva_rate).to eq(21)
+    end
+
+    it "rechaza un request sin ids ni filtros" do
+      post bulk_iva_update_api_v1_products_url, params: { iva_rate: "10.5" }, headers: auth_headers(user)
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(p1.reload.iva_rate).to eq(21)
+    end
+
+    it "cambia todo el catálogo solo con all=true" do
+      post bulk_iva_update_api_v1_products_url, params: { all: "true", iva_rate: "10.5" }, headers: auth_headers(user)
+
+      expect(json_response[:data][:updated]).to eq(3)
+    end
+
+    it "devuelve error si no hay productos" do
+      post bulk_iva_update_api_v1_products_url,
+           params: { product_ids: [ 999_999 ], iva_rate: "10.5" },
+           headers: auth_headers(user)
+
+      expect(response).to have_http_status(:unprocessable_content)
+    end
+
+    context "without authentication" do
+      it "returns unauthorized" do
+        post bulk_iva_update_api_v1_products_url, params: { iva_rate: "21" }
         expect(response).to have_http_status(:unauthorized)
       end
     end

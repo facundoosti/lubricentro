@@ -160,6 +160,52 @@ RSpec.describe ProductImportService do
         end
       end
 
+      context 'with an IVA column' do
+        let!(:existing_105) { create(:product, sku: "IVA-OLD", name: "Neumático viejo", iva_rate: 10.5) }
+        let(:rows) do
+          [
+            [ "SKU", "Nombre *", "Descripción", "Precio Unitario *", "Unidad", "Marca", "Proveedor", "Stock", "IVA" ],
+            [ "IVA-1", "Neumático 175", nil, "1000", nil, nil, nil, nil, "10,5%" ],
+            [ "IVA-2", "Aceite 10W40", nil, "1000", nil, nil, nil, nil, nil ],
+            [ "IVA-OLD", "Neumático viejo", nil, "2000", nil, nil, nil, nil, nil ],
+            [ "IVA-3", "Filtro", nil, "1000", nil, nil, nil, nil, 21 ],
+            [ "IVA-4", "Raro", nil, "1000", nil, nil, nil, nil, "abc" ]
+          ]
+        end
+
+        before do
+          allow(spreadsheet_double).to receive(:each_with_index) do |&block|
+            rows.each_with_index(&block)
+          end
+        end
+
+        it 'guarda 10,5% cuando la celda lo indica' do
+          call_service("/tmp/file.xlsx", "products.xlsx")
+          expect(Product.find_by(sku: "IVA-1").iva_rate).to eq(10.5)
+        end
+
+        it 'usa 21% en productos nuevos sin IVA' do
+          call_service("/tmp/file.xlsx", "products.xlsx")
+          expect(Product.find_by(sku: "IVA-2").iva_rate).to eq(21)
+        end
+
+        it 'conserva la alícuota de un producto existente si la celda está vacía' do
+          call_service("/tmp/file.xlsx", "products.xlsx")
+          expect(existing_105.reload).to have_attributes(iva_rate: 10.5, unit_price: 2000)
+        end
+
+        it 'acepta celdas numéricas' do
+          call_service("/tmp/file.xlsx", "products.xlsx")
+          expect(Product.find_by(sku: "IVA-3").iva_rate).to eq(21)
+        end
+
+        it 'reporta como error un IVA inválido y no crea el producto' do
+          result = call_service("/tmp/file.xlsx", "products.xlsx")
+          expect(result[:errors]).to contain_exactly(a_hash_including(row: 6, message: a_string_including("IVA")))
+          expect(Product.find_by(sku: "IVA-4")).to be_nil
+        end
+      end
+
       context 'with a job_id for progress broadcast' do
         let(:job_id) { "test-job-123" }
 

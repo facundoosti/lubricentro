@@ -7,6 +7,7 @@
 #  brand       :string(100)
 #  description :text
 #  embedding   :vector(768)
+#  iva_rate    :decimal(4, 2)    default(21.0), not null
 #  name        :string(100)      not null
 #  sku         :string(50)
 #  stock       :integer          default(0), not null
@@ -40,7 +41,7 @@ RSpec.describe ProductSerializer do
 
     it 'includes all the required fields' do
       expect(serialized.keys).to contain_exactly(
-        :id, :name, :sku, :brand, :description, :unit_price, :unit, :stock, :active, :image_url,
+        :id, :name, :sku, :brand, :description, :unit_price, :iva_rate, :unit_price_with_iva, :unit, :stock, :active, :image_url,
         :supplier_id, :supplier_name, :category_id, :category_name, :created_at, :updated_at
       )
     end
@@ -55,7 +56,7 @@ RSpec.describe ProductSerializer do
 
     it 'includes only the summary fields' do
       expect(serialized.keys).to contain_exactly(
-        :id, :name, :sku, :brand, :unit_price, :unit, :stock, :active, :image_url,
+        :id, :name, :sku, :brand, :unit_price, :iva_rate, :unit_price_with_iva, :unit, :stock, :active, :image_url,
         :supplier_id, :supplier_name, :category_id, :category_name
       )
     end

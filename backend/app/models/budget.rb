@@ -7,7 +7,9 @@
 #  date                      :date             not null
 #  notes                     :text
 #  status                    :string(20)       default("draft"), not null
+#  subtotal_net              :decimal(12, 2)   default(0.0)
 #  total_card                :decimal(12, 2)   default(0.0)
+#  total_iva                 :decimal(12, 2)   default(0.0)
 #  total_list                :decimal(12, 2)   default(0.0)
 #  vehicle_description       :string(200)
 #  created_at                :datetime         not null
@@ -39,6 +41,8 @@ class Budget < ApplicationRecord
   validates :date, presence: true
   validates :status, inclusion: { in: STATUSES }
   validates :card_surcharge_percentage, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
+  # Solo al cambiar cliente o vehículo: los presupuestos viejos inconsistentes se siguen pudiendo editar.
+  validate :vehicle_belongs_to_customer, if: -> { will_save_change_to_vehicle_id? || will_save_change_to_customer_id? }
 
   scope :recent, -> { order(date: :desc, created_at: :desc) }
   scope :by_status, ->(s) { where(status: s) }
@@ -52,10 +56,26 @@ class Budget < ApplicationRecord
 
   before_save :compute_totals
 
+  # Totales con IVA discriminado. unit_price de los ítems es neto; los ítems sin
+  # alícuota (servicios, presupuestos anteriores al IVA) se suman como precio final.
+  # El IVA se redondea por alícuota, no por línea.
   def compute_totals
-    base = items.reject(&:marked_for_destruction?).sum { |i| (i.quantity || 0) * (i.unit_price || 0) }
-    self.total_list = base
-    self.total_card = base * (1 + (card_surcharge_percentage || 0) / 100.0)
+    self.subtotal_net = taxed_items.sum(&:line_net)
+    self.total_iva = iva_breakdown.sum { |row| row[:amount] }
+    self.total_list = subtotal_net + total_iva + exempt_total
+    self.total_card = (total_list * (1 + (card_surcharge_percentage || 0) / 100)).round(2)
+  end
+
+  # [{ rate: 21.0, base: 20000.0, amount: 4200.0 }, ...] ordenado por alícuota descendente
+  def iva_breakdown
+    taxed_items.group_by { |i| i.iva_rate.to_d }.sort_by { |rate, _| -rate }.map do |rate, group|
+      base = group.sum(&:line_net)
+      { rate: rate, base: base, amount: (base * rate / 100).round(2) }
+    end
+  end
+
+  def exempt_total
+    active_items.reject(&:iva_rate).sum(&:line_net)
   end
 
   def status_label
@@ -66,5 +86,22 @@ class Budget < ApplicationRecord
     when "rejected" then "Rechazado"
     else status
     end
+  end
+
+  private
+
+  def active_items
+    items.reject(&:marked_for_destruction?)
+  end
+
+  def taxed_items
+    active_items.select(&:iva_rate)
+  end
+
+  def vehicle_belongs_to_customer
+    return if vehicle.nil? || customer_id.nil?
+    return if vehicle.customer_id == customer_id
+
+    errors.add(:vehicle, "no pertenece al cliente seleccionado")
   end
 end

@@ -172,7 +172,7 @@ describe('entity helpers — Budgets', () => {
 
   it('showBudgetError ERROR_DELETE calls sileo.error', () => {
     showBudgetError('ERROR_DELETE')
-    expect(sileo.error).toHaveBeenCalledWith({ title: 'Error al eliminar el budget' })
+    expect(sileo.error).toHaveBeenCalledWith({ title: 'Error al eliminar el presupuesto' })
   })
 })
 

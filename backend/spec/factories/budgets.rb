@@ -7,7 +7,9 @@
 #  date                      :date             not null
 #  notes                     :text
 #  status                    :string(20)       default("draft"), not null
+#  subtotal_net              :decimal(12, 2)   default(0.0)
 #  total_card                :decimal(12, 2)   default(0.0)
+#  total_iva                 :decimal(12, 2)   default(0.0)
 #  total_list                :decimal(12, 2)   default(0.0)
 #  vehicle_description       :string(200)
 #  created_at                :datetime         not null
@@ -36,7 +38,7 @@ FactoryBot.define do
     vehicle_description { nil }
 
     association :customer
-    association :vehicle
+    vehicle { association :vehicle, customer: customer }
 
     trait :sent do
       status { "sent" }

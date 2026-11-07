@@ -1,3 +1,22 @@
+# == Schema Information
+#
+# Table name: product_imports
+#
+#  id            :bigint           not null, primary key
+#  error_details :jsonb            not null
+#  errors_count  :integer          default(0), not null
+#  imported      :integer          default(0), not null
+#  processed     :integer          default(0), not null
+#  status        :string           default("queued"), not null
+#  total         :integer          default(0), not null
+#  created_at    :datetime         not null
+#  updated_at    :datetime         not null
+#  job_id        :string           not null
+#
+# Indexes
+#
+#  index_product_imports_on_job_id  (job_id) UNIQUE
+#
 require 'rails_helper'
 
 RSpec.describe ProductImport, type: :model do

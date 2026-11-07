@@ -9,6 +9,7 @@ import ProductsTable from '@components/features/products/ProductsTable';
 import ProductModal from '@components/features/products/ProductModal';
 import ProductImportModal from '@components/features/products/ProductImportModal';
 import BulkPriceModal from '@components/features/products/BulkPriceModal';
+import BulkIvaModal from '@components/features/products/BulkIvaModal';
 import ConfirmModal from '@ui/ConfirmModal';
 import { useProducts, useDeleteProduct } from '@services/productsService';
 import { showProductSuccess } from '@services/notificationService';
@@ -18,6 +19,7 @@ const Products = () => {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isBulkPriceOpen, setIsBulkPriceOpen] = useState(false);
   const [bulkPriceTarget, setBulkPriceTarget] = useState(null);
+  const [bulkIvaTarget, setBulkIvaTarget] = useState(null);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [selectAllByFilter, setSelectAllByFilter] = useState(false);
@@ -134,6 +136,12 @@ const Products = () => {
     setIsBulkPriceOpen(true);
   };
 
+  const handleOpenBulkIva = () => {
+    setBulkIvaTarget(selectAllByFilter
+      ? { type: 'filters', search, brand: brandsParam, supplierId: supplierIdsParam, categoryId: categoryIdsParam, active: activeFilter }
+      : { type: 'ids', ids: [...selectedIds] });
+  };
+
   const handleCloseBulkPrice = () => {
     setIsBulkPriceOpen(false);
     setBulkPriceTarget(null);
@@ -212,6 +220,7 @@ const Products = () => {
         onSelectAllByFilter={handleSelectAllByFilter}
         onClearSelection={handleClearSelection}
         onBulkPriceSelected={handleOpenBulkPriceFromSelection}
+        onBulkIvaSelected={handleOpenBulkIva}
       />
 
       <ProductModal
@@ -230,6 +239,14 @@ const Products = () => {
         isOpen={isBulkPriceOpen}
         onClose={handleCloseBulkPrice}
         target={bulkPriceTarget}
+      />
+
+      <BulkIvaModal
+        isOpen={bulkIvaTarget !== null}
+        onClose={() => setBulkIvaTarget(null)}
+        target={bulkIvaTarget}
+        count={bulkIvaTarget?.type === 'ids' ? bulkIvaTarget.ids.length : totalCount}
+        onDone={handleClearSelection}
       />
 
       <ConfirmModal

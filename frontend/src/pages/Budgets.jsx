@@ -1,60 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, FileText, Pencil, Trash2, Printer, Search } from "lucide-react";
+import { Plus, FileText, Pencil, Trash2, Search } from "lucide-react";
 import { useBudgets, useDeleteBudget } from "@services/budgetsService";
 import {
   showBudgetSuccess,
   showBudgetError,
+  parseApiError,
 } from "@services/notificationService";
 import PageHeader from "@ui/PageHeader";
 import PageError from "@ui/PageError";
 import ConfirmModal from "@ui/ConfirmModal";
-
-const STATUS_LABELS = {
-  draft: {
-    label: "Borrador",
-    className:
-      "bg-surface-container-high text-secondary border border-outline-variant",
-  },
-  sent: { label: "Enviado", className: "bg-primary-container/20 text-primary" },
-  approved: {
-    label: "Aprobado",
-    className: "bg-tertiary-container/20 text-tertiary",
-  },
-  rejected: {
-    label: "bg-error-container text-on-error-container",
-    label2: "Rechazado",
-  },
-};
-
-const StatusBadge = ({ status }) => {
-  const map = {
-    draft: {
-      label: "Borrador",
-      cls: "bg-surface-container-high text-secondary border border-outline-variant",
-    },
-    sent: { label: "Enviado", cls: "bg-primary-container/20 text-primary" },
-    approved: {
-      label: "Aprobado",
-      cls: "bg-tertiary-container/20 text-tertiary",
-    },
-    rejected: {
-      label: "Rechazado",
-      cls: "bg-error-container text-on-error-container",
-    },
-  };
-  const { label, cls } = map[status] ?? {
-    label: status,
-    cls: "text-secondary",
-  };
-  return (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${cls}`}
-    >
-      {label}
-    </span>
-  );
-};
+import BudgetActions from "@components/features/budgets/BudgetActions";
+import BudgetStatusSelect from "@components/features/budgets/BudgetStatusSelect";
+import BudgetStatusFilter from "@components/features/budgets/BudgetStatusFilter";
 
 const formatCurrency = (value) => {
   if (!value && value !== 0) return "—";
@@ -71,6 +29,7 @@ const Budgets = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [perPage] = useState(10);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
@@ -78,6 +37,7 @@ const Budgets = () => {
     page: currentPage,
     per_page: perPage,
     search: searchTerm,
+    status: statusFilter,
   });
 
   const deleteMutation = useDeleteBudget();
@@ -90,6 +50,11 @@ const Budgets = () => {
     setCurrentPage(1);
   };
 
+  const handleStatusFilter = (status) => {
+    setStatusFilter(status);
+    setCurrentPage(1);
+  };
+
   const handleDeleteConfirm = async () => {
     try {
       await deleteMutation.mutateAsync(deleteTarget.id);
@@ -98,7 +63,7 @@ const Budgets = () => {
     } catch (err) {
       showBudgetError(
         "ERROR_DELETE",
-        err.response?.data?.message || err.message,
+        parseApiError(err),
       );
     }
   };
@@ -106,7 +71,7 @@ const Budgets = () => {
   if (error) {
     return (
       <PageError
-        title="Error al cargar los budgets"
+        title="Error al cargar los presupuestos"
         message={error.message || "Ha ocurrido un error inesperado"}
       />
     );
@@ -116,7 +81,7 @@ const Budgets = () => {
     <div className="space-y-6">
       <PageHeader
         title="Presupuestos"
-        description="Gestioná y generá budgets para tus clientes"
+        description="Armá y enviá presupuestos para tus clientes"
       />
 
       {/* Toolbar */}
@@ -141,6 +106,8 @@ const Budgets = () => {
         </button>
       </div>
 
+      <BudgetStatusFilter value={statusFilter} onChange={handleStatusFilter} />
+
       {/* Table */}
       <div id="tour-budgets-table" className="bg-surface-container border border-outline-variant rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
@@ -157,10 +124,10 @@ const Budgets = () => {
                   Estado
                 </th>
                 <th className="text-right px-4 py-3 text-secondary font-medium">
-                  Total Lista
+                  Efectivo / Débito
                 </th>
                 <th className="text-right px-4 py-3 text-secondary font-medium">
-                  Total Tarjeta
+                  Tarjeta
                 </th>
                 <th className="text-right px-4 py-3 text-secondary font-medium">
                   Acciones
@@ -185,7 +152,7 @@ const Budgets = () => {
                 <tr>
                   <td colSpan={6} className="text-center py-12 text-secondary">
                     <FileText className="w-10 h-10 mx-auto mb-2 opacity-40" />
-                    <p>No hay budgets registrados</p>
+                    <p>{statusFilter || searchTerm ? "No hay presupuestos con esos filtros" : "No hay presupuestos registrados"}</p>
                   </td>
                 </tr>
               ) : (
@@ -206,7 +173,7 @@ const Budgets = () => {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={p.status} />
+                      <BudgetStatusSelect budget={p} />
                     </td>
                     <td className="px-4 py-3 text-right text-on-surface font-medium">
                       {formatCurrency(p.total_list)}
@@ -216,21 +183,14 @@ const Budgets = () => {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() =>
-                            navigate(`/presupuestos/${p.id}/imprimir`)
-                          }
-                          className="p-1.5 rounded hover:bg-primary-container/20 text-secondary hover:text-primary transition-colors"
-                          title="Imprimir"
-                        >
-                          <Printer className="w-4 h-4" />
-                        </button>
+                        <BudgetActions budget={p} compact />
                         <button
                           onClick={() =>
                             navigate(`/presupuestos/${p.id}/editar`)
                           }
                           className="p-1.5 rounded hover:bg-surface-container-high text-secondary hover:text-on-surface transition-colors"
                           title="Editar"
+                          aria-label="Editar"
                         >
                           <Pencil className="w-4 h-4" />
                         </button>
@@ -238,6 +198,7 @@ const Budgets = () => {
                           onClick={() => setDeleteTarget(p)}
                           className="p-1.5 rounded hover:bg-error-container/20 text-secondary hover:text-error transition-colors"
                           title="Eliminar"
+                          aria-label="Eliminar"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -254,7 +215,7 @@ const Budgets = () => {
         {pagination && pagination.total_pages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-outline-variant">
             <span className="text-sm text-secondary">
-              {pagination.total_count} budgets
+              {pagination.total_count} presupuestos
             </span>
             <div className="flex gap-2">
               <button
@@ -283,8 +244,8 @@ const Budgets = () => {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
-        title="Eliminar Budget"
-        message={`¿Estás seguro de que querés eliminar el budget del ${formatDate(deleteTarget?.date)}? Esta acción no se puede deshacer.`}
+        title="Eliminar presupuesto"
+        message={`¿Estás seguro de que querés eliminar el presupuesto del ${formatDate(deleteTarget?.date)}? Esta acción no se puede deshacer.`}
         confirmText="Eliminar"
         cancelText="Cancelar"
         loading={deleteMutation.isPending}
