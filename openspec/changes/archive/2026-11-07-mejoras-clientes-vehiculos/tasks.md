@@ -45,5 +45,5 @@
 
 ## 7. Cierre
 
-- [ ] 7.1 Ejecutar en producción `bin/rails customers:normalize_blank_emails` después del deploy (anotar en el PR)
+- [x] 7.1 Ejecutar en producción `bin/rails customers:normalize_blank_emails` después del deploy (anotar en el PR) — corrida 2026-11-06 post-deploy de e07ae99: 1 cliente normalizado (prod tenía 1 cliente, email "")
 - [x] 7.2 Correr lint y tests completos: `bundle exec rspec`, `bundle exec rubocop` (backend) y `npm test -- --run`, `npm run lint` (frontend) — rspec 953 (1 falla previa: check_available_slots_spec.rb:86), rubocop OK, vitest 344/344, eslint OK
