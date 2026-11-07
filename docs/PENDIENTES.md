@@ -6,7 +6,6 @@ Backlog de mejoras detectadas y diferidas. Al tomar uno, movelo a un change de O
 
 ## Backend
 
-- [ ] Evaluar `config.load_defaults 8.1` tras el upgrade a Rails 8.1 (hoy sigue en 8.0).
 - [ ] Evaluar fijar `config.time_zone = "America/Argentina/Buenos_Aires"`: hoy la app corre en UTC y `opening_hours` se interpreta en UTC. Afecta turnos, recordatorios y el bot, así que va con un change propio.
 - [ ] `backend/.env` define `DATABASE_URL` hacia `lubricentro_development`, y en `RAILS_ENV=test` también pisa la base de test. Correr rspec a mano sin sobreescribir `DATABASE_URL` le pega a la base de dev. Usar `DATABASE_URL` solo en dev o pasar a `POSTGRES_*`.
 
