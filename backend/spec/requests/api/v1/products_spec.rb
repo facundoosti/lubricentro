@@ -410,14 +410,14 @@ RSpec.describe "Api::V1::Products", type: :request do
     end
   end
 
-  describe "POST /api/v1/products/bulk_iva_update" do
+  describe "POST /api/v1/products/bulk_vat_update" do
     let(:supplier) { create(:supplier) }
     let!(:p1) { create(:product, supplier: supplier, unit_price: 1000) }
     let!(:p2) { create(:product, supplier: supplier) }
     let!(:p3) { create(:product) }
 
     it "cambia la alícuota de los productos seleccionados" do
-      post bulk_iva_update_api_v1_products_url,
+      post bulk_vat_update_api_v1_products_url,
            params: { product_ids: [ p1.id, p2.id ], iva_rate: "10.5" },
            headers: auth_headers(user)
 
@@ -430,7 +430,7 @@ RSpec.describe "Api::V1::Products", type: :request do
     end
 
     it "no modifica el precio" do
-      post bulk_iva_update_api_v1_products_url,
+      post bulk_vat_update_api_v1_products_url,
            params: { product_ids: [ p1.id ], iva_rate: "10,5" },
            headers: auth_headers(user)
 
@@ -438,7 +438,7 @@ RSpec.describe "Api::V1::Products", type: :request do
     end
 
     it "filtra por proveedor" do
-      post bulk_iva_update_api_v1_products_url,
+      post bulk_vat_update_api_v1_products_url,
            params: { supplier_id: supplier.id, iva_rate: "10.5" },
            headers: auth_headers(user)
 
@@ -449,7 +449,7 @@ RSpec.describe "Api::V1::Products", type: :request do
     it "respeta el filtro de categoría" do
       category = Category.create!(name: "Neumáticos")
       p1.update!(category: category)
-      post bulk_iva_update_api_v1_products_url,
+      post bulk_vat_update_api_v1_products_url,
            params: { category_id: category.id.to_s, iva_rate: "10.5" },
            headers: auth_headers(user)
 
@@ -458,7 +458,7 @@ RSpec.describe "Api::V1::Products", type: :request do
     end
 
     it "rechaza una alícuota inválida" do
-      post bulk_iva_update_api_v1_products_url,
+      post bulk_vat_update_api_v1_products_url,
            params: { product_ids: [ p1.id ], iva_rate: "27" },
            headers: auth_headers(user)
 
@@ -468,20 +468,20 @@ RSpec.describe "Api::V1::Products", type: :request do
     end
 
     it "rechaza un request sin ids ni filtros" do
-      post bulk_iva_update_api_v1_products_url, params: { iva_rate: "10.5" }, headers: auth_headers(user)
+      post bulk_vat_update_api_v1_products_url, params: { iva_rate: "10.5" }, headers: auth_headers(user)
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(p1.reload.iva_rate).to eq(21)
     end
 
     it "cambia todo el catálogo solo con all=true" do
-      post bulk_iva_update_api_v1_products_url, params: { all: "true", iva_rate: "10.5" }, headers: auth_headers(user)
+      post bulk_vat_update_api_v1_products_url, params: { all: "true", iva_rate: "10.5" }, headers: auth_headers(user)
 
       expect(json_response[:data][:updated]).to eq(3)
     end
 
     it "devuelve error si no hay productos" do
-      post bulk_iva_update_api_v1_products_url,
+      post bulk_vat_update_api_v1_products_url,
            params: { product_ids: [ 999_999 ], iva_rate: "10.5" },
            headers: auth_headers(user)
 
@@ -490,7 +490,7 @@ RSpec.describe "Api::V1::Products", type: :request do
 
     context "without authentication" do
       it "returns unauthorized" do
-        post bulk_iva_update_api_v1_products_url, params: { iva_rate: "21" }
+        post bulk_vat_update_api_v1_products_url, params: { iva_rate: "21" }
         expect(response).to have_http_status(:unauthorized)
       end
     end

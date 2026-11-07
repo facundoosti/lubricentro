@@ -98,7 +98,7 @@ const Budgets = () => {
         </div>
         <button
           id="tour-budgets-new-btn"
-          onClick={() => navigate("/presupuestos/nuevo")}
+          onClick={() => navigate("/budgets/new")}
           className="flex items-center gap-2 px-4 py-2 bg-primary-container text-on-primary rounded-lg font-semibold text-sm hover:brightness-110 transition-all"
         >
           <Plus className="w-4 h-4" />
@@ -186,7 +186,7 @@ const Budgets = () => {
                         <BudgetActions budget={p} compact />
                         <button
                           onClick={() =>
-                            navigate(`/presupuestos/${p.id}/editar`)
+                            navigate(`/budgets/${p.id}/edit`)
                           }
                           className="p-1.5 rounded hover:bg-surface-container-high text-secondary hover:text-on-surface transition-colors"
                           title="Editar"

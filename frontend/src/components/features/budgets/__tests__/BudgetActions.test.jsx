@@ -22,8 +22,8 @@ const renderActions = (props) =>
   renderWithProviders(
     <Routes>
       <Route path="/" element={<BudgetActions budget={budget} {...props} />} />
-      <Route path="/presupuestos/:id/editar" element={<div>editando</div>} />
-      <Route path="/presupuestos/:id/imprimir" element={<div>imprimiendo</div>} />
+      <Route path="/budgets/:id/edit" element={<div>editando</div>} />
+      <Route path="/budgets/:id/print" element={<div>imprimiendo</div>} />
     </Routes>,
   );
 

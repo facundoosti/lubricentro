@@ -33,7 +33,7 @@ const BudgetActions = ({ budget, isDirty = false, compact = false, className = '
     try {
       const res = await duplicate.mutateAsync(budget.id);
       showBudgetSuccess('DUPLICATED');
-      if (res?.data?.id) navigate(`/presupuestos/${res.data.id}/editar`);
+      if (res?.data?.id) navigate(`/budgets/${res.data.id}/edit`);
     } catch (err) {
       showBudgetError('ERROR_DUPLICATE', parseApiError(err));
     }
@@ -46,7 +46,7 @@ const BudgetActions = ({ budget, isDirty = false, compact = false, className = '
     <div className={`flex items-center gap-2 ${className}`}>
       <button
         type="button"
-        onClick={() => navigate(`/presupuestos/${budget.id}/imprimir`)}
+        onClick={() => navigate(`/budgets/${budget.id}/print`)}
         disabled={isDirty}
         className={cls}
         title={isDirty ? dirtyTitle : 'Imprimir'}

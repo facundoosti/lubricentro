@@ -48,7 +48,7 @@
 - **Redondeo:** el IVA se redondea por alícuota (no por línea), igual en back y front.
 
 ### 4. Edición masiva de alícuota
-- `POST /api/v1/products/bulk_iva_update`
+- `POST /api/v1/products/bulk_vat_update`
   - Params: `iva_rate` (21 | 10.5) y `product_ids[]` **o** los mismos filtros que `bulk_price_update` (`supplier_id`, `search`, `brand`).
   - Reutiliza `filtered_products_for_bulk`, al que se suman los filtros `category_id` y `active` para que "seleccionar todos los que coinciden" respete los mismos filtros que la tabla (también aplica a `bulk_price_*`).
   - Exige `product_ids`, algún filtro o `all=true`: un request sin criterios no puede cambiar todo el catálogo.

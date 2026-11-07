@@ -299,7 +299,7 @@ const BudgetPrint = () => {
       {/* Screen toolbar — hidden on print */}
       <div className="flex items-center gap-3 mb-6 print:hidden flex-wrap">
         <button
-          onClick={() => navigate(`/presupuestos/${id}/editar`)}
+          onClick={() => navigate(`/budgets/${id}/edit`)}
           className="flex items-center gap-2 px-3 py-2 rounded-lg border border-outline-variant text-secondary hover:text-on-surface hover:bg-surface-container-high text-sm transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />

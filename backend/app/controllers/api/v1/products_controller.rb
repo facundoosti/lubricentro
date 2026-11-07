@@ -149,9 +149,9 @@ class Api::V1::ProductsController < ApplicationController
     render_json({ updated: updated }, message: "#{updated} producto(s) actualizados exitosamente")
   end
 
-  # POST /api/v1/products/bulk_iva_update
+  # POST /api/v1/products/bulk_vat_update
   # Cambia solo la alícuota de IVA; no toca precios ni regenera embeddings.
-  def bulk_iva_update
+  def bulk_vat_update
     iva_rate = parse_iva_rate(params[:iva_rate])
     unless iva_rate
       render_json({}, message: "Alícuota inválida", errors: [ "La alícuota debe ser 21 o 10,5" ], status: :unprocessable_content)

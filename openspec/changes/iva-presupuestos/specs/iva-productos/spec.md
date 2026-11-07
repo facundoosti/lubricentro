@@ -37,24 +37,24 @@ La API de productos SHALL devolver `iva_rate` y `unit_price_with_iva` = `round(u
 - **THEN** `unit_price_with_iva` = "11050.0"
 
 ### Requirement: Edición masiva de alícuota
-El sistema SHALL permitir cambiar la alícuota de varios productos a la vez mediante `POST /api/v1/products/bulk_iva_update`, seleccionándolos por `product_ids` o por los filtros del listado. No MUST modificar ningún otro atributo.
+El sistema SHALL permitir cambiar la alícuota de varios productos a la vez mediante `POST /api/v1/products/bulk_vat_update`, seleccionándolos por `product_ids` o por los filtros del listado. No MUST modificar ningún otro atributo.
 
 #### Scenario: Cambio por selección
 - **GIVEN** tres productos al 21%
-- **WHEN** se envía `bulk_iva_update` con dos `product_ids` e `iva_rate` = 10.5
+- **WHEN** se envía `bulk_vat_update` con dos `product_ids` e `iva_rate` = 10.5
 - **THEN** esos dos quedan al 10,5%, el tercero sigue al 21% y la respuesta incluye `updated` = 2
 
 #### Scenario: Cambio por filtros
 - **GIVEN** productos de dos proveedores
-- **WHEN** se envía `bulk_iva_update` con `supplier_id` de uno de ellos e `iva_rate` = 10.5
+- **WHEN** se envía `bulk_vat_update` con `supplier_id` de uno de ellos e `iva_rate` = 10.5
 - **THEN** solo cambian los productos de ese proveedor
 
 #### Scenario: Alícuota inválida en la edición masiva
-- **WHEN** se envía `bulk_iva_update` con `iva_rate` = 27
+- **WHEN** se envía `bulk_vat_update` con `iva_rate` = 27
 - **THEN** la API responde 422 y ningún producto cambia
 
 #### Scenario: Sin productos que coincidan
-- **WHEN** se envía `bulk_iva_update` con filtros que no coinciden con ningún producto
+- **WHEN** se envía `bulk_vat_update` con filtros que no coinciden con ningún producto
 - **THEN** la API responde 422 con `success: false`
 
 #### Scenario: Acción desde la tabla de productos

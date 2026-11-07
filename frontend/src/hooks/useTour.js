@@ -169,7 +169,7 @@ export function useTour() {
             align: 'start',
           },
           onNextClick: (_el, _step, { driver: dr }) => {
-            goTo(navigate, '/presupuestos', dr);
+            goTo(navigate, '/budgets', dr);
           },
         },
 

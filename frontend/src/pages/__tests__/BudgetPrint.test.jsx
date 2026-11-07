@@ -45,9 +45,9 @@ const renderPrint = (budget) => {
   mocks.useBudget.mockReturnValue({ data: budget ? { data: budget } : null, isLoading: false });
   return renderWithProviders(
     <Routes>
-      <Route path="/presupuestos/:id/imprimir" element={<BudgetPrint />} />
+      <Route path="/budgets/:id/print" element={<BudgetPrint />} />
     </Routes>,
-    { route: `/presupuestos/${budget?.id ?? 0}/imprimir` },
+    { route: `/budgets/${budget?.id ?? 0}/print` },
   );
 };
 

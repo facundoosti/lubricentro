@@ -249,7 +249,7 @@ export const useBulkIvaUpdate = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (params) => {
-      const response = await api.post('/products/bulk_iva_update', params);
+      const response = await api.post('/products/bulk_vat_update', params);
       return response.data;
     },
     onSuccess: () => {

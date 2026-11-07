@@ -32,7 +32,7 @@ describe('useBulkIvaUpdate', () => {
       response = await result.current.mutateAsync({ product_ids: [1, 2], iva_rate: 10.5 });
     });
 
-    expect(mocks.post).toHaveBeenCalledWith('/products/bulk_iva_update', { product_ids: [1, 2], iva_rate: 10.5 });
+    expect(mocks.post).toHaveBeenCalledWith('/products/bulk_vat_update', { product_ids: [1, 2], iva_rate: 10.5 });
     expect(response.data.updated).toBe(2);
   });
 

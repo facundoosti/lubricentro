@@ -51,12 +51,12 @@ const vehicles = [
   { id: 11, brand: 'Fiat', model: 'Uno', year: 2010, license_plate: 'ABC123' },
 ];
 
-const renderForm = (route = '/presupuestos/nuevo') =>
+const renderForm = (route = '/budgets/new') =>
   renderWithProviders(
     <Routes>
-      <Route path="/presupuestos/nuevo" element={<BudgetForm />} />
-      <Route path="/presupuestos/:id/editar" element={<BudgetForm />} />
-      <Route path="/presupuestos" element={<div>listado</div>} />
+      <Route path="/budgets/new" element={<BudgetForm />} />
+      <Route path="/budgets/:id/edit" element={<BudgetForm />} />
+      <Route path="/budgets" element={<div>listado</div>} />
     </Routes>,
     { route },
   );
@@ -191,7 +191,7 @@ describe('BudgetForm — edición', () => {
   });
 
   it('borra en el backend la línea quitada', async () => {
-    renderForm('/presupuestos/5/editar');
+    renderForm('/budgets/5/edit');
     expect(items()).toHaveLength(2);
     fireEvent.click(screen.getByRole('button', { name: 'Quitar línea 2' }));
     fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
@@ -206,21 +206,21 @@ describe('BudgetForm — edición', () => {
   });
 
   it('ofrece WhatsApp con el teléfono del cliente', () => {
-    renderForm('/presupuestos/5/editar');
+    renderForm('/budgets/5/edit');
     const link = screen.getByRole('link', { name: /WhatsApp/ });
     expect(link.getAttribute('href')).toMatch(/^https:\/\/wa\.me\/5491155551234\?text=/);
     expect(decodeURIComponent(link.getAttribute('href'))).toContain('Total efectivo / débito: $1.210');
   });
 
   it('deshabilita WhatsApp mientras haya cambios sin guardar', () => {
-    renderForm('/presupuestos/5/editar');
+    renderForm('/budgets/5/edit');
     fireEvent.change(screen.getByLabelText('Notas'), { target: { value: 'cambio' } });
     expect(screen.queryByRole('link', { name: /WhatsApp/ })).toBeNull();
     expect(screen.getByRole('button', { name: 'Duplicar' })).toBeDisabled();
   });
 
   it('marca la cantidad inválida solo en líneas con descripción', async () => {
-    renderForm('/presupuestos/5/editar');
+    renderForm('/budgets/5/edit');
     fireEvent.change(within(items()[0]).getByLabelText(/Cantidad/), { target: { value: '' } });
     fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
 
@@ -229,7 +229,7 @@ describe('BudgetForm — edición', () => {
   });
 
   it('al quitar el cliente no vuelve a mostrar el anterior', () => {
-    renderForm('/presupuestos/5/editar');
+    renderForm('/budgets/5/edit');
     expect(screen.getByTestId('customer-initial')).toHaveTextContent('Juan Pérez');
     fireEvent.click(screen.getByRole('button', { name: 'quitar cliente' }));
     expect(screen.getByTestId('customer-initial')).toHaveTextContent('');
@@ -238,13 +238,13 @@ describe('BudgetForm — edición', () => {
 
   it('muestra un error si no se puede cargar', () => {
     mocks.useBudget.mockReturnValue({ data: null, isLoading: false, isError: true });
-    renderForm('/presupuestos/5/editar');
+    renderForm('/budgets/5/edit');
     expect(screen.getByText('No pudimos cargar el presupuesto')).toBeInTheDocument();
   });
 
   it('muestra la carga', () => {
     mocks.useBudget.mockReturnValue({ data: null, isLoading: true, isError: false });
-    renderForm('/presupuestos/5/editar');
+    renderForm('/budgets/5/edit');
     expect(screen.getByRole('status', { name: 'Cargando presupuesto' })).toBeInTheDocument();
   });
 });

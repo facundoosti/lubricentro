@@ -56,7 +56,7 @@ const BudgetForm = () => {
         const res = await createMutation.mutateAsync(payload);
         showBudgetSuccess('CREATED');
         const newId = res?.data?.id;
-        navigate(newId ? `/presupuestos/${newId}/editar` : '/presupuestos');
+        navigate(newId ? `/budgets/${newId}/edit` : '/budgets');
       }
     } catch (err) {
       showBudgetError(isEditing ? 'ERROR_UPDATE' : 'ERROR_CREATE', parseApiError(err));
@@ -75,7 +75,7 @@ const BudgetForm = () => {
     return (
       <div className="max-w-4xl mx-auto py-16 text-center space-y-3">
         <p className="text-on-surface font-semibold">No pudimos cargar el presupuesto</p>
-        <button type="button" onClick={() => navigate('/presupuestos')} className="text-primary text-sm hover:underline">
+        <button type="button" onClick={() => navigate('/budgets')} className="text-primary text-sm hover:underline">
           Volver al listado
         </button>
       </div>
@@ -87,7 +87,7 @@ const BudgetForm = () => {
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
-          onClick={() => navigate('/presupuestos')}
+          onClick={() => navigate('/budgets')}
           aria-label="Volver al listado"
           className="p-2 rounded-lg hover:bg-surface-container-high text-secondary hover:text-on-surface transition-colors"
         >
@@ -130,7 +130,7 @@ const BudgetForm = () => {
         formId={FORM_ID}
         isSaving={isSaving}
         submitLabel={isEditing ? 'Guardar' : 'Crear presupuesto'}
-        onCancel={() => navigate('/presupuestos')}
+        onCancel={() => navigate('/budgets')}
       />
     </div>
   );

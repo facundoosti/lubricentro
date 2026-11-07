@@ -46,7 +46,7 @@ Los precios de todos los productos están cargados **sin IVA**, pero el lubricen
   - `products.iva_rate` (decimal, not null, default 21).
   - `budget_items.iva_rate` (decimal, nullable).
   - `budgets.subtotal_net` y `budgets.total_iva` (decimal, default 0).
-- **Backend:** modelos `Product`, `Budget`, `BudgetItem`; `ProductsController` (nuevo `bulk_iva_update`, strong params), `BudgetsController` (nuevo `duplicate`, strong params de ítems), `ProductImportService` y plantilla de importación, serializers `ProductSerializer`, `BudgetSerializer`, `BudgetItemSerializer`; rutas.
+- **Backend:** modelos `Product`, `Budget`, `BudgetItem`; `ProductsController` (nuevo `bulk_vat_update`, strong params), `BudgetsController` (nuevo `duplicate`, strong params de ítems), `ProductImportService` y plantilla de importación, serializers `ProductSerializer`, `BudgetSerializer`, `BudgetItemSerializer`; rutas.
 - **Frontend:** `pages/BudgetForm.jsx` (se divide en subcomponentes), `pages/Budgets.jsx`, `pages/BudgetPrint.jsx`, `components/features/budgets/ItemSearchInput.jsx`, `components/features/products/ProductsTable.jsx`, `ProductForm.jsx`, `pages/Products.jsx`, `services/budgetsService.js`, `services/productsService.js`.
 - **API:** campos nuevos en respuestas de productos y presupuestos (aditivos, no rompen clientes existentes). `total_list` pasa a significar "total efectivo/débito con IVA"; para presupuestos viejos el valor no cambia.
 

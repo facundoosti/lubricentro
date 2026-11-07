@@ -2,7 +2,7 @@
 
 - [x] 1.1 Migración `AddIvaRateToProducts` (`iva_rate decimal(4,2) not null default 21.0`, reversible) y validación `inclusion: [21, 10.5]` en `Product` + model spec
 - [x] 1.2 Permitir `iva_rate` en `product_params` y exponer `iva_rate` y `unit_price_with_iva` en `ProductSerializer` + request spec de create/update/show (incluye 422 por alícuota inválida)
-- [x] 1.3 Endpoint `POST /api/v1/products/bulk_iva_update` (por `product_ids` o filtros, `update_all`, 422 si alícuota inválida o sin productos) + request spec
+- [x] 1.3 Endpoint `POST /api/v1/products/bulk_vat_update` (por `product_ids` o filtros, `update_all`, 422 si alícuota inválida o sin productos) + request spec
 - [x] 1.4 Columna opcional 9 `iva` en `ProductImportService` (parseo `21`, `21%`, `10,5`, `10.5`; vacío conserva en existentes y 21 en nuevos; inválido = error de fila) y actualizar `import_template` + service spec
 
 ## 2. Backend — IVA en presupuestos
