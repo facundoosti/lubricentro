@@ -29,9 +29,10 @@ export const buildBudgetMessage = ({ budget, customerName, businessName }) => {
   return lines.join('\n');
 };
 
-// URL de wa.me o null si no hay teléfono.
+// URL de wa.me (con mensaje opcional) o null si no hay teléfono.
 export const buildWhatsAppUrl = (phone, text) => {
   const normalized = normalizeWhatsAppPhone(phone);
   if (!normalized) return null;
-  return `https://wa.me/${normalized}?text=${encodeURIComponent(text)}`;
+  const base = `https://wa.me/${normalized}`;
+  return text ? `${base}?text=${encodeURIComponent(text)}` : base;
 };

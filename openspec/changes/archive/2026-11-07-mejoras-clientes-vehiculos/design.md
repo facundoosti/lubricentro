@@ -35,7 +35,7 @@
 - **Alternativa descartada:** índice parcial `WHERE email IS NOT NULL AND email <> ''`. Requiere migración y deja datos inconsistentes.
 
 ### 2. Búsqueda y detección de duplicados por teléfono
-- `Customer.by_search` agrega el teléfono comparando solo dígitos: `regexp_replace(phone, '\D', '', 'g') ILIKE '%<dígitos>%'` cuando el término tiene dígitos.
+- `Customer.by_search` agrega el teléfono comparando solo dígitos: `regexp_replace(phone, '\D', '', 'g') LIKE '%<dígitos>%'` **solo cuando el término parece un teléfono** (dígitos y `+ - ( ) espacio`, al menos 3 dígitos). Así "ABC123" o "Golf 1.6" no traen clientes por coincidencias en el teléfono (ajuste de la review).
 - Nuevo scope `by_phone(phone)`: igualdad de dígitos (últimos 10 dígitos, para tolerar `+54 9`).
 - `GET /api/v1/customers?phone=1155551234` → mismo formato de respuesta paginada; el frontend lo usa con debounce al salir del campo teléfono.
 - El aviso **no bloquea** el alta (puede haber familiares con el mismo número): "Ya existe *Juan Pérez* con este teléfono · Ver perfil".
@@ -78,7 +78,7 @@
   - Atenciones: `GET /service_records?customer_id=:id&per_page=5` (ya existe).
   - Presupuestos: `GET /budgets?customer_id=:id&per_page=5` (**filtro nuevo** en `BudgetsController#index`).
   - Turnos: `GET /appointments?customer_id=:id` con los próximos primero (ya existe).
-- Cada fila navega al detalle; "Ver todos" navega al listado filtrado.
+- Cada fila navega al detalle; "Ver todos" navega al listado filtrado. Turnos no tiene "Ver todos" porque `/appointments` (calendario) no filtra por cliente.
 - Cada pestaña maneja carga, error y vacío por separado.
 
 ### 10. Último service por vehículo
@@ -99,6 +99,7 @@
 
 ### 13. Años de vehículo
 - Select de año del actual a 1950. Backend: agregar validación numérica `1950..año_actual + 1` (hoy solo valida longitud 4).
+- La validación corre al crear o cuando cambia el año, para no bloquear la edición de vehículos viejos ya guardados fuera de rango (ajuste de la review).
 
 ## Risks / Trade-offs
 

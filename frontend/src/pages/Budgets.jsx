@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Plus, FileText, Pencil, Trash2, Search } from "lucide-react";
 import { useBudgets, useDeleteBudget } from "@services/budgetsService";
 import {
@@ -27,6 +27,9 @@ const formatDate = (iso) => {
 
 const Budgets = () => {
   const navigate = useNavigate();
+  // Llega desde el perfil del cliente ("Ver todos")
+  const [searchParams] = useSearchParams();
+  const customerId = searchParams.get("customer_id");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -38,6 +41,7 @@ const Budgets = () => {
     per_page: perPage,
     search: searchTerm,
     status: statusFilter,
+    customer_id: customerId,
   });
 
   const deleteMutation = useDeleteBudget();

@@ -10,8 +10,8 @@ import { useServices } from '@services/servicesService';
 import { useProducts } from '@services/productsService';
 import { showServiceRecordSuccess, showServiceRecordError } from '@services/notificationService';
 import { appointmentKeys } from '@services/appointmentsService';
-import { customerKeys } from '@services/customersService';
-import { vehicleKeys } from '@services/vehiclesService';
+import { customerKeys, useCustomer } from '@services/customersService';
+import { vehicleKeys, useVehicle } from '@services/vehiclesService';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { api } from '@services/api';
 
@@ -46,6 +46,12 @@ const ServiceRecordFormPage = () => {
   const [photoFiles, setPhotoFiles] = useState([]);
 
   const isStandaloneCreate = !isEditing && !appointmentId;
+  // Desde el perfil del cliente: ?customer_id=1&vehicle_id=2 (solo en creación standalone)
+  const presetCustomerId = isStandaloneCreate ? searchParams.get('customer_id') : null;
+  const presetVehicleId = presetCustomerId ? searchParams.get('vehicle_id') : null;
+  const { data: presetCustomerData } = useCustomer(presetCustomerId);
+  const { data: presetVehicleData } = useVehicle(presetVehicleId);
+  const presetApplied = useRef({ customer: false, vehicle: false });
 
   // Standalone creation: customer/vehicle search state
   const [customerSearch, setCustomerSearch] = useState('');
@@ -206,6 +212,22 @@ const ServiceRecordFormPage = () => {
     setVehicleSearch('');
     setValue('vehicle_id', '');
   };
+
+  // Preselección por URL (una sola vez; el cliente va antes porque elegirlo limpia el vehículo)
+  useEffect(() => {
+    const customer = presetCustomerData?.data;
+    if (customer && !presetApplied.current.customer) {
+      presetApplied.current.customer = true;
+      handleSelectCustomer(customer);
+    }
+    const vehicle = presetVehicleData?.data;
+    if (presetApplied.current.customer && vehicle && !presetApplied.current.vehicle
+      && String(vehicle.customer_id) === String(presetCustomerId)) {
+      presetApplied.current.vehicle = true;
+      handleSelectVehicle(vehicle);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- los handlers solo usan setters estables
+  }, [presetCustomerData, presetVehicleData, presetCustomerId]);
 
   // Live totals
   const watchedServices = watch('service_record_services_attributes') || [];

@@ -6,6 +6,7 @@ class Api::V1::CustomersController < ApplicationController
   def index
     @customers = Customer.includes(:avatar_attachment)
     @customers = @customers.by_search(params[:search]) if params[:search].present?
+    @customers = @customers.by_phone(params[:phone]) if params[:phone].present?
 
     # Paginación con Pagy
     @pagy, @customers = pagy(@customers, items: safe_per_page(params[:per_page]))

@@ -6,6 +6,7 @@ class Api::V1::BudgetsController < ApplicationController
     @budgets = Budget.includes(:customer, :vehicle, :items)
     @budgets = @budgets.by_search(params[:search]) if params[:search].present?
     @budgets = @budgets.by_status(params[:status]) if params[:status].present?
+    @budgets = @budgets.by_customer(params[:customer_id]) if params[:customer_id].present?
     @budgets = @budgets.recent
 
     @pagy, @budgets = pagy(@budgets, items: safe_per_page(params[:per_page]))

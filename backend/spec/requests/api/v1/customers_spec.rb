@@ -122,6 +122,30 @@ RSpec.describe "Api::V1::Customers", type: :request do
       end
     end
 
+    context 'with search by phone digits' do
+      let!(:juan) { create(:customer, name: 'Juan Perez', phone: '11 5555-1234') }
+
+      it 'finds the customer with another phone format' do
+        get '/api/v1/customers', params: { search: '1155551234' }, headers: auth_headers(user)
+        expect(json_response[:data][:customers].map { |c| c[:id] }).to include(juan.id)
+      end
+    end
+
+    context 'with phone filter' do
+      let!(:match) { create(:customer, phone: '1155551234') }
+      let!(:other) { create(:customer, phone: '1155559999') }
+
+      before do
+        get '/api/v1/customers', params: { phone: '+54 9 11 5555-1234' }, headers: auth_headers(user)
+      end
+
+      it 'returns only the customer with the same phone' do
+        expect(response).to have_http_status(:ok)
+        expect(json_response[:data][:customers].map { |c| c[:id] }).to eq([ match.id ])
+        expect(json_response[:data][:pagination][:total_count]).to eq(1)
+      end
+    end
+
     context 'without authentication' do
       before { get '/api/v1/customers' }
 
@@ -201,6 +225,17 @@ RSpec.describe "Api::V1::Customers", type: :request do
         post '/api/v1/customers', params: { customer: valid_attributes }
         expect(response).to have_http_status(:unauthorized)
       end
+    end
+  end
+
+  describe 'POST /api/v1/customers without email' do
+    before { create(:customer).tap { |c| c.update_column(:email, nil) } }
+
+    it 'creates a second customer with blank email as null' do
+      post '/api/v1/customers', params: { customer: { name: 'Sin Email', phone: '1155551234', email: '' } },
+                                headers: auth_headers(user)
+      expect(response).to have_http_status(:created)
+      expect(Customer.where(email: nil).count).to eq(2)
     end
   end
 

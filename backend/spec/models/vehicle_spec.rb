@@ -43,6 +43,34 @@ RSpec.describe Vehicle, type: :model do
     it { should validate_length_of(:model).is_at_least(2).is_at_most(50) }
     it { should validate_length_of(:year).is_equal_to(4) }
 
+    describe 'year range' do
+      it 'accepts 1950 and next year' do
+        expect(build(:vehicle, year: '1950')).to be_valid
+        expect(build(:vehicle, year: (Date.current.year + 1).to_s)).to be_valid
+      end
+
+      it 'accepts 1986' do
+        expect(build(:vehicle, year: '1986')).to be_valid
+      end
+
+      it 'rejects years out of range' do
+        expect(build(:vehicle, year: '1900')).not_to be_valid
+        expect(build(:vehicle, year: (Date.current.year + 2).to_s)).not_to be_valid
+      end
+
+      it 'allows updating other fields of an existing vehicle with an out-of-range year' do
+        vehicle = create(:vehicle)
+        vehicle.update_column(:year, '1940')
+
+        expect(vehicle.reload.update(brand: 'Renault')).to be(true)
+      end
+
+      it 'validates the range when the year changes on an existing vehicle' do
+        vehicle = create(:vehicle)
+        expect(vehicle.update(year: '1940')).to be(false)
+      end
+    end
+
     it { should validate_uniqueness_of(:license_plate).case_insensitive }
   end
 

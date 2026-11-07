@@ -1,3 +1,4 @@
+import { useEffect, useMemo } from 'react';
 import { useWatch } from 'react-hook-form';
 import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
 import { useVehicles } from '@services/vehiclesService';
@@ -18,7 +19,10 @@ const BudgetGeneralSection = ({ control, register, setValue, errors, initialCust
     per_page: 50,
     enabled: !!customerId,
   });
-  const vehicles = customerId ? vehiclesData?.data?.vehicles || [] : [];
+  const vehicles = useMemo(
+    () => (customerId ? vehiclesData?.data?.vehicles || [] : []),
+    [customerId, vehiclesData],
+  );
 
   const handleCustomerChange = (id) => {
     const next = id || '';
@@ -34,6 +38,13 @@ const BudgetGeneralSection = ({ control, register, setValue, errors, initialCust
     setValue('vehicle_id', vehicle ? vehicle.id : null, { shouldDirty: true });
     setValue('vehicle_description', vehicle ? formatVehicle(vehicle) : '', { shouldDirty: true });
   };
+
+  // Vehículo preelegido por URL: completa la descripción cuando llegan los vehículos del cliente
+  useEffect(() => {
+    if (!vehicleId || vehicleDescription) return;
+    const vehicle = vehicles.find((v) => String(v.id) === String(vehicleId));
+    if (vehicle) setValue('vehicle_description', formatVehicle(vehicle));
+  }, [vehicleId, vehicleDescription, vehicles, setValue]);
 
   const useSelect = !!customerId && vehicles.length > 0;
 

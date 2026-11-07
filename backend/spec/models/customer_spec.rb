@@ -43,6 +43,27 @@ RSpec.describe Customer, type: :model do
     end
   end
 
+  describe 'normalización' do
+    it 'guarda el email vacío como nil' do
+      expect(build(:customer, email: '   ').email).to be_nil
+    end
+
+    it 'guarda el email en minúsculas y sin espacios' do
+      expect(build(:customer, email: ' Juan@Example.COM ').email).to eq('juan@example.com')
+    end
+
+    it 'quita los espacios del teléfono' do
+      expect(build(:customer, phone: '  11 5555-1234 ').phone).to eq('11 5555-1234')
+    end
+
+    it 'permite dos clientes sin email' do
+      create(:customer, email: '')
+      second = create(:customer, email: '')
+      expect(second).to be_persisted
+      expect(Customer.where(email: nil).count).to eq(2)
+    end
+  end
+
   describe 'associations' do
     it { is_expected.to have_many(:vehicles).dependent(:destroy) }
     it { is_expected.to have_many(:appointments).dependent(:destroy) }
@@ -128,6 +149,30 @@ RSpec.describe Customer, type: :model do
 
       it 'matches by email' do
         expect(Customer.by_search('maria@test')).to include(maria)
+      end
+
+      it 'matches by phone comparing only digits' do
+        juan = create(:customer, name: 'Juan Perez', phone: '11 5555-1234')
+        expect(Customer.by_search('1155551234')).to include(juan)
+        expect(Customer.by_search('5555-12')).to include(juan)
+      end
+
+      it 'does not match phones when the term is not phone-like' do
+        juan = create(:customer, name: 'Juan Perez', email: 'juan@test.com', phone: '11 5555-1234')
+        expect(Customer.by_search('ABC123')).not_to include(juan)
+      end
+    end
+
+    describe '.by_phone' do
+      let!(:juan) { create(:customer, phone: '1155551234') }
+      let!(:other) { create(:customer, phone: '1155559999') }
+
+      it 'matches by the last 10 digits' do
+        expect(Customer.by_phone('+54 9 11 5555-1234')).to contain_exactly(juan)
+      end
+
+      it 'returns nothing for a blank phone' do
+        expect(Customer.by_phone('--')).to be_empty
       end
     end
   end

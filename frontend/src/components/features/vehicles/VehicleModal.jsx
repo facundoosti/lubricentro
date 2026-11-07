@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Car } from 'lucide-react';
 import SlideOver from '@ui/SlideOver';
 import VehicleForm from '@components/features/vehicles/VehicleForm';
@@ -12,6 +13,8 @@ const VehicleModal = ({ isOpen, onClose, vehicle = null, customerId = null, init
 
   const isEditing = !!vehicle;
   const isLoading = createVehicle.isPending || updateVehicle.isPending;
+  // La patente pertenece a otro vehículo → no se puede guardar
+  const [plateConflict, setPlateConflict] = useState(false);
 
   const handleSubmit = async (data) => {
     try {
@@ -40,6 +43,7 @@ const VehicleModal = ({ isOpen, onClose, vehicle = null, customerId = null, init
       formId={FORM_ID}
       submitLabel={isEditing ? 'Guardar Cambios' : 'Crear Vehículo'}
       isLoading={isLoading}
+      submitDisabled={plateConflict}
     >
       <VehicleForm
         vehicle={vehicle}
@@ -48,6 +52,7 @@ const VehicleModal = ({ isOpen, onClose, vehicle = null, customerId = null, init
         onSubmit={handleSubmit}
         isLoading={isLoading}
         formId={FORM_ID}
+        onPlateConflictChange={setPlateConflict}
       />
     </SlideOver>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useCustomers, useCustomer } from '@services/customersService';
-import { Search, ChevronDown, X } from 'lucide-react';
+import { Search, ChevronDown, X, UserPlus } from 'lucide-react';
 
 /**
  * CustomerSearchInput - Componente de búsqueda y selección de clientes
@@ -13,6 +13,7 @@ import { Search, ChevronDown, X } from 'lucide-react';
  * @param {string} props.error - Mensaje de error a mostrar
  * @param {boolean} props.disabled - Si el input está deshabilitado
  * @param {Object} props.initialCustomer - Cliente completo para prellenar (usar en edición)
+ * @param {Function} props.onCreateNew - Si se pasa, ofrece "+ Crear cliente" con el texto buscado
  * 
  * @example
  * // Para creación (sin cliente inicial)
@@ -39,10 +40,11 @@ const CustomerSearchInput = ({
   value, // ID del cliente
   onChange, 
   onSelect, 
-  placeholder = "Buscar cliente por nombre o email...",
+  placeholder = "Buscar cliente por nombre, teléfono o email...",
   error = null,
   disabled = false,
-  initialCustomer = null // Cliente completo si está disponible
+  initialCustomer = null, // Cliente completo si está disponible
+  onCreateNew = null,
 }) => {
   // --- STATE MANAGEMENT ---
   const [inputValue, setInputValue] = useState('');
@@ -68,14 +70,13 @@ const CustomerSearchInput = ({
     enabled: !!value && !initialCustomer, // Solo si no tenemos initialCustomer
   });
 
+  // GET /customers/:id devuelve el cliente directo en `data`
+  const loadedCustomer = initialCustomerData?.data?.customer ?? initialCustomerData?.data ?? null;
+
   // --- LOGIC & SIDE EFFECTS ---
 
   // Efecto principal para manejar la inicialización y sincronización
   useEffect(() => {
-    // Debug: Log para verificar que initialCustomer se está recibiendo
-    if (initialCustomer) {
-      console.log('CustomerSearchInput - initialCustomer recibido:', initialCustomer);
-    }
     
     // Caso 1: Tenemos initialCustomer (edición)
     if (initialCustomer) {
@@ -83,13 +84,13 @@ const CustomerSearchInput = ({
       setInputValue(formatCustomerDisplay(initialCustomer));
     }
     // Caso 2: Tenemos value pero no initialCustomer (carga por ID)
-    else if (value && initialCustomerData?.data?.customer) {
-      const customer = initialCustomerData.data.customer;
+    else if (value && loadedCustomer?.id) {
+      const customer = loadedCustomer;
       setSelectedCustomer(customer);
       setInputValue(formatCustomerDisplay(customer));
     }
     // Caso 3: Tenemos value pero no hay datos (cliente no encontrado)
-    else if (value && !isLoadingInitialCustomer && !initialCustomerData?.data?.customer) {
+    else if (value && !isLoadingInitialCustomer && !loadedCustomer?.id) {
       setInputValue("Cliente no encontrado");
     }
     // Caso 4: No hay value, limpiar todo
@@ -97,7 +98,7 @@ const CustomerSearchInput = ({
       setSelectedCustomer(null);
       setInputValue('');
     }
-  }, [initialCustomer, value, initialCustomerData, isLoadingInitialCustomer]);
+  }, [initialCustomer, value, loadedCustomer, isLoadingInitialCustomer]);
 
   // Efecto para asegurar que el inputValue siempre refleje el selectedCustomer
   useEffect(() => {
@@ -193,15 +194,33 @@ const CustomerSearchInput = ({
     onSelect?.(customer);
   }, [onChange, onSelect]);
 
+  // Texto que escribió el usuario (no el de un cliente ya elegido)
+  const searchText = selectedCustomer ? '' : inputValue.trim();
+  const canCreate = Boolean(onCreateNew && searchText);
+  // "+ Crear cliente" es la última opción navegable (índice customers.length)
+  const optionCount = customers.length + (canCreate ? 1 : 0);
+
+  const handleCreateNew = useCallback(() => {
+    setIsOpen(false);
+    setHighlightedIndex(-1);
+    onCreateNew(searchText);
+  }, [onCreateNew, searchText]);
+
   // Navegación con teclado
   const handleKeyDown = useCallback((e) => {
-    if (!isOpen || customers.length === 0) return;
+    if (!isOpen) return;
+    if (e.key === 'Escape') {
+      setIsOpen(false);
+      setHighlightedIndex(-1);
+      return;
+    }
+    if (optionCount === 0) return;
 
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
         setHighlightedIndex(prev => 
-          prev < customers.length - 1 ? prev + 1 : prev
+          prev < optionCount - 1 ? prev + 1 : prev
         );
         break;
       
@@ -216,18 +235,15 @@ const CustomerSearchInput = ({
         e.preventDefault();
         if (highlightedIndex >= 0 && customers[highlightedIndex]) {
           handleCustomerSelect(customers[highlightedIndex]);
+        } else if (canCreate && highlightedIndex === customers.length) {
+          handleCreateNew();
         }
-        break;
-      
-      case 'Escape':
-        setIsOpen(false);
-        setHighlightedIndex(-1);
         break;
       
       default:
         break;
     }
-  }, [isOpen, customers, highlightedIndex, handleCustomerSelect]);
+  }, [isOpen, optionCount, customers, highlightedIndex, handleCustomerSelect, canCreate, handleCreateNew]);
 
   const isLoading = isLoadingSearch || isLoadingInitialCustomer;
 
@@ -247,7 +263,7 @@ const CustomerSearchInput = ({
           onKeyDown={handleKeyDown}
           placeholder={isLoading ? "Cargando cliente..." : placeholder}
           disabled={disabled || isLoadingInitialCustomer}
-          className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+          className={`w-full h-11 pl-10 pr-10 rounded-lg bg-surface-variant border text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
             error ? 'border-error' : selectedCustomer ? 'border-tertiary' : 'border-outline-variant'
           } ${disabled || isLoadingInitialCustomer ? 'opacity-50 cursor-not-allowed' : ''}`}
         />
@@ -305,6 +321,19 @@ const CustomerSearchInput = ({
             <div className="px-4 py-2 text-sm text-on-surface-variant">
               {debouncedSearchTerm ? 'No se encontraron clientes' : 'Escribe para buscar'}
             </div>
+          )}
+          {canCreate && (
+            <button
+              type="button"
+              onClick={handleCreateNew}
+              onMouseEnter={() => setHighlightedIndex(customers.length)}
+              className={`flex w-full items-center gap-2 border-t border-outline-variant px-4 py-2.5 text-left text-sm font-medium text-primary ${
+                highlightedIndex === customers.length ? 'bg-primary/10' : 'hover:bg-surface-container-high'
+              }`}
+            >
+              <UserPlus className="h-4 w-4 shrink-0" />
+              <span className="truncate">+ Crear cliente "{searchText}"</span>
+            </button>
           )}
         </div>
       )}

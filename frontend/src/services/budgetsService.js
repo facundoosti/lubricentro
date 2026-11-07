@@ -16,6 +16,7 @@ export const useBudgets = (filters = {}) => {
       const params = new URLSearchParams();
       if (filters.search) params.append("search", filters.search);
       if (filters.status) params.append("status", filters.status);
+      if (filters.customer_id) params.append("customer_id", filters.customer_id);
       if (filters.page) params.append("page", filters.page);
       if (filters.per_page) params.append("per_page", filters.per_page);
       const response = await api.get(`/budgets?${params.toString()}`);

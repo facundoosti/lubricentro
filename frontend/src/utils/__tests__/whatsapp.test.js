@@ -42,4 +42,8 @@ describe('buildWhatsAppUrl', () => {
   it('devuelve null sin teléfono', () => {
     expect(buildWhatsAppUrl('', 'x')).toBeNull();
   });
+
+  it('sin mensaje devuelve solo el número', () => {
+    expect(buildWhatsAppUrl('11 5555-1234')).toBe('https://wa.me/5491155551234');
+  });
 });

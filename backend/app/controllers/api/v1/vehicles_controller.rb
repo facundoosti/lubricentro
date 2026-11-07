@@ -8,6 +8,7 @@ class Api::V1::VehiclesController < ApplicationController
     # Filtros
     @vehicles = @vehicles.by_customer(params[:customer_id]) if params[:customer_id].present?
     @vehicles = @vehicles.by_brand(params[:brand]) if params[:brand].present?
+    @vehicles = @vehicles.by_license_plate(params[:license_plate]) if params[:license_plate].present?
 
     # Búsqueda por license_plate o brand/model
     if params[:search].present?
@@ -21,9 +22,7 @@ class Api::V1::VehiclesController < ApplicationController
     # Paginación con Pagy
     @pagy, @vehicles = pagy(@vehicles, items: safe_per_page(params[:per_page]))
 
-    # Usar vista específica si se solicita, o vista por defecto
-    view = params[:view] == "with_customer" ? :with_customer : nil
-    @serializer = VehicleSerializer.render_as_hash(@vehicles, root: :vehicles, view: view)
+    @serializer = VehicleSerializer.render_as_hash(@vehicles, root: :vehicles, **index_view_options)
     render_json(@serializer)
   end
 
@@ -89,6 +88,18 @@ class Api::V1::VehiclesController < ApplicationController
   end
 
   private
+
+  # Por patente: datos del dueño. Por cliente: último service de cada vehículo (precargado, sin N+1).
+  # view=with_customer o license_plate tienen prioridad sobre with_last_service (customer_id)
+  def index_view_options
+    if params[:view] == "with_customer" || params[:license_plate].present?
+      { view: :with_customer }
+    elsif params[:customer_id].present?
+      { view: :with_last_service, last_services: Vehicle.last_services_for(@vehicles.map(&:id)) }
+    else
+      {}
+    end
+  end
 
   def set_vehicle
     @vehicle = Vehicle.find(params[:id])

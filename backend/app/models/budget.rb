@@ -46,6 +46,7 @@ class Budget < ApplicationRecord
 
   scope :recent, -> { order(date: :desc, created_at: :desc) }
   scope :by_status, ->(s) { where(status: s) }
+  scope :by_customer, ->(id) { where(customer_id: id) }
   scope :by_search, ->(term) {
     left_joins(:customer)
       .where(

@@ -54,6 +54,66 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
       end
     end
 
+    context 'with customer_id filter and service records' do
+      let(:vehicle) { create(:vehicle, customer: customer) }
+
+      before do
+        create(:service_record, vehicle: vehicle, customer: customer, service_date: Date.new(2026, 3, 10), mileage: 45_000)
+        create(:service_record, vehicle: vehicle, customer: customer, service_date: Date.new(2026, 8, 15), mileage: 52_000)
+        get '/api/v1/vehicles', params: { customer_id: customer.id }, headers: auth_headers(user)
+      end
+
+      it 'includes the last service date and mileage' do
+        data = json_response[:data][:vehicles].find { |v| v[:id] == vehicle.id }
+        expect(data).to include(last_service_date: '2026-08-15', last_mileage: 52_000)
+      end
+
+      it 'returns nulls for vehicles without service records' do
+        data = json_response[:data][:vehicles].find { |v| v[:id] != vehicle.id }
+        expect(data).to include(last_service_date: nil, last_mileage: nil)
+      end
+    end
+
+    context 'with customer_id filter (N+1)' do
+      def query_count
+        count = 0
+        counter = ->(*, payload) { count += 1 unless payload[:name] == 'SCHEMA' || payload[:cached] }
+        ActiveSupport::Notifications.subscribed(counter, 'sql.active_record') do
+          get '/api/v1/vehicles', params: { customer_id: customer.id }, headers: auth_headers(user)
+        end
+        count
+      end
+
+      def add_vehicle_with_services
+        vehicle = create(:vehicle, customer: customer)
+        create_list(:service_record, 2, vehicle: vehicle, customer: customer)
+      end
+
+      it 'does not grow the number of queries with the number of vehicles' do
+        add_vehicle_with_services
+        query_count # calienta caches de autenticación
+        baseline = query_count
+        4.times { add_vehicle_with_services }
+        expect(query_count).to eq(baseline)
+      end
+    end
+
+    context 'with license_plate filter' do
+      let(:owner) { create(:customer, name: 'María Gómez') }
+      let!(:vehicle) { create(:vehicle, license_plate: 'AB123CD', customer: owner) }
+
+      before do
+        create(:vehicle, license_plate: 'AB123CE', customer: customer)
+        get '/api/v1/vehicles', params: { license_plate: 'ab 123 cd' }, headers: auth_headers(user)
+      end
+
+      it 'returns only the exact plate with its owner' do
+        vehicles = json_response[:data][:vehicles]
+        expect(vehicles.map { |v| v[:id] }).to eq([ vehicle.id ])
+        expect(vehicles.first[:customer]).to include(id: owner.id, name: 'María Gómez')
+      end
+    end
+
     context 'with search parameter' do
       let!(:searchable_vehicle) { create(:vehicle, license_plate: 'XYZ789', customer: customer) }
 
@@ -159,6 +219,14 @@ RSpec.describe "Api::V1::Vehicles", type: :request do
         expect(response).to have_http_status(:unprocessable_content)
         expect(json_response[:success]).to be false
         expect(json_response[:errors]).to be_present
+      end
+    end
+
+    context 'with a year out of range' do
+      it 'returns 422 with a year error' do
+        post '/api/v1/vehicles', params: { vehicle: valid_attributes.merge(year: '1900') }, headers: auth_headers(user)
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(json_response[:errors].join).to match(/Year/)
       end
     end
 

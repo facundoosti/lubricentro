@@ -18,17 +18,19 @@ export const useVehicles = (filters = {}) => {
     search = '',
     customer_id,
     brand,
+    // Vista del serializer; null = vista por defecto (con customer_id trae el último service)
+    view = 'with_customer',
     ...otherFilters
   } = filters;
 
   return useQuery({
-    queryKey: vehicleKeys.list({ page, per_page, search, customer_id, brand, ...otherFilters }),
+    queryKey: vehicleKeys.list({ page, per_page, search, customer_id, brand, view, ...otherFilters }),
     queryFn: async () => {
       const params = new URLSearchParams({
         page: page.toString(),
         per_page: per_page.toString(),
-        view: 'with_customer', // Solicitar vista con información completa del cliente
       });
+      if (view) params.append('view', view);
 
       if (search) {
         params.append('search', search);
@@ -48,10 +50,7 @@ export const useVehicles = (filters = {}) => {
           params.append(key, value.toString());
         }
       });
-
-      console.log('VehiclesService - Making API call with params:', params.toString());
       const response = await api.get(`/vehicles?${params}`);
-      console.log('VehiclesService - API response:', response.data);
       return response.data;
     },
     enabled: true,
@@ -100,7 +99,6 @@ export const useCreateVehicle = () => {
       return response.data;
     },
     onSuccess: (data) => {
-      console.log("useCreateVehicle - onSuccess called with:", data);
       // Invalidar y refetch la lista de vehicles
       queryClient.invalidateQueries({ queryKey: vehicleKeys.lists() });
       
@@ -133,7 +131,6 @@ export const useUpdateVehicle = () => {
       return response.data;
     },
     onSuccess: (data, variables) => {
-      console.log("useUpdateVehicle - onSuccess called with:", data);
       // Invalidar y refetch la lista de vehicles
       queryClient.invalidateQueries({ queryKey: vehicleKeys.lists() });
       
@@ -156,13 +153,10 @@ export const useDeleteVehicle = () => {
 
   return useMutation({
     mutationFn: async (id) => {
-      console.log("useDeleteVehicle - mutationFn called with id:", id);
       const response = await api.delete(`/vehicles/${id}`);
-      console.log("useDeleteVehicle - Response:", response);
       return response.data;
     },
     onSuccess: (data, id) => {
-      console.log("useDeleteVehicle - onSuccess called with:", data);
       // Invalidar y refetch la lista de vehicles
       queryClient.invalidateQueries({ queryKey: vehicleKeys.lists() });
       
@@ -182,6 +176,39 @@ export const lookupVehicleByPlate = async (plate) => {
   const response = await api.get(`/vehicles/lookup?plate=${encodeURIComponent(plate)}`);
   return response.data;
 };
+
+// Datos de la patente en el servicio externo. Una consulta por patente (cache sin vencimiento);
+// 404 = sin datos, 503/red = servicio caído. refetch() reintenta.
+export const usePlateLookup = (plate) =>
+  useQuery({
+    queryKey: [...vehicleKeys.all, 'lookup', plate],
+    queryFn: async () => {
+      try {
+        return (await lookupVehicleByPlate(plate))?.data?.vehicle ?? { status: 'not_found' };
+      } catch (error) {
+        // 404 es un resultado (se cachea); el resto es un error que se puede reintentar
+        if (error?.response?.status === 404) return { status: 'not_found' };
+        throw error;
+      }
+    },
+    enabled: !!plate,
+    staleTime: Infinity,
+    gcTime: 30 * 60 * 1000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+// Vehículos ya registrados con esa patente (coincidencia exacta normalizada, con dueño).
+export const useVehiclesByPlate = (plate) =>
+  useQuery({
+    queryKey: [...vehicleKeys.lists(), 'by-plate', plate],
+    queryFn: async () => {
+      const response = await api.get('/vehicles', { params: { license_plate: plate, per_page: 5 } });
+      return response.data?.data?.vehicles || [];
+    },
+    enabled: !!plate,
+    staleTime: 30 * 1000,
+  });
 
 // Funciones helper para el servicio
 export const vehiclesService = {

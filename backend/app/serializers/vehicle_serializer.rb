@@ -44,6 +44,16 @@ class VehicleSerializer < Blueprinter::Base
     end
   end
 
+  # Requiere la opción last_services: { vehicle_id => { date:, mileage: } } (ver Vehicle.last_services_for)
+  view :with_last_service do
+    field :last_service_date do |vehicle, options|
+      options[:last_services]&.dig(vehicle.id, :date)
+    end
+    field :last_mileage do |vehicle, options|
+      options[:last_services]&.dig(vehicle.id, :mileage)
+    end
+  end
+
   view :summary do
     identifier :id
     fields :brand, :model, :license_plate, :year

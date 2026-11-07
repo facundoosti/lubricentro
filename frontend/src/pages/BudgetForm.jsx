@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { ArrowLeft } from 'lucide-react';
 import { useBudget, useCreateBudget, useUpdateBudget } from '@services/budgetsService';
@@ -16,6 +16,8 @@ const BudgetForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditing = !!id;
+  // Desde el perfil del cliente: /budgets/new?customer_id=1&vehicle_id=2 (solo al crear)
+  const [searchParams] = useSearchParams();
 
   const [initialCustomer, setInitialCustomer] = useState(null);
   const [removedIds, setRemovedIds] = useState([]);
@@ -27,7 +29,13 @@ const BudgetForm = () => {
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
   const { register, control, handleSubmit, setValue, getValues, reset, formState: { errors, isDirty } } = useForm({
-    defaultValues: defaultValues(),
+    defaultValues: isEditing ? defaultValues() : {
+      ...defaultValues(),
+      customer_id: searchParams.get('customer_id') || '',
+      vehicle_id: searchParams.get('customer_id') && searchParams.get('vehicle_id')
+        ? Number(searchParams.get('vehicle_id'))
+        : null,
+    },
   });
 
   const budget = existingData?.data;

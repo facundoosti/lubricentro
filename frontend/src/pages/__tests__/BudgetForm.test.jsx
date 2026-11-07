@@ -166,6 +166,31 @@ describe('BudgetForm — nuevo', () => {
   });
 });
 
+describe('BudgetForm — desde el perfil del cliente', () => {
+  it('preselecciona cliente y vehículo de la URL', async () => {
+    mocks.useVehicles.mockImplementation(({ customer_id }) => ({
+      data: { data: { vehicles: String(customer_id) === '3' ? vehicles : [] } },
+      isLoading: false,
+    }));
+    renderForm('/budgets/new?customer_id=3&vehicle_id=10');
+
+    expect(screen.getByTestId('customer-value')).toHaveTextContent('3');
+    await waitFor(() => expect(screen.getByLabelText('Vehículo')).toHaveValue('10'));
+
+    fillItem(0, { description: 'Aceite', price: '100' });
+    submit();
+    await waitFor(() => expect(mocks.create).toHaveBeenCalled());
+    expect(mocks.create.mock.calls[0][0]).toMatchObject({
+      customer_id: '3', vehicle_id: 10, vehicle_description: 'Ford Ka 2015 (AB123CD)',
+    });
+  });
+
+  it('ignora vehicle_id sin customer_id', () => {
+    renderForm('/budgets/new?vehicle_id=10');
+    expect(screen.getByTestId('customer-value')).toHaveTextContent('');
+  });
+});
+
 describe('BudgetForm — edición', () => {
   const budget = {
     id: 5,

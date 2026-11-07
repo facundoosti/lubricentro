@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useCrudPage } from '@hooks/useCrudPage';
 import { useModalError } from '@hooks/useModalError';
 import PageHeader from '@ui/PageHeader';
@@ -5,6 +6,7 @@ import PageError from '@ui/PageError';
 import CustomersTable from '@components/features/customers/CustomersTable';
 import CustomerModal from '@components/features/customers/CustomerModal';
 import ConfirmModal from '@ui/ConfirmModal';
+import CustomerCreatedDialog from '@components/features/customers/CustomerCreatedDialog';
 import {
   useCustomers,
   useCreateCustomer,
@@ -32,6 +34,7 @@ const Customers = () => {
     search: searchTerm,
   });
 
+  const [createdCustomer, setCreatedCustomer] = useState(null);
   const createMutation = useCreateCustomer();
   const updateMutation = useUpdateCustomer();
   const deleteMutation = useDeleteCustomer();
@@ -45,8 +48,8 @@ const Customers = () => {
         await updateMutation.mutateAsync({ id: selectedItem.id, customerData: data });
         showCustomerSuccess('UPDATED');
       } else {
-        await createMutation.mutateAsync(data);
-        showCustomerSuccess('CREATED');
+        const response = await createMutation.mutateAsync(data);
+        setCreatedCustomer(response?.data ?? null);
       }
       handleModalClose();
     } catch (err) {
@@ -96,6 +99,8 @@ const Customers = () => {
         initialData={selectedItem}
         isLoading={createMutation.isPending || updateMutation.isPending}
       />
+
+      <CustomerCreatedDialog customer={createdCustomer} onClose={() => setCreatedCustomer(null)} />
 
       <ConfirmModal
         isOpen={isDeleteModalOpen}

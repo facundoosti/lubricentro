@@ -1,27 +1,42 @@
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
+import { AlertTriangle, ChevronDown } from 'lucide-react';
 import ImageUpload from '@ui/ImageUpload';
+import { useCustomersByPhone } from '@services/customersService';
+import { inputClass, labelClass } from '@utils/formStyles';
 
-const CustomerForm = ({
-  onSubmit,
-  initialData = null,
-  isLoading = false,
-  formId = 'customer-form',
-}) => {
+const EMPTY_CUSTOMER = { name: '', phone: '', email: '', address: '' };
+
+const DuplicatePhoneWarning = ({ customer }) => (
+  <p role="status" className="mt-1 flex items-start gap-1.5 text-xs text-on-surface-variant">
+    <AlertTriangle className="w-3.5 h-3.5 mt-px shrink-0 text-error" />
+    <span>
+      Ya existe <strong className="text-on-surface">{customer.name}</strong> con este teléfono ·{' '}
+      <Link to={`/customers/${customer.id}`} className="text-primary font-medium hover:underline">
+        Ver perfil
+      </Link>
+    </span>
+  </p>
+);
+
+const CustomerForm = ({ onSubmit, initialData = null, formId = 'customer-form' }) => {
   const [avatarFile, setAvatarFile] = useState(null);
+  // Se consulta al salir del campo, no mientras se escribe
+  const [phoneToCheck, setPhoneToCheck] = useState('');
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({
-    defaultValues: initialData || {
-      name: "",
-      phone: "",
-      email: "",
-      address: ""
-    }
+    defaultValues: Object.fromEntries(
+      Object.keys(EMPTY_CUSTOMER).map((key) => [key, initialData?.[key] ?? '']),
+    ),
   });
+
+  const { data: samePhone = [] } = useCustomersByPhone(phoneToCheck);
+  const duplicate = samePhone.find((c) => c.id !== initialData?.id);
 
   const handleFormSubmit = (data) => {
     const payload = { ...data };
@@ -29,105 +44,82 @@ const CustomerForm = ({
     onSubmit(payload);
   };
 
-  console.log("CustomerForm - errors:", errors);
-  console.log("CustomerForm - isLoading:", isLoading);
+  const phoneField = register('phone', {
+    required: 'El teléfono es requerido',
+    pattern: { value: /^[+]?[0-9\s\-()]+$/, message: 'Ingresá un teléfono válido' },
+  });
 
   return (
-    <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" noValidate>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-on-surface mb-1">
-            Nombre completo *
-          </label>
+          <label htmlFor="name" className={labelClass}>Nombre completo *</label>
           <input
-            {...register("name", { 
-              required: "El nombre es requerido",
-              minLength: {
-                value: 2,
-                message: "El nombre debe tener al menos 2 caracteres"
-              }
+            {...register('name', {
+              required: 'El nombre es requerido',
+              minLength: { value: 2, message: 'El nombre debe tener al menos 2 caracteres' },
             })}
             type="text"
             id="name"
-            className="w-full h-11 rounded-lg border border-outline-variant px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="Ingrese el nombre completo"
+            autoComplete="off"
+            className={inputClass(!!errors.name)}
+            placeholder="Ej: Juan Pérez"
           />
-          {errors.name && (
-            <p className="mt-1 text-xs text-error">{errors.name.message}</p>
-          )}
+          {errors.name && <p className="mt-1 text-xs text-error">{errors.name.message}</p>}
         </div>
 
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-on-surface mb-1">
-            Teléfono *
-          </label>
+          <label htmlFor="phone" className={labelClass}>Teléfono *</label>
           <input
-            {...register("phone", { 
-              required: "El teléfono es requerido",
-              pattern: {
-                value: /^[+]?[0-9\s\-()]+$/,
-                message: "Ingrese un teléfono válido"
-              }
-            })}
-            type="text"
+            {...phoneField}
+            onBlur={(e) => { phoneField.onBlur(e); setPhoneToCheck(e.target.value.trim()); }}
+            type="tel"
             id="phone"
-            className="w-full h-11 rounded-lg border border-outline-variant px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="Ingrese el teléfono"
+            autoComplete="off"
+            className={inputClass(!!errors.phone)}
+            placeholder="Ej: 11 5555-1234"
           />
-          {errors.phone && (
-            <p className="mt-1 text-xs text-error">{errors.phone.message}</p>
-          )}
+          {errors.phone && <p className="mt-1 text-xs text-error">{errors.phone.message}</p>}
+          {!errors.phone && duplicate && <DuplicatePhoneWarning customer={duplicate} />}
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-on-surface mb-1">
-            Email
-          </label>
+          <label htmlFor="email" className={labelClass}>Email</label>
           <input
-            {...register("email", {
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: "Ingrese un email válido"
-              }
+            {...register('email', {
+              pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: 'Ingresá un email válido' },
             })}
             type="email"
             id="email"
-            className="w-full h-11 rounded-lg border border-outline-variant px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="Ingrese el email"
+            className={inputClass(!!errors.email)}
+            placeholder="Opcional"
           />
-          {errors.email && (
-            <p className="mt-1 text-xs text-error">{errors.email.message}</p>
-          )}
+          {errors.email && <p className="mt-1 text-xs text-error">{errors.email.message}</p>}
         </div>
 
         <div>
-          <label htmlFor="address" className="block text-sm font-medium text-on-surface mb-1">
-            Dirección *
-          </label>
+          <label htmlFor="address" className={labelClass}>Dirección</label>
           <input
-            {...register("address", { 
-              required: "La dirección es requerida"
-            })}
+            {...register('address')}
             type="text"
             id="address"
-            className="w-full h-11 rounded-lg border border-outline-variant px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="Ingrese la dirección"
+            className={inputClass(false)}
+            placeholder="Opcional"
           />
-          {errors.address && (
-            <p className="mt-1 text-xs text-error">{errors.address.message}</p>
-          )}
         </div>
       </div>
 
-      {/* Avatar */}
-      <ImageUpload
-        label="Foto del Cliente"
-        currentUrl={initialData?.avatar_url}
-        onChange={setAvatarFile}
-      />
-
+      <details className="group rounded-lg border border-outline-variant">
+        <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium text-on-surface">
+          Foto (opcional)
+          <ChevronDown className="w-4 h-4 text-on-surface-variant transition-transform group-open:rotate-180" />
+        </summary>
+        <div className="px-4 pb-4">
+          <ImageUpload label="Foto del cliente" currentUrl={initialData?.avatar_url} onChange={setAvatarFile} />
+        </div>
+      </details>
     </form>
   );
 };
 
-export default CustomerForm; 
+export default CustomerForm;

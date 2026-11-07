@@ -16,6 +16,7 @@ export const useCustomers = (filters = {}) => {
     page = 1,
     per_page = 10,
     search = '',
+    enabled = true,
     ...otherFilters
   } = filters;
 
@@ -41,6 +42,7 @@ export const useCustomers = (filters = {}) => {
       const response = await api.get(`/customers?${params}`);
       return response.data;
     },
+    enabled,
     keepPreviousData: true,
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
@@ -55,6 +57,20 @@ export const useCustomer = (id) => {
     },
     enabled: !!id,
     staleTime: 0, // Siempre considerar los datos como stale para forzar refetch
+  });
+};
+
+// Clientes con el mismo teléfono (coincidencia por los últimos 10 dígitos en el backend).
+export const useCustomersByPhone = (phone) => {
+  const digits = String(phone || '').replace(/\D/g, '');
+  return useQuery({
+    queryKey: [...customerKeys.lists(), 'by-phone', digits],
+    queryFn: async () => {
+      const response = await api.get('/customers', { params: { phone, per_page: 5 } });
+      return response.data?.data?.customers || [];
+    },
+    enabled: digits.length >= 6,
+    staleTime: 30 * 1000,
   });
 };
 
@@ -86,7 +102,6 @@ export const useCreateCustomer = () => {
       return response.data;
     },
     onSuccess: (data) => {
-      console.log("useCreateCustomer - onSuccess called with:", data);
       // Invalidar y refetch la lista de customers
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
       
@@ -119,8 +134,6 @@ export const useUpdateCustomer = () => {
       return response.data;
     },
     onSuccess: (data, variables) => {
-      console.log("useUpdateCustomer - onSuccess called with:", data);
-      console.log("useUpdateCustomer - variables:", variables);
       
       // Invalidar y refetch la lista de customers
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });

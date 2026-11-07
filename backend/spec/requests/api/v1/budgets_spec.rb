@@ -52,6 +52,15 @@ RSpec.describe "Api::V1::Budgets", type: :request do
       expect(ids).not_to include(sent_budget.id)
     end
 
+    it "filters by customer_id" do
+      other_customer = create(:customer)
+      other_budget = create(:budget, customer: other_customer, vehicle: create(:vehicle, customer: other_customer))
+      get "/api/v1/budgets", params: { customer_id: customer.id }, headers: auth_headers(user)
+      ids = json_response[:data][:budgets].map { |b| b[:id] }
+      expect(ids).to contain_exactly(draft_budget.id, sent_budget.id)
+      expect(ids).not_to include(other_budget.id)
+    end
+
     it "searches by vehicle_description" do
       create(:budget, vehicle_description: "Ford Ranger ABC123", customer: customer, vehicle: vehicle)
       get "/api/v1/budgets", params: { search: "Ford" }, headers: auth_headers(user)
