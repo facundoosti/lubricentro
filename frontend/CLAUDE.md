@@ -82,7 +82,7 @@ const { user, login, logout } = useAuthStore();
 
 Light/dark design system (`docs/DESIGN_SYSTEM.md`); theme toggled via `useThemeStore` (`.dark` class on `<html>`). Tokens and component patterns live in `.claude/rules/frontend-ui.md` (auto-loaded when editing `.jsx`/`.css`).
 
-Always design mobile-first and scale up with Tailwind breakpoints.  
+Design desktop-first for notebook screens (reference 1440×900); mobile/tablet layouts are not a target and are not QA-tested.  
 Always handle `isLoading` and `isError` states when consuming React Query hooks.  
 Keep components under 300 lines — extract to sub-components or hooks if larger.
 

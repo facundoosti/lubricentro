@@ -4,7 +4,7 @@
 // Cada caso:
 //   id      → mismo TC-XX que en qa.md
 //   path    → ruta a abrir (opcional si steps navega)
-//   combos  → ['desktop-dark', 'desktop-light', 'mobile-dark', 'mobile-light'] (default: suite.combos o desktop-dark)
+//   combos  → ['desktop-dark', 'desktop-light'] (default: suite.combos o desktop-dark)
 //   steps   → (page, { vp, theme }) => interacción con Playwright
 //   check   → (page, { vp, theme }) => ({ pass, reason?, facts? }) · facts = JSON chico con lo medido
 //   allowStatus / allowConsoleErrors → excepciones explícitas (p. ej. un 422 esperado)
@@ -15,7 +15,7 @@ export default {
     {
       id: 'TC-01',
       path: '/dashboard',
-      combos: ['desktop-dark', 'mobile-light'],
+      combos: ['desktop-dark', 'desktop-light'],
       check: async (page, { vp }) => {
         const overflowX = await page.evaluate(
           () => document.documentElement.scrollWidth > window.innerWidth,

@@ -1,6 +1,6 @@
 ---
 name: qa-visual
-description: QA visual en el navegador para features que cambian UI. Clasifica el riesgo, arma casos TC-XX, automatiza lo posible (Vitest o Playwright con scripts) y usa Chrome DevTools MCP solo para lo exploratorio. Revisa cada caso y audita/corrige los errores. Usar al terminar de implementar cualquier cambio con impacto visual en frontend/ (pantallas, componentes, estilos, temas, responsive), o cuando el usuario pida "QA", "probar en el navegador" o "revisión visual".
+description: QA visual en el navegador para features que cambian UI. Clasifica el riesgo, arma casos TC-XX, automatiza lo posible (Vitest o Playwright con scripts) y usa Chrome DevTools MCP solo para lo exploratorio. Revisa cada caso y audita/corrige los errores. Usar al terminar de implementar cualquier cambio con impacto visual en frontend/ (pantallas, componentes, estilos, temas, layout), o cuando el usuario pida "QA", "probar en el navegador" o "revisión visual".
 ---
 
 # QA visual
@@ -11,7 +11,7 @@ Flujo obligatorio para cambios con impacto visual. La feature no termina hasta q
 
 ## ¿Cuándo aplica?
 
-Aplica si el diff toca: componentes/páginas `.jsx`, `index.css`, layout, temas (claro/oscuro), responsive, formularios, modales, tablas, o flujos de usuario.
+Aplica si el diff toca: componentes/páginas `.jsx`, `index.css`, layout, temas (claro/oscuro), formularios, modales, tablas, o flujos de usuario.
 No aplica a: cambios solo de backend sin efecto en UI, tests, docs, refactors sin cambio visual (en ese caso decilo y saltealo).
 
 ## Requisitos previos
@@ -28,8 +28,8 @@ Clasificá el cambio **por impacto, no por tamaño del diff**. Ante la duda, el 
 | Riesgo | Cuándo | Alcance del QA |
 |---|---|---|
 | **Bajo** | Ajuste visual acotado a 1 componente, reversible, sin lógica | 1–3 casos · solo `desktop-dark` · sin regresión salvo vecino directo |
-| **Medio** | Cambia comportamiento o una pantalla completa; componente compartido | Casos de la spec + 1 regresión por consumidor (`codegraph impact`) · matriz **solo en la dimensión tocada** (temas si tocó colores/tokens; viewports si tocó layout/responsive) |
-| **Alto** | Layout global (sidebar, header, `Layout`), tema/tokens globales, flujos de datos (alta/edición/borrado, importaciones), auth | Matriz completa `desktop/mobile × dark/light` en los casos must + regresión de pantallas vecinas |
+| **Medio** | Cambia comportamiento o una pantalla completa; componente compartido | Casos de la spec + 1 regresión por consumidor (`codegraph impact`) · `desktop-light` además de `desktop-dark` **solo si tocó colores/tokens** |
+| **Alto** | Layout global (sidebar, header, `Layout`), tema/tokens globales, flujos de datos (alta/edición/borrado, importaciones), auth | `desktop-dark` + `desktop-light` en los casos must + regresión de pantallas vecinas |
 
 Escribí el nivel y una frase de justificación al principio del plan.
 
@@ -50,7 +50,7 @@ Archivo del plan:
 | Ejecutor | Para qué | Costo |
 |---|---|---|
 | `vitest` | Estados (cargando, vacío, error 4xx/5xx), validaciones de formulario, lógica de render. Test con Testing Library + mock del service | Mínimo, y queda como regresión permanente |
-| `script` | Layout, tema, responsive, persistencia, flujos repetibles. Va en el `.qa.mjs` y lo corre `tools/qa-runner/run.mjs` | Bajo: una llamada de Bash para toda la matriz |
+| `script` | Layout, tema, persistencia, flujos repetibles. Va en el `.qa.mjs` y lo corre `tools/qa-runner/run.mjs` | Bajo: una llamada de Bash para todos los casos y temas |
 | `mcp` | Exploratorio o algo que no se puede escribir de antemano (hover fino, drag, revisar visualmente un layout nuevo) | Alto: usar con moderación |
 | `manual` | Lo que requiere al usuario (impresión física, WhatsApp real) | Lo ejecuta el usuario; registrás lo que reporte |
 

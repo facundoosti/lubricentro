@@ -46,7 +46,7 @@ Features and non-trivial changes follow the OpenSpec flow. Artifacts are written
 2. `/openspec-propose <idea>` — creates proposal, specs, design, tasks under `openspec/changes/`
 3. `/openspec-apply-change` — implement tasks one by one; tests + lint before checking each task
 4. `rails-reviewer` / `react-reviewer` subagents on the diff
-5. **QA visual** (`/qa-visual`) when the change has visual impact on the frontend: classify risk (low/medium/high sets the scope), write `TC-XX` cases in `openspec/changes/<change>/qa.md` with an executor each — `vitest` for states/validations, `script` via `tools/qa-runner` (Playwright on headless Brave, one call for the whole viewport × theme matrix), `mcp` (`qa-visual-runner` subagent, chrome-devtools) only for exploratory checks — review, audit + fix failures and re-run only the affected cases
+5. **QA visual** (`/qa-visual`) when the change has visual impact on the frontend: classify risk (low/medium/high sets the scope), write `TC-XX` cases in `openspec/changes/<change>/qa.md` with an executor each — `vitest` for states/validations, `script` via `tools/qa-runner` (Playwright on headless Brave, one call for all cases × themes; desktop 1440×900 only — no mobile/tablet QA, the app is used on notebooks), `mcp` (`qa-visual-runner` subagent, chrome-devtools) only for exploratory checks — review, audit + fix failures and re-run only the affected cases
 6. `spec-verifier`
 7. `/openspec-archive-change` — merge specs into `openspec/specs/`
 

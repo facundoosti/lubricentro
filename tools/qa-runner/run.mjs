@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Runner de QA visual con Playwright: corre los casos de un archivo <slug>.qa.mjs en cada
-// combinación viewport × tema, en Brave headless, y devuelve SOLO un resumen compacto.
+// tema (dark/light) en viewport de notebook, en Brave headless, y devuelve SOLO un resumen compacto.
 // El objetivo es ahorrar tokens: toda la navegación pasa fuera del contexto del agente.
 //
 // Uso:
@@ -14,9 +14,9 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+// La app se usa en notebook: solo se prueba desktop (mobile/tablet quedaron fuera de QA).
 const VIEWPORTS = {
   desktop: { width: 1440, height: 900 },
-  mobile: { width: 375, height: 812 },
 };
 const DEFAULT_COMBOS = ['desktop-dark'];
 const BROWSER_CANDIDATES = [
@@ -75,6 +75,12 @@ async function ensureAuth() {
 
 async function runCombo(testCase, combo, storageState) {
   const [vp, theme] = combo.split('-');
+  if (!VIEWPORTS[vp]) {
+    return {
+      id: testCase.id, combo, status: 'fail', facts: {}, evidence: '-',
+      failures: [`viewport "${vp}" no se prueba: usá desktop-dark / desktop-light`],
+    };
+  }
   const context = await browser.newContext({
     baseURL,
     viewport: VIEWPORTS[vp],

@@ -24,4 +24,4 @@ Tema claro/oscuro (switch en el header, clase `.dark` en `<html>`, store `useThe
 - Badge activo: `bg-primary-container/20 text-primary` · éxito: `bg-tertiary/10 text-tertiary` · error: `bg-error-container text-on-error-container`
 - Input: `bg-surface-variant border border-outline-variant text-on-surface placeholder:text-secondary`
 
-Mobile-first: estilos base para mobile y escalá con breakpoints de Tailwind. Reutilizá primitivas de `@ui` (Button, Modal, Table, PageHeader, PageError) antes de crear nuevas.
+Desktop-first: la app se usa en notebook (referencia 1440×900); diseñá para esa pantalla y no agregues breakpoints para mobile/tablet salvo pedido explícito. Reutilizá primitivas de `@ui` (Button, Modal, Table, PageHeader, PageError) antes de crear nuevas.
