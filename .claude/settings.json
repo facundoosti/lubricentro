@@ -21,10 +21,10 @@
       "Bash(git log*)",
       "Bash(git show*)",
       "Bash(git branch*)",
+      "Bash(git push*)",
       "mcp__codegraph__*"
     ],
     "ask": [
-      "Bash(git push*)",
       "Bash(bin/rails db:migrate*)",
       "Bash(bundle exec rails db:migrate*)",
       "Bash(rails db:migrate*)",

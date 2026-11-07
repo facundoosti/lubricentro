@@ -70,9 +70,16 @@ codegraph sync                    # incremental re-index (runs automatically on 
 
 Fall back to `grep` only for exact string matches where a literal pattern is known.
 
+## Git workflow
+
+Single developer, early stage: **work directly on `main`** — no feature branches or PRs needed. Commit on `main` and `git push origin main` when the user asks to commit/push.
+
+- Pushing to `main` runs CI (Backend CI / Frontend CI) and, if it passes, **deploys to production** (`.github/workflows/deploy.yml`). Run tests + lint before pushing; mention pending migrations.
+- Still never force-push, `reset --hard`, or commit unrelated files (e.g. `.codegraph/daemon.pid`, personal `docker-compose.yml` tweaks).
+
 ## Guardrails (`.claude/`)
 
-- **Permissions** (`settings.json`): `.env*` and Rails keys are unreadable; `schema.rb` is not editable; `db:drop`/`db:reset`/force-push are denied; `git push` and `db:migrate` ask first.
+- **Permissions** (`settings.json`): `.env*` and Rails keys are unreadable; `schema.rb` is not editable; `db:drop`/`db:reset`/force-push are denied; `db:migrate` asks first. `git push` is allowed.
 - **Hooks** (`.claude/hooks/`): block edits to generated/secret files, auto-fix with RuboCop/ESLint after each edit, run affected RSpec/Vitest tests when Claude stops (failures make it keep working).
 - **Path-scoped rules** in `.claude/rules/` load only when touching matching files (specs, migrations, UI, frontend tests).
 - Personal overrides go in `.claude/settings.local.json` or `CLAUDE.local.md` (both git-ignored).
