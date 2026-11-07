@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Routes, Route } from 'react-router-dom';
 import { renderWithProviders } from '@/test/utils';
@@ -59,5 +59,26 @@ describe('ServiceRecordFormPage — desde el perfil del cliente', () => {
     renderPage('/service-records/new');
     expect(screen.getByPlaceholderText('Buscar cliente...')).toHaveValue('');
     expect(mocks.useCustomer).toHaveBeenCalledWith(null);
+  });
+});
+
+describe('ServiceRecordFormPage — validación de cliente y vehículo', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.useCustomer.mockReturnValue({ data: undefined });
+    mocks.useVehicle.mockReturnValue({ data: undefined });
+  });
+
+  it('al guardar sin cliente ni vehículo marca ambos buscadores en rojo', async () => {
+    renderPage('/service-records/new');
+    fireEvent.click(screen.getByRole('button', { name: 'Registrar atención' }));
+    await screen.findByText('El cliente es obligatorio');
+    const customer = screen.getByPlaceholderText('Buscar cliente...');
+    const vehicle = screen.getByPlaceholderText('Primero seleccioná un cliente');
+    [customer, vehicle].forEach((el) => {
+      expect(el).toHaveAttribute('aria-invalid', 'true');
+      expect(el.className).toMatch(/\bborder-error\b/);
+      expect(el.className).not.toMatch(/\bborder-outline-variant\b/);
+    });
   });
 });

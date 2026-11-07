@@ -290,7 +290,11 @@ const ServiceRecordFormPage = () => {
     }
   };
 
-  const inputClass = 'w-full px-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary placeholder:text-secondary';
+  const fieldClass = (hasError) =>
+    `w-full px-3 py-2 bg-surface-variant border rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary placeholder:text-secondary ${
+      hasError ? 'border-error' : 'border-outline-variant'
+    }`;
+  const inputClass = fieldClass(false);
 
   const isLoadingInitial = (appointmentId && loadingAppointment) || (isEditing && loadingExisting);
 
@@ -389,7 +393,8 @@ const ServiceRecordFormPage = () => {
                       }}
                       onFocus={() => setShowCustomerDropdown(true)}
                       placeholder="Buscar cliente..."
-                      className={`${inputClass} pl-9 pr-8`}
+                      className={`${fieldClass(!!errors.customer_id)} pl-9 pr-8`}
+                      aria-invalid={!!errors.customer_id}
                       readOnly={!!selectedCustomer}
                     />
                     {selectedCustomer && (
@@ -453,7 +458,8 @@ const ServiceRecordFormPage = () => {
                       onFocus={() => { if (selectedCustomer) setShowVehicleDropdown(true); }}
                       placeholder={selectedCustomer ? 'Buscar vehículo...' : 'Primero seleccioná un cliente'}
                       disabled={!selectedCustomer}
-                      className={`${inputClass} pl-9 pr-8 disabled:opacity-50 disabled:cursor-not-allowed`}
+                      className={`${fieldClass(!!errors.vehicle_id)} pl-9 pr-8 disabled:opacity-50 disabled:cursor-not-allowed`}
+                      aria-invalid={!!errors.vehicle_id}
                       readOnly={!!selectedVehicle}
                     />
                     {selectedVehicle && (

@@ -5,6 +5,11 @@ import TextArea from '@ui/TextArea';
 import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
 import { useEffect, useState, useMemo } from 'react';
 
+const fieldClass = (hasError) =>
+  `h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-on-surface shadow-theme-xs placeholder:text-secondary focus:border-primary focus:outline-hidden focus:ring-3 focus:ring-primary/10 ${
+    hasError ? 'border-error' : 'border-outline-variant'
+  }`;
+
 const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' }) => {
   // Función para obtener la fecha y hora actual
   const getCurrentDateTime = () => {
@@ -76,7 +81,6 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
   ];
 
   const handleFormSubmit = (data) => {
-    setSubmitted(true);
     // Validate customer_id before submission
     if (!data.customer_id) {
       return;
@@ -151,7 +155,16 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
   const customerError = submitted && !selectedCustomerId ? 'Cliente es requerido' : null;
 
   return (
-    <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <form
+      id={formId}
+      onSubmit={(e) => {
+        // Se marca antes de validar: si falla otro campo, RHF no llama a handleFormSubmit
+        // y el error de "Cliente" (validado a mano) nunca se mostraría
+        setSubmitted(true);
+        return handleSubmit(handleFormSubmit)(e);
+      }}
+      className="space-y-6"
+    >
       {/* Cliente */}
       <div>
         <label className="mb-1.5 block text-sm font-medium text-on-surface">
@@ -178,7 +191,8 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
         </label>
         <select
           {...register('vehicle_id', { required: 'Vehículo es requerido' })}
-          className="h-11 w-full rounded-lg border border-outline-variant bg-transparent px-4 py-2.5 text-sm text-on-surface shadow-theme-xs placeholder:text-secondary focus:border-primary focus:outline-hidden focus:ring-3 focus:ring-primary/10"
+          className={fieldClass(!!errors.vehicle_id)}
+          aria-invalid={!!errors.vehicle_id}
           disabled={vehiclesLoading || !selectedCustomerId}
         >
           <option value="">
@@ -216,7 +230,8 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
           <input
             type="date"
             {...register('scheduled_date', { required: 'Fecha es requerida' })}
-            className="h-11 w-full rounded-lg border border-outline-variant bg-transparent px-4 py-2.5 text-sm text-on-surface shadow-theme-xs placeholder:text-secondary focus:border-primary focus:outline-hidden focus:ring-3 focus:ring-primary/10"
+            className={fieldClass(!!errors.scheduled_date)}
+            aria-invalid={!!errors.scheduled_date}
           />
           {errors.scheduled_date && (
             <p className="mt-1 text-sm text-error">
@@ -232,7 +247,8 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
           </label>
           <select
             {...register('scheduled_time', { required: 'Hora es requerida' })}
-            className="h-11 w-full rounded-lg border border-outline-variant bg-transparent px-4 py-2.5 text-sm text-on-surface shadow-theme-xs placeholder:text-secondary focus:border-primary focus:outline-hidden focus:ring-3 focus:ring-primary/10"
+            className={fieldClass(!!errors.scheduled_time)}
+            aria-invalid={!!errors.scheduled_time}
           >
             <option value="">Seleccionar hora</option>
             {timeSlots.map((time) => (
@@ -256,7 +272,7 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
         </label>
         <select
           {...register('status')}
-          className="h-11 w-full rounded-lg border border-outline-variant bg-transparent px-4 py-2.5 text-sm text-on-surface shadow-theme-xs placeholder:text-secondary focus:border-primary focus:outline-hidden focus:ring-3 focus:ring-primary/10"
+          className={fieldClass(false)}
         >
           {statusOptions.map((option) => (
             <option key={option.value} value={option.value}>

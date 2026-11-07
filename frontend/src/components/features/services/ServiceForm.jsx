@@ -51,7 +51,7 @@ const ServiceForm = ({
               message: 'El nombre no puede exceder 100 caracteres'
             }
           })}
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
             errors.name ? 'border-error' : 'border-outline-variant'
           }`}
           placeholder="Ej: Cambio de Aceite, Alineación, Frenos..."
@@ -77,7 +77,7 @@ const ServiceForm = ({
               message: 'La descripción no puede exceder 1000 caracteres'
             }
           })}
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
             errors.description ? 'border-error' : 'border-outline-variant'
           }`}
           placeholder="Descripción detallada del servicio..."
@@ -114,7 +114,7 @@ const ServiceForm = ({
                 return !isNaN(price) && price > 0 || 'Precio inválido';
               }
             })}
-            className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+            className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
               errors.base_price ? 'border-error' : 'border-outline-variant'
             }`}
             placeholder="0.00"
