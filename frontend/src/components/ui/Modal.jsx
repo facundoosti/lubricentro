@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useId } from "react";
 import { X } from "lucide-react";
 
 const Modal = ({
@@ -9,8 +9,10 @@ const Modal = ({
   showCloseButton = true,
   isFullscreen = false,
   title,
+  ariaLabel,
 }) => {
   const modalRef = useRef(null);
+  const titleId = useId();
 
   useEffect(() => {
     const handleEscape = (event) => {
@@ -56,12 +58,18 @@ const Modal = ({
       )}
       <div
         ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
+        aria-label={title ? undefined : ariaLabel}
         className={`${contentClasses} ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         {showCloseButton && (
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Cerrar"
             className="absolute right-3 top-3 z-999 flex h-9.5 w-9.5 items-center justify-center rounded-full bg-surface-container-high text-secondary transition-colors hover:bg-surface-container-highest hover:text-on-surface sm:right-6 sm:top-6 sm:h-11 sm:w-11"
           >
             <X className="w-5 h-5" />
@@ -70,7 +78,7 @@ const Modal = ({
         <div className="p-6">
           {title && (
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-on-surface">
+              <h2 id={titleId} className="text-xl font-semibold text-on-surface">
                 {title}
               </h2>
             </div>

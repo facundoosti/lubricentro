@@ -92,3 +92,18 @@ describe('Modal', () => {
     })
   })
 })
+
+describe('Modal — accesibilidad', () => {
+  it('se expone como diálogo modal con el título como nombre', () => {
+    render(<Modal isOpen onClose={vi.fn()} title="Editar cliente">Contenido</Modal>);
+    const dialog = screen.getByRole('dialog', { name: 'Editar cliente' });
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
+  });
+
+  it('la X de cerrar tiene nombre accesible', () => {
+    const close = vi.fn();
+    render(<Modal isOpen onClose={close} title="Editar cliente">Contenido</Modal>);
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar' }));
+    expect(close).toHaveBeenCalled();
+  });
+});

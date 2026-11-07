@@ -86,7 +86,9 @@ const SlideOver = ({
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Cerrar"
             className="p-2 text-secondary hover:text-on-surface hover:bg-surface-container-high rounded-full transition-all"
           >
             <X className="w-5 h-5" />
@@ -112,7 +114,7 @@ const SlideOver = ({
             type="submit"
             form={formId}
             disabled={isLoading || submitDisabled}
-            className="flex-1 px-4 py-2.5 bg-primary text-on-primary font-bold rounded-lg hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 bg-primary-container text-on-primary font-bold rounded-lg hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isLoading ? (
               <>

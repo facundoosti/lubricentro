@@ -49,16 +49,21 @@ const NavItem = ({ name, icon, path, subItems, menuType, index, tourId }) => {
     return (
       <li id={tourId}>
         <button
+          type="button"
           onClick={handleSubmenuToggle}
+          aria-expanded={isSubmenuOpen}
+          aria-label={isVisible ? undefined : name}
+          title={isVisible ? undefined : name}
+          // Activo solo si la ruta actual está dentro del grupo; abrirlo no lo marca
           className={`menu-item group w-full ${
-            isSubmenuOpen || hasActiveSubItem
+            hasActiveSubItem
               ? "menu-item-active"
               : "menu-item-inactive"
           } ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"}`}
         >
           <span
             className={`menu-item-icon-size flex-shrink-0 ${
-              isSubmenuOpen || hasActiveSubItem
+              hasActiveSubItem
                 ? "menu-item-icon-active"
                 : "menu-item-icon-inactive"
             }`}
@@ -111,6 +116,8 @@ const NavItem = ({ name, icon, path, subItems, menuType, index, tourId }) => {
       {path && (
         <Link
           to={path}
+          aria-label={isVisible ? undefined : name}
+          title={isVisible ? undefined : name}
           className={`menu-item group ${
             isActive(path) ? "menu-item-active" : "menu-item-inactive"
           } ${!isExpanded && !isHovered ? "lg:justify-center" : ""}`}
@@ -294,6 +301,8 @@ const Sidebar = () => {
           <div className="mt-4 flex flex-col gap-0.5">
             <Link
               to="/settings"
+              aria-label={isVisible ? undefined : "Configuración"}
+              title={isVisible ? undefined : "Configuración"}
               className={`menu-item group menu-item-inactive ${
                 !isVisible ? "lg:justify-center" : ""
               }`}
@@ -306,7 +315,10 @@ const Sidebar = () => {
           </div>
           <div className="pt-4 border-t border-outline-variant">
             <button
+              type="button"
               onClick={handleLogout}
+              aria-label={isVisible ? undefined : "Cerrar sesión"}
+              title={isVisible ? undefined : "Cerrar sesión"}
               className={`menu-item group w-full text-secondary hover:text-error hover:bg-error-container/20 ${
                 !isVisible ? "lg:justify-center" : ""
               }`}

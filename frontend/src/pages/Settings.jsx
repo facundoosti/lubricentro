@@ -263,6 +263,9 @@ const Settings = () => {
                   >
                     <button
                       type="button"
+                      role="switch"
+                      aria-checked={!!day.open}
+                      aria-label={label}
                       onClick={() => toggleDay(key)}
                       className={`relative inline-flex w-11 h-6 rounded-full flex-shrink-0 transition-colors duration-200 overflow-hidden ${
                         day.open ? "bg-primary-container" : "bg-outline"

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { showAppointmentSuccess, showAppointmentError } from '@services/notificationService';
 import FullCalendar from '@fullcalendar/react';
@@ -103,9 +103,10 @@ const Appointments = () => {
   const updateAppointmentMutation = useUpdateAppointment();
   const deleteAppointmentMutation = useDeleteAppointment();
 
-  const appointments = appointmentsData?.data || [];
+  const appointments = useMemo(() => appointmentsData?.data || [], [appointmentsData]);
 
-  const calendarEvents = appointments.map(appointment => {
+  // Memo: eventos estables entre renders (p. ej. al mostrar/ocultar el tooltip)
+  const calendarEvents = useMemo(() => appointments.map(appointment => {
     const customerName = appointment?.customer?.name || 'Cliente no especificado';
     const vehicleInfo = appointment?.vehicle
       ? `${appointment.vehicle.brand || ''} ${appointment.vehicle.model || ''}`.trim()
@@ -117,7 +118,7 @@ const Appointments = () => {
       end: new Date(new Date(appointment.scheduled_at).getTime() + 60 * 60 * 1000),
       extendedProps: { appointment, status: appointment.status },
     };
-  });
+  }), [appointments]);
 
   const todayAppointments = appointments.filter(a => {
     const d = new Date(a.scheduled_at);
@@ -133,7 +134,12 @@ const Appointments = () => {
     setIsModalOpen(true);
   };
 
+  const hideTooltip = useCallback(() => {
+    setTooltip({ visible: false, x: 0, y: 0, appointment: null });
+  }, []);
+
   const handleEventClick = (clickInfo) => {
+    hideTooltip();
     setSelectedAppointment(clickInfo.event.extendedProps.appointment);
     setIsModalOpen(true);
   };
@@ -142,6 +148,8 @@ const Appointments = () => {
     // currentStart es el primer día del mes activo en la vista,
     // a diferencia de dateInfo.start que es el primer día visible (puede ser del mes anterior)
     setCurrentDate(dateInfo.view.currentStart);
+    // Al cambiar de vista/mes el evento se desmonta bajo el puntero y nunca llega su mouseleave
+    hideTooltip();
   };
 
   const handleFormSubmit = async (data) => {
@@ -180,9 +188,6 @@ const Appointments = () => {
     setTooltip(prev => prev.visible ? { ...prev, x: e.clientX, y: e.clientY } : prev);
   }, []);
 
-  const handleTooltipMouseLeave = useCallback(() => {
-    setTooltip({ visible: false, x: 0, y: 0, appointment: null });
-  }, []);
 
   const renderEventContent = (eventInfo) => {
     const { status, appointment } = eventInfo.event.extendedProps;
@@ -192,7 +197,7 @@ const Appointments = () => {
         className={`${cfg.bg} border-l-2 ${cfg.border} px-1 py-0.5 rounded text-[10px] ${cfg.text} truncate font-medium cursor-pointer`}
         onMouseEnter={(e) => handleTooltipMouseEnter(e, appointment)}
         onMouseMove={handleTooltipMouseMove}
-        onMouseLeave={handleTooltipMouseLeave}
+        onMouseLeave={hideTooltip}
       >
         {new Date(appointment.scheduled_at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
         {' '}{eventInfo.event.title}
@@ -286,6 +291,7 @@ const Appointments = () => {
                   dayHeaderFormat={{ weekday: 'short' }}
                   titleFormat={{ year: 'numeric', month: 'long' }}
                   datesSet={handleDatesSet}
+                  eventWillUnmount={hideTooltip}
                 />
               </div>
             </div>

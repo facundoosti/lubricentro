@@ -83,3 +83,12 @@ describe('SlideOver', () => {
     expect(trigger).toHaveFocus();
   });
 });
+
+describe('SlideOver — accesibilidad', () => {
+  it('la X de cerrar tiene nombre accesible', () => {
+    const close = vi.fn();
+    render(<SlideOver isOpen onClose={close} title="Nuevo turno">contenido</SlideOver>);
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar' }));
+    expect(close).toHaveBeenCalled();
+  });
+});

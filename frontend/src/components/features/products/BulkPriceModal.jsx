@@ -120,7 +120,12 @@ const BulkPriceModal = ({ isOpen, onClose, target = null }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
-      <div className="relative bg-surface-container border border-outline-variant rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="bulk-price-title"
+        className="relative bg-surface-container border border-outline-variant rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-outline-variant shrink-0">
           <div className="flex items-center gap-3">
@@ -128,7 +133,7 @@ const BulkPriceModal = ({ isOpen, onClose, target = null }) => {
               <TrendingUp className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-on-surface">Actualización de Precios por Lote</h2>
+              <h2 id="bulk-price-title" className="text-base font-semibold text-on-surface">Actualización de Precios por Lote</h2>
               <p className="text-xs text-secondary">
                 {step === STEPS.FILTER && (hasTarget ? 'Definí el tipo de ajuste' : 'Definí los criterios y el tipo de ajuste')}
                 {step === STEPS.PREVIEW && `Vista previa — ${previews.length} producto(s) afectados`}
@@ -136,7 +141,7 @@ const BulkPriceModal = ({ isOpen, onClose, target = null }) => {
               </p>
             </div>
           </div>
-          <button onClick={handleClose} className="p-1.5 rounded-md text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors">
+          <button type="button" onClick={handleClose} aria-label="Cerrar" className="p-1.5 rounded-md text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
