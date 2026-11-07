@@ -9,6 +9,7 @@ import {
   Search, Plus, Edit, Trash2, Eye, Package, X, TrendingUp, Percent,
 } from "lucide-react";
 import ProductPriceCell from '@components/features/products/ProductPriceCell';
+import ImageLightbox from '@ui/ImageLightbox';
 
 const buildCategoryOptions = (categories) => {
   const byParent = {};
@@ -60,6 +61,7 @@ const ProductsTable = ({
   const [brandSearch, setBrandSearch] = useState('');
   const [supplierSearch, setSupplierSearch] = useState('');
   const [categorySearch, setCategorySearch] = useState('');
+  const [lightboxProductId, setLightboxProductId] = useState(null);
   const headerCheckRef = useRef(null);
   const searchDebounceRef = useRef(null);
 
@@ -105,6 +107,23 @@ const ProductsTable = ({
   const removeBrand = (b) => onFilterChange({ brand: brands.filter((v) => v !== b) });
   const removeSupplierId = (id) => onFilterChange({ supplier_id: supplierIds.filter((v) => v !== id) });
   const removeCategoryId = (id) => onFilterChange({ category_id: categoryIds.filter((v) => v !== id) });
+
+  // Imágenes de la página actual para el carrusel del lightbox
+  const galleryProducts = products.filter((p) => p.image_url);
+  const galleryImages = galleryProducts.map((p) => ({
+    src: p.image_url,
+    alt: p.name,
+    title: p.name,
+    subtitle: p.sku || undefined,
+  }));
+  // Se guarda el id (no el índice) para que un refetch/paginado no muestre otra imagen
+  const lightboxIdx = galleryProducts.findIndex((p) => p.id === lightboxProductId);
+  const lightboxIndex = lightboxIdx >= 0 ? lightboxIdx : null;
+  useEffect(() => {
+    if (lightboxProductId !== null && lightboxIndex === null) setLightboxProductId(null);
+  }, [lightboxProductId, lightboxIndex]);
+  const closeLightbox = useCallback(() => setLightboxProductId(null), []);
+  const changeLightboxIndex = (i) => setLightboxProductId(galleryProducts[i]?.id ?? null);
 
   const hasActiveFilters = search || brands.length > 0 || supplierIds.length > 0 || categoryIds.length > 0 || activeFilter;
 
@@ -359,16 +378,24 @@ const ProductsTable = ({
                       <TableCell className="px-5 py-4 text-start">
                         <div className="flex items-center gap-3">
                           {product.image_url ? (
-                            <img
-                              src={product.image_url}
-                              alt={product.name}
-                              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                              style={{
-                                outline: `2px solid ${isActive ? 'var(--color-success-500)' : 'var(--color-error)'}`,
-                                outlineOffset: '2px',
-                                boxShadow: `0 0 8px 2px color-mix(in srgb, ${isActive ? 'var(--color-success-500)' : 'var(--color-error)'} 40%, transparent)`,
-                              }}
-                            />
+                            <button
+                              type="button"
+                              onClick={() => setLightboxProductId(product.id)}
+                              aria-label={`Ampliar imagen de ${product.name}`}
+                              title="Ampliar imagen"
+                              className="flex-shrink-0 rounded-full cursor-zoom-in transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                            >
+                              <img
+                                src={product.image_url}
+                                alt={product.name}
+                                className="w-10 h-10 rounded-full object-cover"
+                                style={{
+                                  outline: `2px solid ${isActive ? 'var(--color-success-500)' : 'var(--color-error)'}`,
+                                  outlineOffset: '2px',
+                                  boxShadow: `0 0 8px 2px color-mix(in srgb, ${isActive ? 'var(--color-success-500)' : 'var(--color-error)'} 40%, transparent)`,
+                                }}
+                              />
+                            </button>
                           ) : (
                             <div
                               style={{
@@ -454,6 +481,13 @@ const ProductsTable = ({
           </Table>
         </div>
       </div>
+
+      <ImageLightbox
+        images={galleryImages}
+        index={lightboxIndex}
+        onClose={closeLightbox}
+        onIndexChange={changeLightboxIndex}
+      />
 
       {/* Pagination */}
       {pagination && pagination.total_pages > 1 && (

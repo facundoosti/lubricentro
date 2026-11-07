@@ -50,3 +50,48 @@ describe('ProductsTable — IVA', () => {
     expect(screen.queryByRole('button', { name: /Cambiar IVA/ })).toBeNull();
   });
 });
+
+describe('ProductsTable — zoom de imágenes', () => {
+  const withImages = [
+    { ...products[0], image_url: 'https://img.test/aceite.jpg' },
+    { ...products[1], image_url: 'https://img.test/neumatico.jpg' },
+    { id: 3, name: 'Filtro sin foto', sku: 'F1', stock: 1, active: true, unit_price: '1.0', iva_rate: '21.0', unit_price_with_iva: '1.21' },
+  ];
+
+  it('abre el visor al clickear la imagen y navega entre productos con imagen', () => {
+    renderTable({ products: withImages });
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ampliar imagen de Aceite 10W40' }));
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText('1 / 2')).toBeInTheDocument();
+    expect(within(dialog).getByRole('img', { name: 'Aceite 10W40' })).toBeInTheDocument();
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Imagen siguiente' }));
+    expect(within(dialog).getByText('2 / 2')).toBeInTheDocument();
+    expect(within(dialog).getByRole('img', { name: 'Neumático 175' })).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: 'ArrowRight' });
+    expect(within(dialog).getByText('1 / 2')).toBeInTheDocument();
+  });
+
+  it('hace zoom al clickear la imagen y cierra con Escape', () => {
+    renderTable({ products: withImages });
+    fireEvent.click(screen.getByRole('button', { name: 'Ampliar imagen de Neumático 175' }));
+    const img = within(screen.getByRole('dialog')).getByRole('img', { name: 'Neumático 175' });
+
+    expect(img.style.transform).toBe('scale(1)');
+    fireEvent.click(img);
+    expect(img.style.transform).toBe('scale(2.5)');
+    fireEvent.click(img);
+    expect(img.style.transform).toBe('scale(1)');
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('no ofrece zoom para productos sin imagen', () => {
+    renderTable({ products: withImages });
+    expect(screen.queryByRole('button', { name: /Ampliar imagen de Filtro/ })).toBeNull();
+  });
+});
