@@ -5,7 +5,6 @@ import { X } from 'lucide-react';
 const SIZE_CLASSES = {
   md: 'max-w-2xl',
   lg: 'max-w-3xl',
-  xl: 'max-w-3xl',
 };
 
 // Un diálogo apilado sobre otro (nivel ≥ 1) es más angosto, para que se note que está encima.
@@ -14,6 +13,8 @@ const BASE_Z_INDEX = 50;
 
 // Diálogos abiertos, el último es el de arriba (permite apilar uno sobre otro).
 const openStack = [];
+// overflow del body antes de abrir el primer diálogo de la pila; se restaura al cerrar el último
+let previousBodyOverflow = '';
 
 const FormDialog = ({
   isOpen,
@@ -47,11 +48,14 @@ const FormDialog = ({
   useLayoutEffect(() => {
     if (!isOpen) return undefined;
     setLevel(openStack.length);
+    if (openStack.length === 0) previousBodyOverflow = document.body.style.overflow;
     openStack.push(dialogId);
     document.body.style.overflow = 'hidden';
     return () => {
       openStack.splice(openStack.indexOf(dialogId), 1);
-      if (openStack.length === 0) document.body.style.overflow = '';
+      if (openStack.length === 0) document.body.style.overflow = previousBodyOverflow;
+      // Al cerrar vuelve al nivel base: la próxima apertura no renderiza con el nivel viejo
+      setLevel(0);
     };
   }, [isOpen, dialogId]);
 

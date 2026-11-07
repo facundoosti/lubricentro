@@ -1,11 +1,23 @@
-import React, { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useCustomers, useCustomer } from '@services/customersService';
-import { Search, ChevronDown, X, UserPlus } from 'lucide-react';
+import { useFloatingPosition } from '@hooks/useFloatingPosition';
+import { Search, ChevronDown, X } from 'lucide-react';
+import CustomerSearchResults from '@components/features/customers/CustomerSearchResults';
+
+// Altura máxima de la lista (max-h-60 = 15rem = 240px) y separación con el input
+const LIST_MAX_HEIGHT = 240;
+const LIST_GAP = 4;
+// Por encima de cualquier FormDialog apilado (50 + nivel * 10), igual que SearchableSelect
+const LIST_Z_INDEX = 9999;
+
+const formatCustomerDisplay = (customer) => {
+  if (!customer) return '';
+  return `${customer.name} - ${customer.email || customer.phone || 'Sin contacto'}`;
+};
 
 /**
  * CustomerSearchInput - Componente de búsqueda y selección de clientes
- * 
+ *
  * @param {Object} props
  * @param {string|number} props.value - ID del cliente seleccionado
  * @param {Function} props.onChange - Callback cuando cambia el ID del cliente (value)
@@ -15,52 +27,11 @@ import { Search, ChevronDown, X, UserPlus } from 'lucide-react';
  * @param {boolean} props.disabled - Si el input está deshabilitado
  * @param {Object} props.initialCustomer - Cliente completo para prellenar (usar en edición)
  * @param {Function} props.onCreateNew - Si se pasa, ofrece "+ Crear cliente" con el texto buscado
- * 
+ *
  * @example
- * // Para creación (sin cliente inicial)
- * <CustomerSearchInput
- *   value={selectedCustomerId}
- *   onChange={setSelectedCustomerId}
- *   onSelect={handleCustomerSelect}
- * />
- * 
- * // Para edición (con cliente inicial)
- * <CustomerSearchInput
- *   value={vehicle.customer_id}
- *   onChange={setSelectedCustomerId}
- *   onSelect={handleCustomerSelect}
- *   initialCustomer={vehicle.customer}
- * />
+ * // Edición: pasar initialCustomer para prellenar sin pedir el cliente por ID
+ * <CustomerSearchInput value={vehicle.customer_id} onChange={setId} onSelect={onSelect} initialCustomer={vehicle.customer} />
  */
-// Altura máxima de la lista (max-h-60 = 15rem = 240px) y separación con el input
-const LIST_MAX_HEIGHT = 240;
-const LIST_GAP = 4;
-// Por encima de cualquier FormDialog apilado (50 + nivel * 10), igual que SearchableSelect
-const LIST_Z_INDEX = 9999;
-
-// Posición fija de la lista según el input: abajo, o arriba si abajo no entra y arriba hay más lugar
-const calcListStyle = (anchor) => {
-  if (!anchor) return {};
-  const rect = anchor.getBoundingClientRect();
-  const spaceBelow = window.innerHeight - rect.bottom - LIST_GAP;
-  const spaceAbove = rect.top - LIST_GAP;
-  const openUp = spaceBelow < LIST_MAX_HEIGHT && spaceAbove > spaceBelow;
-  return {
-    position: 'fixed',
-    left: rect.left,
-    width: rect.width,
-    zIndex: LIST_Z_INDEX,
-    ...(openUp
-      ? { bottom: window.innerHeight - rect.top + LIST_GAP }
-      : { top: rect.bottom + LIST_GAP }),
-  };
-};
-
-const formatCustomerDisplay = (customer) => {
-  if (!customer) return '';
-  return `${customer.name} - ${customer.email || customer.phone || 'Sin contacto'}`;
-};
-
 const CustomerSearchInput = ({ 
   value, // ID del cliente
   onChange, 
@@ -77,8 +48,6 @@ const CustomerSearchInput = ({
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(initialCustomer);
   const [highlightedIndex, setHighlightedIndex] = useState(-1); // Para navegación con teclado
-  
-  const [listStyle, setListStyle] = useState({});
 
   const wrapperRef = useRef(null);
   const anchorRef = useRef(null);
@@ -102,11 +71,15 @@ const CustomerSearchInput = ({
   // GET /customers/:id devuelve el cliente directo en `data`
   const loadedCustomer = initialCustomerData?.data?.customer ?? initialCustomerData?.data ?? null;
 
-  // --- LOGIC & SIDE EFFECTS ---
+  // Cierra la lista y descarta la opción destacada
+  const closeList = useCallback(() => {
+    setIsOpen(false);
+    setHighlightedIndex(-1);
+  }, []);
 
+  // --- LOGIC & SIDE EFFECTS ---
   // Efecto principal para manejar la inicialización y sincronización
   useEffect(() => {
-    
     // Caso 1: Tenemos initialCustomer (edición)
     if (initialCustomer) {
       setSelectedCustomer(initialCustomer);
@@ -114,9 +87,8 @@ const CustomerSearchInput = ({
     }
     // Caso 2: Tenemos value pero no initialCustomer (carga por ID)
     else if (value && loadedCustomer?.id) {
-      const customer = loadedCustomer;
-      setSelectedCustomer(customer);
-      setInputValue(formatCustomerDisplay(customer));
+      setSelectedCustomer(loadedCustomer);
+      setInputValue(formatCustomerDisplay(loadedCustomer));
     }
     // Caso 3: Tenemos value pero no hay datos (cliente no encontrado)
     else if (value && !isLoadingInitialCustomer && !loadedCustomer?.id) {
@@ -131,51 +103,31 @@ const CustomerSearchInput = ({
 
   // Efecto para asegurar que el inputValue siempre refleje el selectedCustomer
   useEffect(() => {
-    if (selectedCustomer) {
-      const displayValue = formatCustomerDisplay(selectedCustomer);
-      if (inputValue !== displayValue) {
-        setInputValue(displayValue);
-      }
-    }
+    const displayValue = formatCustomerDisplay(selectedCustomer);
+    if (selectedCustomer && inputValue !== displayValue) setInputValue(displayValue);
   }, [selectedCustomer, inputValue]);
 
-  // Efecto para el debouncing de la búsqueda
-  useEffect(() => {
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-    };
-  }, []);
-  
+  // Limpia el debounce pendiente al desmontar
+  useEffect(() => () => clearTimeout(debounceTimeoutRef.current), []);
+
   // Efecto para cerrar el dropdown al hacer clic fuera (la lista vive en un portal, fuera del wrapper)
   useEffect(() => {
     const handleClickOutside = (event) => {
       const inWrapper = wrapperRef.current?.contains(event.target);
       const inList = listRef.current?.contains(event.target);
-      if (wrapperRef.current && !inWrapper && !inList) {
-        setIsOpen(false);
-        setHighlightedIndex(-1);
-      }
+      if (wrapperRef.current && !inWrapper && !inList) closeList();
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [closeList]);
 
   // Posicionar la lista (portal con position: fixed) y seguir al input en scroll/resize
-  useLayoutEffect(() => {
-    if (!isOpen) return undefined;
-    const update = () => setListStyle(calcListStyle(anchorRef.current));
-    update();
-    window.addEventListener('scroll', update, true);
-    window.addEventListener('resize', update);
-    return () => {
-      window.removeEventListener('scroll', update, true);
-      window.removeEventListener('resize', update);
-    };
-  }, [isOpen]);
+  const { style: floatingStyle } = useFloatingPosition(anchorRef, {
+    isOpen,
+    maxHeight: LIST_MAX_HEIGHT,
+    offset: LIST_GAP,
+  });
+  const listStyle = useMemo(() => ({ ...floatingStyle, zIndex: LIST_Z_INDEX }), [floatingStyle]);
 
   // Resetear índice destacado cuando cambian los resultados
   useEffect(() => {
@@ -183,16 +135,14 @@ const CustomerSearchInput = ({
   }, [customers]);
 
   // --- HANDLERS ---
-
   const handleClear = useCallback(() => {
     setSelectedCustomer(null);
     setInputValue('');
     setDebouncedSearchTerm('');
-    setIsOpen(false);
-    setHighlightedIndex(-1);
+    closeList();
     onChange?.('');
     onSelect?.(null);
-  }, [onChange, onSelect]);
+  }, [onChange, onSelect, closeList]);
 
   const handleInputChange = useCallback((e) => {
     const newText = e.target.value;
@@ -206,8 +156,7 @@ const CustomerSearchInput = ({
       return;
     }
 
-    // Si el texto cambia y es diferente al cliente seleccionado, 
-    // permitir búsqueda pero mantener la selección hasta que se confirme
+    // Texto distinto al cliente seleccionado: buscar, pero mantener la selección hasta confirmar
     if (selectedCustomer && newText !== formatCustomerDisplay(selectedCustomer)) {
       // Solo limpiar la selección si el texto es completamente diferente
       // Esto permite búsquedas adicionales sin perder la selección
@@ -219,9 +168,7 @@ const CustomerSearchInput = ({
     }
     
     // Aplicar debounce a la búsqueda
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
+    clearTimeout(debounceTimeoutRef.current);
     debounceTimeoutRef.current = setTimeout(() => {
       setDebouncedSearchTerm(newText);
     }, 300);
@@ -231,12 +178,10 @@ const CustomerSearchInput = ({
     setSelectedCustomer(customer);
     setInputValue(formatCustomerDisplay(customer));
     setDebouncedSearchTerm('');
-    setIsOpen(false);
-    setHighlightedIndex(-1);
-    
+    closeList();
     onChange?.(customer.id);
     onSelect?.(customer);
-  }, [onChange, onSelect]);
+  }, [onChange, onSelect, closeList]);
 
   // Texto que escribió el usuario (no el de un cliente ya elegido)
   const searchText = selectedCustomer ? '' : inputValue.trim();
@@ -245,10 +190,9 @@ const CustomerSearchInput = ({
   const optionCount = customers.length + (canCreate ? 1 : 0);
 
   const handleCreateNew = useCallback(() => {
-    setIsOpen(false);
-    setHighlightedIndex(-1);
+    closeList();
     onCreateNew(searchText);
-  }, [onCreateNew, searchText]);
+  }, [onCreateNew, searchText, closeList]);
 
   // Navegación con teclado
   const handleKeyDown = useCallback((e) => {
@@ -256,8 +200,7 @@ const CustomerSearchInput = ({
     if (e.key === 'Escape') {
       // Cierra solo la lista: el diálogo contenedor ignora un Escape ya atendido
       e.preventDefault();
-      setIsOpen(false);
-      setHighlightedIndex(-1);
+      closeList();
       return;
     }
     if (optionCount === 0) return;
@@ -265,18 +208,12 @@ const CustomerSearchInput = ({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setHighlightedIndex(prev => 
-          prev < optionCount - 1 ? prev + 1 : prev
-        );
+        setHighlightedIndex(prev => (prev < optionCount - 1 ? prev + 1 : prev));
         break;
-      
       case 'ArrowUp':
         e.preventDefault();
-        setHighlightedIndex(prev => 
-          prev > 0 ? prev - 1 : -1
-        );
+        setHighlightedIndex(prev => (prev > 0 ? prev - 1 : -1));
         break;
-      
       case 'Enter':
         e.preventDefault();
         if (highlightedIndex >= 0 && customers[highlightedIndex]) {
@@ -285,11 +222,10 @@ const CustomerSearchInput = ({
           handleCreateNew();
         }
         break;
-      
       default:
         break;
     }
-  }, [isOpen, optionCount, customers, highlightedIndex, handleCustomerSelect, canCreate, handleCreateNew]);
+  }, [isOpen, optionCount, customers, highlightedIndex, handleCustomerSelect, canCreate, handleCreateNew, closeList]);
 
   const isLoading = isLoadingSearch || isLoadingInitialCustomer;
 
@@ -300,7 +236,6 @@ const CustomerSearchInput = ({
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Search className="h-5 w-5 text-secondary" />
         </div>
-        
         <input
           type="text"
           value={inputValue}
@@ -314,7 +249,6 @@ const CustomerSearchInput = ({
             error ? 'border-error' : selectedCustomer ? 'border-tertiary' : 'border-outline-variant'
           } ${disabled || isLoadingInitialCustomer ? 'opacity-50 cursor-not-allowed' : ''}`}
         />
-        
         <div className="absolute inset-y-0 right-0 flex items-center">
           {inputValue && (
             <button
@@ -341,60 +275,24 @@ const CustomerSearchInput = ({
       </div>
 
       {/* Dropdown de resultados — portal al body para que el overflow del diálogo no lo recorte */}
-      {isOpen && createPortal(
-        <div
-          ref={listRef}
+      {isOpen && (
+        <CustomerSearchResults
+          listRef={listRef}
           style={listStyle}
-          data-testid="customer-search-results"
-          className="bg-surface-container border border-outline-variant rounded-lg shadow-lg max-h-60 overflow-auto"
-        >
-          {isLoadingSearch ? (
-            <div className="px-4 py-2 text-sm text-on-surface-variant">Buscando...</div>
-          ) : customers.length > 0 ? (
-            <div>
-              {customers.map((customer, index) => (
-                <button
-                  key={customer.id}
-                  type="button"
-                  onClick={() => handleCustomerSelect(customer)}
-                  className={`w-full px-4 py-2 text-left focus:outline-none transition-colors ${
-                    index === highlightedIndex
-                      ? 'bg-primary/10 text-on-surface'
-                      : 'hover:bg-surface-container-high focus:bg-surface-container-high'
-                  }`}
-                  onMouseEnter={() => setHighlightedIndex(index)}
-                >
-                  <div className="font-medium text-on-surface">{customer.name}</div>
-                  <div className="text-sm text-on-surface-variant">{customer.email || customer.phone || 'Sin contacto'}</div>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="px-4 py-2 text-sm text-on-surface-variant">
-              {debouncedSearchTerm ? 'No se encontraron clientes' : 'Escribe para buscar'}
-            </div>
-          )}
-          {canCreate && (
-            <button
-              type="button"
-              onClick={handleCreateNew}
-              onMouseEnter={() => setHighlightedIndex(customers.length)}
-              className={`flex w-full items-center gap-2 border-t border-outline-variant px-4 py-2.5 text-left text-sm font-medium text-primary ${
-                highlightedIndex === customers.length ? 'bg-primary/10' : 'hover:bg-surface-container-high'
-              }`}
-            >
-              <UserPlus className="h-4 w-4 shrink-0" />
-              <span className="truncate">+ Crear cliente "{searchText}"</span>
-            </button>
-          )}
-        </div>,
-        document.body,
+          isLoading={isLoadingSearch}
+          customers={customers}
+          highlightedIndex={highlightedIndex}
+          onHighlight={setHighlightedIndex}
+          onSelect={handleCustomerSelect}
+          hasSearchTerm={Boolean(debouncedSearchTerm)}
+          canCreate={canCreate}
+          searchText={searchText}
+          onCreateNew={handleCreateNew}
+        />
       )}
 
       {/* Mensaje de error */}
-      {error && (
-        <p className="mt-1 text-sm text-error">{error}</p>
-      )}
+      {error && <p className="mt-1 text-sm text-error">{error}</p>}
     </div>
   );
 };

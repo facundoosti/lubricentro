@@ -68,6 +68,33 @@ describe('FormDialog', () => {
     expect(document.body.style.overflow).toBe('');
   });
 
+  it('al cerrar el último diálogo restaura el overflow previo del body (no lo pisa con vacío)', () => {
+    document.body.style.overflow = 'scroll';
+    const { rerender } = render(
+      <>
+        <FormDialog isOpen onClose={vi.fn()} title="Abajo" />
+        <FormDialog isOpen onClose={vi.fn()} title="Arriba" />
+      </>,
+    );
+    expect(document.body.style.overflow).toBe('hidden');
+
+    rerender(
+      <>
+        <FormDialog isOpen onClose={vi.fn()} title="Abajo" />
+        <FormDialog isOpen={false} onClose={vi.fn()} title="Arriba" />
+      </>,
+    );
+    expect(document.body.style.overflow).toBe('hidden');
+
+    rerender(
+      <>
+        <FormDialog isOpen={false} onClose={vi.fn()} title="Abajo" />
+        <FormDialog isOpen={false} onClose={vi.fn()} title="Arriba" />
+      </>,
+    );
+    expect(document.body.style.overflow).toBe('scroll');
+  });
+
   it('se renderiza en document.body, enfoca el diálogo al abrir y devuelve el foco al cerrar', () => {
     const Harness = () => {
       const [open, setOpen] = useState(false);
