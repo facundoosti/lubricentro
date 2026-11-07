@@ -54,21 +54,6 @@ export const authAPI = {
       return false;
     }
   },
-
-  // Refresh token (si es necesario en el futuro)
-  refreshToken: async () => {
-    try {
-      const response = await api.post('/auth/refresh');
-      if (response.data.success) {
-        localStorage.setItem('authToken', response.data.data.token);
-        return response.data;
-      }
-      throw new Error(response.data.message || 'Error refreshing token');
-    } catch (error) {
-      console.error('Refresh token error:', error);
-      throw error;
-    }
-  }
 };
 
 export default authAPI; 
