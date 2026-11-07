@@ -47,6 +47,57 @@ RSpec.describe ToolRegistry::CheckAvailableSlots do
       end
     end
 
+    context 'with the Argentina time zone' do
+      let(:date) { Date.new(2026, 11, 20) } # viernes
+
+      around { |example| travel_to(Time.utc(2026, 11, 10, 15, 0)) { example.run } }
+
+      before do
+        Setting.instance.update!(opening_hours: {
+          "viernes" => { "open" => true, "from" => "09:00", "to" => "18:00" }
+        })
+      end
+
+      it 'lists the slots in local time' do
+        result = call_tool(date.to_s)
+        expect(result[:reply]).to include("09:00 a 12:00", "12:00 a 15:00", "15:00 a 18:00")
+      end
+
+      it 'generates the first slot at 09:00 Argentina (12:00 UTC)' do
+        tool  = described_class.new({ date: date.to_s }, conversation)
+        slots = tool.send(:generate_slots, date, { "from" => "09:00", "to" => "18:00" })
+        expect(slots.first).to eq(Time.utc(2026, 11, 20, 12, 0))
+      end
+
+      it 'blocks the local slot with an appointment sent as UTC instant' do
+        customer = create(:customer)
+        create(:appointment,
+          customer: customer,
+          vehicle: create(:vehicle, customer: customer),
+          scheduled_at: Time.zone.parse("2026-11-20T12:00:00Z"),
+          status: "scheduled")
+
+        result = call_tool(date.to_s)
+        expect(result[:reply]).not_to include("09:00 a 12:00")
+        expect(result[:reply]).to include("12:00 a 15:00")
+      end
+    end
+
+    context 'when it is night in Argentina but already the next day in UTC' do
+      before do
+        Setting.instance.update!(opening_hours: {
+          "domingo" => { "open" => true, "from" => "09:00", "to" => "18:00" }
+        })
+      end
+
+      it 'interprets mañana with the Argentina date' do
+        travel_to Time.utc(2026, 11, 8, 1, 30) do # sábado 07/11 22:30 en Argentina → mañana = domingo 08/11
+          result = call_tool("mañana")
+          expect(result[:reply]).to include("08/11")
+        end
+      end
+    end
+
     context 'when the day is closed (saturday)' do
       it 'returns a message saying the lubricentro is closed' do
         next_saturday = Date.current.next_occurring(:saturday)

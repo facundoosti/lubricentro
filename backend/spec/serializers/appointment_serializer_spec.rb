@@ -115,6 +115,24 @@ RSpec.describe AppointmentSerializer do
       )
     end
 
+    context 'with the Argentina time zone' do
+      include ActiveSupport::Testing::TimeHelpers
+
+      let(:appointment) do
+        travel_to(Time.utc(2026, 11, 10, 15, 0)) do
+          create(:appointment, customer: customer, vehicle: vehicle, scheduled_at: Time.utc(2026, 11, 20, 16, 0))
+        end
+      end
+
+      it 'formats formatted_date in local time' do
+        expect(serialized[:formatted_date]).to eq("20/11/2026 13:00")
+      end
+
+      it 'keeps scheduled_at as the same instant' do
+        expect(serialized[:scheduled_at]).to eq(Time.utc(2026, 11, 20, 16, 0))
+      end
+    end
+
     it 'excludes timestamp fields' do
       expect(serialized).not_to have_key(:created_at)
       expect(serialized).not_to have_key(:updated_at)

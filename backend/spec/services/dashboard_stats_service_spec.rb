@@ -210,6 +210,26 @@ RSpec.describe DashboardStatsService do
     end
   end
 
+  context 'when it is night in Argentina but already the next day in UTC' do
+    let(:customer) { create(:customer) }
+    let(:vehicle)  { create(:vehicle, customer: customer) }
+
+    before do
+      appointment = create(:appointment, customer: customer, vehicle: vehicle, scheduled_at: 1.day.from_now)
+      appointment.update_columns(scheduled_at: Time.utc(2026, 11, 7, 13, 0)) # 07/11 10:00 en Argentina
+    end
+
+    around { |example| travel_to(Time.utc(2026, 11, 8, 1, 30)) { example.run } } # 07/11 22:30 en Argentina
+
+    it 'counts the appointment in appointments_today' do
+      expect(described_class.calculate_main_metrics[:appointments_today]).to eq(1)
+    end
+
+    it 'shows the appointment time in local time' do
+      expect(described_class.get_recent_activity[:today_appointments].first[:time]).to eq("10:00")
+    end
+  end
+
   describe '.get_recent_activity' do
     it 'returns today_appointments and recent_services keys' do
       activity = described_class.get_recent_activity

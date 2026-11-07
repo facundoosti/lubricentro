@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe ToolRegistry::ScheduleAppointment do
+  include ActiveSupport::Testing::TimeHelpers
+
   let(:customer) { create(:customer) }
   let!(:vehicle) { create(:vehicle, customer: customer) }
   let(:conversation) { create(:conversation, customer: customer) }
@@ -58,6 +60,20 @@ RSpec.describe ToolRegistry::ScheduleAppointment do
       it 'escalates to human' do
         result = call_tool({ preferred_date: future_datetime })
         expect(result[:reply]).to include("agente")
+      end
+    end
+
+    context 'when preferred_date has no offset' do
+      around { |example| travel_to(Time.utc(2026, 11, 10, 15, 0)) { example.run } }
+
+      it 'interprets it as Argentina time' do
+        call_tool({ preferred_date: "2026-11-20 13:00" })
+        expect(Appointment.last.scheduled_at).to eq(Time.utc(2026, 11, 20, 16, 0))
+      end
+
+      it 'confirms the same local time' do
+        result = call_tool({ preferred_date: "2026-11-20 13:00" })
+        expect(result[:reply]).to include("20/11/2026 a las 13:00")
       end
     end
 

@@ -167,6 +167,23 @@ RSpec.describe Appointment, type: :model do
         appointments = Appointment.by_date_range(start_date, end_date)
         expect(appointments.count).to eq(2) # scheduled and confirmed
       end
+
+      context 'when the appointment is at night in Argentina but already the next day in UTC' do
+        let!(:late_appointment) do
+          create(:appointment, customer: customer, vehicle: vehicle, scheduled_at: 1.day.from_now).tap do |appointment|
+            # 07/11/2026 22:30 en Argentina = 08/11/2026 01:30 UTC
+            appointment.update_column(:scheduled_at, Time.utc(2026, 11, 8, 1, 30))
+          end
+        end
+
+        it 'falls on the local day' do
+          expect(Appointment.by_date_range(Date.new(2026, 11, 7), Date.new(2026, 11, 7))).to include(late_appointment)
+        end
+
+        it 'does not fall on the next UTC day' do
+          expect(Appointment.by_date_range(Date.new(2026, 11, 8), Date.new(2026, 11, 8))).not_to include(late_appointment)
+        end
+      end
     end
   end
 
