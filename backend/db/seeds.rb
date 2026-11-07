@@ -495,19 +495,25 @@ end
 #   end
 # end
 
-# Crear usuario admin
-User.find_or_create_by!(email: 'facundoosti@gmail.com') do |user|
-  user.name = 'Facundo Osti'
-  user.password = 'lubri123'
-  user.password_confirmation = 'lubri123'
-end
+# Usuarios iniciales: la contraseña sale de una variable de entorno, nunca del repo.
+# Si la variable no está definida, el usuario no se crea.
+[
+  { email: "facundoosti@gmail.com", name: "Facundo Osti", password_env: "SEED_ADMIN_PASSWORD" },
+  { email: "lubricentrokillamet@gmail.com", name: "Santiago Killamet", password_env: "SEED_OWNER_PASSWORD" }
+].each do |seed_user|
+  password = ENV[seed_user[:password_env]]
+  if password.blank?
+    puts "⚠️  #{seed_user[:password_env]} no está definida: no se crea #{seed_user[:email]}"
+    next
+  end
 
-User.find_or_create_by!(email: 'lubricentrokillamet@gmail.com') do |user|
-  user.name = 'Santiago Killamet'
-  user.password = 'lubricentro-killamet'
-  user.password_confirmation = 'lubricentro-killamet'
+  User.find_or_create_by!(email: seed_user[:email]) do |user|
+    user.name = seed_user[:name]
+    user.password = password
+    user.password_confirmation = password
+  end
+  puts "Usuario inicial listo: #{seed_user[:email]}"
 end
-puts 'Usuario admin creado: facundoosti@gmail.com'
 
 # Crear Doorkeeper application para desarrollo
 Doorkeeper::Application.find_or_create_by!(name: 'Lubricentro Web App') do |app|

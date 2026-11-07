@@ -22,6 +22,13 @@ ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
 # Prevent database truncation if the environment is production
 abort("The Rails environment is running in production mode!") if Rails.env.production?
+# backend/.env define DATABASE_URL hacia la base de desarrollo y, en test, pisa database.yml.
+# Abortar antes de que DatabaseCleaner trunque una base que no es de test.
+test_database = ActiveRecord::Base.connection_db_config.database.to_s
+unless test_database.match?(/_test\d*\z/)
+  abort("Los tests deben correr contra una base *_test, no #{test_database.inspect}. " \
+        "Usá make test-backend-local (pasa DATABASE_URL de test) o quitá DATABASE_URL de backend/.env.")
+end
 require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 
