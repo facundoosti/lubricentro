@@ -432,7 +432,7 @@ const Appointments = () => {
                               )}
                               {appointment.has_service_record ? (
                                 <button
-                                  onClick={() => navigate(`/atenciones/${appointment.service_record_id}/editar`)}
+                                  onClick={() => navigate(`/service-records/${appointment.service_record_id}/edit`)}
                                   className="p-1 text-on-surface-variant hover:text-tertiary transition-colors"
                                   title="Ver atención"
                                 >
@@ -440,7 +440,7 @@ const Appointments = () => {
                                 </button>
                               ) : appointment.can_be_completed && (
                                 <button
-                                  onClick={() => navigate(`/atenciones/nueva?appointment_id=${appointment.id}`)}
+                                  onClick={() => navigate(`/service-records/new?appointment_id=${appointment.id}`)}
                                   className="p-1 text-on-surface-variant hover:text-primary transition-colors"
                                   title="Registrar atención"
                                 >

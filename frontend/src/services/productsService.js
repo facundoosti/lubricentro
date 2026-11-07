@@ -243,6 +243,21 @@ export const useBulkPriceUpdate = () => {
   });
 };
 
+// Cambia la alícuota de IVA (21 | 10.5) de los productos seleccionados
+// (product_ids) o de los que coinciden con los filtros.
+export const useBulkIvaUpdate = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (params) => {
+      const response = await api.post('/products/bulk_vat_update', params);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
+    },
+  });
+};
+
 // Funciones helper para el servicio
 export const productsService = {
   // Obtener todos los products con filtros

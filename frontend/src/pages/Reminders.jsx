@@ -258,7 +258,7 @@ const Reminders = () => {
                     </td>
                     <td className="px-6 py-5 text-right">
                       <button
-                        onClick={() => navigate(`/atenciones/${serviceRecord.id}/editar`)}
+                        onClick={() => navigate(`/service-records/${serviceRecord.id}/edit`)}
                         className="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 justify-end ml-auto text-xs font-bold"
                       >
                         Ver registro

@@ -78,3 +78,32 @@ export const useDeleteBudget = () => {
     },
   });
 };
+
+// Crea una copia en borrador con fecha de hoy (POST /budgets/:id/duplicate).
+export const useDuplicateBudget = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id) => {
+      const response = await api.post(`/budgets/${id}/duplicate`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: budgetKeys.lists() });
+    },
+  });
+};
+
+// Cambio rápido de estado desde el listado.
+export const useUpdateBudgetStatus = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, status }) => {
+      const response = await api.patch(`/budgets/${id}`, { budgets: { status } });
+      return response.data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: budgetKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: budgetKeys.detail(variables.id) });
+    },
+  });
+};

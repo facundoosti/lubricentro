@@ -7,7 +7,9 @@
 #  date                      :date             not null
 #  notes                     :text
 #  status                    :string(20)       default("draft"), not null
+#  subtotal_net              :decimal(12, 2)   default(0.0)
 #  total_card                :decimal(12, 2)   default(0.0)
+#  total_iva                 :decimal(12, 2)   default(0.0)
 #  total_list                :decimal(12, 2)   default(0.0)
 #  vehicle_description       :string(200)
 #  created_at                :datetime         not null
@@ -55,6 +57,31 @@ RSpec.describe Budget, type: :model do
     it 'is valid with 0% surcharge' do
       budget.card_surcharge_percentage = 0
       expect(budget).to be_valid
+    end
+
+    describe 'vehículo del cliente' do
+      let(:customer) { create(:customer) }
+
+      it 'acepta un vehículo del mismo cliente' do
+        budget = build(:budget, customer: customer, vehicle: create(:vehicle, customer: customer))
+        expect(budget).to be_valid
+      end
+
+      it 'rechaza un vehículo de otro cliente' do
+        budget = build(:budget, customer: customer, vehicle: create(:vehicle))
+        expect(budget).not_to be_valid
+        expect(budget.errors[:vehicle]).to be_present
+      end
+
+      it 'permite editar un presupuesto viejo inconsistente si no cambia cliente ni vehículo' do
+        budget = create(:budget, customer: customer, vehicle: create(:vehicle, customer: customer))
+        budget.update_column(:vehicle_id, create(:vehicle).id)
+        expect(budget.reload.update(status: 'sent')).to be(true)
+      end
+
+      it 'acepta un vehículo sin cliente elegido' do
+        expect(build(:budget, customer: nil, vehicle: create(:vehicle))).to be_valid
+      end
     end
   end
 
@@ -112,6 +139,64 @@ RSpec.describe Budget, type: :model do
 
     it 'calculates total_card with surcharge' do
       expect(budget.total_card).to be_within(0.01).of(275)
+    end
+  end
+
+  describe 'totales con IVA' do
+    def build_budget(surcharge, items)
+      budget = build(:budget, card_surcharge_percentage: surcharge)
+      items.each { |attrs| budget.items.build(attrs.merge(description: "Ítem")) }
+      budget.save!
+      budget
+    end
+
+    context 'presupuesto mixto' do
+      subject(:budget) do
+        build_budget(10, [
+          { quantity: 2, unit_price: 10_000, iva_rate: 21 },
+          { quantity: 1, unit_price: 4_000, iva_rate: 10.5 },
+          { quantity: 1, unit_price: 15_000, iva_rate: nil }
+        ])
+      end
+
+      it 'calcula subtotal neto, IVA, sin IVA y totales' do
+        expect(budget).to have_attributes(subtotal_net: 24_000, total_iva: 4_620, total_list: 43_620, total_card: 47_982)
+        expect(budget.exempt_total).to eq(15_000)
+      end
+
+      it 'desglosa el IVA por alícuota' do
+        expect(budget.iva_breakdown).to eq([
+          { rate: 21, base: 20_000, amount: 4_200 },
+          { rate: 10.5, base: 4_000, amount: 420 }
+        ])
+      end
+    end
+
+    it 'aplica el recargo sobre el total con IVA' do
+      budget = build_budget(10, [ { quantity: 1, unit_price: 100, iva_rate: 21 } ])
+      expect(budget.total_list).to eq(121)
+      expect(budget.total_card).to eq(BigDecimal("133.1"))
+    end
+
+    it 'redondea el IVA por alícuota y no por línea' do
+      budget = build_budget(0, [
+        { quantity: 1, unit_price: BigDecimal("0.05"), iva_rate: 21 },
+        { quantity: 1, unit_price: BigDecimal("0.05"), iva_rate: 21 }
+      ])
+      # por línea serían 0.01 + 0.01; por alícuota 0.10 * 21% = 0.021 -> 0.02
+      expect(budget.total_iva).to eq(BigDecimal("0.02"))
+    end
+
+    it 'ignora los ítems marcados para borrar' do
+      budget = build_budget(0, [ { quantity: 1, unit_price: 100, iva_rate: 21 }, { quantity: 1, unit_price: 50, iva_rate: nil } ])
+      budget.update!(items_attributes: [ { id: budget.items.last.id, _destroy: "1" } ])
+      expect(budget.reload).to have_attributes(total_list: 121, total_iva: 21)
+    end
+
+    it 'no cambia los totales de un presupuesto sin alícuotas' do
+      budget = build_budget(10, [ { quantity: 2, unit_price: 25_000, iva_rate: nil } ])
+      budget.save!
+      expect(budget).to have_attributes(total_list: 50_000, total_iva: 0, subtotal_net: 0, total_card: 55_000)
     end
   end
 

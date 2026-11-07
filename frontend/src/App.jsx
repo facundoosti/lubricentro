@@ -61,13 +61,13 @@ function App() {
               <Route path="services" element={<Services />} />
               <Route path="products" element={<Products />} />
               <Route path="suppliers" element={<Suppliers />} />
-              <Route path="atenciones/nueva" element={<ServiceRecordFormPage />} />
-              <Route path="atenciones/:id/editar" element={<ServiceRecordFormPage />} />
-              <Route path="presupuestos" element={<Budgets />} />
-              <Route path="presupuestos/nuevo" element={<BudgetForm />} />
-              <Route path="presupuestos/:id/editar" element={<BudgetForm />} />
+              <Route path="service-records/new" element={<ServiceRecordFormPage />} />
+              <Route path="service-records/:id/edit" element={<ServiceRecordFormPage />} />
+              <Route path="budgets" element={<Budgets />} />
+              <Route path="budgets/new" element={<BudgetForm />} />
+              <Route path="budgets/:id/edit" element={<BudgetForm />} />
               <Route
-                path="presupuestos/:id/imprimir"
+                path="budgets/:id/print"
                 element={<BudgetPrint />}
               />
               <Route path="inbox" element={<Inbox />} />

@@ -43,9 +43,9 @@ const ServiceRecords = () => {
     setCurrentPage(1);
   };
 
-  const handleCreate = () => navigate('/atenciones/nueva');
+  const handleCreate = () => navigate('/service-records/new');
 
-  const handleEdit = (record) => navigate(`/atenciones/${record.id}/editar`);
+  const handleEdit = (record) => navigate(`/service-records/${record.id}/edit`);
 
   const handleDelete = (record) => {
     setRecordToDelete(record);

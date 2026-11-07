@@ -3,11 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Download } from "lucide-react";
 import { useBudget } from "@services/budgetsService";
 import { useSetting } from "@services/settingsService";
-
-const formatCurrency = (value) => {
-  const n = Number(value) || 0;
-  return `$${n.toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
-};
+import BudgetPrintItems from "@components/features/budgets/BudgetPrintItems";
+import BudgetPrintTotals from "@components/features/budgets/BudgetPrintTotals";
 
 const formatDate = (iso) => {
   if (!iso) return { day: "", month: "", year: "" };
@@ -18,12 +15,6 @@ const formatDate = (iso) => {
 const PrintSheet = ({ budget, setting }) => {
   const { day, month, year } = formatDate(budget.date);
   const items = budget.items || [];
-
-  const MIN_ROWS = 12;
-  const padded = [
-    ...items,
-    ...Array.from({ length: Math.max(0, MIN_ROWS - items.length) }, () => null),
-  ];
 
   const phone = setting?.phone || "";
   const mobile = setting?.mobile || "";
@@ -191,148 +182,8 @@ const PrintSheet = ({ budget, setting }) => {
             : "")}
       </div>
 
-      {/* Items table */}
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          fontSize: "11px",
-          marginTop: "0",
-        }}
-      >
-        <thead>
-          <tr style={{ backgroundColor: "#cc2200", color: "#fff" }}>
-            <th
-              style={{
-                border: "1px solid #999",
-                padding: "4px 6px",
-                textAlign: "center",
-                width: "40px",
-              }}
-            >
-              CANT
-            </th>
-            <th
-              style={{
-                border: "1px solid #999",
-                padding: "4px 6px",
-                textAlign: "left",
-              }}
-            >
-              ARTÍCULO
-            </th>
-            <th
-              style={{
-                border: "1px solid #999",
-                padding: "4px 6px",
-                textAlign: "right",
-                width: "90px",
-              }}
-            >
-              IMPORTE
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {padded.map((item, idx) => (
-            <tr key={idx} style={{ height: "22px" }}>
-              <td
-                style={{
-                  border: "1px solid #ccc",
-                  padding: "3px 6px",
-                  textAlign: "center",
-                  color: item ? "#000" : "transparent",
-                }}
-              >
-                {item ? item.quantity : "."}
-              </td>
-              <td
-                style={{
-                  border: "1px solid #ccc",
-                  padding: "3px 8px",
-                  color: item ? "#000" : "transparent",
-                }}
-              >
-                {item ? item.description : "."}
-              </td>
-              <td
-                style={{
-                  border: "1px solid #ccc",
-                  padding: "3px 8px",
-                  textAlign: "right",
-                  color: item ? "#000" : "transparent",
-                  fontWeight: item ? "600" : "normal",
-                }}
-              >
-                {item ? formatCurrency(item.total) : "."}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Totals */}
-      <div
-        style={{
-          border: "1px solid #ccc",
-          borderTop: "none",
-          padding: "8px 12px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "4px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <div style={{ fontSize: "11px" }}>
-            <strong>PRECIO D/LISTA / </strong>
-            <span
-              style={{
-                backgroundColor: "#ffe066",
-                padding: "1px 4px",
-                fontWeight: "bold",
-              }}
-            >
-              EFT/DEB
-            </span>
-            <strong> TOTAL $</strong>
-          </div>
-          <div style={{ fontSize: "14px", fontWeight: "900" }}>
-            {formatCurrency(budget.total_list)}
-          </div>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <div style={{ fontSize: "11px" }}>
-            <strong>TARJETA D/CRED TOTAL $</strong>
-          </div>
-          <div style={{ fontSize: "14px", fontWeight: "900" }}>
-            {formatCurrency(budget.total_card)}
-          </div>
-        </div>
-        {budget.notes && (
-          <div
-            style={{
-              marginTop: "4px",
-              fontSize: "10px",
-              color: "#444",
-              fontStyle: "italic",
-            }}
-          >
-            {budget.notes}
-          </div>
-        )}
-      </div>
+      <BudgetPrintItems items={items} />
+      <BudgetPrintTotals budget={budget} />
 
       {/* Footer */}
       {address && (
@@ -438,7 +289,7 @@ const BudgetPrint = () => {
   if (!budget) {
     return (
       <div className="text-center py-24 text-secondary">
-        Budget no encontrado.
+        Presupuesto no encontrado.
       </div>
     );
   }
@@ -448,7 +299,7 @@ const BudgetPrint = () => {
       {/* Screen toolbar — hidden on print */}
       <div className="flex items-center gap-3 mb-6 print:hidden flex-wrap">
         <button
-          onClick={() => navigate(`/presupuestos/${id}/editar`)}
+          onClick={() => navigate(`/budgets/${id}/edit`)}
           className="flex items-center gap-2 px-3 py-2 rounded-lg border border-outline-variant text-secondary hover:text-on-surface hover:bg-surface-container-high text-sm transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />

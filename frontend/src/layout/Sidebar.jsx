@@ -177,7 +177,7 @@ const Sidebar = () => {
       subItems: [
         { name: "Turnos", path: "/appointments" },
         { name: "Atenciones", path: "/service-records" },
-        { name: "Presupuestos", path: "/presupuestos" },
+        { name: "Presupuestos", path: "/budgets" },
       ],
     },
     {

@@ -72,8 +72,8 @@ export default function Dashboard() {
           </div>
           <div id="tour-dashboard-quickactions" className="flex items-center gap-2">
             <QuickAction icon={Plus} label="Turno" variant="primary" onClick={() => navigate('/appointments')} />
-            <QuickAction icon={Wrench} label="Atención" onClick={() => navigate('/atenciones/nueva')} />
-            <QuickAction icon={FileText} label="Presupuesto" onClick={() => navigate('/presupuestos/nuevo')} />
+            <QuickAction icon={Wrench} label="Atención" onClick={() => navigate('/service-records/new')} />
+            <QuickAction icon={FileText} label="Presupuesto" onClick={() => navigate('/budgets/new')} />
             <QuickAction icon={Users} label="Clientes" onClick={() => navigate('/customers')} />
           </div>
         </div>

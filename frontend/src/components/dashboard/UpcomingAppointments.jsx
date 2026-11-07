@@ -73,10 +73,10 @@ const UpcomingAppointments = ({ appointments = [], pendingBudgets = 0 }) => {
       {/* Presupuestos pendientes */}
       <div
         className="bg-surface-container border border-outline-variant rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-surface-container-high transition-colors flex-shrink-0"
-        onClick={() => navigate('/presupuestos')}
+        onClick={() => navigate('/budgets')}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && navigate('/presupuestos')}
+        onKeyDown={(e) => e.key === 'Enter' && navigate('/budgets')}
       >
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center">

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_06_204242) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_06_215217) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -68,6 +68,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_204242) do
     t.decimal "total", precision: 12, scale: 2, default: "0.0", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "iva_rate", precision: 4, scale: 2
     t.index ["budget_id", "position"], name: "index_budget_items_on_budget_id_and_position"
     t.index ["budget_id"], name: "index_budget_items_on_budget_id"
   end
@@ -84,6 +85,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_204242) do
     t.decimal "total_card", precision: 12, scale: 2, default: "0.0"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "subtotal_net", precision: 12, scale: 2, default: "0.0"
+    t.decimal "total_iva", precision: 12, scale: 2, default: "0.0"
     t.index ["customer_id"], name: "index_budgets_on_customer_id"
     t.index ["date"], name: "index_budgets_on_date"
     t.index ["status"], name: "index_budgets_on_status"
@@ -208,6 +211,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_204242) do
     t.bigint "category_id"
     t.integer "stock", default: 0, null: false
     t.boolean "active", default: true, null: false
+    t.decimal "iva_rate", precision: 4, scale: 2, default: "21.0", null: false
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["name"], name: "index_products_on_name", unique: true
     t.index ["sku"], name: "index_products_on_sku", unique: true, where: "(sku IS NOT NULL)"

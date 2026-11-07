@@ -100,6 +100,65 @@ RSpec.describe "Api::V1::Budgets", type: :request do
       it "returns the created budget" do
         expect(json_response[:data][:status]).to eq("draft")
       end
+
+      it "returns the message in Spanish" do
+        expect(json_response[:message]).to eq("Presupuesto creado exitosamente")
+      end
+    end
+
+    context "con ítems con IVA" do
+      before do
+        attrs = valid_attributes.deep_dup
+        attrs[:budgets][:card_surcharge_percentage] = 10
+        attrs[:budgets][:items_attributes] = [
+          { description: "Aceite", quantity: 2, unit_price: 10_000, iva_rate: "21" },
+          { description: "Neumático", quantity: 1, unit_price: 4_000, iva_rate: "10.5" },
+          { description: "Mano de obra", quantity: 1, unit_price: 15_000, iva_rate: "" }
+        ]
+        post "/api/v1/budgets", params: attrs, headers: auth_headers(user)
+      end
+
+      it "devuelve los totales con IVA discriminado" do
+        data = json_response[:data]
+        expect(data).to include(subtotal_net: "24000.0", total_iva: "4620.0", total_list: "43620.0",
+                                total_card: "47982.0", exempt_total: "15000.0")
+        expect(data[:iva_breakdown].map { |row| row.to_h.symbolize_keys }).to eq([
+          { rate: "21.0", base: "20000.0", amount: "4200.0" },
+          { rate: "10.5", base: "4000.0", amount: "420.0" }
+        ])
+      end
+
+      it "guarda la alícuota de cada ítem" do
+        expect(json_response[:data][:items].map { |i| i[:iva_rate] }).to eq([ "21.0", "10.5", nil ])
+      end
+    end
+
+    context "con una alícuota inválida en un ítem" do
+      it "returns 422" do
+        attrs = valid_attributes.deep_dup
+        attrs[:budgets][:items_attributes] = [ { description: "X", quantity: 1, unit_price: 100, iva_rate: "15" } ]
+        post "/api/v1/budgets", params: attrs, headers: auth_headers(user)
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(json_response[:success]).to be(false)
+        expect(Budget.count).to eq(0)
+      end
+    end
+
+    context "con un vehículo de otro cliente" do
+      it "returns 422" do
+        attrs = valid_attributes.deep_dup
+        attrs[:budgets][:vehicle_id] = create(:vehicle).id
+        post "/api/v1/budgets", params: attrs, headers: auth_headers(user)
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(json_response[:errors]).to be_present
+      end
+    end
+
+    context "without authentication" do
+      it "returns 401" do
+        post "/api/v1/budgets", params: valid_attributes
+        expect(response).to have_http_status(:unauthorized)
+      end
     end
 
     context "with invalid attributes" do
@@ -155,6 +214,58 @@ RSpec.describe "Api::V1::Budgets", type: :request do
 
       it "returns 404" do
         expect(response).to have_http_status(:not_found)
+      end
+    end
+  end
+
+  describe "POST /api/v1/budgets/:id/duplicate" do
+    let!(:budget) do
+      create(:budget, status: "approved", date: 1.month.ago.to_date, customer: customer, vehicle: vehicle,
+                      notes: "Original", card_surcharge_percentage: 10)
+    end
+
+    before do
+      budget.items.create!(description: "Aceite", quantity: 2, unit_price: 1000, iva_rate: 21, position: 0)
+      budget.items.create!(description: "Mano de obra", quantity: 1, unit_price: 500, iva_rate: nil, position: 1)
+      budget.save!
+    end
+
+    context "when budget exists" do
+      before { post "/api/v1/budgets/#{budget.id}/duplicate", headers: auth_headers(user) }
+
+      it "returns 201 with a new draft dated today" do
+        expect(response).to have_http_status(:created)
+        expect(json_response[:success]).to be(true)
+        data = json_response[:data]
+        expect(data[:id]).not_to eq(budget.id)
+        expect(data).to include(status: "draft", date: Date.current.iso8601, notes: "Original",
+                                customer_id: customer.id, vehicle_id: vehicle.id)
+      end
+
+      it "copies the items with their IVA rate" do
+        items = json_response[:data][:items]
+        expect(items.map { |i| [ i[:description], i[:iva_rate] ] }).to eq([ [ "Aceite", "21.0" ], [ "Mano de obra", nil ] ])
+        expect(json_response[:data][:total_list]).to eq(budget.reload.total_list.to_s)
+      end
+
+      it "keeps the original untouched" do
+        expect(budget.reload.status).to eq("approved")
+        expect(budget.items.count).to eq(2)
+      end
+    end
+
+    context "when budget does not exist" do
+      it "returns 404" do
+        post "/api/v1/budgets/0/duplicate", headers: auth_headers(user)
+        expect(response).to have_http_status(:not_found)
+        expect(json_response[:success]).to be(false)
+      end
+    end
+
+    context "without authentication" do
+      it "returns 401" do
+        post "/api/v1/budgets/#{budget.id}/duplicate"
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
