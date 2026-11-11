@@ -78,7 +78,7 @@ Fall back to `grep` only for exact string matches where a literal pattern is kno
 
 Single developer, early stage: **work directly on `main`** — no feature branches or PRs needed. Commit on `main` and `git push origin main` when the user asks to commit/push.
 
-- Pushing to `main` runs CI (Backend CI / Frontend CI) and, if it passes, **deploys to production** (`.github/workflows/deploy.yml`). Run tests + lint before pushing; mention pending migrations.
+- Pushing to `main` runs CI (Backend CI / Frontend CI) and, if it passes, **deploys to production** (Railway auto-deploy with "Wait for CI" on backend/frontend/cron — see `docs/DEPLOY_RAILWAY.md` §6). Run tests + lint before pushing; mention pending migrations.
 - Still never force-push, `reset --hard`, or commit unrelated files (e.g. `.codegraph/daemon.pid`, personal `docker-compose.yml` tweaks).
 
 ## Guardrails (`.claude/`)

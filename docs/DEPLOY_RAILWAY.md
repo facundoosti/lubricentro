@@ -13,7 +13,7 @@ Proyecto: lubricentro
 └── Postgres   (Plugin Railway)
 ```
 
-El deploy se activa automáticamente via GitHub Actions al pushear a `main`.
+El deploy lo hace Railway al pushear a `main`, después de que pasen las GitHub Actions del commit ("Wait for CI", ver §6).
 
 ---
 
@@ -136,78 +136,14 @@ restartPolicyMaxRetries = 3
 
 ---
 
-## 6. GitHub Actions — Secrets requeridos
+## 6. Deploy automático (Railway + CI)
 
-Ir a **GitHub → Settings → Secrets and variables → Actions** y agregar:
+Los servicios `backend`, `frontend` y `cron` están conectados al repo (`facundoosti/lubricentro`, rama `main`) y Railway despliega solo en cada push.
 
-| Secret | Cómo obtenerlo |
-|---|---|
-| `RAILWAY_TOKEN` | Railway → Account Settings → Tokens → Create Token |
-| `RAILWAY_SERVICE_BACKEND` | ID del servicio backend (Railway dashboard URL o CLI) |
-| `RAILWAY_SERVICE_FRONTEND` | ID del servicio frontend (Railway dashboard URL o CLI) |
+**Railway → servicio → Settings → Source → "Wait for CI" tiene que estar activado en los 3 servicios.** Así Railway espera a que pasen todas las GitHub Actions del commit (Backend CI y Frontend CI) y, si alguna falla, el deploy queda en `SKIPPED`.
 
-**Obtener IDs de servicios via CLI:**
-```bash
-railway link   # vincular el proyecto
-railway status # muestra project + service IDs
-```
-
-### Corrección al workflow existente
-
-El archivo `.github/workflows/deploy.yml` tiene un bug en las condiciones de filtro por directorio — `contains()` no funciona con arrays de paths parciales. Reemplazar las condiciones:
-
-```yaml
-# ❌ Esto no funciona como se espera:
-if: contains(github.event.head_commit.modified, 'backend/')
-
-# ✅ Usar paths filter en el trigger en su lugar:
-on:
-  push:
-    branches: [main]
-    paths:
-      - 'backend/**'   # solo para el job de backend
-```
-
-Ver la sección de workflow corregido más abajo.
-
-### Workflow corregido
-
-Reemplazar `.github/workflows/deploy.yml` con:
-
-```yaml
-name: Deploy to Production
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy-backend:
-    runs-on: ubuntu-latest
-    if: |
-      contains(toJSON(github.event.commits.*.modified), 'backend/') ||
-      contains(toJSON(github.event.commits.*.added), 'backend/')
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy Backend to Railway
-        uses: bervProject/railway-deploy@v1.0.0
-        with:
-          railway_token: ${{ secrets.RAILWAY_TOKEN }}
-          service: ${{ secrets.RAILWAY_SERVICE_BACKEND }}
-
-  deploy-frontend:
-    runs-on: ubuntu-latest
-    if: |
-      contains(toJSON(github.event.commits.*.modified), 'frontend/') ||
-      contains(toJSON(github.event.commits.*.added), 'frontend/')
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy Frontend to Railway
-        uses: bervProject/railway-deploy@v1.0.0
-        with:
-          railway_token: ${{ secrets.RAILWAY_TOKEN }}
-          service: ${{ secrets.RAILWAY_SERVICE_FRONTEND }}
-```
+- No hay workflow de deploy en GitHub Actions (se borró `.github/workflows/deploy.yml` el 2026-11-11: duplicaba el deploy del frontend y no frenaba el de Railway). Ver `docs/fixes/2026-11-11-deploy-espera-ci.md`.
+- Verificar: `railway` MCP `get-service-config` → `source.checkSuites: true` en cada servicio.
 
 ---
 
@@ -306,7 +242,7 @@ railway logs --service frontend
 - [ ] Dominios públicos generados para ambos servicios
 - [ ] `ALLOWED_ORIGINS` en backend apunta al dominio del frontend
 - [ ] `backend/railway.toml` y `frontend/railway.toml` commiteados
-- [ ] Secrets de GitHub Actions configurados (`RAILWAY_TOKEN`, `RAILWAY_SERVICE_BACKEND`, `RAILWAY_SERVICE_FRONTEND`)
+- [ ] "Wait for CI" activado en backend, frontend y cron (Railway → Settings → Source)
 - [ ] Primer deploy manual exitoso
 - [ ] `/up` responde 200 en backend
 - [ ] `/health` responde 200 en frontend

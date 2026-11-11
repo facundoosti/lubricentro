@@ -34,7 +34,7 @@
 
 FactoryBot.define do
   factory :product do
-    name { Faker::Commerce.product_name }
+    sequence(:name) { |n| "#{Faker::Commerce.product_name} #{n}" }
     description { Faker::Lorem.sentence(word_count: 6, supplemental: false, random_words_to_add: 3) }
     unit_price { rand(500..15000) } # $5.00 - $150.00
     unit { [ 'L', 'unit', 'kit', 'piece', 'bottle' ].sample }
