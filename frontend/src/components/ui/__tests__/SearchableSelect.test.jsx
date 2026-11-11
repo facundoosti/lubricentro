@@ -28,3 +28,12 @@ describe('SearchableSelect — Escape', () => {
     expect(close).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('SearchableSelect — opciones largas', () => {
+  it('cada opción muestra su texto completo en el tooltip', () => {
+    const label = 'Filtro de aire pesado WAP-203 - JOHN DEERE 9900 Algodonera JD 540 - JD 540A JD 440c - JD 540B JD 450E - CATERPILLAR 950 - KOMATSU WA200 - NEW HOLLAND W130 - Equivalencias MANN C 23 610 - BALDWIN PA 1890';
+    renderWithProviders(<SearchableSelect options={[{ value: '9', label }]} onChange={vi.fn()} placeholder="Producto" />);
+    fireEvent.click(screen.getByRole('button', { name: /Producto/ }));
+    expect(screen.getByTitle(label)).toHaveTextContent(label);
+  });
+});

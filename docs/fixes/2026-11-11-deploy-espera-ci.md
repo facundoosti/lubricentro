@@ -16,7 +16,7 @@ El commit `6b7817c` se desplegó a producción aunque la Backend CI falló. Rail
 - [x] Tests + lint
 - [x] Review (rails-reviewer, sin bloqueantes)
 - [x] QA visual: N/A, no hay cambios de UI
-- [ ] Activar "Wait for CI" en Railway (backend, frontend, cron). Lo hace el usuario desde el dashboard, porque el MCP de Railway no expone `checkSuites`.
+- [x] Activar "Wait for CI" en Railway (backend, frontend, cron). Lo hizo el usuario desde el dashboard; verificado el 2026-11-11 con `checkSuites: true` en los 3 servicios.
 
 ## Solución
 - Factory: `sequence(:name) { |n| "#{Faker::Commerce.product_name} #{n}" }`.

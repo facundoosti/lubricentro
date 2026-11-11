@@ -408,8 +408,8 @@ const ProductsTable = ({
                               {getProductIcon(product.name)}
                             </div>
                           )}
-                          <div>
-                            <span className="block font-medium text-on-surface text-sm">
+                          <div className="min-w-0">
+                            <span className="line-clamp-2 break-words font-medium text-on-surface text-sm" title={product.name}>
                               {product.name}
                             </span>
                             <span className="block text-secondary text-xs font-mono">

@@ -30,7 +30,7 @@ FactoryBot.define do
       email { Faker::Internet.email }
       phone { Faker::PhoneNumber.phone_number }
       address { Faker::Address.street_address }
-      cuit { "20-#{rand(10_000_000..99_999_999)}-#{rand(0..9)}" }
+      sequence(:cuit) { |n| format("20-%08d-%d", n, n % 10) }
     end
 
     trait :with_products do

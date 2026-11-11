@@ -55,7 +55,7 @@ const ConfirmModal = ({
           {title}
         </h3>
         
-        <p className="text-sm text-on-surface-variant mb-6">
+        <p className="text-sm text-on-surface-variant mb-6 break-words">
           {message}
         </p>
         

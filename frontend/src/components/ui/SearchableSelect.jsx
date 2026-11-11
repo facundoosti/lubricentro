@@ -157,11 +157,12 @@ const SearchableSelect = ({ options = [], value, onChange, placeholder = 'Selecc
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => handleSelect(opt)}
+                    title={opt.label}
                     className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-surface-container-high ${
                       String(opt.value) === String(value) ? 'text-primary font-medium' : 'text-on-surface'
                     }`}
                   >
-                    {opt.label}
+                    <span className="line-clamp-2 break-words">{opt.label}</span>
                   </button>
                 </li>
               ))

@@ -95,3 +95,11 @@ describe('ProductsTable — zoom de imágenes', () => {
     expect(screen.queryByRole('button', { name: /Ampliar imagen de Filtro/ })).toBeNull();
   });
 });
+
+describe('ProductsTable — nombres largos', () => {
+  it('muestra el nombre completo en el tooltip (el texto se recorta a 2 líneas)', () => {
+    const name = 'Filtro de aire pesado WAP-203 - JOHN DEERE 9900 Algodonera JD 540 - JD 540A JD 440c - JD 540B JD 450E - CATERPILLAR 950 - KOMATSU WA200 - NEW HOLLAND W130 - Equivalencias MANN C 23 610 - BALDWIN PA 1890';
+    renderTable({ products: [{ ...products[0], name }] });
+    expect(screen.getByTitle(name)).toHaveTextContent(name);
+  });
+});

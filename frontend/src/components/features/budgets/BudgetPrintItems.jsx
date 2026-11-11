@@ -5,6 +5,8 @@ import { lineGrossTotal } from '@utils/budgetMath';
 const MIN_ROWS = 12;
 const cell = { border: '1px solid #ccc', padding: '3px 6px' };
 const head = { border: '1px solid #999', padding: '4px 6px' };
+// Nombres de producto largos (hasta 500 caracteres): máximo 2 líneas para que el presupuesto siga entrando en una hoja.
+const clamp2 = { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', overflowWrap: 'break-word' };
 
 // Tabla de ítems de la hoja impresa. Precio unitario sin IVA e importe con IVA; la columna IVA solo aparece si
 // algún ítem tiene alícuota (los presupuestos anteriores al IVA se ven igual que antes).
@@ -28,7 +30,9 @@ const BudgetPrintItems = ({ items = [] }) => {
         {padded.map((item, idx) => (
           <tr key={idx} style={{ height: '22px' }}>
             <td style={{ ...cell, textAlign: 'center', ...blank(item) }}>{item ? Number(item.quantity) : '.'}</td>
-            <td style={{ ...cell, padding: '3px 8px', ...blank(item) }}>{item ? item.description : '.'}</td>
+            <td style={{ ...cell, padding: '3px 8px', ...blank(item) }}>
+              {item ? <span style={clamp2}>{item.description}</span> : '.'}
+            </td>
             <td style={{ ...cell, textAlign: 'right', ...blank(item) }}>{item ? formatCurrency(item.unit_price) : '.'}</td>
             {showIva && (
               <td style={{ ...cell, textAlign: 'center', ...blank(item) }}>

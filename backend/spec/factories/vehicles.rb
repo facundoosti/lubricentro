@@ -25,7 +25,7 @@ FactoryBot.define do
   factory :vehicle do
     brand { Faker::Vehicle.make }
     model { Faker::Vehicle.model(make_of_model: brand) }
-    license_plate { Faker::Alphanumeric.alphanumeric(number: 6, min_alpha: 3, min_numeric: 3).upcase }
+    sequence(:license_plate) { |n| format("AB%06d", n) }
     year { Faker::Vehicle.year }
     association :customer
 

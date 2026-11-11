@@ -18,7 +18,7 @@
 
 FactoryBot.define do
   factory :service do
-    name { Faker::Commerce.unique.product_name }
+    sequence(:name) { |n| "#{Faker::Commerce.product_name} #{n}" }
     description { Faker::Lorem.sentence(word_count: 8, supplemental: false, random_words_to_add: 4) }
     base_price { rand(1000..50000) } # Entre $10.00 y $500.00
 
