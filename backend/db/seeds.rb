@@ -18,8 +18,7 @@ load Rails.root.join("db/seeds/categories.rb")
 # Limpiar datos existentes (solo en development)
 if Rails.env.development?
   puts "🧹 Limpiando datos existentes..."
-  ServiceRecordProduct.destroy_all
-  ServiceRecordService.destroy_all
+  ServiceRecordItem.destroy_all
   ServiceRecord.destroy_all
   Appointment.destroy_all
   Vehicle.destroy_all
@@ -286,8 +285,9 @@ end
 #       # Agregar servicios al registro
 #       services_to_add = Service.all.sample(rand(1..3))
 #       services_to_add.each do |service|
-#         service_record.service_record_services.create!(
+#         service_record.items.create!(
 #           service: service,
+#           description: service.name,
 #           quantity: rand(1..2),
 #           unit_price: service.base_price
 #         )
@@ -296,15 +296,16 @@ end
 #       # Agregar productos al registro
 #       products_to_add = Product.all.sample(rand(1..4))
 #       products_to_add.each do |product|
-#         service_record.service_record_products.create!(
+#         service_record.items.create!(
 #           product: product,
+#           description: product.name,
 #           quantity: rand(1..3),
 #           unit_price: product.unit_price
 #         )
 #       end
 
 #       # Actualizar total
-#       service_record.update_total_amount
+#       service_record.update!(total_amount: service_record.items_grand_total)
 #     end
 
 #     # Registro reciente
@@ -321,8 +322,9 @@ end
 #     # Agregar servicios al registro reciente
 #     services_to_add = Service.all.sample(rand(1..2))
 #     services_to_add.each do |service|
-#       service_record.service_record_services.create!(
+#       service_record.items.create!(
 #         service: service,
+#         description: service.name,
 #         quantity: rand(1..2),
 #         unit_price: service.base_price
 #       )
@@ -331,15 +333,16 @@ end
 #     # Agregar productos al registro reciente
 #     products_to_add = Product.all.sample(rand(1..3))
 #     products_to_add.each do |product|
-#       service_record.service_record_products.create!(
+#       service_record.items.create!(
 #         product: product,
+#         description: product.name,
 #         quantity: rand(1..2),
 #         unit_price: product.unit_price
 #       )
 #     end
 
 #     # Actualizar total
-#     service_record.update_total_amount
+#     service_record.update!(total_amount: service_record.items_grand_total)
 #   end
 # end
 
@@ -361,22 +364,24 @@ end
 
 #   # Agregar servicios y productos
 #   Service.all.sample(rand(1..2)).each do |service|
-#     service_record.service_record_services.create!(
+#     service_record.items.create!(
 #       service: service,
+#       description: service.name,
 #       quantity: rand(1..2),
 #       unit_price: service.base_price
 #     )
 #   end
 
 #   Product.all.sample(rand(1..3)).each do |product|
-#     service_record.service_record_products.create!(
+#     service_record.items.create!(
 #       product: product,
+#       description: product.name,
 #       quantity: rand(1..2),
 #       unit_price: product.unit_price
 #     )
 #   end
 
-#   service_record.update_total_amount
+#   service_record.update!(total_amount: service_record.items_grand_total)
 # end
 
 # # Crear algunos registros próximos para testing
@@ -397,22 +402,24 @@ end
 
 #   # Agregar servicios y productos
 #   Service.all.sample(rand(1..3)).each do |service|
-#     service_record.service_record_services.create!(
+#     service_record.items.create!(
 #       service: service,
+#       description: service.name,
 #       quantity: rand(1..2),
 #       unit_price: service.base_price
 #     )
 #   end
 
 #   Product.all.sample(rand(1..4)).each do |product|
-#     service_record.service_record_products.create!(
+#     service_record.items.create!(
 #       product: product,
+#       description: product.name,
 #       quantity: rand(1..3),
 #       unit_price: product.unit_price
 #     )
 #   end
 
-#   service_record.update_total_amount
+#   service_record.update!(total_amount: service_record.items_grand_total)
 # end
 
 # # Crear clientes adicionales para testing
@@ -531,8 +538,7 @@ puts "   🔧 Services: #{Service.count}"
 puts "   📦 Products: #{Product.count}"
 puts "   📅 Appointments: #{Appointment.count}"
 puts "   🔧 Service Records: #{ServiceRecord.count}"
-puts "   🔧 Service Record Services: #{ServiceRecordService.count}"
-puts "   📦 Service Record Products: #{ServiceRecordProduct.count}"
+puts "   🧾 Service Record Items: #{ServiceRecordItem.count}"
 
 puts "\n🎯 Datos de prueba disponibles:"
 puts "   • Usuarios con múltiples vehículos"

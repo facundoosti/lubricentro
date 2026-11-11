@@ -1,26 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
-import SearchableSelect from '@ui/SearchableSelect';
+import { useForm } from 'react-hook-form';
 import PhotosUpload from '@ui/PhotosUpload';
-import { ArrowLeft, Save, Plus, Trash2, Car, User, Wrench, Package, Search, X, ImageIcon } from 'lucide-react';
+import { ArrowLeft, Car, User, Search, X, ImageIcon, FileText } from 'lucide-react';
+import ItemsEditor from '@components/features/items/ItemsEditor';
+import ItemsTotalsBar from '@components/features/items/ItemsTotalsBar';
+import CopyFromBudgetDialog from '@components/features/service-records/CopyFromBudgetDialog';
+import BudgetLinkChip from '@components/features/service-records/BudgetLinkChip';
 import { useAppointment } from '@services/appointmentsService';
 import { useServiceRecord, useCreateServiceRecord, useUpdateServiceRecord } from '@services/serviceRecordsService';
-import { useServices } from '@services/servicesService';
-import { useProducts } from '@services/productsService';
 import { showServiceRecordSuccess, showServiceRecordError } from '@services/notificationService';
 import { appointmentKeys } from '@services/appointmentsService';
 import { customerKeys, useCustomer } from '@services/customersService';
 import { vehicleKeys, useVehicle } from '@services/vehiclesService';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { api } from '@services/api';
+import { emptyItem, hasFilledItems } from '@utils/items';
+import { budgetToFormItems, toServiceRecordFormItems, toServiceRecordPayload } from '@utils/serviceRecord';
 
 const today = new Date().toISOString().split('T')[0];
-
-const formatCurrency = (value) => {
-  const n = Number(value) || 0;
-  return `$${n.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
-};
+const FORM_ID = 'service-record-form';
 
 const ServiceRecordFormPage = () => {
   const navigate = useNavigate();
@@ -33,17 +32,16 @@ const ServiceRecordFormPage = () => {
   const { data: appointmentData, isLoading: loadingAppointment } = useAppointment(appointmentId);
   const { data: existingData, isLoading: loadingExisting } = useServiceRecord(id);
 
-  const { data: servicesData } = useServices({ per_page: 100 });
-  const { data: productsData } = useProducts({ per_page: 100 });
-
-  const allServices = servicesData?.data?.services || servicesData?.data || [];
-  const allProducts = productsData?.data?.products || productsData?.data || [];
-
   const createMutation = useCreateServiceRecord();
   const updateMutation = useUpdateServiceRecord();
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
   const [photoFiles, setPhotoFiles] = useState([]);
+  // Ítems guardados que se quitan: se envían con _destroy
+  const [removedIds, setRemovedIds] = useState([]);
+  const [copyOpen, setCopyOpen] = useState(false);
+  // Cliente del presupuesto copiado (null si no tenía): cambiar a otro cliente rompe el vínculo.
+  const linkedBudgetCustomerId = useRef(null);
 
   const isStandaloneCreate = !isEditing && !appointmentId;
   // Desde el perfil del cliente: ?customer_id=1&vehicle_id=2 (solo en creación standalone)
@@ -65,7 +63,7 @@ const ServiceRecordFormPage = () => {
   const customerRef = useRef(null);
   const vehicleRef = useRef(null);
 
-  const { register, control, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm({
+  const { register, control, handleSubmit, watch, setValue, getValues, reset, formState: { errors } } = useForm({
     defaultValues: {
       service_date: today,
       mileage: '',
@@ -74,19 +72,9 @@ const ServiceRecordFormPage = () => {
       customer_id: '',
       vehicle_id: '',
       appointment_id: appointmentId || '',
-      service_record_services_attributes: [],
-      service_record_products_attributes: [],
+      budget_id: null,
+      items_attributes: [emptyItem(0)],
     },
-  });
-
-  const { fields: serviceFields, append: appendService, remove: removeService } = useFieldArray({
-    control,
-    name: 'service_record_services_attributes',
-  });
-
-  const { fields: productFields, append: appendProduct, remove: removeProduct } = useFieldArray({
-    control,
-    name: 'service_record_products_attributes',
   });
 
   const appointment = appointmentData?.data;
@@ -113,19 +101,10 @@ const ServiceRecordFormPage = () => {
         customer_id: r.customer_id || '',
         vehicle_id: r.vehicle_id || '',
         appointment_id: r.appointment_id || '',
-        service_record_services_attributes: (r.service_record_services || []).map((s) => ({
-          id: s.id,
-          service_id: String(s.service_id),
-          quantity: s.quantity,
-          unit_price: s.unit_price,
-        })),
-        service_record_products_attributes: (r.service_record_products || []).map((p) => ({
-          id: p.id,
-          product_id: String(p.product_id),
-          quantity: p.quantity,
-          unit_price: p.unit_price,
-        })),
+        budget_id: r.budget_id ?? null,
+        items_attributes: toServiceRecordFormItems(r),
       });
+      setRemovedIds([]);
     }
   }, [isEditing, existingData, reset]);
 
@@ -180,7 +159,17 @@ const ServiceRecordFormPage = () => {
   const customerResults = customerSearchData?.data?.customers || [];
   const vehicleResults = customerVehiclesData?.data?.vehicles || customerVehiclesData?.data || [];
 
+  // El vínculo con el presupuesto solo vale para su cliente (si el presupuesto no tenía, cualquiera).
+  const unlinkBudgetIfCustomerDiffers = (newCustomerId) => {
+    const budgetCustomerId = linkedBudgetCustomerId.current;
+    if (!getValues('budget_id') || budgetCustomerId == null) return;
+    if (String(newCustomerId ?? '') !== String(budgetCustomerId)) {
+      setValue('budget_id', null, { shouldDirty: true });
+    }
+  };
+
   const handleSelectCustomer = (customer) => {
+    unlinkBudgetIfCustomerDiffers(customer.id);
     setSelectedCustomer(customer);
     setCustomerSearch(customer.name);
     setShowCustomerDropdown(false);
@@ -192,6 +181,7 @@ const ServiceRecordFormPage = () => {
   };
 
   const handleClearCustomer = () => {
+    unlinkBudgetIfCustomerDiffers(null);
     setSelectedCustomer(null);
     setCustomerSearch('');
     setValue('customer_id', '');
@@ -229,53 +219,32 @@ const ServiceRecordFormPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- los handlers solo usan setters estables
   }, [presetCustomerData, presetVehicleData, presetCustomerId]);
 
-  // Live totals
-  const watchedServices = watch('service_record_services_attributes') || [];
-  const watchedProducts = watch('service_record_products_attributes') || [];
+  const customerId = watch('customer_id');
+  const budgetId = watch('budget_id');
 
-  const servicesTotal = watchedServices.reduce(
-    (sum, s) => sum + (Number(s.quantity) || 0) * (Number(s.unit_price) || 0),
-    0
-  );
-  const productsTotal = watchedProducts.reduce(
-    (sum, p) => sum + (Number(p.quantity) || 0) * (Number(p.unit_price) || 0),
-    0
-  );
-  const grandTotal = servicesTotal + productsTotal;
-
-  const handleServiceChange = (index, serviceId) => {
-    const service = allServices.find((s) => String(s.id) === String(serviceId));
-    if (service) {
-      setValue(`service_record_services_attributes.${index}.unit_price`, service.base_price);
+  // Copiar desde presupuesto: reemplaza los ítems, vincula el presupuesto y completa
+  // cliente/vehículo (solo en creación standalone; desde un turno vienen fijos).
+  const handleCopyBudget = (budget) => {
+    setValue('items_attributes', budgetToFormItems(budget), { shouldDirty: true });
+    linkedBudgetCustomerId.current = budget.customer?.id ?? null;
+    setValue('budget_id', budget.id, { shouldDirty: true });
+    if (!isStandaloneCreate) return;
+    if (budget.customer && String(budget.customer.id) !== String(selectedCustomer?.id ?? '')) {
+      handleSelectCustomer(budget.customer);
     }
+    if (budget.vehicle) handleSelectVehicle(budget.vehicle);
   };
 
-  const handleProductChange = (index, productId) => {
-    const product = allProducts.find((p) => String(p.id) === String(productId));
-    if (product) {
-      setValue(`service_record_products_attributes.${index}.unit_price`, product.unit_price);
-    }
-  };
+  const goBack = () => navigate(appointmentId ? '/appointments' : '/service-records');
 
   const onSubmit = async (formData) => {
-    // Strip empty nested rows
-    const payload = {
-      ...formData,
-      mileage: formData.mileage ? parseInt(formData.mileage, 10) : null,
-      next_service_date: formData.next_service_date || null,
-      appointment_id: formData.appointment_id || null,
-      service_record_services_attributes: formData.service_record_services_attributes
-        .filter((s) => s.service_id)
-        .map((s) => ({ ...s, quantity: parseInt(s.quantity, 10) || 1 })),
-      service_record_products_attributes: formData.service_record_products_attributes
-        .filter((p) => p.product_id)
-        .map((p) => ({ ...p, quantity: parseInt(p.quantity, 10) || 1 })),
-    };
+    const payload = toServiceRecordPayload(formData, { removedIds, isEditing });
     if (photoFiles.length > 0) payload.photos = photoFiles;
 
     try {
       if (isEditing) {
         await updateMutation.mutateAsync({ id, data: payload });
+        setRemovedIds([]);
         showServiceRecordSuccess('UPDATED');
       } else {
         await createMutation.mutateAsync(payload);
@@ -283,7 +252,7 @@ const ServiceRecordFormPage = () => {
         // Invalidate appointments so the has_service_record flag updates
         queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
       }
-      navigate(appointmentId ? '/appointments' : '/service-records');
+      goBack();
     } catch (err) {
       const action = isEditing ? 'ERROR_UPDATE' : 'ERROR_CREATE';
       showServiceRecordError(action, err.response?.data?.message || err.message);
@@ -317,7 +286,7 @@ const ServiceRecordFormPage = () => {
       <div className="flex items-center gap-4">
         <button
           type="button"
-          onClick={() => navigate(appointmentId ? '/appointments' : '/service-records')}
+          onClick={goBack}
           className="p-2 rounded-lg hover:bg-surface-container-high text-secondary hover:text-on-surface transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -336,7 +305,7 @@ const ServiceRecordFormPage = () => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form id={FORM_ID} noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Datos generales */}
         <div className="bg-surface-container border border-outline-variant rounded-lg p-5 space-y-4">
           <h2 className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
@@ -576,197 +545,28 @@ const ServiceRecordFormPage = () => {
           </div>
         </div>
 
-        {/* Servicios */}
-        <div className="bg-surface-container border border-outline-variant rounded-lg p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Wrench className="w-4 h-4 text-primary" />
-              <h2 className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
-                Servicios
-              </h2>
-            </div>
+        <ItemsEditor
+          control={control}
+          register={register}
+          setValue={setValue}
+          getValues={getValues}
+          errors={errors.items_attributes}
+          onRemoveSaved={(itemId) => setRemovedIds((ids) => [...ids, itemId])}
+          headerAction={!isEditing && (
             <button
               type="button"
-              onClick={() => appendService({ service_id: '', quantity: 1, unit_price: 0 })}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary-container/20 text-primary rounded-lg hover:bg-primary-container/30 transition-colors"
+              onClick={() => setCopyOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-surface-container-high border border-outline-variant text-on-surface rounded-lg hover:bg-surface-variant transition-colors"
             >
-              <Plus className="w-3.5 h-3.5" />
-              Agregar servicio
+              <FileText className="w-3.5 h-3.5" />
+              Copiar desde presupuesto
             </button>
-          </div>
-
-          {serviceFields.length === 0 ? (
-            <p className="text-sm text-secondary text-center py-4">
-              No hay servicios agregados.
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-outline-variant">
-                    <th className="text-left pb-2 text-secondary font-medium">Servicio</th>
-                    <th className="text-center pb-2 text-secondary font-medium w-20">Cant.</th>
-                    <th className="text-right pb-2 text-secondary font-medium w-32">Precio Unit.</th>
-                    <th className="text-right pb-2 text-secondary font-medium w-28">Subtotal</th>
-                    <th className="w-10" />
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-outline-variant">
-                  {serviceFields.map((field, index) => {
-                    const qty = Number(watchedServices[index]?.quantity) || 0;
-                    const price = Number(watchedServices[index]?.unit_price) || 0;
-                    return (
-                      <tr key={field.id}>
-                        <td className="py-2 pr-2">
-                          <Controller
-                            control={control}
-                            name={`service_record_services_attributes.${index}.service_id`}
-                            render={({ field: f }) => (
-                              <SearchableSelect
-                                options={allServices.map((s) => ({ value: String(s.id), label: s.name }))}
-                                value={f.value}
-                                onChange={(val) => {
-                                  f.onChange(val);
-                                  handleServiceChange(index, val);
-                                }}
-                                placeholder="Seleccionar servicio"
-                              />
-                            )}
-                          />
-                        </td>
-                        <td className="py-2 pr-2">
-                          <input
-                            type="number"
-                            min="1"
-                            {...register(`service_record_services_attributes.${index}.quantity`, { min: 1 })}
-                            className={`${inputClass} text-center`}
-                          />
-                        </td>
-                        <td className="py-2 pr-2">
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            {...register(`service_record_services_attributes.${index}.unit_price`, { min: 0 })}
-                            className={`${inputClass} text-right`}
-                          />
-                        </td>
-                        <td className="py-2 pr-2 text-right text-on-surface font-medium">
-                          {formatCurrency(qty * price)}
-                        </td>
-                        <td className="py-2 text-center">
-                          <button
-                            type="button"
-                            onClick={() => removeService(index)}
-                            className="p-1 rounded hover:bg-error-container/20 text-secondary hover:text-error transition-colors"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
           )}
-        </div>
-
-        {/* Productos */}
-        <div className="bg-surface-container border border-outline-variant rounded-lg p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Package className="w-4 h-4 text-primary" />
-              <h2 className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
-                Productos
-              </h2>
-            </div>
-            <button
-              type="button"
-              onClick={() => appendProduct({ product_id: '', quantity: 1, unit_price: 0 })}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary-container/20 text-primary rounded-lg hover:bg-primary-container/30 transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              Agregar producto
-            </button>
-          </div>
-
-          {productFields.length === 0 ? (
-            <p className="text-sm text-secondary text-center py-4">
-              No hay productos agregados.
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-outline-variant">
-                    <th className="text-left pb-2 text-secondary font-medium">Producto</th>
-                    <th className="text-center pb-2 text-secondary font-medium w-20">Cant.</th>
-                    <th className="text-right pb-2 text-secondary font-medium w-32">Precio Unit.</th>
-                    <th className="text-right pb-2 text-secondary font-medium w-28">Subtotal</th>
-                    <th className="w-10" />
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-outline-variant">
-                  {productFields.map((field, index) => {
-                    const qty = Number(watchedProducts[index]?.quantity) || 0;
-                    const price = Number(watchedProducts[index]?.unit_price) || 0;
-                    return (
-                      <tr key={field.id}>
-                        <td className="py-2 pr-2">
-                          <Controller
-                            control={control}
-                            name={`service_record_products_attributes.${index}.product_id`}
-                            render={({ field: f }) => (
-                              <SearchableSelect
-                                options={allProducts.map((p) => ({ value: String(p.id), label: p.name }))}
-                                value={f.value}
-                                onChange={(val) => {
-                                  f.onChange(val);
-                                  handleProductChange(index, val);
-                                }}
-                                placeholder="Seleccionar producto"
-                              />
-                            )}
-                          />
-                        </td>
-                        <td className="py-2 pr-2">
-                          <input
-                            type="number"
-                            min="1"
-                            {...register(`service_record_products_attributes.${index}.quantity`, { min: 1 })}
-                            className={`${inputClass} text-center`}
-                          />
-                        </td>
-                        <td className="py-2 pr-2">
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            {...register(`service_record_products_attributes.${index}.unit_price`, { min: 0 })}
-                            className={`${inputClass} text-right`}
-                          />
-                        </td>
-                        <td className="py-2 pr-2 text-right text-on-surface font-medium">
-                          {formatCurrency(qty * price)}
-                        </td>
-                        <td className="py-2 text-center">
-                          <button
-                            type="button"
-                            onClick={() => removeProduct(index)}
-                            className="p-1 rounded hover:bg-error-container/20 text-secondary hover:text-error transition-colors"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+        >
+          {!isEditing && budgetId && (
+            <BudgetLinkChip budgetId={budgetId} onUnlink={() => setValue('budget_id', null, { shouldDirty: true })} />
           )}
-        </div>
+        </ItemsEditor>
 
         {/* Fotos */}
         <div className="bg-surface-container border border-outline-variant rounded-lg p-5 space-y-4">
@@ -782,47 +582,26 @@ const ServiceRecordFormPage = () => {
           />
         </div>
 
-        {/* Total */}
-        <div className="bg-surface-container border border-outline-variant rounded-lg p-5">
-          <div className="flex flex-col items-end gap-2">
-            {servicesTotal > 0 && (
-              <div className="flex items-center justify-between w-full sm:w-64 text-sm">
-                <span className="text-secondary">Servicios</span>
-                <span className="text-on-surface">{formatCurrency(servicesTotal)}</span>
-              </div>
-            )}
-            {productsTotal > 0 && (
-              <div className="flex items-center justify-between w-full sm:w-64 text-sm">
-                <span className="text-secondary">Productos</span>
-                <span className="text-on-surface">{formatCurrency(productsTotal)}</span>
-              </div>
-            )}
-            <div className="flex items-center justify-between w-full sm:w-64 pt-2 border-t border-outline-variant">
-              <span className="font-bold text-on-surface">TOTAL</span>
-              <span className="font-bold text-xl text-primary">{formatCurrency(grandTotal)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => navigate(appointmentId ? '/appointments' : '/service-records')}
-            className="px-5 py-2 rounded-lg border border-outline-variant text-secondary hover:text-on-surface hover:bg-surface-container-high text-sm transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="flex items-center gap-2 px-5 py-2 bg-primary-container text-on-primary rounded-lg font-semibold text-sm hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-          >
-            <Save className="w-4 h-4" />
-            {isSaving ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Registrar atención'}
-          </button>
-        </div>
       </form>
+
+      <ItemsTotalsBar
+        control={control}
+        formId={FORM_ID}
+        isSaving={isSaving}
+        submitLabel={isEditing ? 'Guardar cambios' : 'Registrar atención'}
+        showCard={false}
+        onCancel={goBack}
+      />
+
+      {copyOpen && (
+        <CopyFromBudgetDialog
+          isOpen
+          onClose={() => setCopyOpen(false)}
+          customerId={customerId}
+          hasFilledItems={hasFilledItems(getValues('items_attributes'))}
+          onCopy={handleCopyBudget}
+        />
+      )}
     </div>
   );
 };

@@ -193,6 +193,18 @@ RSpec.describe Budget, type: :model do
       expect(budget.reload).to have_attributes(total_list: 121, total_iva: 21)
     end
 
+    it 'aplica un % libre por línea' do
+      budget = build_budget(0, [ { quantity: 1, unit_price: 1_000, iva_rate: 15 } ])
+      expect(budget).to have_attributes(subtotal_net: 1_000, total_iva: 150, total_list: 1_150)
+      expect(budget.iva_breakdown).to eq([ { rate: 15, base: 1_000, amount: 150 } ])
+    end
+
+    it 'trata un 0% como sin IVA' do
+      budget = build_budget(0, [ { quantity: 1, unit_price: 1_000, iva_rate: 0 } ])
+      expect(budget).to have_attributes(total_iva: 0, total_list: 1_000, exempt_total: 1_000)
+      expect(budget.iva_breakdown).to be_empty
+    end
+
     it 'no cambia los totales de un presupuesto sin alícuotas' do
       budget = build_budget(10, [ { quantity: 2, unit_price: 25_000, iva_rate: nil } ])
       budget.save!

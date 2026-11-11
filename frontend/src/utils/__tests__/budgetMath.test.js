@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeBudgetTotals, lineGrossTotal } from '@utils/budgetMath';
+import { computeBudgetTotals, computeItemsTotals, lineGrossTotal } from '@utils/budgetMath';
 
 describe('computeBudgetTotals', () => {
   it('calcula un presupuesto mixto igual que el backend', () => {
@@ -66,5 +66,29 @@ describe('lineGrossTotal', () => {
       { quantity: 1, unit_price: 15000, iva_rate: null },
     ]);
     expect(totals.subtotalGross).toBe(28620);
+  });
+});
+
+describe('computeItemsTotals', () => {
+  it('es la misma fórmula que la del presupuesto', () => {
+    expect(computeItemsTotals).toBe(computeBudgetTotals);
+  });
+
+  it('calcula una atención mixta sin recargo', () => {
+    const totals = computeItemsTotals([
+      { quantity: 2, unit_price: 10000, iva_rate: '21' },
+      { quantity: 1, unit_price: 5000, iva_rate: '' },
+    ]);
+    expect(totals).toMatchObject({ totalList: 29200, totalCard: 29200, exemptTotal: 5000, totalIva: 4200 });
+  });
+
+  it('aplica un % libre y trata el 0 como sin IVA', () => {
+    const totals = computeItemsTotals([
+      { quantity: 1, unit_price: 1000, iva_rate: '15' },
+      { quantity: 1, unit_price: 1000, iva_rate: '0' },
+    ]);
+    expect(totals.ivaBreakdown).toEqual([{ rate: 15, base: 1000, amount: 150 }]);
+    expect(totals).toMatchObject({ exemptTotal: 1000, totalList: 2150 });
+    expect(lineGrossTotal({ quantity: 1, unit_price: 1000, iva_rate: '30' })).toBe(1300);
   });
 });

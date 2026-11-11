@@ -35,6 +35,17 @@
 require 'rails_helper'
 
 RSpec.describe Product, type: :model do
+  describe 'associations' do
+    it { should have_many(:service_record_items).dependent(:nullify) }
+
+    it 'al borrar el producto el ítem de la atención queda con product_id nulo' do
+      product = create(:product)
+      item = create(:service_record_item, product: product, description: 'Filtro')
+      product.destroy!
+      expect(item.reload).to have_attributes(product_id: nil, description: 'Filtro')
+    end
+  end
+
   describe 'validations' do
     subject { build(:product) }
 

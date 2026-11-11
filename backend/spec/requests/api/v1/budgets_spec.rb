@@ -145,11 +145,46 @@ RSpec.describe "Api::V1::Budgets", type: :request do
     context "con una alícuota inválida en un ítem" do
       it "returns 422" do
         attrs = valid_attributes.deep_dup
-        attrs[:budgets][:items_attributes] = [ { description: "X", quantity: 1, unit_price: 100, iva_rate: "15" } ]
+        attrs[:budgets][:items_attributes] = [ { description: "X", quantity: 1, unit_price: 100, iva_rate: "100" } ]
         post "/api/v1/budgets", params: attrs, headers: auth_headers(user)
         expect(response).to have_http_status(:unprocessable_content)
         expect(json_response[:success]).to be(false)
         expect(Budget.count).to eq(0)
+      end
+    end
+
+    context "con distintos % de IVA en un ítem" do
+      def post_with_rate(rate)
+        attrs = valid_attributes.deep_dup
+        attrs[:budgets][:items_attributes] = [ { description: "X", quantity: 1, unit_price: 100, iva_rate: rate } ]
+        post "/api/v1/budgets", params: attrs, headers: auth_headers(user)
+      end
+
+      it "guarda 0 como sin IVA" do
+        post_with_rate("0")
+        expect(response).to have_http_status(:created)
+        expect(json_response[:data][:items].first[:iva_rate]).to be_nil
+      end
+
+      [ "100", "-1" ].each do |rate|
+        it "responde 422 con #{rate}" do
+          post_with_rate(rate)
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(json_response[:success]).to be(false)
+          expect(json_response[:errors]).to be_present
+          expect(Budget.count).to eq(0)
+        end
+      end
+    end
+
+    context "con un % libre en un ítem" do
+      it "guarda el % y lo suma al total" do
+        attrs = valid_attributes.deep_dup
+        attrs[:budgets][:items_attributes] = [ { description: "X", quantity: 1, unit_price: 1000, iva_rate: "15" } ]
+        post "/api/v1/budgets", params: attrs, headers: auth_headers(user)
+        expect(response).to have_http_status(:created)
+        expect(json_response[:data][:items].first[:iva_rate]).to eq("15.0")
+        expect(json_response[:data][:total_list]).to eq("1150.0")
       end
     end
 

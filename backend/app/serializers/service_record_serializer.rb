@@ -11,18 +11,21 @@
 #  created_at        :datetime         not null
 #  updated_at        :datetime         not null
 #  appointment_id    :bigint
+#  budget_id         :bigint
 #  customer_id       :bigint           not null
 #  vehicle_id        :bigint           not null
 #
 # Indexes
 #
 #  index_service_records_on_appointment_id  (appointment_id) UNIQUE
+#  index_service_records_on_budget_id       (budget_id)
 #  index_service_records_on_customer_id     (customer_id)
 #  index_service_records_on_vehicle_id      (vehicle_id)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (appointment_id => appointments.id)
+#  fk_rails_...  (budget_id => budgets.id) ON DELETE => nullify
 #  fk_rails_...  (customer_id => customers.id)
 #  fk_rails_...  (vehicle_id => vehicles.id)
 #
@@ -84,30 +87,20 @@ class ServiceRecordSerializer < Blueprinter::Base
     field :days_until_next_service
     association :customer, blueprint: CustomerSerializer, view: :summary
     association :vehicle, blueprint: VehicleSerializer, view: :summary
-    field :service_record_services do |obj|
-      obj.service_record_services.map do |srs|
-        {
-          id: srs.id,
-          service_id: srs.service_id,
-          name: srs.service&.name,
-          quantity: srs.quantity,
-          unit_price: srs.unit_price,
-          total_price: srs.total_price
-        }
-      end
+    field :budget_id
+    field :subtotal_net do |obj|
+      obj.subtotal_net.to_d.to_s
     end
-    field :service_record_products do |obj|
-      obj.service_record_products.map do |srp|
-        {
-          id: srp.id,
-          product_id: srp.product_id,
-          name: srp.product&.name,
-          quantity: srp.quantity,
-          unit_price: srp.unit_price,
-          total_price: srp.total_price
-        }
-      end
+    field :total_iva do |obj|
+      obj.total_iva.to_d.to_s
     end
+    field :exempt_total do |obj|
+      obj.exempt_total.to_d.to_s
+    end
+    field :iva_breakdown do |obj|
+      obj.iva_breakdown.map { |row| row.transform_values { |v| v.to_d.to_s } }
+    end
+    association :items, blueprint: ServiceRecordItemSerializer
   end
 
   view :formatted do

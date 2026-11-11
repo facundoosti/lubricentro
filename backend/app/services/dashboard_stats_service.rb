@@ -21,8 +21,8 @@ class DashboardStatsService
       retention_rate: calculate_retention_rate,
       average_ticket: calculate_average_ticket,
       # Nuevas métricas basadas en las asociaciones
-      total_services_performed: ServiceRecordService.sum(:quantity),
-      total_products_used: ServiceRecordProduct.sum(:quantity),
+      total_services_performed: quantity_value(service_items.sum(:quantity)),
+      total_products_used: quantity_value(product_items.sum(:quantity)),
       top_service: get_top_service,
       top_product: get_top_product
     }
@@ -60,9 +60,9 @@ class DashboardStatsService
       satisfaction_current: 4.2, # Rating promedio (mock por ahora)
       # Nuevos objetivos
       services_performed_target: 120, # Meta de servicios realizados
-      services_performed_current: ServiceRecordService.where(created_at: current_month.all_month).sum(:quantity),
+      services_performed_current: quantity_value(service_items.where(created_at: current_month.all_month).sum(:quantity)),
       products_used_target: 200, # Meta de productos utilizados
-      products_used_current: ServiceRecordProduct.where(created_at: current_month.all_month).sum(:quantity)
+      products_used_current: quantity_value(product_items.where(created_at: current_month.all_month).sum(:quantity))
     }
   end
 
@@ -70,7 +70,7 @@ class DashboardStatsService
     alerts = []
 
     # Productos más utilizados (para identificar stock necesario)
-    top_products = ServiceRecordProduct.joins(:product)
+    top_products = product_items.joins(:product)
       .group("products.name")
       .sum(:quantity)
       .sort_by { |_, quantity| -quantity }
@@ -115,26 +115,44 @@ class DashboardStatsService
           status: appointment.status
         }
       end,
-      recent_services: ServiceRecord.includes(:customer, :vehicle, :service_record_services, :service_record_products)
+      recent_services: ServiceRecord.includes(:customer, :vehicle, :items)
         .order(created_at: :desc)
         .limit(5)
         .map do |service|
+        service_lines = service.items.select(&:service_id)
+        product_lines = service.items.select(&:product_id)
         {
           id: service.id,
           customer: service.customer.name,
           vehicle: "#{service.vehicle.brand} #{service.vehicle.model}",
-          services: service.service_record_services.sum(:quantity),
-          products: service.service_record_products.sum(:quantity),
+          services: quantity_value(service_lines.sum(&:quantity)),
+          products: quantity_value(product_lines.sum(&:quantity)),
           total: service.total_amount,
           date: service.created_at.strftime("%d/%m/%Y"),
-          service_types: service.service_record_services.includes(:service).map { |srs| srs.service.name }.join(", "),
-          product_types: service.service_record_products.includes(:product).map { |srp| srp.product.name }.join(", ")
+          service_types: service_lines.map(&:description).join(", "),
+          product_types: product_lines.map(&:description).join(", ")
         }
       end
     }
   end
 
   private
+
+  # Ítems de atención con origen en el catálogo. Sin el orden del default_scope (rompe los GROUP BY).
+  # Los ítems de texto libre no cuentan como servicio ni producto.
+  def self.service_items
+    ServiceRecordItem.reorder(nil).where.not(service_id: nil)
+  end
+
+  def self.product_items
+    ServiceRecordItem.reorder(nil).where.not(product_id: nil)
+  end
+
+  # Las cantidades son decimales: 4.0 → 4, 1.5 → 1.5
+  def self.quantity_value(value)
+    value = value.to_d
+    value.frac.zero? ? value.to_i : value.to_f
+  end
 
   def self.calculate_customer_growth
     current_month = Date.current.beginning_of_month
@@ -219,12 +237,12 @@ class DashboardStatsService
       month = Date.current - i.months
       services_count = ServiceRecord.where(created_at: month.all_month).count
       revenue = ServiceRecord.where(created_at: month.all_month).sum(:total_amount)
-      services_performed = ServiceRecordService.joins(:service_record)
+      services_performed = quantity_value(service_items.joins(:service_record)
         .where(service_records: { created_at: month.all_month })
-        .sum(:quantity)
-      products_used = ServiceRecordProduct.joins(:service_record)
+        .sum(:quantity))
+      products_used = quantity_value(product_items.joins(:service_record)
         .where(service_records: { created_at: month.all_month })
-        .sum(:quantity)
+        .sum(:quantity))
 
       {
         month: month.strftime("%b"),
@@ -237,35 +255,35 @@ class DashboardStatsService
   end
 
   def self.calculate_services_by_type
-    ServiceRecordService.joins(:service)
+    service_items.joins(:service)
       .group("services.name")
       .sum(:quantity)
-      .map { |name, count| { name: name, count: count } }
+      .map { |name, count| { name: name, count: quantity_value(count) } }
       .sort_by { |service| -service[:count] }
       .first(10)
   end
 
   def self.calculate_revenue_by_service_type
-    ServiceRecordService.joins(:service)
+    service_items.joins(:service)
       .group("services.name")
-      .sum("service_record_services.quantity * service_record_services.unit_price")
+      .sum("service_record_items.quantity * service_record_items.unit_price")
       .map { |name, revenue| { name: name, revenue: revenue } }
       .sort_by { |service| -service[:revenue] }
       .first(10)
   end
 
   def self.calculate_revenue_by_product_type
-    ServiceRecordProduct.joins(:product)
+    product_items.joins(:product)
       .group("products.name")
-      .sum("service_record_products.quantity * service_record_products.unit_price")
+      .sum("service_record_items.quantity * service_record_items.unit_price")
       .map { |name, revenue| { name: name, revenue: revenue } }
       .sort_by { |product| -product[:revenue] }
       .first(10)
   end
 
   def self.calculate_service_product_ratio
-    total_services = ServiceRecordService.sum(:quantity)
-    total_products = ServiceRecordProduct.sum(:quantity)
+    total_services = quantity_value(service_items.sum(:quantity))
+    total_products = quantity_value(product_items.sum(:quantity))
 
     return { services: 0, products: 0, ratio: 0 } if total_products == 0
 
@@ -277,25 +295,25 @@ class DashboardStatsService
   end
 
   def self.get_top_service
-    top_service = ServiceRecordService.joins(:service)
+    top_service = service_items.joins(:service)
       .group("services.name")
       .sum(:quantity)
       .max_by { |_, quantity| quantity }
 
     return { name: "N/A", count: 0 } unless top_service
 
-    { name: top_service[0], count: top_service[1] }
+    { name: top_service[0], count: quantity_value(top_service[1]) }
   end
 
   def self.get_top_product
-    top_product = ServiceRecordProduct.joins(:product)
+    top_product = product_items.joins(:product)
       .group("products.name")
       .sum(:quantity)
       .max_by { |_, quantity| quantity }
 
     return { name: "N/A", count: 0 } unless top_product
 
-    { name: top_product[0], count: top_product[1] }
+    { name: top_product[0], count: quantity_value(top_product[1]) }
   end
 
   def self.calculate_customer_flow

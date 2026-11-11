@@ -11,37 +11,39 @@
 #  created_at        :datetime         not null
 #  updated_at        :datetime         not null
 #  appointment_id    :bigint
+#  budget_id         :bigint
 #  customer_id       :bigint           not null
 #  vehicle_id        :bigint           not null
 #
 # Indexes
 #
 #  index_service_records_on_appointment_id  (appointment_id) UNIQUE
+#  index_service_records_on_budget_id       (budget_id)
 #  index_service_records_on_customer_id     (customer_id)
 #  index_service_records_on_vehicle_id      (vehicle_id)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (appointment_id => appointments.id)
+#  fk_rails_...  (budget_id => budgets.id) ON DELETE => nullify
 #  fk_rails_...  (customer_id => customers.id)
 #  fk_rails_...  (vehicle_id => vehicles.id)
 #
 
 class ServiceRecord < ApplicationRecord
+  include ItemizedTotals
+
   belongs_to :customer
   belongs_to :vehicle
   belongs_to :appointment, optional: true
+  # Presupuesto de origen (copiar desde presupuesto)
+  belongs_to :budget, optional: true
 
-  # Relaciones con servicios y productos
-  has_many :service_record_services, dependent: :destroy
-  has_many :service_record_products, dependent: :destroy
-  has_many :services, through: :service_record_services
-  has_many :products, through: :service_record_products
+  has_many :items, class_name: "ServiceRecordItem", dependent: :destroy, inverse_of: :service_record
   has_many_attached :photos
   has_many :service_reminders, dependent: :destroy
 
-  accepts_nested_attributes_for :service_record_services, allow_destroy: true
-  accepts_nested_attributes_for :service_record_products, allow_destroy: true
+  accepts_nested_attributes_for :items, allow_destroy: true, reject_if: ->(attrs) { attrs[:description].blank? }
 
   # Validaciones
   validates :service_date, presence: true
@@ -54,6 +56,7 @@ class ServiceRecord < ApplicationRecord
   # Validaciones de fecha
   validate :service_date_cannot_be_in_future
   validate :next_service_date_after_service_date, if: :next_service_date?
+  validate :budget_matches_customer, if: -> { will_save_change_to_budget_id? || will_save_change_to_customer_id? }
 
   # Scopes
   scope :recent, -> { order(service_date: :desc) }
@@ -82,6 +85,8 @@ class ServiceRecord < ApplicationRecord
 
   # Callbacks
   before_save :calculate_next_service_date, if: :mileage_changed?
+  # Solo si cambian los ítems: las atenciones migradas (o sin ítems) conservan su total histórico.
+  before_save :compute_total_amount, if: :items_changed?
 
   public
   def formatted_total_amount
@@ -105,17 +110,33 @@ class ServiceRecord < ApplicationRecord
     (next_service_date - Date.current).to_i
   end
 
-  def calculate_total_from_items
-    services_total = service_record_services.sum(&:total_price)
-    products_total = service_record_products.sum(&:total_price)
-    services_total + products_total
+  # Mismo cálculo que el total efectivo/débito del presupuesto (ver ItemizedTotals)
+  def compute_total_amount
+    self.total_amount = items_grand_total.round(2)
   end
 
-  def update_total_amount
-    self.total_amount = calculate_total_from_items
+  def subtotal_net
+    items_net_total
+  end
+
+  def total_iva
+    items_iva_total
   end
 
   private
+
+  # Mira solo lo que está en memoria (nested attributes): no dispara queries si no se tocaron ítems.
+  def items_changed?
+    items.target.any?(&:changed_for_autosave?)
+  end
+
+  def budget_matches_customer
+    return if budget_id.nil?
+    return errors.add(:budget, "no existe") if budget.nil?
+    return if budget.customer_id.nil? || budget.customer_id == customer_id
+
+    errors.add(:budget, "pertenece a otro cliente")
+  end
 
   def service_date_cannot_be_in_future
     if service_date.present? && service_date > Date.current

@@ -36,8 +36,7 @@ class Product < ApplicationRecord
   # Relaciones
   belongs_to :supplier, optional: true
   belongs_to :category, optional: true
-  has_many :service_record_products, dependent: :destroy
-  has_many :service_records, through: :service_record_products
+  has_many :service_record_items, dependent: :nullify
   has_one_attached :image
 
   IVA_RATES = [ BigDecimal("21"), BigDecimal("10.5") ].freeze

@@ -18,8 +18,7 @@
 
 class Service < ApplicationRecord
   # Relaciones
-  has_many :service_record_services, dependent: :destroy
-  has_many :service_records, through: :service_record_services
+  has_many :service_record_items, dependent: :nullify
 
   # Validaciones (siguiendo BD constraints)
   validates :name, presence: true, length: { maximum: 100 }, uniqueness: { case_sensitive: false }

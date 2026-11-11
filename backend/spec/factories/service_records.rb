@@ -11,18 +11,21 @@
 #  created_at        :datetime         not null
 #  updated_at        :datetime         not null
 #  appointment_id    :bigint
+#  budget_id         :bigint
 #  customer_id       :bigint           not null
 #  vehicle_id        :bigint           not null
 #
 # Indexes
 #
 #  index_service_records_on_appointment_id  (appointment_id) UNIQUE
+#  index_service_records_on_budget_id       (budget_id)
 #  index_service_records_on_customer_id     (customer_id)
 #  index_service_records_on_vehicle_id      (vehicle_id)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (appointment_id => appointments.id)
+#  fk_rails_...  (budget_id => budgets.id) ON DELETE => nullify
 #  fk_rails_...  (customer_id => customers.id)
 #  fk_rails_...  (vehicle_id => vehicles.id)
 #

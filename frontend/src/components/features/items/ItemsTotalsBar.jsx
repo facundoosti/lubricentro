@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import { ChevronUp, Save } from 'lucide-react';
-import { computeBudgetTotals } from '@utils/budgetMath';
+import { computeItemsTotals } from '@utils/budgetMath';
 import { formatCurrency } from '@utils/money';
 import { formatIvaRate } from '@utils/iva';
 
@@ -12,19 +12,26 @@ const Row = ({ label, value, testId }) => (
   </div>
 );
 
-// Barra fija al pie del formulario: totales en vivo (vista previa del cálculo del
-// backend), desglose plegable y acciones Cancelar / Guardar.
-const BudgetTotalsBar = ({ control, formId, isSaving, submitLabel, onCancel }) => {
+/**
+ * ItemsTotalsBar — barra fija al pie del formulario: totales en vivo (vista previa del
+ * cálculo del backend), desglose plegable y acciones Cancelar / Guardar.
+ *
+ * @param {boolean} [showCard=true] - Presupuesto: efectivo/débito + tarjeta (con recargo).
+ *   Atención (`false`): un solo "Total", sin recargo de tarjeta.
+ * @param {string} [name='items_attributes'] - Field array de los ítems
+ */
+const ItemsTotalsBar = ({ control, formId, isSaving, submitLabel, onCancel, showCard = true, name = 'items_attributes' }) => {
   const [open, setOpen] = useState(false);
-  const items = useWatch({ control, name: 'items_attributes' }) || [];
-  const surcharge = Number(useWatch({ control, name: 'card_surcharge_percentage' })) || 0;
-  const totals = computeBudgetTotals(items, surcharge);
+  const items = useWatch({ control, name }) || [];
+  const surchargeValue = useWatch({ control, name: 'card_surcharge_percentage', disabled: !showCard });
+  const surcharge = showCard ? Number(surchargeValue) || 0 : 0;
+  const totals = computeItemsTotals(items, surcharge);
 
   return (
     <div className="sticky bottom-0 z-20 -mx-6 sm:mx-0">
       <div className="border-t sm:border border-outline-variant bg-surface-container shadow-lg sm:rounded-t-lg">
         {open && (
-          <div id="budget-breakdown" className="px-4 sm:px-5 pt-4 pb-2 space-y-1.5 border-b border-outline-variant">
+          <div id="items-breakdown" className="px-4 sm:px-5 pt-4 pb-2 space-y-1.5 border-b border-outline-variant">
             <Row label="Subtotal neto" value={formatCurrency(totals.subtotalNet)} testId="subtotal-net" />
             {totals.ivaBreakdown.map((row) => (
               <Row
@@ -38,7 +45,7 @@ const BudgetTotalsBar = ({ control, formId, isSaving, submitLabel, onCancel }) =
             {totals.exemptTotal > 0 && (
               <Row label="Sin IVA (servicios)" value={formatCurrency(totals.exemptTotal)} testId="exempt-total" />
             )}
-            {surcharge > 0 && (
+            {showCard && surcharge > 0 && (
               <Row label={`Recargo tarjeta (${surcharge}%)`} value={formatCurrency(totals.surchargeAmount)} />
             )}
           </div>
@@ -50,26 +57,37 @@ const BudgetTotalsBar = ({ control, formId, isSaving, submitLabel, onCancel }) =
               type="button"
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
-              aria-controls="budget-breakdown"
+              aria-controls="items-breakdown"
               className="flex items-center gap-1 text-xs text-primary hover:underline shrink-0"
             >
               <ChevronUp className={`w-4 h-4 transition-transform ${open ? '' : 'rotate-180'}`} />
               Desglose
             </button>
-            <div>
-              <p className="text-xs text-secondary">Efectivo / Débito</p>
-              <p className="text-lg font-bold text-on-surface tabular-nums" data-testid="total-list">
-                {formatCurrency(totals.totalList)}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-secondary">
-                Tarjeta de crédito{surcharge > 0 ? ` (+${surcharge}%)` : ''}
-              </p>
-              <p className="text-lg font-bold text-primary tabular-nums" data-testid="total-card">
-                {formatCurrency(totals.totalCard)}
-              </p>
-            </div>
+            {showCard ? (
+              <>
+                <div>
+                  <p className="text-xs text-secondary">Efectivo / Débito</p>
+                  <p className="text-lg font-bold text-on-surface tabular-nums" data-testid="total-list">
+                    {formatCurrency(totals.totalList)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-secondary">
+                    Tarjeta de crédito{surcharge > 0 ? ` (+${surcharge}%)` : ''}
+                  </p>
+                  <p className="text-lg font-bold text-primary tabular-nums" data-testid="total-card">
+                    {formatCurrency(totals.totalCard)}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div>
+                <p className="text-xs text-secondary">Total</p>
+                <p className="text-lg font-bold text-primary tabular-nums" data-testid="total-list">
+                  {formatCurrency(totals.totalList)}
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-2">
@@ -96,4 +114,4 @@ const BudgetTotalsBar = ({ control, formId, isSaving, submitLabel, onCancel }) =
   );
 };
 
-export default BudgetTotalsBar;
+export default ItemsTotalsBar;

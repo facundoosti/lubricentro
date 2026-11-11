@@ -75,6 +75,32 @@ describe('BudgetPrint', () => {
     expect(screen.getByTestId('print-total-card')).toHaveTextContent('$47.982');
   });
 
+  it('muestra % libres con coma en la línea y en el pie', () => {
+    renderPrint({
+      ...legacy,
+      id: 9,
+      subtotal_net: '2000.0',
+      total_iva: '307.5',
+      exempt_total: '0.0',
+      total_list: '2307.5',
+      total_card: '2307.5',
+      iva_breakdown: [
+        { rate: '15.75', base: '1000.0', amount: '157.5' },
+        { rate: '15.0', base: '1000.0', amount: '150.0' },
+      ],
+      items: [
+        { id: 1, quantity: '1.0', description: 'Mano de obra', unit_price: '1000.0', iva_rate: '15.0', total: '1000.0' },
+        { id: 2, quantity: '1.0', description: 'Repuesto', unit_price: '1000.0', iva_rate: '15.75', total: '1000.0' },
+      ],
+    });
+    expect(within(screen.getByText('Mano de obra').closest('tr')).getByText('15%')).toBeInTheDocument();
+    expect(within(screen.getByText('Repuesto').closest('tr')).getByText('15,75%')).toBeInTheDocument();
+    expect(screen.getByText('IVA 15% s/ $1.000')).toBeInTheDocument();
+    expect(screen.getByTestId('print-iva-15')).toHaveTextContent('$150');
+    expect(screen.getByText('IVA 15,75% s/ $1.000')).toBeInTheDocument();
+    expect(screen.getByTestId('print-iva-15.75')).toHaveTextContent('$157,50');
+  });
+
   it('un presupuesto viejo se imprime solo con los totales', () => {
     renderPrint(legacy);
     expect(screen.queryByTestId('print-iva-breakdown')).toBeNull();

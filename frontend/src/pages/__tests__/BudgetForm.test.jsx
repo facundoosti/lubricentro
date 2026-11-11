@@ -61,15 +61,15 @@ const renderForm = (route = '/budgets/new') =>
     { route },
   );
 
-const items = () => screen.getAllByTestId('budget-item');
+const items = () => screen.getAllByTestId('item-row');
 const fillItem = (index, { description, quantity, price, iva }) => {
   const row = items()[index];
   if (description !== undefined) {
-    fireEvent.change(within(row).getByRole('combobox', { name: 'Artículo o descripción' }), { target: { value: description } });
+    fireEvent.change(within(row).getByRole('combobox', { name: 'Producto o servicio' }), { target: { value: description } });
   }
   if (quantity !== undefined) fireEvent.change(within(row).getByLabelText(/Cantidad/), { target: { value: quantity } });
   if (price !== undefined) fireEvent.change(within(row).getByLabelText(/Precio unit/), { target: { value: price } });
-  if (iva !== undefined) fireEvent.change(within(row).getByLabelText('IVA'), { target: { value: iva } });
+  if (iva !== undefined) fireEvent.change(within(row).getByLabelText(/% IVA/), { target: { value: iva } });
 };
 const submit = () => fireEvent.click(screen.getByRole('button', { name: 'Crear presupuesto' }));
 
@@ -88,6 +88,42 @@ describe('BudgetForm — nuevo', () => {
     renderForm();
     expect(screen.getByText('Completá los datos del presupuesto')).toBeInTheDocument();
     expect(document.body.textContent).not.toMatch(/budget/i);
+  });
+
+  it('muestra la sección "Productos y Servicios" y no "Artículos"', () => {
+    renderForm();
+    expect(screen.getByRole('heading', { name: /Productos y Servicios/ })).toHaveTextContent('(1)');
+    expect(document.body.textContent).not.toMatch(/Artículos/);
+  });
+
+  it('un % libre recalcula la línea y el total', () => {
+    renderForm();
+    fillItem(0, { description: 'Mano de obra', quantity: '1', price: '1000', iva: '30' });
+    expect(screen.getByTestId('line-total')).toHaveTextContent('$1.300');
+    expect(screen.getByTestId('total-list')).toHaveTextContent('$1.300');
+  });
+
+  it('envía un % libre y el 0 como sin IVA', async () => {
+    renderForm();
+    fillItem(0, { description: 'Mano de obra', price: '1000', iva: '15.75' });
+    fireEvent.click(screen.getByRole('button', { name: 'Agregar ítem' }));
+    fillItem(1, { description: 'Lavado', price: '500', iva: '0' });
+    submit();
+
+    await waitFor(() => expect(mocks.create).toHaveBeenCalled());
+    expect(mocks.create.mock.calls[0][0].items_attributes).toEqual([
+      expect.objectContaining({ description: 'Mano de obra', iva_rate: 15.75 }),
+      expect.objectContaining({ description: 'Lavado', iva_rate: null }),
+    ]);
+    expect(mocks.create.mock.calls[0][0].items_attributes[0]).not.toHaveProperty('product_id');
+  });
+
+  it('un % fuera de rango muestra el mensaje propio (sin burbuja nativa)', async () => {
+    renderForm();
+    fillItem(0, { description: 'Mano de obra', price: '1000', iva: '120' });
+    submit();
+    expect(await screen.findByText('% IVA inválido (0 a 99,99)')).toBeInTheDocument();
+    expect(mocks.create).not.toHaveBeenCalled();
   });
 
   it('calcula los totales con IVA en vivo', () => {
@@ -127,7 +163,7 @@ describe('BudgetForm — nuevo', () => {
 
     expect(items()).toHaveLength(2);
     expect(mocks.create).not.toHaveBeenCalled();
-    expect(within(items()[1]).getByRole('combobox', { name: 'Artículo o descripción' })).toHaveFocus();
+    expect(within(items()[1]).getByRole('combobox', { name: 'Producto o servicio' })).toHaveFocus();
   });
 
   it('borrar la única línea deja una vacía', () => {
@@ -136,7 +172,7 @@ describe('BudgetForm — nuevo', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Quitar línea 1' }));
 
     expect(items()).toHaveLength(1);
-    expect(within(items()[0]).getByRole('combobox', { name: 'Artículo o descripción' })).toHaveValue('');
+    expect(within(items()[0]).getByRole('combobox', { name: 'Producto o servicio' })).toHaveValue('');
   });
 
   it('vincula el vehículo elegido y envía la alícuota de cada línea', async () => {

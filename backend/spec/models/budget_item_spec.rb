@@ -3,7 +3,7 @@
 # Table name: budget_items
 #
 #  id          :bigint           not null, primary key
-#  description :string(300)      not null
+#  description :string(500)      not null
 #  iva_rate    :decimal(4, 2)
 #  position    :integer          default(0), not null
 #  quantity    :decimal(10, 2)   default(1.0), not null
@@ -44,16 +44,31 @@ RSpec.describe BudgetItem, type: :model do
     it { is_expected.to validate_presence_of(:unit_price) }
     it { is_expected.to validate_numericality_of(:unit_price).is_greater_than_or_equal_to(0) }
 
-    it 'acepta IVA 21, 10,5 o vacío' do
-      [ 21, 10.5, nil ].each do |rate|
+    it 'acepta un % libre entre 0 y 99,99 o vacío' do
+      [ 21, 10.5, 15, 15.75, 99.99, nil ].each do |rate|
         expect(build(:budget_item, iva_rate: rate)).to be_valid
       end
     end
 
-    it 'rechaza otras alícuotas' do
-      item = build(:budget_item, iva_rate: 15)
-      expect(item).not_to be_valid
-      expect(item.errors[:iva_rate]).to be_present
+    it 'rechaza 100 y negativos' do
+      [ 100, -1 ].each do |rate|
+        item = build(:budget_item, iva_rate: rate)
+        expect(item).not_to be_valid
+        expect(item.errors[:iva_rate]).to be_present
+      end
+    end
+
+    it 'rechaza un % no numérico o apenas negativo' do
+      [ 'abc', -0.001 ].each do |rate|
+        item = build(:budget_item, iva_rate: rate)
+        expect(item).not_to be_valid
+        expect(item.errors[:iva_rate]).to be_present
+      end
+    end
+
+    it 'guarda 0 como sin IVA' do
+      item = create(:budget_item, iva_rate: 0)
+      expect(item.reload.iva_rate).to be_nil
     end
   end
 

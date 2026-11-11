@@ -41,8 +41,7 @@ class Api::V1::ServiceRecordsController < ApplicationController
 
     @service_record = ServiceRecord.new(service_record_params)
 
-    if @service_record.save
-      recalculate_total(@service_record)
+    if save_and_approve_budget(@service_record)
       complete_linked_appointment(@service_record)
       @serializer = ServiceRecordSerializer.render_as_hash(@service_record.reload, view: :with_details)
       render_json(@serializer, message: "Service record created successfully", status: :created)
@@ -54,12 +53,14 @@ class Api::V1::ServiceRecordsController < ApplicationController
   # PATCH/PUT /api/v1/service_records/:id
   def update
     if @service_record.update(service_record_params)
-      recalculate_total(@service_record)
       @serializer = ServiceRecordSerializer.render_as_hash(@service_record.reload, view: :with_details)
       render_json(@serializer, message: "Service record updated successfully")
     else
       render_json({ errors: @service_record.errors.full_messages }, message: "Failed to update service record", status: :unprocessable_content)
     end
+  rescue ActiveRecord::RecordNotFound
+    # items_attributes con un id que no pertenece a esta atención
+    render_json({ errors: [ "Service record item not found" ] }, message: "Service record item not found", status: :not_found)
   end
 
   # DELETE /api/v1/service_records/:id
@@ -118,9 +119,16 @@ class Api::V1::ServiceRecordsController < ApplicationController
     render_json({ errors: [ "Service record not found" ] }, message: "Service record not found", status: :not_found)
   end
 
-  def recalculate_total(record)
-    new_total = record.calculate_total_from_items
-    record.update_column(:total_amount, new_total)
+  # La atención y el paso del presupuesto de origen a "Aprobado" se guardan juntos o nada.
+  def save_and_approve_budget(record)
+    ServiceRecord.transaction do
+      record.save!
+      record.budget&.update!(status: "approved")
+    end
+    true
+  rescue ActiveRecord::RecordInvalid => e
+    record.errors.add(:budget, e.record.errors.full_messages.to_sentence) unless e.record == record
+    false
   end
 
   def complete_linked_appointment(record)
@@ -129,13 +137,14 @@ class Api::V1::ServiceRecordsController < ApplicationController
     appointment.update(status: "completed") if appointment&.can_be_completed?
   end
 
+  # budget_id solo al crear: el presupuesto de origen no se cambia después.
   def service_record_params
     params.require(:service_record).permit(
-      :service_date, :total_amount, :notes, :mileage, :next_service_date,
+      :service_date, :notes, :mileage, :next_service_date,
       :customer_id, :vehicle_id, :appointment_id,
+      *(action_name == "create" ? [ :budget_id ] : []),
       photos: [],
-      service_record_services_attributes: [ :id, :service_id, :quantity, :unit_price, :_destroy ],
-      service_record_products_attributes: [ :id, :product_id, :quantity, :unit_price, :_destroy ]
+      items_attributes: [ :id, :position, :description, :quantity, :unit_price, :iva_rate, :product_id, :service_id, :_destroy ]
     )
   end
 end

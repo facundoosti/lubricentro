@@ -207,16 +207,132 @@ RSpec.describe "Api::V1::ServiceRecords", type: :request do
     end
   end
 
+  describe "ítems (items_attributes)" do
+    let(:product) { create(:product) }
+    let(:mixed_items) do
+      [
+        { description: "Aceite 5W30", quantity: 2, unit_price: 10_000, iva_rate: 21, product_id: product.id, position: 0 },
+        { description: "Lavado de motor", quantity: 1, unit_price: 5_000, position: 1 }
+      ]
+    end
+
+    def create_record(extra = {})
+      post "/api/v1/service_records",
+           params: { service_record: valid_attributes.merge(items_attributes: mixed_items).merge(extra) },
+           headers: auth_headers(user), as: :json
+    end
+
+    it "crea la atención con sus ítems en orden y el total con IVA" do
+      create_record
+      expect(response).to have_http_status(:created)
+      data = JSON.parse(response.body)["data"]
+      expect(data["items"].map { |i| i["description"] }).to eq([ "Aceite 5W30", "Lavado de motor" ])
+      expect(data["items"].first).to include("product_id" => product.id, "service_id" => nil, "iva_rate" => "21.0", "total" => "20000.0")
+      expect(data["items"].last).to include("product_id" => nil, "service_id" => nil, "iva_rate" => nil)
+      expect(data).to include("total_amount" => "29200.0", "subtotal_net" => "20000.0", "total_iva" => "4200.0",
+                              "exempt_total" => "5000.0", "budget_id" => nil)
+      expect(data["iva_breakdown"]).to eq([ { "rate" => "21.0", "base" => "20000.0", "amount" => "4200.0" } ])
+    end
+
+    it "ignora el total_amount enviado por el cliente" do
+      create_record(total_amount: 1)
+      expect(JSON.parse(response.body)["data"]["total_amount"]).to eq("29200.0")
+    end
+
+    it "descarta los ítems sin descripción" do
+      post "/api/v1/service_records",
+           params: { service_record: valid_attributes.merge(items_attributes: [ { description: "", quantity: 1, unit_price: 100 } ]) },
+           headers: auth_headers(user), as: :json
+      expect(response).to have_http_status(:created)
+      expect(ServiceRecord.last.items).to be_empty
+    end
+
+    it "responde 422 con un % de IVA inválido" do
+      post "/api/v1/service_records",
+           params: { service_record: valid_attributes.merge(items_attributes: [ { description: "X", quantity: 1, unit_price: 100, iva_rate: 100 } ]) },
+           headers: auth_headers(user), as: :json
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(ServiceRecord.count).to eq(0)
+    end
+
+    it "borra un ítem con _destroy y recalcula el total" do
+      create_record
+      record = ServiceRecord.last
+      patch "/api/v1/service_records/#{record.id}",
+            params: { service_record: { items_attributes: [ { id: record.items.first.id, _destroy: true } ] } },
+            headers: auth_headers(user), as: :json
+      expect(response).to have_http_status(:ok)
+      expect(record.reload.items.count).to eq(1)
+      expect(record.total_amount).to eq(5_000)
+    end
+  end
+
+  describe "copiar desde presupuesto (budget_id)" do
+    let(:budget) { create(:budget, customer: customer, status: "sent") }
+
+    def create_with_budget(budget_id, customer_id: customer.id, vehicle_id: vehicle.id)
+      post "/api/v1/service_records",
+           params: { service_record: valid_attributes.merge(customer_id: customer_id, vehicle_id: vehicle_id, budget_id: budget_id) },
+           headers: auth_headers(user), as: :json
+    end
+
+    it "vincula la atención y pasa el presupuesto a aprobado" do
+      create_with_budget(budget.id)
+      expect(response).to have_http_status(:created)
+      expect(JSON.parse(response.body)["data"]["budget_id"]).to eq(budget.id)
+      expect(budget.reload.status).to eq("approved")
+    end
+
+    it "sin budget_id no toca ningún presupuesto" do
+      create_with_budget(nil)
+      expect(response).to have_http_status(:created)
+      expect(ServiceRecord.last.budget_id).to be_nil
+      expect(budget.reload.status).to eq("sent")
+    end
+
+    it "responde 422 si el presupuesto es de otro cliente y no guarda nada" do
+      other_customer = create(:customer)
+      other_vehicle = create(:vehicle, customer: other_customer)
+      expect {
+        create_with_budget(budget.id, customer_id: other_customer.id, vehicle_id: other_vehicle.id)
+      }.not_to change(ServiceRecord, :count)
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(budget.reload.status).to eq("sent")
+    end
+
+    it "responde 422 si el presupuesto no existe" do
+      expect { create_with_budget(0) }.not_to change(ServiceRecord, :count)
+      expect(response).to have_http_status(:unprocessable_content)
+    end
+
+    it "no crea la atención si el presupuesto no se puede aprobar" do
+      budget.update_column(:card_surcharge_percentage, 200)
+      expect { create_with_budget(budget.id) }.not_to change(ServiceRecord, :count)
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(budget.reload.status).to eq("sent")
+    end
+
+    it "editar la atención no cambia el estado del presupuesto" do
+      create_with_budget(budget.id)
+      budget.reload.update!(status: "sent")
+      patch "/api/v1/service_records/#{ServiceRecord.last.id}",
+            params: { service_record: { notes: "otra nota" } }, headers: auth_headers(user), as: :json
+      expect(response).to have_http_status(:ok)
+      expect(budget.reload.status).to eq("sent")
+    end
+  end
+
   describe "PATCH/PUT /api/v1/service_records/:id" do
     context "with valid parameters" do
       let(:new_attributes) { { notes: "Updated notes", total_amount: 150.50 } }
 
       it "updates the requested service record" do
+        previous_total = service_record.total_amount
         patch "/api/v1/service_records/#{service_record.id}", params: { service_record: new_attributes }, headers: auth_headers(user)
         service_record.reload
         expect(service_record.notes).to eq("Updated notes")
-        # total_amount is auto-recalculated from items (0 when no items present)
-        expect(service_record.total_amount).to eq(0.0)
+        # total_amount no se acepta del cliente; sin cambios en los ítems queda como estaba
+        expect(service_record.total_amount).to eq(previous_total)
       end
 
       it "returns a successful response" do
@@ -226,6 +342,29 @@ RSpec.describe "Api::V1::ServiceRecords", type: :request do
         expect(json_response["success"]).to be true
         expect(json_response["message"]).to eq("Service record updated successfully")
       end
+    end
+
+    it "ignora budget_id: el presupuesto de origen no cambia al editar" do
+      budget = create(:budget, customer: customer)
+      service_record.update_column(:budget_id, budget.id)
+      other_budget = create(:budget, customer: customer)
+      patch "/api/v1/service_records/#{service_record.id}",
+            params: { service_record: { notes: "x", budget_id: other_budget.id } }, headers: auth_headers(user), as: :json
+      expect(response).to have_http_status(:ok)
+      expect(service_record.reload.budget_id).to eq(budget.id)
+    end
+
+    it "responde 404 si items_attributes trae un ítem de otra atención" do
+      foreign_item = create(:service_record_item, description: "Ajeno", quantity: 1, unit_price: 100)
+      patch "/api/v1/service_records/#{service_record.id}",
+            params: { service_record: { items_attributes: [ { id: foreign_item.id, description: "Robado", quantity: 9 } ] } },
+            headers: auth_headers(user), as: :json
+      expect(response).to have_http_status(:not_found)
+      json_response = JSON.parse(response.body)
+      expect(json_response["success"]).to be false
+      expect(json_response["errors"]).to be_present
+      expect(json_response["message"]).to be_present
+      expect(foreign_item.reload).to have_attributes(description: "Ajeno", service_record_id: foreign_item.service_record_id)
     end
 
     context "with invalid parameters" do

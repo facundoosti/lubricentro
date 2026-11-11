@@ -11,18 +11,21 @@
 #  created_at        :datetime         not null
 #  updated_at        :datetime         not null
 #  appointment_id    :bigint
+#  budget_id         :bigint
 #  customer_id       :bigint           not null
 #  vehicle_id        :bigint           not null
 #
 # Indexes
 #
 #  index_service_records_on_appointment_id  (appointment_id) UNIQUE
+#  index_service_records_on_budget_id       (budget_id)
 #  index_service_records_on_customer_id     (customer_id)
 #  index_service_records_on_vehicle_id      (vehicle_id)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (appointment_id => appointments.id)
+#  fk_rails_...  (budget_id => budgets.id) ON DELETE => nullify
 #  fk_rails_...  (customer_id => customers.id)
 #  fk_rails_...  (vehicle_id => vehicles.id)
 #
@@ -33,6 +36,133 @@ RSpec.describe ServiceRecord, type: :model do
   describe 'associations' do
     it { should belong_to(:customer) }
     it { should belong_to(:vehicle) }
+    it { should belong_to(:budget).optional }
+    it { should have_many(:items).class_name('ServiceRecordItem').dependent(:destroy) }
+  end
+
+  describe 'ítems y total con IVA' do
+    let(:customer) { create(:customer) }
+    let(:vehicle) { create(:vehicle, customer: customer) }
+
+    def build_record(items, **attrs)
+      record = build(:service_record, customer: customer, vehicle: vehicle, **attrs)
+      items.each { |item| record.items.build({ description: 'Ítem' }.merge(item)) }
+      record
+    end
+
+    it 'calcula total_amount con IVA en una atención mixta (29200)' do
+      record = build_record([ { quantity: 2, unit_price: 10_000, iva_rate: 21 }, { quantity: 1, unit_price: 5_000 } ])
+      record.save!
+      expect(record.reload.total_amount).to eq(29_200)
+      expect(record).to have_attributes(subtotal_net: 20_000, total_iva: 4_200, exempt_total: 5_000)
+      expect(record.iva_breakdown).to eq([ { rate: 21, base: 20_000, amount: 4_200 } ])
+    end
+
+    it 'ignora el total_amount asignado si hay ítems' do
+      record = build_record([ { quantity: 2, unit_price: 10_000, iva_rate: 21 }, { quantity: 1, unit_price: 5_000 } ], total_amount: 1)
+      record.save!
+      expect(record.total_amount).to eq(29_200)
+    end
+
+    it 'descarta los ítems sin descripción' do
+      record = create(:service_record, customer: customer, vehicle: vehicle,
+                      items_attributes: [ { description: '', quantity: 1, unit_price: 100 }, { description: 'Filtro', quantity: 1, unit_price: 100 } ])
+      expect(record.items.map(&:description)).to eq([ 'Filtro' ])
+    end
+
+    it 'redondea líneas y total_amount a 2 decimales (0,33 x 10,01 = 3,30)' do
+      record = build_record([ { quantity: 0.33, unit_price: 10.01 } ])
+      record.save!
+      expect(record.items.first.reload.total).to eq(BigDecimal('3.30'))
+      expect(record.reload.total_amount).to eq(BigDecimal('3.30'))
+    end
+
+    # Comportamiento actual (reject_if también aplica a ítems existentes): vaciar la descripción
+    # de un ítem guardado, sin _destroy, descarta esos atributos y el ítem queda como estaba.
+    it 'ignora los cambios a un ítem existente al que se le vacía la descripción' do
+      record = build_record([ { description: 'Filtro', quantity: 1, unit_price: 100 } ])
+      record.save!
+      item = record.items.first
+      record.update!(items_attributes: [ { id: item.id, description: '', quantity: 5 } ])
+      expect(item.reload).to have_attributes(description: 'Filtro', quantity: 1)
+      expect(record.reload.items.count).to eq(1)
+    end
+
+    it 'permite el mismo producto en dos líneas' do
+      product = create(:product)
+      record = build_record([ { product: product, unit_price: 100 }, { product: product, unit_price: 100 } ])
+      expect(record.save).to be(true)
+      expect(record.items.count).to eq(2)
+    end
+
+    it 'recalcula el total al borrar un ítem' do
+      record = build_record([ { quantity: 1, unit_price: 100, iva_rate: 21 }, { quantity: 1, unit_price: 50 } ])
+      record.save!
+      record.update!(items_attributes: [ { id: record.items.last.id, _destroy: '1' } ])
+      expect(record.reload.items.count).to eq(1)
+      expect(record.total_amount).to eq(121)
+    end
+
+    it 'recalcula el total al agregar un ítem a una atención guardada' do
+      record = build_record([ { quantity: 1, unit_price: 100 } ])
+      record.save!
+      record.update!(items_attributes: [ { description: 'Lavado', quantity: 1, unit_price: 1_000, iva_rate: 21 } ])
+      expect(record.reload.total_amount).to eq(1_310)
+    end
+
+    context 'atención migrada (ítems sin IVA, total 14000)' do
+      let!(:record) do
+        record = create(:service_record, customer: customer, vehicle: vehicle)
+        record.update_column(:total_amount, 14_000)
+        create(:service_record_item, service_record: record, description: 'Cambio de aceite', quantity: 1, unit_price: 8_000, position: 0)
+        create(:service_record_item, service_record: record, description: 'Filtro', quantity: 2, unit_price: 3_000, position: 1)
+        record.reload
+      end
+
+      it 'conserva el total al volver a guardarla sin cambios' do
+        record.save!
+        expect(record.reload.total_amount).to eq(14_000)
+      end
+
+      it 'conserva el total al guardar los mismos ítems sin cambios' do
+        record.update!(notes: 'otra nota', items_attributes: record.items.map { |i| { id: i.id, description: i.description } })
+        expect(record.reload.total_amount).to eq(14_000)
+      end
+    end
+  end
+
+  describe 'presupuesto de origen' do
+    let(:customer) { create(:customer) }
+    let(:vehicle) { create(:vehicle, customer: customer) }
+
+    it 'acepta un presupuesto del mismo cliente' do
+      record = build(:service_record, customer: customer, vehicle: vehicle, budget: create(:budget, customer: customer))
+      expect(record).to be_valid
+    end
+
+    it 'acepta un presupuesto sin cliente' do
+      record = build(:service_record, customer: customer, vehicle: vehicle, budget: create(:budget, customer: nil, vehicle: nil))
+      expect(record).to be_valid
+    end
+
+    it 'rechaza un presupuesto de otro cliente' do
+      record = build(:service_record, customer: customer, vehicle: vehicle, budget: create(:budget, customer: create(:customer)))
+      expect(record).not_to be_valid
+      expect(record.errors[:budget]).to include('pertenece a otro cliente')
+    end
+
+    it 'rechaza un presupuesto que no existe' do
+      record = build(:service_record, customer: customer, vehicle: vehicle, budget_id: 0)
+      expect(record).not_to be_valid
+      expect(record.errors[:budget]).to include('no existe')
+    end
+
+    it 'queda sin presupuesto si se borra el presupuesto' do
+      budget = create(:budget, customer: customer)
+      record = create(:service_record, customer: customer, vehicle: vehicle, budget: budget)
+      budget.destroy!
+      expect(record.reload.budget_id).to be_nil
+    end
   end
 
   describe 'validations' do

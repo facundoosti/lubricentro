@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toIvaRate, ivaRateToOption, formatIvaRate, priceWithIva } from '@utils/iva';
+import { toIvaRate, ivaRateToOption, formatIvaRate, priceWithIva, isValidItemIvaRate } from '@utils/iva';
 import { round2, formatCurrency } from '@utils/money';
 
 describe('utils/iva', () => {
@@ -8,6 +8,19 @@ describe('utils/iva', () => {
     expect(toIvaRate('10,5')).toBe(10.5);
     expect(toIvaRate('')).toBeNull();
     expect(toIvaRate(null)).toBeNull();
+  });
+
+  it('trata el 0 como sin IVA', () => {
+    expect(toIvaRate(0)).toBeNull();
+    expect(toIvaRate('0')).toBeNull();
+    expect(toIvaRate('0.00')).toBeNull();
+    expect(ivaRateToOption('0.0')).toBe('');
+  });
+
+  it('acepta cualquier % libre', () => {
+    expect(toIvaRate('15')).toBe(15);
+    expect(toIvaRate('15,75')).toBe(15.75);
+    expect(ivaRateToOption('99.99')).toBe('99.99');
   });
 
   it('convierte a valor de select', () => {
@@ -20,6 +33,14 @@ describe('utils/iva', () => {
     expect(formatIvaRate('10.5')).toBe('10,5%');
     expect(formatIvaRate(21)).toBe('21%');
     expect(formatIvaRate(null)).toBe('Sin IVA');
+    expect(formatIvaRate('15.0')).toBe('15%');
+    expect(formatIvaRate('15.75')).toBe('15,75%');
+    expect(formatIvaRate(0)).toBe('Sin IVA');
+  });
+
+  it('valida el % de una línea', () => {
+    ['', null, '0', '15', '15.75', '99.99', 21].forEach((v) => expect(isValidItemIvaRate(v)).toBe(true));
+    ['100', '-1', '15.755', 'abc'].forEach((v) => expect(isValidItemIvaRate(v)).toBe(false));
   });
 
   it('calcula el precio con IVA', () => {

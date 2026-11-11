@@ -19,9 +19,7 @@
 require 'rails_helper'
 
 RSpec.describe Service, type: :model do
-  # Associations (to be added when ServiceRecord is implemented)
-  # it { should have_many(:service_record_services).dependent(:destroy) }
-  # it { should have_many(:service_records).through(:service_record_services) }
+  it { should have_many(:service_record_items).dependent(:nullify) }
 
   # Validations
   describe 'validations' do

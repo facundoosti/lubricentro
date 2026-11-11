@@ -59,7 +59,7 @@ RSpec.describe DashboardStatsService do
       vehicle  = create(:vehicle, customer: customer)
       service  = create(:service)
       sr       = create(:service_record, customer: customer, vehicle: vehicle)
-      create(:service_record_service, service_record: sr, service: service, quantity: 3)
+      create(:service_record_item, service_record: sr, service: service, description: service.name, quantity: 3)
 
       top = described_class.calculate_main_metrics[:top_service]
       expect(top).to include(:name, :count)
@@ -68,8 +68,23 @@ RSpec.describe DashboardStatsService do
     end
 
     it 'returns top_service as N/A when no services exist' do
-      ServiceRecordService.delete_all
+      ServiceRecordItem.delete_all
       expect(described_class.calculate_main_metrics[:top_service]).to eq(name: 'N/A', count: 0)
+    end
+
+    it 'calcula el top producto desde los ítems con producto (texto libre no cuenta)' do
+      customer = create(:customer)
+      vehicle  = create(:vehicle, customer: customer)
+      sr       = create(:service_record, customer: customer, vehicle: vehicle)
+      filtro   = create(:product, name: 'Filtro')
+      aceite   = create(:product, name: 'Aceite')
+      [ 1, 2, 1 ].each { |q| create(:service_record_item, service_record: sr, product: filtro, quantity: q) }
+      create(:service_record_item, service_record: sr, product: aceite, quantity: 2)
+      create(:service_record_item, service_record: sr, description: 'Filtro', quantity: 10)
+
+      metrics = described_class.calculate_main_metrics
+      expect(metrics[:top_product]).to eq(name: 'Filtro', count: 4)
+      expect(metrics[:total_products_used]).to eq(6)
     end
   end
 
@@ -188,8 +203,7 @@ RSpec.describe DashboardStatsService do
     end
 
     it 'returns service_product_ratio with zero values when no data' do
-      ServiceRecordProduct.delete_all
-      ServiceRecordService.delete_all
+      ServiceRecordItem.delete_all
       trends = described_class.calculate_trends
       expect(trends[:service_product_ratio]).to include(services: 0, products: 0, ratio: 0)
     end
@@ -200,8 +214,9 @@ RSpec.describe DashboardStatsService do
       service  = create(:service)
       product  = create(:product)
       sr       = create(:service_record, customer: customer, vehicle: vehicle)
-      create(:service_record_service, service_record: sr, service: service, quantity: 4)
-      create(:service_record_product, service_record: sr, product: product, quantity: 2)
+      create(:service_record_item, service_record: sr, service: service, quantity: 4)
+      create(:service_record_item, service_record: sr, product: product, quantity: 2)
+      create(:service_record_item, service_record: sr, description: 'Texto libre', quantity: 5)
 
       ratio = described_class.calculate_trends[:service_product_ratio]
       expect(ratio[:services]).to eq(4)
@@ -246,6 +261,18 @@ RSpec.describe DashboardStatsService do
       expect(activity[:recent_services].first).to include(:id, :customer, :vehicle, :total, :date)
     end
 
+    it 'detalla servicios y productos de la atención desde sus ítems' do
+      customer = create(:customer)
+      vehicle  = create(:vehicle, customer: customer)
+      sr       = create(:service_record, customer: customer, vehicle: vehicle)
+      create(:service_record_item, service_record: sr, service: create(:service), description: 'Cambio de aceite', quantity: 1, position: 0)
+      create(:service_record_item, service_record: sr, product: create(:product), description: 'Filtro', quantity: 2, position: 1)
+      create(:service_record_item, service_record: sr, description: 'Lavado', quantity: 1, position: 2)
+
+      recent = described_class.get_recent_activity[:recent_services].first
+      expect(recent).to include(services: 1, products: 2, service_types: 'Cambio de aceite', product_types: 'Filtro')
+    end
+
     it 'returns today_appointments with expected shape' do
       customer = create(:customer)
       vehicle  = create(:vehicle, customer: customer)
@@ -286,8 +313,7 @@ RSpec.describe DashboardStatsService do
 
     describe '.calculate_retention_rate' do
       before do
-        ServiceRecordProduct.delete_all
-        ServiceRecordService.delete_all
+        ServiceRecordItem.delete_all
         ServiceRecord.delete_all
         Appointment.delete_all
         Vehicle.delete_all

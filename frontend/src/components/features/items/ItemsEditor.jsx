@@ -1,22 +1,38 @@
 import { useEffect, useRef } from 'react';
 import { useFieldArray } from 'react-hook-form';
 import { Plus } from 'lucide-react';
-import BudgetItemRow from '@components/features/budgets/BudgetItemRow';
-import { emptyItem } from '@utils/budget';
+import ItemRow from '@components/features/items/ItemRow';
+import { emptyItem } from '@utils/items';
 
 const HEADERS = [
   { label: 'Cant.', className: 'text-center' },
-  { label: 'Artículo / descripción' },
+  { label: 'Producto / servicio' },
   { label: 'Precio unit. s/IVA', className: 'text-right' },
-  { label: 'IVA' },
+  { label: '% IVA', className: 'text-right' },
   { label: 'Importe c/IVA', className: 'text-right' },
   { label: '' },
 ];
 
-// Lista editable de ítems. `onRemoveSaved(id)` recibe los ids ya guardados que se
-// quitan, para enviarlos con _destroy al backend.
-const BudgetItemsEditor = ({ control, register, setValue, getValues, errors, onRemoveSaved }) => {
-  const { fields, append, remove } = useFieldArray({ control, name: 'items_attributes' });
+/**
+ * ItemsEditor — sección "Productos y Servicios" (presupuesto y atención).
+ *
+ * @param {string} [name='items_attributes'] - Nombre del field array en el form
+ * @param {Function} onRemoveSaved - Recibe los ids ya guardados que se quitan (para enviarlos con _destroy)
+ * @param {React.ReactNode} [headerAction] - Acción extra en la cabecera de la sección
+ * @param {React.ReactNode} [children] - Contenido bajo la cabecera (ej. un aviso o chip)
+ */
+const ItemsEditor = ({
+  name = 'items_attributes',
+  control,
+  register,
+  setValue,
+  getValues,
+  errors,
+  onRemoveSaved,
+  headerAction,
+  children,
+}) => {
+  const { fields, append, remove } = useFieldArray({ control, name });
   const descriptionRefs = useRef({});
   const focusIndexRef = useRef(null);
 
@@ -33,7 +49,7 @@ const BudgetItemsEditor = ({ control, register, setValue, getValues, errors, onR
   };
 
   const handleRemove = (index) => {
-    const savedId = getValues(`items_attributes.${index}.id`);
+    const savedId = getValues(`${name}.${index}.id`);
     if (savedId) onRemoveSaved?.(savedId);
     if (fields.length === 1) {
       remove(0);
@@ -54,19 +70,24 @@ const BudgetItemsEditor = ({ control, register, setValue, getValues, errors, onR
 
   return (
     <section className="bg-surface-container border border-outline-variant rounded-lg p-4 sm:p-5 space-y-3">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-sm font-semibold text-on-surface-variant uppercase tracking-wide">
-          Artículos <span className="text-secondary font-normal normal-case">({fields.length})</span>
+          Productos y Servicios <span className="text-secondary font-normal normal-case">({fields.length})</span>
         </h2>
-        <button
-          type="button"
-          onClick={addItem}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary-container/20 text-primary rounded-lg hover:bg-primary-container/30 transition-colors"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          Agregar ítem
-        </button>
+        <div className="flex items-center gap-2">
+          {headerAction}
+          <button
+            type="button"
+            onClick={addItem}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary-container/20 text-primary rounded-lg hover:bg-primary-container/30 transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Agregar ítem
+          </button>
+        </div>
       </div>
+
+      {children}
 
       <div
         aria-hidden="true"
@@ -79,8 +100,9 @@ const BudgetItemsEditor = ({ control, register, setValue, getValues, errors, onR
 
       <div className="space-y-3 md:space-y-0 md:divide-y md:divide-outline-variant">
         {fields.map((field, index) => (
-          <BudgetItemRow
+          <ItemRow
             key={field.id}
+            name={name}
             index={index}
             control={control}
             register={register}
@@ -95,9 +117,10 @@ const BudgetItemsEditor = ({ control, register, setValue, getValues, errors, onR
 
       <p className="text-xs text-secondary">
         Tip: Enter en el precio de la última línea agrega otra. Los productos traen su IVA; los servicios van sin IVA.
+        Dejá el % vacío (o en 0) para cargar una línea sin IVA.
       </p>
     </section>
   );
 };
 
-export default BudgetItemsEditor;
+export default ItemsEditor;

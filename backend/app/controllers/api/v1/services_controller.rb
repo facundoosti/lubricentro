@@ -44,7 +44,7 @@ class Api::V1::ServicesController < ApplicationController
   # DELETE /api/v1/services/:id
   def destroy
     # Verificar si tiene service_records asociados
-    if @service.service_record_services.exists?
+    if @service.service_record_items.exists?
       render_json({}, errors: [ "Cannot delete service with associated records" ], message: "Error deleting service", status: :unprocessable_content)
       return
     end

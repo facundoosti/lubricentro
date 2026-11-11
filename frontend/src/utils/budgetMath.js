@@ -3,10 +3,10 @@ import { toIvaRate } from '@utils/iva';
 
 const lineNet = (item) => (Number(item?.quantity) || 0) * (Number(item?.unit_price) || 0);
 
-// Vista previa de los totales del presupuesto. Replica Budget#compute_totals del
-// backend (fuente de verdad): IVA redondeado por alícuota, no por línea; el recargo
-// de tarjeta se aplica sobre el total con IVA.
-export const computeBudgetTotals = (items = [], surchargePercentage = 0) => {
+// Vista previa de los totales de una lista de ítems (presupuesto o atención). Replica
+// Budget#compute_totals del backend (fuente de verdad): IVA redondeado por alícuota, no
+// por línea; el recargo de tarjeta se aplica sobre el total con IVA.
+export const computeItemsTotals = (items = [], surchargePercentage = 0) => {
   const groups = new Map();
   let exemptTotal = 0;
 
@@ -41,6 +41,8 @@ export const computeBudgetTotals = (items = [], surchargePercentage = 0) => {
     surchargeAmount: round2(totalCard - totalList),
   };
 };
+
+export const computeBudgetTotals = computeItemsTotals;
 
 export const lineNetTotal = (item) => round2(lineNet(item));
 

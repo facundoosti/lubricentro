@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@services/api';
+import { budgetKeys } from '@services/budgetsService';
 
 // Query keys
 export const serviceRecordKeys = {
@@ -76,17 +77,16 @@ export const useUpcomingServiceRecords = () => {
 };
 
 // Helper: build FormData for multipart uploads (only when photos are present)
-const toFormData = (namespace, data) => {
+export const toFormData = (namespace, data) => {
   const fd = new FormData();
   Object.entries(data).forEach(([key, value]) => {
     if (value === null || value === undefined) return;
-    if (key === 'service_record_services_attributes' || key === 'service_record_products_attributes') {
-      // Serialize nested arrays into indexed FormData keys
+    if (key === 'items_attributes') {
+      // Ítems anidados con índice: service_record[items_attributes][0][description].
+      // null va como '' (Rails lo toma como nil): así se puede vaciar el % o el catálogo de una línea guardada.
       value.forEach((item, idx) => {
         Object.entries(item).forEach(([k, v]) => {
-          if (v !== null && v !== undefined) {
-            fd.append(`${namespace}[${key}][${idx}][${k}]`, v);
-          }
+          if (v !== undefined) fd.append(`${namespace}[${key}][${idx}][${k}]`, v ?? '');
         });
       });
     } else if (Array.isArray(value)) {
@@ -111,9 +111,14 @@ export const useCreateServiceRecord = () => {
       const response = await api.post('/service_records', payload);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (response, variables) => {
       queryClient.invalidateQueries({ queryKey: serviceRecordKeys.lists() });
       queryClient.invalidateQueries({ queryKey: serviceRecordKeys.statistics() });
+      // Crear la atención desde un presupuesto lo marca como aprobado en el backend.
+      if (response?.data?.budget_id ?? variables?.budget_id) {
+        queryClient.invalidateQueries({ queryKey: budgetKeys.lists() });
+        queryClient.invalidateQueries({ queryKey: budgetKeys.details() });
+      }
     },
     onError: (error) => {
       throw error;

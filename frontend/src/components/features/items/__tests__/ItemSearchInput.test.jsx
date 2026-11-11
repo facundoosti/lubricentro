@@ -1,7 +1,7 @@
 import { screen, fireEvent, act } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderWithProviders } from '@/test/utils'
-import ItemSearchInput from '@components/features/budgets/ItemSearchInput'
+import ItemSearchInput from '@components/features/items/ItemSearchInput'
 
 vi.mock('@services/productsService', () => ({ useProducts: vi.fn() }))
 vi.mock('@services/servicesService', () => ({ useServices: vi.fn() }))
@@ -20,7 +20,7 @@ const withResults = ({ products = mockProducts, services = mockServices, isLoadi
   useServices.mockReturnValue({ data: { data: { services } }, isLoading })
 }
 
-const getInput = () => screen.getByRole('combobox', { name: 'Artículo o descripción' })
+const getInput = () => screen.getByRole('combobox', { name: 'Producto o servicio' })
 
 const typeAndWait = (text) => {
   fireEvent.change(getInput(), { target: { value: text } })
@@ -127,22 +127,22 @@ describe('ItemSearchInput', () => {
   })
 
   describe('selección', () => {
-    it('un producto devuelve su precio neto, alícuota y stock', () => {
+    it('un producto devuelve su precio neto, alícuota, stock y product_id', () => {
       withResults()
       const onSelect = vi.fn()
       renderWithProviders(<ItemSearchInput value="" onSelect={onSelect} />)
       typeAndWait('neu')
       fireEvent.mouseDown(screen.getByRole('option', { name: /Neumático 175/ }))
-      expect(onSelect).toHaveBeenCalledWith({ description: 'Neumático 175', unit_price: 4000, iva_rate: 10.5, stock: 0 })
+      expect(onSelect).toHaveBeenCalledWith({ description: 'Neumático 175', unit_price: 4000, iva_rate: 10.5, stock: 0, product_id: 2, service_id: null })
     })
 
-    it('un servicio queda sin IVA', () => {
+    it('un servicio queda sin IVA y con su service_id', () => {
       withResults()
       const onSelect = vi.fn()
       renderWithProviders(<ItemSearchInput value="" onSelect={onSelect} />)
       typeAndWait('cam')
       fireEvent.mouseDown(screen.getByRole('option', { name: /Cambio de aceite/ }))
-      expect(onSelect).toHaveBeenCalledWith({ description: 'Cambio de aceite', unit_price: 15000, iva_rate: null, stock: null })
+      expect(onSelect).toHaveBeenCalledWith({ description: 'Cambio de aceite', unit_price: 15000, iva_rate: null, stock: null, product_id: null, service_id: 9 })
     })
 
     it('un producto sin alícuota usa 21% y precio 0 si no es numérico', () => {

@@ -11,18 +11,21 @@
 #  created_at        :datetime         not null
 #  updated_at        :datetime         not null
 #  appointment_id    :bigint
+#  budget_id         :bigint
 #  customer_id       :bigint           not null
 #  vehicle_id        :bigint           not null
 #
 # Indexes
 #
 #  index_service_records_on_appointment_id  (appointment_id) UNIQUE
+#  index_service_records_on_budget_id       (budget_id)
 #  index_service_records_on_customer_id     (customer_id)
 #  index_service_records_on_vehicle_id      (vehicle_id)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (appointment_id => appointments.id)
+#  fk_rails_...  (budget_id => budgets.id) ON DELETE => nullify
 #  fk_rails_...  (customer_id => customers.id)
 #  fk_rails_...  (vehicle_id => vehicles.id)
 #
@@ -120,6 +123,40 @@ RSpec.describe ServiceRecordSerializer do
         :is_overdue,
         :days_until_next_service
       )
+    end
+
+    context 'con ítems' do
+      let(:product) { create(:product) }
+      let(:service_record) do
+        record = build(:service_record, customer: customer, vehicle: vehicle, budget: create(:budget, customer: customer))
+        record.items.build(description: 'Aceite', quantity: 2, unit_price: 10_000, iva_rate: 21, product: product, position: 0)
+        record.items.build(description: 'Lavado', quantity: 1, unit_price: 5_000, position: 1)
+        record.save!
+        record.reload
+      end
+
+      it 'incluye los ítems con su forma de contrato' do
+        expect(serialized[:items].size).to eq(2)
+        expect(serialized[:items].first.keys).to contain_exactly(
+          :id, :position, :description, :quantity, :unit_price, :iva_rate, :total, :product_id, :service_id
+        )
+        expect(serialized[:items].map { |i| i[:description] }).to eq(%w[Aceite Lavado])
+        expect(serialized[:items].first[:product_id]).to eq(product.id)
+      end
+
+      it 'incluye el presupuesto de origen y el desglose de IVA' do
+        expect(serialized).to include(
+          budget_id: service_record.budget_id,
+          subtotal_net: '20000.0',
+          total_iva: '4200.0',
+          exempt_total: '5000.0',
+          iva_breakdown: [ { rate: '21.0', base: '20000.0', amount: '4200.0' } ]
+        )
+      end
+
+      it 'ya no incluye las listas viejas de servicios y productos' do
+        expect(serialized).not_to include(:service_record_services, :service_record_products)
+      end
     end
 
     it 'serializes formatted_total_amount correctly' do

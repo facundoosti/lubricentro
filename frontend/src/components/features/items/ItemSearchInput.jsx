@@ -7,7 +7,8 @@ import { formatCurrency } from '@utils/money';
 
 const DEBOUNCE_MS = 300;
 
-// Producto: precio neto + su alícuota. Servicio: precio final (sin IVA).
+// Producto: precio neto + su alícuota. Servicio: precio final (sin IVA). Ambos guardan
+// el origen en el catálogo (product_id / service_id).
 const toSelection = (item) => {
   if (item._type === 'Producto') {
     return {
@@ -15,9 +16,18 @@ const toSelection = (item) => {
       unit_price: Number(item.unit_price) || 0,
       iva_rate: toIvaRate(item.iva_rate) ?? DEFAULT_IVA_RATE,
       stock: item.stock ?? null,
+      product_id: item.id,
+      service_id: null,
     };
   }
-  return { description: item.name, unit_price: Number(item.base_price) || 0, iva_rate: null, stock: null };
+  return {
+    description: item.name,
+    unit_price: Number(item.base_price) || 0,
+    iva_rate: null,
+    stock: null,
+    product_id: null,
+    service_id: item.id,
+  };
 };
 
 const PriceLine = ({ item }) => {
@@ -43,11 +53,11 @@ const StockBadge = ({ stock }) => {
 };
 
 /**
- * ItemSearchInput — busca productos y servicios para ítems de presupuesto.
+ * ItemSearchInput — busca productos y servicios para una línea de "Productos y Servicios".
  * Teclado: ↑ ↓ para moverse, Enter para elegir, Esc para cerrar.
  *
  * @param {string} value - Texto actual del campo descripción
- * @param {Function} onSelect - Callback con { description, unit_price, iva_rate, stock }
+ * @param {Function} onSelect - Callback con { description, unit_price, iva_rate, stock, product_id, service_id }
  * @param {Function} onChange - Callback para edición libre del texto
  * @param {Object} inputRef - Ref opcional al <input> (para enfocarlo desde afuera)
  */
@@ -158,7 +168,7 @@ const ItemSearchInput = ({ value, onSelect, onChange, inputRef }) => {
           ref={inputRef}
           type="text"
           role="combobox"
-          aria-label="Artículo o descripción"
+          aria-label="Producto o servicio"
           aria-expanded={showList}
           aria-controls={showList ? listId : undefined}
           aria-autocomplete="list"

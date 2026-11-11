@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_130002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -219,32 +219,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_120000) do
     t.index ["unit_price"], name: "index_products_on_unit_price"
   end
 
-  create_table "service_record_products", force: :cascade do |t|
+  create_table "service_record_items", force: :cascade do |t|
     t.bigint "service_record_id", null: false
-    t.bigint "product_id", null: false
-    t.integer "quantity", default: 1, null: false
-    t.decimal "unit_price", precision: 10, scale: 2, null: false
+    t.integer "position", default: 0, null: false
+    t.decimal "quantity", precision: 10, scale: 2, default: "1.0", null: false
+    t.string "description", limit: 500, null: false
+    t.decimal "unit_price", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "iva_rate", precision: 4, scale: 2
+    t.decimal "total", precision: 12, scale: 2, default: "0.0", null: false
+    t.bigint "product_id"
+    t.bigint "service_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["product_id"], name: "index_service_record_products_on_product_id"
-    t.index ["quantity"], name: "index_service_record_products_on_quantity"
-    t.index ["service_record_id", "product_id"], name: "index_service_record_products_unique", unique: true
-    t.index ["service_record_id"], name: "index_service_record_products_on_service_record_id"
-    t.index ["unit_price"], name: "index_service_record_products_on_unit_price"
-  end
-
-  create_table "service_record_services", force: :cascade do |t|
-    t.bigint "service_record_id", null: false
-    t.bigint "service_id", null: false
-    t.integer "quantity", default: 1, null: false
-    t.decimal "unit_price", precision: 10, scale: 2, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["quantity"], name: "index_service_record_services_on_quantity"
-    t.index ["service_id"], name: "index_service_record_services_on_service_id"
-    t.index ["service_record_id", "service_id"], name: "index_service_record_services_unique", unique: true
-    t.index ["service_record_id"], name: "index_service_record_services_on_service_record_id"
-    t.index ["unit_price"], name: "index_service_record_services_on_unit_price"
+    t.index ["product_id"], name: "index_service_record_items_on_product_id"
+    t.index ["service_id"], name: "index_service_record_items_on_service_id"
+    t.index ["service_record_id", "position"], name: "index_service_record_items_on_service_record_id_and_position"
   end
 
   create_table "service_records", force: :cascade do |t|
@@ -258,7 +247,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_120000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "appointment_id"
+    t.bigint "budget_id"
     t.index ["appointment_id"], name: "index_service_records_on_appointment_id", unique: true
+    t.index ["budget_id"], name: "index_service_records_on_budget_id"
     t.index ["customer_id"], name: "index_service_records_on_customer_id"
     t.index ["vehicle_id"], name: "index_service_records_on_vehicle_id"
   end
@@ -492,11 +483,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_120000) do
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "products", "categories"
   add_foreign_key "products", "suppliers"
-  add_foreign_key "service_record_products", "products"
-  add_foreign_key "service_record_products", "service_records"
-  add_foreign_key "service_record_services", "service_records"
-  add_foreign_key "service_record_services", "services"
+  add_foreign_key "service_record_items", "products", on_delete: :nullify
+  add_foreign_key "service_record_items", "service_records"
+  add_foreign_key "service_record_items", "services", on_delete: :nullify
   add_foreign_key "service_records", "appointments"
+  add_foreign_key "service_records", "budgets", on_delete: :nullify
   add_foreign_key "service_records", "customers"
   add_foreign_key "service_records", "vehicles"
   add_foreign_key "service_reminders", "customers"

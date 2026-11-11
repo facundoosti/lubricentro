@@ -295,8 +295,8 @@ RSpec.describe "Api::V1::Services", type: :request do
 
     context "when service has associated records" do
       let!(:service_record) { create(:service_record) }
-      let!(:service_record_service) do
-        create(:service_record_service, service: service, service_record: service_record)
+      let!(:service_record_item) do
+        create(:service_record_item, service: service, service_record: service_record)
       end
 
       it "does not delete the service" do

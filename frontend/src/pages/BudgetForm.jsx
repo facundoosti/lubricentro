@@ -5,8 +5,8 @@ import { ArrowLeft } from 'lucide-react';
 import { useBudget, useCreateBudget, useUpdateBudget } from '@services/budgetsService';
 import { showBudgetSuccess, showBudgetError, parseApiError } from '@services/notificationService';
 import BudgetGeneralSection from '@components/features/budgets/BudgetGeneralSection';
-import BudgetItemsEditor from '@components/features/budgets/BudgetItemsEditor';
-import BudgetTotalsBar from '@components/features/budgets/BudgetTotalsBar';
+import ItemsEditor from '@components/features/items/ItemsEditor';
+import ItemsTotalsBar from '@components/features/items/ItemsTotalsBar';
 import BudgetActions from '@components/features/budgets/BudgetActions';
 import { defaultValues, toFormValues, toPayload } from '@utils/budget';
 
@@ -114,7 +114,7 @@ const BudgetForm = () => {
         )}
       </div>
 
-      <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form id={FORM_ID} noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <BudgetGeneralSection
           control={control}
           register={register}
@@ -123,7 +123,7 @@ const BudgetForm = () => {
           initialCustomer={initialCustomer}
         />
 
-        <BudgetItemsEditor
+        <ItemsEditor
           control={control}
           register={register}
           setValue={setValue}
@@ -133,7 +133,7 @@ const BudgetForm = () => {
         />
       </form>
 
-      <BudgetTotalsBar
+      <ItemsTotalsBar
         control={control}
         formId={FORM_ID}
         isSaving={isSaving}

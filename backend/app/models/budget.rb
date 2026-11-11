@@ -30,6 +30,8 @@
 #  fk_rails_...  (vehicle_id => vehicles.id)
 #
 class Budget < ApplicationRecord
+  include ItemizedTotals
+
   belongs_to :customer, optional: true
   belongs_to :vehicle, optional: true
   has_many :items, class_name: "BudgetItem", dependent: :destroy, inverse_of: :budget
@@ -57,26 +59,12 @@ class Budget < ApplicationRecord
 
   before_save :compute_totals
 
-  # Totales con IVA discriminado. unit_price de los ítems es neto; los ítems sin
-  # alícuota (servicios, presupuestos anteriores al IVA) se suman como precio final.
-  # El IVA se redondea por alícuota, no por línea.
+  # Ver ItemizedTotals: IVA redondeado por alícuota; ítems sin alícuota como precio final.
   def compute_totals
-    self.subtotal_net = taxed_items.sum(&:line_net)
-    self.total_iva = iva_breakdown.sum { |row| row[:amount] }
-    self.total_list = subtotal_net + total_iva + exempt_total
+    self.subtotal_net = items_net_total
+    self.total_iva = items_iva_total
+    self.total_list = items_grand_total
     self.total_card = (total_list * (1 + (card_surcharge_percentage || 0) / 100)).round(2)
-  end
-
-  # [{ rate: 21.0, base: 20000.0, amount: 4200.0 }, ...] ordenado por alícuota descendente
-  def iva_breakdown
-    taxed_items.group_by { |i| i.iva_rate.to_d }.sort_by { |rate, _| -rate }.map do |rate, group|
-      base = group.sum(&:line_net)
-      { rate: rate, base: base, amount: (base * rate / 100).round(2) }
-    end
-  end
-
-  def exempt_total
-    active_items.reject(&:iva_rate).sum(&:line_net)
   end
 
   def status_label
@@ -90,14 +78,6 @@ class Budget < ApplicationRecord
   end
 
   private
-
-  def active_items
-    items.reject(&:marked_for_destruction?)
-  end
-
-  def taxed_items
-    active_items.select(&:iva_rate)
-  end
 
   def vehicle_belongs_to_customer
     return if vehicle.nil? || customer_id.nil?
