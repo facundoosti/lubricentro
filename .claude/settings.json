@@ -47,7 +47,6 @@
       "Read(./backend/config/master.key)",
       "Read(./backend/config/credentials/*.key)",
       "Edit(./backend/db/schema.rb)",
-      "Write(./backend/db/schema.rb)",
       "Bash(git push --force*)",
       "Bash(git push -f*)",
       "Bash(git reset --hard*)",
