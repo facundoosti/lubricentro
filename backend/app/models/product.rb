@@ -8,7 +8,7 @@
 #  description :text
 #  embedding   :vector(768)
 #  iva_rate    :decimal(4, 2)    default(21.0), not null
-#  name        :string(100)      not null
+#  name        :string(500)      not null
 #  sku         :string(50)
 #  stock       :integer          default(0), not null
 #  unit        :string(50)
@@ -43,7 +43,7 @@ class Product < ApplicationRecord
   IVA_RATES = [ BigDecimal("21"), BigDecimal("10.5") ].freeze
 
   # Validaciones
-  validates :name, presence: true, length: { maximum: 100 }, uniqueness: { case_sensitive: false }
+  validates :name, presence: true, length: { maximum: 500 }, uniqueness: { case_sensitive: false }
   validates :sku, length: { maximum: 50 }, allow_blank: true,
                   uniqueness: { case_sensitive: false, allow_blank: true }
   validates :description, length: { maximum: 1000 }, allow_blank: true

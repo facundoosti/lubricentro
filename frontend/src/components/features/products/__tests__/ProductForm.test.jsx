@@ -49,3 +49,34 @@ describe('ProductForm — IVA', () => {
     expect(onSubmit.mock.calls[0][0]).toMatchObject({ iva_rate: 10.5, unit_price: 1000 });
   });
 });
+
+describe('ProductForm — nombre', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const fillAndSubmit = (name) => {
+    fireEvent.change(screen.getByLabelText(/Nombre del Producto/), { target: { value: name } });
+    fireEvent.change(screen.getByLabelText(/Precio sin IVA/), { target: { value: '1000' } });
+    submitForm();
+  };
+
+  it('acepta nombres de hasta 500 caracteres', async () => {
+    const onSubmit = vi.fn().mockResolvedValue();
+    renderWithProviders(<ProductForm onSubmit={onSubmit} />);
+
+    const name = 'A'.repeat(500);
+    fillAndSubmit(name);
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    expect(onSubmit.mock.calls[0][0]).toMatchObject({ name });
+  });
+
+  it('rechaza nombres de más de 500 caracteres', async () => {
+    const onSubmit = vi.fn();
+    renderWithProviders(<ProductForm onSubmit={onSubmit} />);
+
+    fillAndSubmit('A'.repeat(501));
+
+    expect(await screen.findByText('El nombre no puede exceder 500 caracteres')).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+});

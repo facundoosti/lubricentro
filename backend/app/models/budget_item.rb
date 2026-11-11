@@ -25,7 +25,7 @@
 class BudgetItem < ApplicationRecord
   belongs_to :budget
 
-  validates :description, presence: true, length: { maximum: 300 }
+  validates :description, presence: true, length: { maximum: 500 }
   validates :quantity, presence: true, numericality: { greater_than: 0 }
   validates :unit_price, presence: true, numericality: { greater_than_or_equal_to: 0 }
   # nil = sin IVA (precio final, p. ej. servicios)

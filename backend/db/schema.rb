@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_06_215217) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -63,7 +63,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_215217) do
     t.bigint "budget_id", null: false
     t.integer "position", default: 0, null: false
     t.decimal "quantity", precision: 10, scale: 2, default: "1.0", null: false
-    t.string "description", limit: 300, null: false
+    t.string "description", limit: 500, null: false
     t.decimal "unit_price", precision: 12, scale: 2, default: "0.0", null: false
     t.decimal "total", precision: 12, scale: 2, default: "0.0", null: false
     t.datetime "created_at", null: false
@@ -198,7 +198,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_215217) do
   end
 
   create_table "products", force: :cascade do |t|
-    t.string "name", limit: 100, null: false
+    t.string "name", limit: 500, null: false
     t.text "description"
     t.decimal "unit_price", precision: 10, scale: 2, null: false
     t.string "unit", limit: 50

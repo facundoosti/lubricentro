@@ -8,7 +8,7 @@
 #  description :text
 #  embedding   :vector(768)
 #  iva_rate    :decimal(4, 2)    default(21.0), not null
-#  name        :string(100)      not null
+#  name        :string(500)      not null
 #  sku         :string(50)
 #  stock       :integer          default(0), not null
 #  unit        :string(50)
@@ -39,7 +39,13 @@ RSpec.describe Product, type: :model do
     subject { build(:product) }
 
     it { should validate_presence_of(:name) }
-    it { should validate_length_of(:name).is_at_most(100) }
+    it { should validate_length_of(:name).is_at_most(500) }
+
+    it 'guarda un nombre de 500 caracteres en la base' do
+      product = create(:product, name: 'A' * 500)
+      expect(product.reload.name.length).to eq(500)
+    end
+
     it { should validate_uniqueness_of(:name).case_insensitive }
 
     it { should validate_length_of(:description).is_at_most(1000) }

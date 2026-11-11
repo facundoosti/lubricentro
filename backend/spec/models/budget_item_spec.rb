@@ -33,7 +33,12 @@ RSpec.describe BudgetItem, type: :model do
 
   describe 'validations' do
     it { is_expected.to validate_presence_of(:description) }
-    it { is_expected.to validate_length_of(:description).is_at_most(300) }
+    it { is_expected.to validate_length_of(:description).is_at_most(500) }
+
+    it 'guarda una descripción de 500 caracteres en la base (nombre largo de producto)' do
+      item = create(:budget_item, description: 'A' * 500)
+      expect(item.reload.description.length).to eq(500)
+    end
     it { is_expected.to validate_presence_of(:quantity) }
     it { is_expected.to validate_numericality_of(:quantity).is_greater_than(0) }
     it { is_expected.to validate_presence_of(:unit_price) }

@@ -109,7 +109,7 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
           id="name"
           {...register('name', {
             required: 'El nombre es requerido',
-            maxLength: { value: 100, message: 'El nombre no puede exceder 100 caracteres' },
+            maxLength: { value: 500, message: 'El nombre no puede exceder 500 caracteres' },
           })}
           className={inputClass(errors.name)}
           placeholder="Ej: Aceite de Motor 5W-30"

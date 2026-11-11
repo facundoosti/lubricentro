@@ -8,7 +8,7 @@
 #  description :text
 #  embedding   :vector(768)
 #  iva_rate    :decimal(4, 2)    default(21.0), not null
-#  name        :string(100)      not null
+#  name        :string(500)      not null
 #  sku         :string(50)
 #  stock       :integer          default(0), not null
 #  unit        :string(50)
