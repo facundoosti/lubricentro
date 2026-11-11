@@ -1,6 +1,7 @@
 # Totales con IVA discriminado para un padre con `has_many :items` (presupuesto, atención).
 # unit_price de los ítems es neto; los ítems sin alícuota (servicios, datos anteriores al IVA)
 # se suman como precio final. El IVA se redondea por alícuota, no por línea.
+# La ganancia (fórmula sumada) se calcula por línea sobre el neto de todos los ítems, con o sin IVA.
 # Los ítems marcados para borrar (nested attributes) no cuentan.
 module ItemizedTotals
   extend ActiveSupport::Concern
@@ -26,9 +27,13 @@ module ItemizedTotals
     iva_breakdown.sum { |row| row[:amount] }
   end
 
-  # Neto + IVA + sin IVA (= total efectivo/débito del presupuesto)
+  def margin_total
+    active_items.sum(&:line_margin)
+  end
+
+  # Neto + IVA + sin IVA + ganancia (= total efectivo/débito del presupuesto)
   def items_grand_total
-    items_net_total + items_iva_total + exempt_total
+    items_net_total + items_iva_total + exempt_total + margin_total
   end
 
   private

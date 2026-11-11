@@ -18,27 +18,27 @@ describe('utils/serviceRecord', () => {
   it('mapea los ítems de la respuesta al form (migrada = % vacío)', () => {
     const items = toServiceRecordFormItems({
       items: [
-        { id: 2, position: 1, description: 'Filtro', quantity: '2.0', unit_price: '3000.0', iva_rate: null, product_id: 4, service_id: null },
+        { id: 2, position: 1, description: 'Filtro', quantity: '2.0', unit_price: '3000.0', iva_rate: null, margin_percentage: '20.0', product_id: 4, service_id: null },
         { id: 1, position: 0, description: 'Cambio de aceite', quantity: '1.0', unit_price: '8000.0', iva_rate: null, product_id: null, service_id: 9 },
       ],
     });
     expect(items).toEqual([
-      { id: 1, position: 0, description: 'Cambio de aceite', quantity: 1, unit_price: 8000, iva_rate: '', product_id: null, service_id: 9 },
-      { id: 2, position: 1, description: 'Filtro', quantity: 2, unit_price: 3000, iva_rate: '', product_id: 4, service_id: null },
+      { id: 1, position: 0, description: 'Cambio de aceite', quantity: 1, unit_price: 8000, iva_rate: '', margin_percentage: 0, product_id: null, service_id: 9 },
+      { id: 2, position: 1, description: 'Filtro', quantity: 2, unit_price: 3000, iva_rate: '', margin_percentage: 20, product_id: 4, service_id: null },
     ]);
   });
 
   it('sin ítems deja una línea vacía', () => {
     expect(toServiceRecordFormItems({ items: [] })).toHaveLength(1);
-    expect(toServiceRecordFormItems(undefined)[0]).toMatchObject({ description: '', iva_rate: '21' });
+    expect(toServiceRecordFormItems(undefined)[0]).toMatchObject({ description: '', iva_rate: '21', margin_percentage: 0 });
   });
 
-  it('los ítems de un presupuesto se copian sin ids', () => {
+  it('los ítems de un presupuesto se copian sin ids y con su ganancia', () => {
     const items = budgetToFormItems({
-      items: [{ id: 50, position: 0, description: 'Aceite', quantity: '4.0', unit_price: '10000.0', iva_rate: '21.0' }],
+      items: [{ id: 50, position: 0, description: 'Aceite', quantity: '4.0', unit_price: '10000.0', iva_rate: '21.0', margin_percentage: '30.0' }],
     });
     expect(items).toEqual([
-      { position: 0, description: 'Aceite', quantity: 4, unit_price: 10000, iva_rate: '21', product_id: null, service_id: null },
+      { position: 0, description: 'Aceite', quantity: 4, unit_price: 10000, iva_rate: '21', margin_percentage: 30, product_id: null, service_id: null },
     ]);
   });
 
@@ -47,7 +47,7 @@ describe('utils/serviceRecord', () => {
       form({
         total_amount: 1,
         items_attributes: [
-          { id: 1, description: ' Aceite 5W30 ', quantity: 4, unit_price: 10000, iva_rate: '21', product_id: 7, service_id: null },
+          { id: 1, description: ' Aceite 5W30 ', quantity: 4, unit_price: 10000, iva_rate: '21', margin_percentage: '15.5', product_id: 7, service_id: null },
           { description: 'Lavado de motor', quantity: 1, unit_price: 5000, iva_rate: '', product_id: null, service_id: null },
           { id: 3, description: '', quantity: 1, unit_price: 0, iva_rate: '21' },
           { description: '', quantity: 1, unit_price: 0, iva_rate: '21' },
@@ -57,8 +57,8 @@ describe('utils/serviceRecord', () => {
     );
 
     expect(payload.items_attributes).toEqual([
-      { id: 1, position: 0, quantity: 4, description: 'Aceite 5W30', unit_price: 10000, iva_rate: 21, product_id: 7, service_id: null },
-      { position: 1, quantity: 1, description: 'Lavado de motor', unit_price: 5000, iva_rate: null, product_id: null, service_id: null },
+      { id: 1, position: 0, quantity: 4, description: 'Aceite 5W30', unit_price: 10000, iva_rate: 21, margin_percentage: 15.5, product_id: 7, service_id: null },
+      { position: 1, quantity: 1, description: 'Lavado de motor', unit_price: 5000, iva_rate: null, margin_percentage: 0, product_id: null, service_id: null },
       { id: 9, _destroy: true },
       { id: 3, _destroy: true },
     ]);

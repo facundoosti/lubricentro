@@ -127,22 +127,22 @@ describe('ItemSearchInput', () => {
   })
 
   describe('selección', () => {
-    it('un producto devuelve su precio neto, alícuota, stock y product_id', () => {
+    it('un producto devuelve su precio neto, alícuota, ganancia por defecto (30%), stock y product_id', () => {
       withResults()
       const onSelect = vi.fn()
       renderWithProviders(<ItemSearchInput value="" onSelect={onSelect} />)
       typeAndWait('neu')
       fireEvent.mouseDown(screen.getByRole('option', { name: /Neumático 175/ }))
-      expect(onSelect).toHaveBeenCalledWith({ description: 'Neumático 175', unit_price: 4000, iva_rate: 10.5, stock: 0, product_id: 2, service_id: null })
+      expect(onSelect).toHaveBeenCalledWith({ description: 'Neumático 175', unit_price: 4000, iva_rate: 10.5, margin_percentage: 30, stock: 0, product_id: 2, service_id: null })
     })
 
-    it('un servicio queda sin IVA y con su service_id', () => {
+    it('un servicio queda sin IVA, sin ganancia y con su service_id', () => {
       withResults()
       const onSelect = vi.fn()
       renderWithProviders(<ItemSearchInput value="" onSelect={onSelect} />)
       typeAndWait('cam')
       fireEvent.mouseDown(screen.getByRole('option', { name: /Cambio de aceite/ }))
-      expect(onSelect).toHaveBeenCalledWith({ description: 'Cambio de aceite', unit_price: 15000, iva_rate: null, stock: null, product_id: null, service_id: 9 })
+      expect(onSelect).toHaveBeenCalledWith({ description: 'Cambio de aceite', unit_price: 15000, iva_rate: null, margin_percentage: 0, stock: null, product_id: null, service_id: 9 })
     })
 
     it('un producto sin alícuota usa 21% y precio 0 si no es numérico', () => {

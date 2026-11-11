@@ -62,7 +62,7 @@ const renderForm = (route = '/budgets/new') =>
   );
 
 const items = () => screen.getAllByTestId('item-row');
-const fillItem = (index, { description, quantity, price, iva }) => {
+const fillItem = (index, { description, quantity, price, iva, margin }) => {
   const row = items()[index];
   if (description !== undefined) {
     fireEvent.change(within(row).getByRole('combobox', { name: 'Producto o servicio' }), { target: { value: description } });
@@ -70,6 +70,7 @@ const fillItem = (index, { description, quantity, price, iva }) => {
   if (quantity !== undefined) fireEvent.change(within(row).getByLabelText(/Cantidad/), { target: { value: quantity } });
   if (price !== undefined) fireEvent.change(within(row).getByLabelText(/Precio unit/), { target: { value: price } });
   if (iva !== undefined) fireEvent.change(within(row).getByLabelText(/% IVA/), { target: { value: iva } });
+  if (margin !== undefined) fireEvent.change(within(row).getByLabelText(/% Ganancia/), { target: { value: margin } });
 };
 const submit = () => fireEvent.click(screen.getByRole('button', { name: 'Crear presupuesto' }));
 
@@ -96,33 +97,39 @@ describe('BudgetForm — nuevo', () => {
     expect(document.body.textContent).not.toMatch(/Artículos/);
   });
 
-  it('un % libre recalcula la línea y el total', () => {
+  it('la ganancia recalcula la línea y los totales (1 × $1.000, 21%, 30%, recargo 10%)', () => {
     renderForm();
-    fillItem(0, { description: 'Mano de obra', quantity: '1', price: '1000', iva: '30' });
-    expect(screen.getByTestId('line-total')).toHaveTextContent('$1.300');
-    expect(screen.getByTestId('total-list')).toHaveTextContent('$1.300');
+    fireEvent.change(screen.getByLabelText(/Recargo tarjeta/), { target: { value: '10' } });
+    fillItem(0, { description: 'Mano de obra', quantity: '1', price: '1000', iva: '21', margin: '30' });
+    expect(screen.getByTestId('line-total')).toHaveTextContent('$1.510');
+    expect(screen.getByTestId('total-list')).toHaveTextContent('$1.510');
+    expect(screen.getByTestId('total-card')).toHaveTextContent('$1.661');
+
+    fireEvent.click(screen.getByRole('button', { name: /Desglose/ }));
+    expect(screen.getByTestId('margin-total')).toHaveTextContent('$300');
+    expect(screen.getByTestId('iva-21')).toHaveTextContent('$210');
   });
 
-  it('envía un % libre y el 0 como sin IVA', async () => {
+  it('envía la alícuota elegida en el select y la ganancia de cada línea', async () => {
     renderForm();
-    fillItem(0, { description: 'Mano de obra', price: '1000', iva: '15.75' });
+    fillItem(0, { description: 'Mano de obra', price: '1000', iva: '10.5', margin: '30' });
     fireEvent.click(screen.getByRole('button', { name: 'Agregar ítem' }));
-    fillItem(1, { description: 'Lavado', price: '500', iva: '0' });
+    fillItem(1, { description: 'Lavado', price: '500', iva: '' });
     submit();
 
     await waitFor(() => expect(mocks.create).toHaveBeenCalled());
     expect(mocks.create.mock.calls[0][0].items_attributes).toEqual([
-      expect.objectContaining({ description: 'Mano de obra', iva_rate: 15.75 }),
-      expect.objectContaining({ description: 'Lavado', iva_rate: null }),
+      expect.objectContaining({ description: 'Mano de obra', iva_rate: 10.5, margin_percentage: 30 }),
+      expect.objectContaining({ description: 'Lavado', iva_rate: null, margin_percentage: 0 }),
     ]);
     expect(mocks.create.mock.calls[0][0].items_attributes[0]).not.toHaveProperty('product_id');
   });
 
-  it('un % fuera de rango muestra el mensaje propio (sin burbuja nativa)', async () => {
+  it('una ganancia fuera de rango muestra el mensaje propio (sin burbuja nativa)', async () => {
     renderForm();
-    fillItem(0, { description: 'Mano de obra', price: '1000', iva: '120' });
+    fillItem(0, { description: 'Mano de obra', price: '1000', margin: '1000' });
     submit();
-    expect(await screen.findByText('% IVA inválido (0 a 99,99)')).toBeInTheDocument();
+    expect(await screen.findByText('% Ganancia inválido (0 a 999,99)')).toBeInTheDocument();
     expect(mocks.create).not.toHaveBeenCalled();
   });
 
@@ -138,7 +145,7 @@ describe('BudgetForm — nuevo', () => {
     fireEvent.click(screen.getByRole('button', { name: /Desglose/ }));
     expect(screen.getByTestId('subtotal-net')).toHaveTextContent('$20.000');
     expect(screen.getByTestId('iva-21')).toHaveTextContent('$4.200');
-    expect(screen.getByTestId('subtotal-gross')).toHaveTextContent('$24.200');
+    expect(screen.queryByTestId('margin-total')).toBeNull();
     expect(screen.getByTestId('line-total')).toHaveTextContent('$24.200');
   });
 
@@ -243,6 +250,7 @@ describe('BudgetForm — edición', () => {
     items: [
       { id: 1, quantity: '1.0', description: 'Aceite', unit_price: '1000.0', iva_rate: '21.0' },
       { id: 2, quantity: '1.0', description: 'Filtro', unit_price: '500.0', iva_rate: null },
+      { id: 3, quantity: '1.0', description: 'Viejo', unit_price: '100.0', iva_rate: '15.0', margin_percentage: '30.0' },
     ],
   };
 
@@ -253,7 +261,7 @@ describe('BudgetForm — edición', () => {
 
   it('borra en el backend la línea quitada', async () => {
     renderForm('/budgets/5/edit');
-    expect(items()).toHaveLength(2);
+    expect(items()).toHaveLength(3);
     fireEvent.click(screen.getByRole('button', { name: 'Quitar línea 2' }));
     fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
 
@@ -261,9 +269,19 @@ describe('BudgetForm — edición', () => {
     const { id, data } = mocks.update.mock.calls[0][0];
     expect(id).toBe('5');
     expect(data.items_attributes).toEqual([
-      expect.objectContaining({ id: 1, iva_rate: 21 }),
+      expect.objectContaining({ id: 1, iva_rate: 21, margin_percentage: 0 }),
+      expect.objectContaining({ id: 3, iva_rate: 15, margin_percentage: 30 }),
       { id: 2, _destroy: true },
     ]);
+  });
+
+  it('muestra el % anterior de una línea vieja y su ganancia', () => {
+    renderForm('/budgets/5/edit');
+    const row = items()[2];
+    expect(within(row).getByLabelText('% IVA línea 3')).toHaveValue('15');
+    expect(within(row).getByRole('option', { name: '15% (anterior)' }).selected).toBe(true);
+    expect(within(row).getByLabelText('% Ganancia línea 3')).toHaveValue(30);
+    expect(within(row).getByTestId('line-total')).toHaveTextContent('$145');
   });
 
   it('ofrece WhatsApp con el teléfono del cliente', () => {

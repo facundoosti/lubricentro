@@ -14,7 +14,8 @@ const Row = ({ label, value, testId }) => (
 
 /**
  * ItemsTotalsBar — barra fija al pie del formulario: totales en vivo (vista previa del
- * cálculo del backend), desglose plegable y acciones Cancelar / Guardar.
+ * cálculo del backend), desglose plegable (Subtotal neto · Ganancia · IVA por alícuota ·
+ * Sin IVA · Recargo) y acciones Cancelar / Guardar. La ganancia es interna: solo se ve acá.
  *
  * @param {boolean} [showCard=true] - Presupuesto: efectivo/débito + tarjeta (con recargo).
  *   Atención (`false`): un solo "Total", sin recargo de tarjeta.
@@ -33,6 +34,9 @@ const ItemsTotalsBar = ({ control, formId, isSaving, submitLabel, onCancel, show
         {open && (
           <div id="items-breakdown" className="px-4 sm:px-5 pt-4 pb-2 space-y-1.5 border-b border-outline-variant">
             <Row label="Subtotal neto" value={formatCurrency(totals.subtotalNet)} testId="subtotal-net" />
+            {totals.marginTotal > 0 && (
+              <Row label="Ganancia" value={formatCurrency(totals.marginTotal)} testId="margin-total" />
+            )}
             {totals.ivaBreakdown.map((row) => (
               <Row
                 key={row.rate}
@@ -41,7 +45,6 @@ const ItemsTotalsBar = ({ control, formId, isSaving, submitLabel, onCancel, show
                 testId={`iva-${row.rate}`}
               />
             ))}
-            <Row label="Subtotal con IVA" value={formatCurrency(totals.subtotalGross)} testId="subtotal-gross" />
             {totals.exemptTotal > 0 && (
               <Row label="Sin IVA (servicios)" value={formatCurrency(totals.exemptTotal)} testId="exempt-total" />
             )}

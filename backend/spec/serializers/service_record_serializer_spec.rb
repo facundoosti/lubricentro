@@ -138,7 +138,8 @@ RSpec.describe ServiceRecordSerializer do
       it 'incluye los ítems con su forma de contrato' do
         expect(serialized[:items].size).to eq(2)
         expect(serialized[:items].first.keys).to contain_exactly(
-          :id, :position, :description, :quantity, :unit_price, :iva_rate, :total, :product_id, :service_id
+          :id, :position, :description, :quantity, :unit_price, :iva_rate, :margin_percentage, :total, :product_id,
+          :service_id
         )
         expect(serialized[:items].map { |i| i[:description] }).to eq(%w[Aceite Lavado])
         expect(serialized[:items].first[:product_id]).to eq(product.id)
@@ -150,6 +151,7 @@ RSpec.describe ServiceRecordSerializer do
           subtotal_net: '20000.0',
           total_iva: '4200.0',
           exempt_total: '5000.0',
+          margin_total: '0.0',
           iva_breakdown: [ { rate: '21.0', base: '20000.0', amount: '4200.0' } ]
         )
       end

@@ -58,6 +58,27 @@ RSpec.describe ServiceRecord, type: :model do
       expect(record.iva_breakdown).to eq([ { rate: 21, base: 20_000, amount: 4_200 } ])
     end
 
+    it 'suma la ganancia de un ítem sin IVA (2 × 500, 20% → 1200)' do
+      record = build_record([ { quantity: 2, unit_price: 500, iva_rate: nil, margin_percentage: 20 } ])
+      record.save!
+      expect(record.reload.total_amount).to eq(1_200)
+      expect(record.margin_total).to eq(200)
+    end
+
+    it 'suma la ganancia sobre el neto con IVA (1 × 1000, 21%, 30% → 1510)' do
+      record = build_record([ { quantity: 1, unit_price: 1_000, iva_rate: 21, margin_percentage: 30 } ])
+      record.save!
+      expect(record.reload.total_amount).to eq(1_510)
+      expect(record).to have_attributes(total_iva: 210, margin_total: 300)
+    end
+
+    it 'recalcula el total si solo cambia la ganancia de un ítem' do
+      record = build_record([ { quantity: 1, unit_price: 1_000 } ])
+      record.save!
+      record.update!(items_attributes: [ { id: record.items.first.id, description: 'Ítem', margin_percentage: 10 } ])
+      expect(record.reload.total_amount).to eq(1_100)
+    end
+
     it 'ignora el total_amount asignado si hay ítems' do
       record = build_record([ { quantity: 2, unit_price: 10_000, iva_rate: 21 }, { quantity: 1, unit_price: 5_000 } ], total_amount: 1)
       record.save!

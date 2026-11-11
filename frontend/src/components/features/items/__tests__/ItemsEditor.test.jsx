@@ -52,7 +52,10 @@ describe('ItemsEditor', () => {
     renderWithProviders(<Harness />);
     expect(screen.getByRole('heading', { name: /Productos y Servicios/ })).toHaveTextContent('(1)');
     expect(screen.getByText('Producto / servicio', { selector: 'span[class]' })).toBeInTheDocument();
-    expect(screen.getAllByText('% IVA').length).toBeGreaterThan(0);
+    const header = screen.getByText('Cant.').parentElement;
+    expect([...header.children].map((c) => c.textContent)).toEqual([
+      'Cant.', 'Producto / servicio', 'Precio unit. s/IVA', '% Ganancia', 'IVA', 'Importe final', '',
+    ]);
     expect(document.body.textContent).not.toMatch(/Artículos/);
   });
 
@@ -61,42 +64,72 @@ describe('ItemsEditor', () => {
     expect(screen.getByRole('button', { name: 'extra' })).toBeInTheDocument();
   });
 
-  it('al elegir un producto guarda precio, % y product_id', () => {
+  it('al elegir un producto guarda precio, % IVA, ganancia 30% y product_id', () => {
     renderWithProviders(<Harness />);
+    expect(within(rows()[0]).getByLabelText('% Ganancia línea 1')).toHaveValue(0);
     search(rows()[0], 'ace');
     fireEvent.mouseDown(screen.getByRole('option', { name: /Aceite 5W30/ }));
 
-    expect(within(rows()[0]).getByLabelText('% IVA línea 1')).toHaveValue(10.5);
-    expect(within(rows()[0]).getByTestId('line-total')).toHaveTextContent('$11.050');
+    expect(within(rows()[0]).getByLabelText('% IVA línea 1')).toHaveValue('10.5');
+    expect(within(rows()[0]).getByLabelText('% Ganancia línea 1')).toHaveValue(30);
+    // 10.000 + 30% ganancia (3.000) + 10,5% IVA (1.050)
+    expect(within(rows()[0]).getByTestId('line-total')).toHaveTextContent('$14.050');
     expect(formApi.getValues('items_attributes.0')).toMatchObject({
-      description: 'Aceite 5W30', unit_price: 10000, iva_rate: '10.5', product_id: 1, service_id: null,
+      description: 'Aceite 5W30', unit_price: 10000, iva_rate: '10.5', margin_percentage: 30, product_id: 1, service_id: null,
     });
   });
 
-  it('al elegir un servicio deja el % vacío y guarda service_id', () => {
-    renderWithProviders(<Harness />);
+  it('al elegir un servicio queda "Sin IVA", sin ganancia y guarda service_id', () => {
+    renderWithProviders(<Harness items={[{ ...emptyItem(0), margin_percentage: 30 }]} />);
     search(rows()[0], 'lav');
     fireEvent.mouseDown(screen.getByRole('option', { name: /Lavado de motor/ }));
 
-    expect(within(rows()[0]).getByLabelText('% IVA línea 1')).toHaveValue(null);
-    expect(formApi.getValues('items_attributes.0')).toMatchObject({ product_id: null, service_id: 7 });
+    expect(within(rows()[0]).getByLabelText('% IVA línea 1')).toHaveValue('');
+    expect(within(rows()[0]).getByLabelText('% Ganancia línea 1')).toHaveValue(0);
+    expect(formApi.getValues('items_attributes.0')).toMatchObject({ margin_percentage: 0, product_id: null, service_id: 7 });
   });
 
-  it('un % libre recalcula el importe de la línea', () => {
+  it('el texto libre no cambia la ganancia (línea nueva = 0)', () => {
+    renderWithProviders(<Harness />);
+    search(rows()[0], 'Mano de obra');
+    expect(formApi.getValues('items_attributes.0')).toMatchObject({ description: 'Mano de obra', margin_percentage: 0 });
+  });
+
+  it('cambiar la alícuota recalcula el importe de la línea', () => {
     renderWithProviders(<Harness items={[{ ...emptyItem(0), description: 'Mano de obra', unit_price: 1000 }]} />);
-    fireEvent.change(within(rows()[0]).getByLabelText('% IVA línea 1'), { target: { value: '30' } });
-    expect(within(rows()[0]).getByTestId('line-total')).toHaveTextContent('$1.300');
+    expect(within(rows()[0]).getByTestId('line-total')).toHaveTextContent('$1.210');
+    fireEvent.change(within(rows()[0]).getByLabelText('% IVA línea 1'), { target: { value: '10.5' } });
+    expect(within(rows()[0]).getByTestId('line-total')).toHaveTextContent('$1.105');
     fireEvent.change(within(rows()[0]).getByLabelText('% IVA línea 1'), { target: { value: '' } });
     expect(within(rows()[0]).getByTestId('line-total')).toHaveTextContent('$1.000');
+    expect(formApi.getValues('items_attributes.0.iva_rate')).toBe('');
   });
 
-  it('marca un % fuera de rango en una línea con descripción', async () => {
+  it('la ganancia se suma al importe final (1 × $1.000, 21%, 30% → $1.510)', () => {
+    renderWithProviders(<Harness items={[{ ...emptyItem(0), description: 'Filtro', unit_price: 1000 }]} />);
+    const margin = within(rows()[0]).getByLabelText('% Ganancia línea 1');
+    expect(margin).toHaveValue(0);
+    expect(margin).toHaveAttribute('step', '0.01');
+    fireEvent.change(margin, { target: { value: '30' } });
+    expect(within(rows()[0]).getByTestId('line-total')).toHaveTextContent('$1.510');
+    fireEvent.change(margin, { target: { value: '' } });
+    expect(within(rows()[0]).getByTestId('line-total')).toHaveTextContent('$1.210');
+  });
+
+  it('muestra un % guardado fuera de la lista como "(anterior)"', () => {
+    renderWithProviders(<Harness items={[{ ...emptyItem(0), description: 'Viejo', unit_price: 1000, iva_rate: '15' }]} />);
+    expect(within(rows()[0]).getByLabelText('% IVA línea 1')).toHaveValue('15');
+    expect(within(rows()[0]).getByRole('option', { name: '15% (anterior)' }).selected).toBe(true);
+    expect(within(rows()[0]).getByTestId('line-total')).toHaveTextContent('$1.150');
+  });
+
+  it('marca una ganancia fuera de rango en una línea con descripción', async () => {
     vi.useRealTimers();
     renderWithProviders(<Harness items={[{ ...emptyItem(0), description: 'Mano de obra', unit_price: 1000 }]} />);
-    fireEvent.change(within(rows()[0]).getByLabelText('% IVA línea 1'), { target: { value: '100' } });
-    // submit directo: saltea la validación nativa del navegador (max=99.99) y prueba la del form
+    fireEvent.change(within(rows()[0]).getByLabelText('% Ganancia línea 1'), { target: { value: '1000' } });
+    // submit directo: saltea la validación nativa del navegador (max=999.99) y prueba la del form
     fireEvent.submit(screen.getByRole('button', { name: 'guardar' }).closest('form'));
-    expect(await screen.findByRole('alert')).toHaveTextContent('% IVA inválido');
+    expect(await screen.findByRole('alert')).toHaveTextContent('% Ganancia inválido');
   });
 
   it('marca cantidad 0 como inválida', async () => {
@@ -136,6 +169,7 @@ describe('ItemsEditor', () => {
     renderWithProviders(<Harness />);
     fireEvent.click(screen.getByRole('button', { name: 'Agregar ítem' }));
     expect(rows()).toHaveLength(2);
-    expect(within(rows()[1]).getByLabelText('% IVA línea 2')).toHaveValue(21);
+    expect(within(rows()[1]).getByLabelText('% IVA línea 2')).toHaveValue('21');
+    expect(within(rows()[1]).getByLabelText('% Ganancia línea 2')).toHaveValue(0);
   });
 });

@@ -49,12 +49,13 @@ class Api::V1::BudgetsController < ApplicationController
   end
 
   # POST /api/v1/budgets/:id/duplicate
-  # Copia cliente, vehículo, notas, recargo e ítems (con su alícuota) en un borrador con fecha de hoy.
+  # Copia cliente, vehículo, notas, recargo e ítems (con su alícuota y ganancia) en un borrador con fecha de hoy.
   def duplicate
     copy = @budget.dup
     copy.assign_attributes(status: "draft", date: Date.current)
     @budget.items.each do |item|
-      copy.items.build(item.attributes.slice("position", "quantity", "description", "unit_price", "iva_rate"))
+      copied = copy.items.build(item.attributes.slice("position", "quantity", "description", "unit_price", "iva_rate", "margin_percentage"))
+      copied.legacy_iva_rate_ok = true # conserva un % anterior (p. ej. 15)
     end
 
     if copy.save
@@ -77,7 +78,7 @@ class Api::V1::BudgetsController < ApplicationController
     params.require(:budgets).permit(
       :customer_id, :vehicle_id, :vehicle_description,
       :date, :status, :notes, :card_surcharge_percentage,
-      items_attributes: [ :id, :position, :quantity, :description, :unit_price, :iva_rate, :_destroy ]
+      items_attributes: [ :id, :position, :quantity, :description, :unit_price, :iva_rate, :margin_percentage, :_destroy ]
     )
   end
 end

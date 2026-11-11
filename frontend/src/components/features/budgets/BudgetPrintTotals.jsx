@@ -10,11 +10,11 @@ const Line = ({ label, value, testId }) => (
   </div>
 );
 
-// Pie de la hoja impresa: desglose de IVA (solo si hay IVA) y los dos totales.
+// Pie de la hoja impresa: IVA por alícuota (sin base, solo si hay IVA) y los dos totales que calcula
+// el backend. No muestra neto, subtotales, importe sin IVA ni ganancia (la ganancia es interna).
 const BudgetPrintTotals = ({ budget }) => {
   const breakdown = (budget.iva_breakdown || []).filter((r) => Number(r.amount) > 0);
   const hasIva = Number(budget.total_iva) > 0 && breakdown.length > 0;
-  const exempt = Number(budget.exempt_total) || 0;
 
   return (
     <div
@@ -22,21 +22,9 @@ const BudgetPrintTotals = ({ budget }) => {
     >
       {hasIva && (
         <div data-testid="print-iva-breakdown" style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingBottom: '4px', borderBottom: '1px dashed #ccc' }}>
-          <Line label="Subtotal neto" value={budget.subtotal_net} testId="print-subtotal" />
           {breakdown.map((r) => (
-            <Line
-              key={r.rate}
-              label={`IVA ${formatIvaRate(r.rate)} s/ ${formatCurrency(r.base)}`}
-              value={r.amount}
-              testId={`print-iva-${Number(r.rate)}`}
-            />
+            <Line key={r.rate} label={`IVA ${formatIvaRate(r.rate)}`} value={r.amount} testId={`print-iva-${Number(r.rate)}`} />
           ))}
-          <Line
-            label="Subtotal con IVA"
-            value={(Number(budget.subtotal_net) || 0) + (Number(budget.total_iva) || 0)}
-            testId="print-subtotal-gross"
-          />
-          {exempt > 0 && <Line label="Sin IVA (servicios)" value={exempt} testId="print-exempt" />}
         </div>
       )}
 

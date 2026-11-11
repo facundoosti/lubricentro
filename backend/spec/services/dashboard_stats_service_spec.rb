@@ -225,6 +225,34 @@ RSpec.describe DashboardStatsService do
     end
   end
 
+  describe 'ingresos por servicio y por producto' do
+    it 'incluyen la ganancia de cada línea' do
+      customer = create(:customer)
+      sr = create(:service_record, customer: customer, vehicle: create(:vehicle, customer: customer))
+      service = create(:service, name: 'Alineación')
+      product = create(:product, name: 'Filtro')
+      create(:service_record_item, service_record: sr, service: service, quantity: 2, unit_price: 500, margin_percentage: 20)
+      create(:service_record_item, service_record: sr, product: product, quantity: 1, unit_price: 1_000, iva_rate: 21,
+                                   margin_percentage: 30)
+
+      trends = described_class.calculate_trends
+      expect(trends[:revenue_by_service_type]).to eq([ { name: 'Alineación', revenue: 1_200 } ])
+      expect(trends[:revenue_by_product_type]).to eq([ { name: 'Filtro', revenue: 1_300 } ])
+    end
+
+    it 'redondean neto y ganancia a 2 decimales como el modelo' do
+      customer = create(:customer)
+      sr = create(:service_record, customer: customer, vehicle: create(:vehicle, customer: customer))
+      item = create(:service_record_item, service_record: sr, service: create(:service, name: 'Lavado'),
+                                          quantity: 1.5, unit_price: 33.33, margin_percentage: 10)
+
+      revenue = described_class.calculate_trends[:revenue_by_service_type].first[:revenue]
+      # neto ROUND(49.995) = 50.00; ganancia ROUND(5.00) = 5.00 → 55.00 (sin redondeo daría 54.9945)
+      expect(revenue).to eq(item.line_net + item.line_margin)
+      expect(revenue).to eq(BigDecimal('55'))
+    end
+  end
+
   context 'when it is night in Argentina but already the next day in UTC' do
     let(:customer) { create(:customer) }
     let(:vehicle)  { create(:vehicle, customer: customer) }

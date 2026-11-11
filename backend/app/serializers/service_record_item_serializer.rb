@@ -5,6 +5,7 @@
 #  id                :bigint           not null, primary key
 #  description       :string(500)      not null
 #  iva_rate          :decimal(4, 2)
+#  margin_percentage :decimal(6, 2)    default(0.0), not null
 #  position          :integer          default(0), not null
 #  quantity          :decimal(10, 2)   default(1.0), not null
 #  total             :decimal(12, 2)   default(0.0), not null
@@ -30,5 +31,5 @@
 class ServiceRecordItemSerializer < Blueprinter::Base
   identifier :id
 
-  fields :position, :description, :quantity, :unit_price, :iva_rate, :total, :product_id, :service_id
+  fields :position, :description, :quantity, :unit_price, :iva_rate, :margin_percentage, :total, :product_id, :service_id
 end

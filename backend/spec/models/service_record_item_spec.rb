@@ -5,6 +5,7 @@
 #  id                :bigint           not null, primary key
 #  description       :string(500)      not null
 #  iva_rate          :decimal(4, 2)
+#  margin_percentage :decimal(6, 2)    default(0.0), not null
 #  position          :integer          default(0), not null
 #  quantity          :decimal(10, 2)   default(1.0), not null
 #  total             :decimal(12, 2)   default(0.0), not null
@@ -45,6 +46,26 @@ RSpec.describe ServiceRecordItem, type: :model do
     it { is_expected.to validate_numericality_of(:quantity).is_greater_than(0) }
     it { is_expected.to validate_presence_of(:unit_price) }
     it { is_expected.to validate_numericality_of(:unit_price).is_greater_than_or_equal_to(0) }
+
+    it 'rechaza una alícuota nueva de 15' do
+      item = build(:service_record_item, iva_rate: 15)
+      expect(item).not_to be_valid
+      expect(item.errors[:iva_rate]).to be_present
+    end
+
+    it 'vuelve a guardar un ítem viejo con 15% cambiando la cantidad' do
+      item = create(:service_record_item, iva_rate: 21)
+      item.update_column(:iva_rate, 15)
+      expect(item.reload.update(quantity: 2)).to be(true)
+      expect(item.reload).to have_attributes(quantity: 2, iva_rate: 15)
+    end
+
+    it 'acepta una ganancia de 999,99 y rechaza 1000' do
+      expect(build(:service_record_item, margin_percentage: 999.99)).to be_valid
+      item = build(:service_record_item, margin_percentage: 1000)
+      expect(item).not_to be_valid
+      expect(item.errors[:margin_percentage]).to be_present
+    end
 
     it 'acepta cantidades decimales' do
       expect(create(:service_record_item, quantity: 1.5).reload.quantity).to eq(BigDecimal('1.5'))

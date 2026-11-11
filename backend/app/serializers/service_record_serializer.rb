@@ -97,6 +97,9 @@ class ServiceRecordSerializer < Blueprinter::Base
     field :exempt_total do |obj|
       obj.exempt_total.to_d.to_s
     end
+    field :margin_total do |obj|
+      obj.margin_total.to_d.to_s
+    end
     field :iva_breakdown do |obj|
       obj.iva_breakdown.map { |row| row.transform_values { |v| v.to_d.to_s } }
     end

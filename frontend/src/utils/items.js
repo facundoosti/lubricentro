@@ -1,11 +1,13 @@
 import { DEFAULT_IVA_RATE, ivaRateToOption, toIvaRate } from '@utils/iva';
+import { toMarginPercentage } from '@utils/budgetMath';
 
-// Línea nueva de "Productos y Servicios" (presupuesto y atención). Texto libre = 21%.
+// Línea nueva de "Productos y Servicios" (presupuesto y atención). Texto libre = 21%, sin ganancia.
 export const emptyItem = (position = 0) => ({
   quantity: 1,
   description: '',
   unit_price: 0,
   iva_rate: String(DEFAULT_IVA_RATE),
+  margin_percentage: 0,
   product_id: null,
   service_id: null,
   position,
@@ -24,6 +26,7 @@ export const toFormItems = (items, { keepIds = true } = {}) =>
           description: item.description,
           unit_price: Number(item.unit_price),
           iva_rate: ivaRateToOption(item.iva_rate),
+          margin_percentage: toMarginPercentage(item.margin_percentage),
           product_id: item.product_id ?? null,
           service_id: item.service_id ?? null,
         }))
@@ -47,6 +50,7 @@ export const toItemsAttributes = (items = [], removedIds = [], { withCatalog = f
       description: item.description.trim(),
       unit_price: item.unit_price,
       iva_rate: toIvaRate(item.iva_rate),
+      margin_percentage: toMarginPercentage(item.margin_percentage),
       ...(withCatalog ? { product_id: item.product_id || null, service_id: item.service_id || null } : {}),
     })),
     ...[...removedIds, ...blankSaved].map((id) => ({ id, _destroy: true })),

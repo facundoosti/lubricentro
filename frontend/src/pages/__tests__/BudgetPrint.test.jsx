@@ -54,28 +54,66 @@ const renderPrint = (budget) => {
 describe('BudgetPrint', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('muestra precio sin IVA, importe con IVA, alícuota por línea y el desglose', () => {
+  it('muestra precio unitario e importe finales, sin columna IVA, y el IVA por alícuota sin base', () => {
     renderPrint(mixed);
-    expect(screen.getByText('P. UNIT. S/IVA')).toBeInTheDocument();
-    expect(screen.getByText('IMPORTE C/IVA')).toBeInTheDocument();
-    const row = screen.getByText('Neumático').closest('tr');
-    expect(within(row).getByText('10,5%')).toBeInTheDocument();
-    expect(within(row).getByText('$4.420')).toBeInTheDocument();
-    expect(within(screen.getByText('Aceite').closest('tr')).getByText('$24.200')).toBeInTheDocument();
-    expect(within(screen.getByText('Mano de obra').closest('tr')).getAllByText('$15.000')).toHaveLength(2);
-    expect(within(screen.getByText('Mano de obra').closest('tr')).getByText('s/IVA')).toBeInTheDocument();
+    const headers = screen.getAllByRole('columnheader').map((th) => th.textContent);
+    expect(headers).toEqual(['CANT', 'DESCRIPCIÓN', 'P. UNIT.', 'IMPORTE']);
 
-    expect(screen.getByTestId('print-subtotal')).toHaveTextContent('$24.000');
+    const neumatico = screen.getByText('Neumático').closest('tr');
+    expect(within(neumatico).getAllByText('$4.420')).toHaveLength(2);
+    expect(within(neumatico).queryByText('10,5%')).toBeNull();
+    const aceite = screen.getByText('Aceite').closest('tr');
+    expect(within(aceite).getByText('$12.100')).toBeInTheDocument();
+    expect(within(aceite).getByText('$24.200')).toBeInTheDocument();
+    const mano = screen.getByText('Mano de obra').closest('tr');
+    expect(within(mano).getAllByText('$15.000')).toHaveLength(2);
+    expect(within(mano).queryByText('s/IVA')).toBeNull();
+
+    expect(screen.getByText('IVA 21%')).toBeInTheDocument();
     expect(screen.getByTestId('print-iva-21')).toHaveTextContent('$4.200');
-    expect(screen.getByText('IVA 21% s/ $20.000')).toBeInTheDocument();
-    expect(screen.getByTestId('print-subtotal-gross')).toHaveTextContent('$28.620');
+    expect(screen.getByText('IVA 10,5%')).toBeInTheDocument();
     expect(screen.getByTestId('print-iva-10.5')).toHaveTextContent('$420');
-    expect(screen.getByTestId('print-exempt')).toHaveTextContent('$15.000');
     expect(screen.getByTestId('print-total-list')).toHaveTextContent('$43.620');
     expect(screen.getByTestId('print-total-card')).toHaveTextContent('$47.982');
+
+    const text = document.body.textContent;
+    expect(text).not.toMatch(/Subtotal neto|Subtotal con IVA|Sin IVA|s\/ \$/);
+    expect(screen.queryByTestId('print-subtotal')).toBeNull();
+    expect(screen.queryByTestId('print-exempt')).toBeNull();
   });
 
-  it('muestra % libres con coma en la línea y en el pie', () => {
+  it('no muestra la ganancia: 1 × $1.000, 21%, 30%, recargo 10%', () => {
+    renderPrint({
+      id: 10,
+      date: '2026-11-11',
+      customer: { name: 'Juan', phone: '11' },
+      subtotal_net: '1000.0',
+      total_iva: '210.0',
+      exempt_total: '0.0',
+      margin_total: '300.0',
+      total_list: '1510.0',
+      total_card: '1661.0',
+      iva_breakdown: [{ rate: '21.0', base: '1000.0', amount: '210.0' }],
+      items: [
+        { id: 1, quantity: '1.0', description: 'Filtro', unit_price: '1000.0', iva_rate: '21.0', margin_percentage: '30.0', total: '1000.0' },
+      ],
+    });
+    const row = screen.getByText('Filtro').closest('tr');
+    expect(within(row).getAllByText('$1.510')).toHaveLength(2);
+    expect(screen.getByText('IVA 21%')).toBeInTheDocument();
+    expect(screen.getByTestId('print-iva-21')).toHaveTextContent('$210');
+    expect(screen.getByTestId('print-total-list')).toHaveTextContent('$1.510');
+    expect(screen.getByTestId('print-total-card')).toHaveTextContent('$1.661');
+
+    const text = document.body.textContent;
+    expect(text).not.toMatch(/Ganancia/i);
+    expect(text).not.toContain('$300');
+    expect(text).not.toContain('30%');
+    expect(text).not.toMatch(/Subtotal/);
+    expect(text).not.toMatch(/Sin IVA/);
+  });
+
+  it('muestra % anteriores con coma en el pie', () => {
     renderPrint({
       ...legacy,
       id: 9,
@@ -93,18 +131,19 @@ describe('BudgetPrint', () => {
         { id: 2, quantity: '1.0', description: 'Repuesto', unit_price: '1000.0', iva_rate: '15.75', total: '1000.0' },
       ],
     });
-    expect(within(screen.getByText('Mano de obra').closest('tr')).getByText('15%')).toBeInTheDocument();
-    expect(within(screen.getByText('Repuesto').closest('tr')).getByText('15,75%')).toBeInTheDocument();
-    expect(screen.getByText('IVA 15% s/ $1.000')).toBeInTheDocument();
+    expect(within(screen.getByText('Mano de obra').closest('tr')).getAllByText('$1.150')).toHaveLength(2);
+    expect(within(screen.getByText('Repuesto').closest('tr')).getAllByText('$1.157,50')).toHaveLength(2);
+    expect(screen.getByText('IVA 15%')).toBeInTheDocument();
     expect(screen.getByTestId('print-iva-15')).toHaveTextContent('$150');
-    expect(screen.getByText('IVA 15,75% s/ $1.000')).toBeInTheDocument();
+    expect(screen.getByText('IVA 15,75%')).toBeInTheDocument();
     expect(screen.getByTestId('print-iva-15.75')).toHaveTextContent('$157,50');
   });
 
   it('un presupuesto viejo se imprime solo con los totales', () => {
     renderPrint(legacy);
     expect(screen.queryByTestId('print-iva-breakdown')).toBeNull();
-    expect(screen.queryByText('IVA')).toBeNull();
+    expect(document.body.textContent).not.toMatch(/IVA/);
+    expect(within(screen.getByText('Service').closest('tr')).getByText('$25.000')).toBeInTheDocument();
     expect(screen.getByTestId('print-total-list')).toHaveTextContent('$50.000');
     expect(screen.getByTestId('print-total-card')).toHaveTextContent('$55.000');
   });

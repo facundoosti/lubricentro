@@ -63,7 +63,12 @@ RSpec.describe BudgetSerializer, type: :serializer do
 
     it 'includes items association' do
       expect(result[:items]).to be_an(Array)
-      expect(result[:items].first).to include(:id, :description, :quantity, :unit_price, :total)
+      expect(result[:items].first).to include(:id, :description, :quantity, :unit_price, :margin_percentage, :total)
+    end
+
+    it 'includes margin_total' do
+      budget.items.first.update!(margin_percentage: 30)
+      expect(BudgetSerializer.render_as_hash(budget.reload, view: :with_items)[:margin_total]).to eq('60.0')
     end
 
     it 'includes customer association' do

@@ -2,16 +2,17 @@
 #
 # Table name: budget_items
 #
-#  id          :bigint           not null, primary key
-#  description :string(500)      not null
-#  iva_rate    :decimal(4, 2)
-#  position    :integer          default(0), not null
-#  quantity    :decimal(10, 2)   default(1.0), not null
-#  total       :decimal(12, 2)   default(0.0), not null
-#  unit_price  :decimal(12, 2)   default(0.0), not null
-#  created_at  :datetime         not null
-#  updated_at  :datetime         not null
-#  budget_id   :bigint           not null
+#  id                :bigint           not null, primary key
+#  description       :string(500)      not null
+#  iva_rate          :decimal(4, 2)
+#  margin_percentage :decimal(6, 2)    default(0.0), not null
+#  position          :integer          default(0), not null
+#  quantity          :decimal(10, 2)   default(1.0), not null
+#  total             :decimal(12, 2)   default(0.0), not null
+#  unit_price        :decimal(12, 2)   default(0.0), not null
+#  created_at        :datetime         not null
+#  updated_at        :datetime         not null
+#  budget_id         :bigint           not null
 #
 # Indexes
 #
@@ -31,7 +32,7 @@ RSpec.describe BudgetItemSerializer, type: :serializer do
 
   it 'includes all fields' do
     expect(result).to include(
-      :id, :budget_id, :position, :quantity, :description, :unit_price, :iva_rate, :total
+      :id, :budget_id, :position, :quantity, :description, :unit_price, :iva_rate, :margin_percentage, :total
     )
   end
 

@@ -40,6 +40,7 @@ class Api::V1::ServiceRecordsController < ApplicationController
     end
 
     @service_record = ServiceRecord.new(service_record_params)
+    allow_budget_iva_rates(@service_record)
 
     if save_and_approve_budget(@service_record)
       complete_linked_appointment(@service_record)
@@ -119,6 +120,16 @@ class Api::V1::ServiceRecordsController < ApplicationController
     render_json({ errors: [ "Service record not found" ] }, message: "Service record not found", status: :not_found)
   end
 
+  # Ítems copiados del presupuesto de origen: conservan su alícuota aunque sea un % anterior.
+  def allow_budget_iva_rates(record)
+    return if record.budget.nil?
+
+    budget_rates = record.budget.items.filter_map(&:iva_rate)
+    record.items.each do |item|
+      item.legacy_iva_rate_ok = true if item.iva_rate.present? && budget_rates.include?(item.iva_rate)
+    end
+  end
+
   # La atención y el paso del presupuesto de origen a "Aprobado" se guardan juntos o nada.
   def save_and_approve_budget(record)
     ServiceRecord.transaction do
@@ -144,7 +155,7 @@ class Api::V1::ServiceRecordsController < ApplicationController
       :customer_id, :vehicle_id, :appointment_id,
       *(action_name == "create" ? [ :budget_id ] : []),
       photos: [],
-      items_attributes: [ :id, :position, :description, :quantity, :unit_price, :iva_rate, :product_id, :service_id, :_destroy ]
+      items_attributes: [ :id, :position, :description, :quantity, :unit_price, :iva_rate, :margin_percentage, :product_id, :service_id, :_destroy ]
     )
   end
 end

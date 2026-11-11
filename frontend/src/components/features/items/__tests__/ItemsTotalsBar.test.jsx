@@ -9,8 +9,8 @@ const items = [
   { description: 'Lavado', quantity: 1, unit_price: 5000, iva_rate: '' },
 ];
 
-const Harness = ({ showCard, surcharge = 10, onCancel = vi.fn() }) => {
-  const { control } = useForm({ defaultValues: { items_attributes: items, card_surcharge_percentage: surcharge } });
+const Harness = ({ showCard, surcharge = 10, onCancel = vi.fn(), items: lines = items }) => {
+  const { control } = useForm({ defaultValues: { items_attributes: lines, card_surcharge_percentage: surcharge } });
   return (
     <ItemsTotalsBar control={control} formId="f" submitLabel="Guardar" onCancel={onCancel} showCard={showCard} />
   );
@@ -37,6 +37,23 @@ describe('ItemsTotalsBar', () => {
     expect(screen.getByTestId('iva-21')).toHaveTextContent('$4.200');
     expect(screen.getByTestId('exempt-total')).toHaveTextContent('$5.000');
     expect(screen.queryByText(/Recargo tarjeta/)).toBeNull();
+    expect(screen.queryByTestId('margin-total')).toBeNull();
+    expect(screen.queryByText('Subtotal con IVA')).toBeNull();
+  });
+
+  it('el desglose muestra la ganancia (1 × $1.000, 21%, 30%, recargo 10%)', () => {
+    renderWithProviders(
+      <Harness items={[{ description: 'Filtro', quantity: 1, unit_price: 1000, iva_rate: '21', margin_percentage: '30' }]} />,
+    );
+    expect(screen.getByTestId('total-list')).toHaveTextContent('$1.510');
+    expect(screen.getByTestId('total-card')).toHaveTextContent('$1.661');
+
+    fireEvent.click(screen.getByRole('button', { name: /Desglose/ }));
+    const labels = [...document.querySelectorAll('#items-breakdown > div > span:first-child')].map((el) => el.textContent);
+    expect(labels).toEqual(['Subtotal neto', 'Ganancia', 'IVA 21% s/ $1.000', 'Recargo tarjeta (10%)']);
+    expect(screen.getByTestId('subtotal-net')).toHaveTextContent('$1.000');
+    expect(screen.getByTestId('margin-total')).toHaveTextContent('$300');
+    expect(screen.getByTestId('iva-21')).toHaveTextContent('$210');
   });
 
   it('el botón de guardar envía el form y Cancelar avisa', () => {

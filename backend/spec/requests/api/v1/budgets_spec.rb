@@ -160,13 +160,7 @@ RSpec.describe "Api::V1::Budgets", type: :request do
         post "/api/v1/budgets", params: attrs, headers: auth_headers(user)
       end
 
-      it "guarda 0 como sin IVA" do
-        post_with_rate("0")
-        expect(response).to have_http_status(:created)
-        expect(json_response[:data][:items].first[:iva_rate]).to be_nil
-      end
-
-      [ "100", "-1" ].each do |rate|
+      [ "15", "0", "100", "-1" ].each do |rate|
         it "responde 422 con #{rate}" do
           post_with_rate(rate)
           expect(response).to have_http_status(:unprocessable_content)
@@ -177,14 +171,50 @@ RSpec.describe "Api::V1::Budgets", type: :request do
       end
     end
 
-    context "con un % libre en un ítem" do
-      it "guarda el % y lo suma al total" do
+    context "con ganancia en un ítem" do
+      def post_with_margin(margin)
         attrs = valid_attributes.deep_dup
-        attrs[:budgets][:items_attributes] = [ { description: "X", quantity: 1, unit_price: 1000, iva_rate: "15" } ]
+        attrs[:budgets][:card_surcharge_percentage] = 10
+        attrs[:budgets][:items_attributes] = [
+          { description: "Aceite", quantity: 1, unit_price: 1000, iva_rate: "21", margin_percentage: margin }.compact
+        ]
         post "/api/v1/budgets", params: attrs, headers: auth_headers(user)
+      end
+
+      it "guarda la ganancia y la suma a los totales" do
+        post_with_margin("30")
         expect(response).to have_http_status(:created)
-        expect(json_response[:data][:items].first[:iva_rate]).to eq("15.0")
-        expect(json_response[:data][:total_list]).to eq("1150.0")
+        data = json_response[:data]
+        expect(data[:items].first[:margin_percentage]).to eq("30.0")
+        expect(data).to include(subtotal_net: "1000.0", total_iva: "210.0", margin_total: "300.0",
+                                total_list: "1510.0", total_card: "1661.0")
+      end
+
+      it "usa 0 si no se envía" do
+        post_with_margin(nil)
+        expect(response).to have_http_status(:created)
+        expect(json_response[:data][:items].first[:margin_percentage]).to eq("0.0")
+        expect(json_response[:data]).to include(margin_total: "0.0", total_list: "1210.0")
+      end
+
+      [ "", nil ].each do |blank|
+        it "usa 0 si se envía la clave con #{blank.inspect}" do
+          attrs = valid_attributes.deep_dup
+          attrs[:budgets][:items_attributes] = [
+            { description: "Aceite", quantity: 1, unit_price: 1000, iva_rate: "21", margin_percentage: blank }
+          ]
+          post "/api/v1/budgets", params: attrs, headers: auth_headers(user), as: :json
+          expect(response).to have_http_status(:created)
+          expect(json_response[:data][:items].first[:margin_percentage]).to eq("0.0")
+          expect(json_response[:data]).to include(margin_total: "0.0", total_list: "1210.0")
+        end
+      end
+
+      it "responde 422 con una ganancia negativa" do
+        post_with_margin("-5")
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(json_response[:success]).to be(false)
+        expect(Budget.count).to eq(0)
       end
     end
 
@@ -249,6 +279,32 @@ RSpec.describe "Api::V1::Budgets", type: :request do
       end
     end
 
+    context "con un ítem viejo guardado con % libre" do
+      let!(:item) do
+        budget.items.create!(description: "Aceite", quantity: 1, unit_price: 1000, iva_rate: 21).tap do |i|
+          i.update_column(:iva_rate, 15)
+        end
+      end
+
+      it "lo vuelve a guardar sin tocar la alícuota y con ganancia" do
+        patch "/api/v1/budgets/#{budget.id}",
+          params: { budgets: { items_attributes: [ { id: item.id, description: "Aceite", quantity: 2, iva_rate: "15",
+                                                     margin_percentage: "10" } ] } },
+          headers: auth_headers(user)
+        expect(response).to have_http_status(:ok)
+        expect(item.reload).to have_attributes(iva_rate: 15, margin_percentage: 10)
+        expect(json_response[:data]).to include(total_iva: "300.0", margin_total: "200.0", total_list: "2500.0")
+      end
+
+      it "responde 422 si se cambia a otro % fuera de la lista" do
+        patch "/api/v1/budgets/#{budget.id}",
+          params: { budgets: { items_attributes: [ { id: item.id, description: "Aceite", iva_rate: "16" } ] } },
+          headers: auth_headers(user)
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(item.reload.iva_rate).to eq(15)
+      end
+    end
+
     context "when budget does not exist" do
       before do
         patch "/api/v1/budgets/0",
@@ -269,7 +325,8 @@ RSpec.describe "Api::V1::Budgets", type: :request do
     end
 
     before do
-      budget.items.create!(description: "Aceite", quantity: 2, unit_price: 1000, iva_rate: 21, position: 0)
+      budget.items.create!(description: "Aceite", quantity: 2, unit_price: 1000, iva_rate: 21, margin_percentage: 25,
+                           position: 0)
       budget.items.create!(description: "Mano de obra", quantity: 1, unit_price: 500, iva_rate: nil, position: 1)
       budget.save!
     end
@@ -286,15 +343,31 @@ RSpec.describe "Api::V1::Budgets", type: :request do
                                 customer_id: customer.id, vehicle_id: vehicle.id)
       end
 
-      it "copies the items with their IVA rate" do
+      it "copies the items with their IVA rate and margin" do
         items = json_response[:data][:items]
-        expect(items.map { |i| [ i[:description], i[:iva_rate] ] }).to eq([ [ "Aceite", "21.0" ], [ "Mano de obra", nil ] ])
+        expect(items.map { |i| [ i[:description], i[:iva_rate], i[:margin_percentage] ] })
+          .to eq([ [ "Aceite", "21.0", "25.0" ], [ "Mano de obra", nil, "0.0" ] ])
         expect(json_response[:data][:total_list]).to eq(budget.reload.total_list.to_s)
       end
 
       it "keeps the original untouched" do
         expect(budget.reload.status).to eq("approved")
         expect(budget.items.count).to eq(2)
+      end
+    end
+
+    context "con un ítem al % anterior (15)" do
+      before do
+        budget.items.create!(description: "Filtro", quantity: 1, unit_price: 200, iva_rate: 21, position: 2)
+                     .update_column(:iva_rate, 15)
+      end
+
+      it "lo duplica y conserva el 15%" do
+        post "/api/v1/budgets/#{budget.id}/duplicate", headers: auth_headers(user)
+        expect(response).to have_http_status(:created)
+        filtro = json_response[:data][:items].find { |i| i[:description] == "Filtro" }
+        expect(filtro[:iva_rate]).to eq("15.0")
+        expect(Budget.find(json_response[:data][:id]).items.find_by(description: "Filtro").iva_rate).to eq(15)
       end
     end
 

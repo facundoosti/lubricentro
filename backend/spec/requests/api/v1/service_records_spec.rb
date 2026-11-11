@@ -228,9 +228,9 @@ RSpec.describe "Api::V1::ServiceRecords", type: :request do
       data = JSON.parse(response.body)["data"]
       expect(data["items"].map { |i| i["description"] }).to eq([ "Aceite 5W30", "Lavado de motor" ])
       expect(data["items"].first).to include("product_id" => product.id, "service_id" => nil, "iva_rate" => "21.0", "total" => "20000.0")
-      expect(data["items"].last).to include("product_id" => nil, "service_id" => nil, "iva_rate" => nil)
+      expect(data["items"].last).to include("product_id" => nil, "service_id" => nil, "iva_rate" => nil, "margin_percentage" => "0.0")
       expect(data).to include("total_amount" => "29200.0", "subtotal_net" => "20000.0", "total_iva" => "4200.0",
-                              "exempt_total" => "5000.0", "budget_id" => nil)
+                              "exempt_total" => "5000.0", "margin_total" => "0.0", "budget_id" => nil)
       expect(data["iva_breakdown"]).to eq([ { "rate" => "21.0", "base" => "20000.0", "amount" => "4200.0" } ])
     end
 
@@ -247,9 +247,32 @@ RSpec.describe "Api::V1::ServiceRecords", type: :request do
       expect(ServiceRecord.last.items).to be_empty
     end
 
-    it "responde 422 con un % de IVA inválido" do
+    [ 100, 15 ].each do |rate|
+      it "responde 422 con un % de IVA inválido (#{rate})" do
+        post "/api/v1/service_records",
+             params: { service_record: valid_attributes.merge(items_attributes: [ { description: "X", quantity: 1, unit_price: 100, iva_rate: rate } ]) },
+             headers: auth_headers(user), as: :json
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(ServiceRecord.count).to eq(0)
+      end
+    end
+
+    it "guarda la ganancia de cada ítem y la suma al total" do
       post "/api/v1/service_records",
-           params: { service_record: valid_attributes.merge(items_attributes: [ { description: "X", quantity: 1, unit_price: 100, iva_rate: 100 } ]) },
+           params: { service_record: valid_attributes.merge(items_attributes: [
+             { description: "Aceite", quantity: 1, unit_price: 1_000, iva_rate: 21, margin_percentage: 30 },
+             { description: "Lavado", quantity: 2, unit_price: 500, margin_percentage: 20 }
+           ]) },
+           headers: auth_headers(user), as: :json
+      expect(response).to have_http_status(:created)
+      data = JSON.parse(response.body)["data"]
+      expect(data["items"].map { |i| i["margin_percentage"] }).to eq([ "30.0", "20.0" ])
+      expect(data).to include("total_amount" => "2710.0", "margin_total" => "500.0", "total_iva" => "210.0")
+    end
+
+    it "responde 422 con una ganancia negativa" do
+      post "/api/v1/service_records",
+           params: { service_record: valid_attributes.merge(items_attributes: [ { description: "X", quantity: 1, unit_price: 100, margin_percentage: -5 } ]) },
            headers: auth_headers(user), as: :json
       expect(response).to have_http_status(:unprocessable_content)
       expect(ServiceRecord.count).to eq(0)
@@ -281,6 +304,50 @@ RSpec.describe "Api::V1::ServiceRecords", type: :request do
       expect(response).to have_http_status(:created)
       expect(JSON.parse(response.body)["data"]["budget_id"]).to eq(budget.id)
       expect(budget.reload.status).to eq("approved")
+    end
+
+    it "conserva la ganancia de las líneas copiadas del presupuesto" do
+      budget.items.create!(description: "Aceite", quantity: 1, unit_price: 1_000, iva_rate: 21, margin_percentage: 30)
+      items = budget.items.map { |i| i.attributes.slice("description", "quantity", "unit_price", "iva_rate", "margin_percentage", "position") }
+      post "/api/v1/service_records",
+           params: { service_record: valid_attributes.merge(customer_id: customer.id, vehicle_id: vehicle.id, budget_id: budget.id,
+                                                            items_attributes: items) },
+           headers: auth_headers(user), as: :json
+      expect(response).to have_http_status(:created)
+      data = JSON.parse(response.body)["data"]
+      expect(data["items"].first["margin_percentage"]).to eq("30.0")
+      expect(data).to include("total_amount" => "1510.0", "margin_total" => "300.0")
+    end
+
+    context "con un ítem al % anterior" do
+      before do
+        budget.items.create!(description: "Filtro", quantity: 1, unit_price: 200, iva_rate: 21).update_column(:iva_rate, 15)
+      end
+
+      def create_with_item_rate(rate, budget_id: budget.id)
+        post "/api/v1/service_records",
+             params: { service_record: valid_attributes.merge(customer_id: customer.id, vehicle_id: vehicle.id, budget_id: budget_id,
+                                                              items_attributes: [ { description: "Filtro", quantity: 1, unit_price: 200,
+                                                                                    iva_rate: rate } ]) },
+             headers: auth_headers(user), as: :json
+      end
+
+      it "acepta el 15% si viene del presupuesto de origen" do
+        create_with_item_rate("15.0")
+        expect(response).to have_http_status(:created)
+        expect(ServiceRecord.last.items.first.iva_rate).to eq(15)
+      end
+
+      it "responde 422 con un % que no está en el presupuesto (17)" do
+        expect { create_with_item_rate(17) }.not_to change(ServiceRecord, :count)
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(budget.reload.status).to eq("sent")
+      end
+
+      it "responde 422 con 15% sin budget_id" do
+        expect { create_with_item_rate(15, budget_id: nil) }.not_to change(ServiceRecord, :count)
+        expect(response).to have_http_status(:unprocessable_content)
+      end
     end
 
     it "sin budget_id no toca ningún presupuesto" do
@@ -352,6 +419,16 @@ RSpec.describe "Api::V1::ServiceRecords", type: :request do
             params: { service_record: { notes: "x", budget_id: other_budget.id } }, headers: auth_headers(user), as: :json
       expect(response).to have_http_status(:ok)
       expect(service_record.reload.budget_id).to eq(budget.id)
+    end
+
+    it "re-guarda un ítem existente con % anterior (15) cambiando la cantidad" do
+      item = service_record.items.create!(description: "Filtro", quantity: 1, unit_price: 200, iva_rate: 21)
+      item.update_column(:iva_rate, 15)
+      patch "/api/v1/service_records/#{service_record.id}",
+            params: { service_record: { items_attributes: [ { id: item.id, description: "Filtro", quantity: 3, iva_rate: "15" } ] } },
+            headers: auth_headers(user), as: :json
+      expect(response).to have_http_status(:ok)
+      expect(item.reload).to have_attributes(quantity: 3, iva_rate: 15)
     end
 
     it "responde 404 si items_attributes trae un ítem de otra atención" do

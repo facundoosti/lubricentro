@@ -162,6 +162,7 @@ RSpec.describe Budget, type: :model do
       it 'calcula subtotal neto, IVA, sin IVA y totales' do
         expect(budget).to have_attributes(subtotal_net: 24_000, total_iva: 4_620, total_list: 43_620, total_card: 47_982)
         expect(budget.exempt_total).to eq(15_000)
+        expect(budget.margin_total).to eq(0)
       end
 
       it 'desglosa el IVA por alícuota' do
@@ -193,16 +194,32 @@ RSpec.describe Budget, type: :model do
       expect(budget.reload).to have_attributes(total_list: 121, total_iva: 21)
     end
 
-    it 'aplica un % libre por línea' do
-      budget = build_budget(0, [ { quantity: 1, unit_price: 1_000, iva_rate: 15 } ])
-      expect(budget).to have_attributes(subtotal_net: 1_000, total_iva: 150, total_list: 1_150)
-      expect(budget.iva_breakdown).to eq([ { rate: 15, base: 1_000, amount: 150 } ])
+    it 'conserva un ítem viejo con % libre al recalcular' do
+      budget = build_budget(0, [ { quantity: 1, unit_price: 1_000, iva_rate: 21 } ])
+      budget.items.first.update_column(:iva_rate, 15)
+      budget.reload.update!(notes: "Editado", items_attributes: [ { id: budget.items.first.id, quantity: 2 } ])
+      expect(budget.reload).to have_attributes(subtotal_net: 2_000, total_iva: 300, total_list: 2_300)
     end
 
-    it 'trata un 0% como sin IVA' do
-      budget = build_budget(0, [ { quantity: 1, unit_price: 1_000, iva_rate: 0 } ])
-      expect(budget).to have_attributes(total_iva: 0, total_list: 1_000, exempt_total: 1_000)
-      expect(budget.iva_breakdown).to be_empty
+    it 'suma la ganancia al total (1 × 1000, 21%, 30%, recargo 10%)' do
+      budget = build_budget(10, [ { quantity: 1, unit_price: 1_000, iva_rate: 21, margin_percentage: 30 } ])
+      expect(budget.reload).to have_attributes(subtotal_net: 1_000, total_iva: 210, total_list: 1_510, total_card: 1_661)
+      expect(budget.margin_total).to eq(300)
+      expect(budget.iva_breakdown).to eq([ { rate: 21, base: 1_000, amount: 210 } ])
+    end
+
+    it 'suma la ganancia de los ítems sin IVA' do
+      budget = build_budget(0, [ { quantity: 2, unit_price: 500, iva_rate: nil, margin_percentage: 20 } ])
+      expect(budget).to have_attributes(total_iva: 0, total_list: 1_200)
+      expect(budget.margin_total).to eq(200)
+    end
+
+    it 'no cuenta la ganancia de los ítems marcados para borrar' do
+      budget = build_budget(0, [ { quantity: 1, unit_price: 1_000, iva_rate: nil, margin_percentage: 50 },
+                                 { quantity: 1, unit_price: 100, iva_rate: nil } ])
+      budget.update!(items_attributes: [ { id: budget.items.first.id, _destroy: "1" } ])
+      expect(budget.reload).to have_attributes(total_list: 100)
+      expect(budget.margin_total).to eq(0)
     end
 
     it 'no cambia los totales de un presupuesto sin alícuotas' do

@@ -2,16 +2,17 @@
 #
 # Table name: budget_items
 #
-#  id          :bigint           not null, primary key
-#  description :string(500)      not null
-#  iva_rate    :decimal(4, 2)
-#  position    :integer          default(0), not null
-#  quantity    :decimal(10, 2)   default(1.0), not null
-#  total       :decimal(12, 2)   default(0.0), not null
-#  unit_price  :decimal(12, 2)   default(0.0), not null
-#  created_at  :datetime         not null
-#  updated_at  :datetime         not null
-#  budget_id   :bigint           not null
+#  id                :bigint           not null, primary key
+#  description       :string(500)      not null
+#  iva_rate          :decimal(4, 2)
+#  margin_percentage :decimal(6, 2)    default(0.0), not null
+#  position          :integer          default(0), not null
+#  quantity          :decimal(10, 2)   default(1.0), not null
+#  total             :decimal(12, 2)   default(0.0), not null
+#  unit_price        :decimal(12, 2)   default(0.0), not null
+#  created_at        :datetime         not null
+#  updated_at        :datetime         not null
+#  budget_id         :bigint           not null
 #
 # Indexes
 #
@@ -44,31 +45,54 @@ RSpec.describe BudgetItem, type: :model do
     it { is_expected.to validate_presence_of(:unit_price) }
     it { is_expected.to validate_numericality_of(:unit_price).is_greater_than_or_equal_to(0) }
 
-    it 'acepta un % libre entre 0 y 99,99 o vacío' do
-      [ 21, 10.5, 15, 15.75, 99.99, nil ].each do |rate|
+    it 'acepta 21, 10,5 o vacío como alícuota' do
+      [ 21, 10.5, nil ].each do |rate|
         expect(build(:budget_item, iva_rate: rate)).to be_valid
       end
     end
 
-    it 'rechaza 100 y negativos' do
-      [ 100, -1 ].each do |rate|
+    it 'rechaza otra alícuota nueva (15, 0, negativos, no numérico)' do
+      [ 15, 0, -1, 'abc' ].each do |rate|
         item = build(:budget_item, iva_rate: rate)
         expect(item).not_to be_valid
         expect(item.errors[:iva_rate]).to be_present
       end
     end
 
-    it 'rechaza un % no numérico o apenas negativo' do
-      [ 'abc', -0.001 ].each do |rate|
-        item = build(:budget_item, iva_rate: rate)
-        expect(item).not_to be_valid
-        expect(item.errors[:iva_rate]).to be_present
+    it 'vuelve a guardar un ítem viejo con 15% si no cambia la alícuota' do
+      item = create(:budget_item, iva_rate: 21)
+      item.update_column(:iva_rate, 15)
+      expect(item.reload.update(quantity: 2)).to be(true)
+      expect(item.reload.iva_rate).to eq(15)
+    end
+
+    it { is_expected.to validate_numericality_of(:margin_percentage).is_greater_than_or_equal_to(0).is_less_than(1000) }
+
+    it 'acepta una ganancia de 999,99 y rechaza 1000' do
+      expect(build(:budget_item, margin_percentage: 999.99)).to be_valid
+      item = build(:budget_item, margin_percentage: 1000)
+      expect(item).not_to be_valid
+      expect(item.errors[:margin_percentage]).to be_present
+    end
+
+    it 'usa 0 si la ganancia viene vacía o nil' do
+      [ nil, '' ].each do |margin|
+        item = build(:budget_item, margin_percentage: margin)
+        expect(item).to be_valid
+        expect(item.margin_percentage).to eq(0)
       end
     end
 
-    it 'guarda 0 como sin IVA' do
-      item = create(:budget_item, iva_rate: 0)
-      expect(item.reload.iva_rate).to be_nil
+    it 'acepta un % anterior (15) si legacy_iva_rate_ok' do
+      item = build(:budget_item, iva_rate: 15)
+      item.legacy_iva_rate_ok = true
+      expect(item).to be_valid
+    end
+
+    it 'rechaza una ganancia de -5' do
+      item = build(:budget_item, margin_percentage: -5)
+      expect(item).not_to be_valid
+      expect(item.errors[:margin_percentage]).to be_present
     end
   end
 

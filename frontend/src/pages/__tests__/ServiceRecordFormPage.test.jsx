@@ -114,7 +114,7 @@ const presetCustomer = () => {
 };
 
 const rows = () => screen.getAllByTestId('item-row');
-const fillItem = (index, { description, quantity, price, iva }) => {
+const fillItem = (index, { description, quantity, price, iva, margin }) => {
   const row = rows()[index];
   if (description !== undefined) {
     fireEvent.change(within(row).getByRole('combobox', { name: 'Producto o servicio' }), { target: { value: description } });
@@ -122,6 +122,7 @@ const fillItem = (index, { description, quantity, price, iva }) => {
   if (quantity !== undefined) fireEvent.change(within(row).getByLabelText(/Cantidad/), { target: { value: quantity } });
   if (price !== undefined) fireEvent.change(within(row).getByLabelText(/Precio unit/), { target: { value: price } });
   if (iva !== undefined) fireEvent.change(within(row).getByLabelText(/% IVA/), { target: { value: iva } });
+  if (margin !== undefined) fireEvent.change(within(row).getByLabelText(/% Ganancia/), { target: { value: margin } });
 };
 
 const budgetDetail = {
@@ -131,7 +132,7 @@ const budgetDetail = {
   customer: { id: 3, name: 'Juan Pérez', phone: '' },
   vehicle: { id: 11, brand: 'Fiat', model: 'Uno', license_plate: 'ABC123', year: 2010 },
   items: [
-    { id: 1, position: 0, quantity: '2.0', description: 'Aceite', unit_price: '10000.0', iva_rate: '21.0' },
+    { id: 1, position: 0, quantity: '2.0', description: 'Aceite', unit_price: '10000.0', iva_rate: '21.0', margin_percentage: '30.0' },
     { id: 2, position: 1, quantity: '1.0', description: 'Neumático', unit_price: '4000.0', iva_rate: '10.5' },
     { id: 3, position: 2, quantity: '1.0', description: 'Mano de obra', unit_price: '15000.0', iva_rate: null },
   ],
@@ -175,23 +176,30 @@ describe('ServiceRecordFormPage — Productos y Servicios', () => {
     expect(screen.getByTestId('total-list')).toHaveTextContent('$12.100');
   });
 
+  it('una línea 1 × $1.000 al 21% con ganancia 30% da Total $1.510', () => {
+    renderPage('/service-records/new');
+    fillItem(0, { description: 'Aceite 5W30', price: '1000', iva: '21', margin: '30' });
+    expect(screen.getByTestId('line-total')).toHaveTextContent('$1.510');
+    expect(screen.getByTestId('total-list')).toHaveTextContent('$1.510');
+  });
+
   it('envía items_attributes sin total_amount ni budget_id', async () => {
     renderPage('/service-records/new?customer_id=3&vehicle_id=10');
     await waitFor(() => expect(screen.getByPlaceholderText('Buscar cliente...')).toHaveValue('Juan Pérez'));
-    fillItem(0, { description: 'Lavado de motor', price: '5000', iva: '' });
+    fillItem(0, { description: 'Lavado de motor', price: '5000', iva: '', margin: '20' });
     fireEvent.click(screen.getByRole('button', { name: 'Registrar atención' }));
 
     await waitFor(() => expect(mocks.create).toHaveBeenCalled());
     const payload = mocks.create.mock.calls[0][0];
     expect(payload).toMatchObject({ customer_id: 3, vehicle_id: 10 });
     expect(payload.items_attributes).toEqual([
-      { position: 0, quantity: 1, description: 'Lavado de motor', unit_price: '5000', iva_rate: null, product_id: null, service_id: null },
+      { position: 0, quantity: 1, description: 'Lavado de motor', unit_price: '5000', iva_rate: null, margin_percentage: 20, product_id: null, service_id: null },
     ]);
     expect(payload).not.toHaveProperty('total_amount');
     expect(payload).not.toHaveProperty('budget_id');
   });
 
-  it('copia un presupuesto: ítems, vehículo, total y vínculo', async () => {
+  it('copia un presupuesto: ítems con su ganancia, vehículo, total y vínculo', async () => {
     renderPage('/service-records/new?customer_id=3&vehicle_id=10');
     await waitFor(() => expect(screen.getByPlaceholderText('Buscar cliente...')).toHaveValue('Juan Pérez'));
     await copyBudget();
@@ -199,22 +207,24 @@ describe('ServiceRecordFormPage — Productos y Servicios', () => {
     expect(mocks.useBudgets).toHaveBeenCalledWith(expect.objectContaining({ customer_id: 3 }));
     await waitFor(() => expect(rows()).toHaveLength(3));
     expect(within(rows()[1]).getByRole('combobox', { name: 'Producto o servicio' })).toHaveValue('Neumático');
-    expect(within(rows()[1]).getByLabelText(/% IVA/)).toHaveValue(10.5);
-    expect(within(rows()[2]).getByLabelText(/% IVA/)).toHaveValue(null);
-    expect(screen.getByTestId('total-list')).toHaveTextContent('$43.620');
+    expect(within(rows()[0]).getByLabelText(/% Ganancia/)).toHaveValue(30);
+    expect(within(rows()[1]).getByLabelText(/% IVA/)).toHaveValue('10.5');
+    expect(within(rows()[2]).getByLabelText(/% IVA/)).toHaveValue('');
+    // 43.620 sin ganancia + 30% de $20.000 = $49.620
+    expect(screen.getByTestId('total-list')).toHaveTextContent('$49.620');
     expect(screen.getByDisplayValue('Fiat Uno — ABC123')).toBeInTheDocument();
     expect(screen.getByText('Desde presupuesto #7')).toBeInTheDocument();
 
     // Editar después de copiar recalcula el total
     fillItem(2, { quantity: '2' });
-    expect(screen.getByTestId('total-list')).toHaveTextContent('$58.620');
+    expect(screen.getByTestId('total-list')).toHaveTextContent('$64.620');
 
     fireEvent.click(screen.getByRole('button', { name: 'Registrar atención' }));
     await waitFor(() => expect(mocks.create).toHaveBeenCalled());
     const payload = mocks.create.mock.calls[0][0];
     expect(payload).toMatchObject({ budget_id: 7, customer_id: 3, vehicle_id: 11 });
     expect(payload.items_attributes).toHaveLength(3);
-    expect(payload.items_attributes[0]).toMatchObject({ description: 'Aceite', quantity: 2, unit_price: 10000, iva_rate: 21 });
+    expect(payload.items_attributes[0]).toMatchObject({ description: 'Aceite', quantity: 2, unit_price: 10000, iva_rate: 21, margin_percentage: 30 });
     expect(payload.items_attributes[0]).not.toHaveProperty('id');
   });
 
@@ -304,12 +314,12 @@ describe('ServiceRecordFormPage — validación propia del formulario', () => {
     presetCustomer();
   });
 
-  it('un % fuera de rango muestra el mensaje propio (sin burbuja nativa)', async () => {
+  it('una ganancia fuera de rango muestra el mensaje propio (sin burbuja nativa)', async () => {
     renderPage('/service-records/new?customer_id=3&vehicle_id=10');
     await waitFor(() => expect(screen.getByPlaceholderText('Buscar cliente...')).toHaveValue('Juan Pérez'));
-    fillItem(0, { description: 'Mano de obra', price: '1000', iva: '120' });
+    fillItem(0, { description: 'Mano de obra', price: '1000', margin: '1000' });
     fireEvent.click(screen.getByRole('button', { name: 'Registrar atención' }));
-    expect(await screen.findByText('% IVA inválido (0 a 99,99)')).toBeInTheDocument();
+    expect(await screen.findByText('% Ganancia inválido (0 a 999,99)')).toBeInTheDocument();
     expect(mocks.create).not.toHaveBeenCalled();
   });
 });
@@ -338,11 +348,11 @@ describe('ServiceRecordFormPage — edición de una atención migrada', () => {
     mocks.update.mockResolvedValue({ data: record });
   });
 
-  it('muestra las líneas con % vacío, el total guardado y sin "Copiar desde presupuesto"', async () => {
+  it('muestra las líneas "Sin IVA", el total guardado y sin "Copiar desde presupuesto"', async () => {
     renderPage('/service-records/4/edit');
     await waitFor(() => expect(rows()).toHaveLength(2));
     expect(within(rows()[0]).getByRole('combobox', { name: 'Producto o servicio' })).toHaveValue('Cambio de aceite');
-    rows().forEach((row) => expect(within(row).getByLabelText(/% IVA/)).toHaveValue(null));
+    rows().forEach((row) => expect(within(row).getByLabelText(/% IVA/)).toHaveValue(''));
     expect(screen.getByTestId('total-list')).toHaveTextContent('$14.000');
     expect(screen.queryByRole('button', { name: 'Copiar desde presupuesto' })).toBeNull();
     expect(screen.queryByText(/Desde presupuesto/)).toBeNull();
@@ -358,7 +368,7 @@ describe('ServiceRecordFormPage — edición de una atención migrada', () => {
     const { id, data } = mocks.update.mock.calls[0][0];
     expect(id).toBe('4');
     expect(data.items_attributes).toEqual([
-      { id: 22, position: 0, quantity: 2, description: 'Filtro', unit_price: 3000, iva_rate: null, product_id: 4, service_id: null },
+      { id: 22, position: 0, quantity: 2, description: 'Filtro', unit_price: 3000, iva_rate: null, margin_percentage: 0, product_id: 4, service_id: null },
       { id: 21, _destroy: true },
     ]);
     expect(data).not.toHaveProperty('budget_id');

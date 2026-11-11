@@ -8,8 +8,9 @@ const HEADERS = [
   { label: 'Cant.', className: 'text-center' },
   { label: 'Producto / servicio' },
   { label: 'Precio unit. s/IVA', className: 'text-right' },
-  { label: '% IVA', className: 'text-right' },
-  { label: 'Importe c/IVA', className: 'text-right' },
+  { label: '% Ganancia', className: 'text-right' },
+  { label: 'IVA' },
+  { label: 'Importe final', className: 'text-right' },
   { label: '' },
 ];
 
@@ -91,7 +92,7 @@ const ItemsEditor = ({
 
       <div
         aria-hidden="true"
-        className="hidden md:grid md:grid-cols-[4.5rem_minmax(0,1fr)_8rem_6.5rem_7rem_2.25rem] md:gap-2 pb-2 border-b border-outline-variant text-xs font-medium text-secondary"
+        className="hidden md:grid md:grid-cols-[4.5rem_minmax(0,1fr)_8rem_5.5rem_6.5rem_7rem_2.25rem] md:gap-2 pb-2 border-b border-outline-variant text-xs font-medium text-secondary"
       >
         {HEADERS.map((h, i) => (
           <span key={i} className={h.className}>{h.label}</span>
@@ -117,7 +118,7 @@ const ItemsEditor = ({
 
       <p className="text-xs text-secondary">
         Tip: Enter en el precio de la última línea agrega otra. Los productos traen su IVA; los servicios van sin IVA.
-        Dejá el % vacío (o en 0) para cargar una línea sin IVA.
+        El importe final suma el IVA y la ganancia sobre el precio sin IVA.
       </p>
     </section>
   );

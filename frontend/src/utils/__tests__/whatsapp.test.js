@@ -32,6 +32,27 @@ describe('buildBudgetMessage', () => {
         'Total tarjeta de crédito: $47.982',
     );
   });
+
+  it('no menciona la ganancia (1 × $1.000, 21%, 30%, recargo 10%)', () => {
+    const text = buildBudgetMessage({
+      budget: {
+        id: 13,
+        date: '2026-11-11',
+        subtotal_net: '1000.0',
+        total_iva: '210.0',
+        margin_total: '300.0',
+        total_list: '1510.0',
+        total_card: '1661.0',
+        items: [{ id: 1, quantity: '1.0', description: 'Filtro', unit_price: '1000.0', iva_rate: '21.0', margin_percentage: '30.0' }],
+      },
+      customerName: 'Juan',
+    });
+    expect(text).toContain('Total efectivo / débito: $1.510');
+    expect(text).toContain('Total tarjeta de crédito: $1.661');
+    expect(text).not.toMatch(/ganancia/i);
+    expect(text).not.toContain('$300');
+    expect(text).not.toContain('30%');
+  });
 });
 
 describe('buildWhatsAppUrl', () => {

@@ -9,9 +9,6 @@ export const PRODUCT_IVA_OPTIONS = [
   { value: '10.5', label: '10,5%' },
 ];
 
-// Ítems (presupuesto y atención): % libre entre 0 y 99,99; vacío o 0 = sin IVA.
-export const MAX_ITEM_IVA_RATE = 99.99;
-
 // "21.0" | 21 | "10,5" -> 21 | 10.5 ; vacío/nulo/0 -> null (sin IVA)
 export const toIvaRate = (value) => {
   if (value === null || value === undefined || value === '') return null;
@@ -19,7 +16,7 @@ export const toIvaRate = (value) => {
   return Number.isFinite(n) && n !== 0 ? n : null;
 };
 
-// Valor para el campo del form: 21 -> "21", 10.5 -> "10.5", null/0 -> ""
+// Valor para el select: 21 -> "21", 10.5 -> "10.5", null/0 -> ""
 export const ivaRateToOption = (value) => {
   const rate = toIvaRate(value);
   return rate === null ? '' : String(rate);
@@ -31,15 +28,19 @@ export const formatIvaRate = (value) => {
   return rate === null ? 'Sin IVA' : `${String(rate).replace('.', ',')}%`;
 };
 
+// Alícuotas de una línea (presupuesto y atención): 21% · 10,5% · Sin IVA ('' = precio final).
+export const ITEM_IVA_OPTIONS = [...PRODUCT_IVA_OPTIONS, { value: '', label: 'Sin IVA' }];
+
+// Opciones del select para una línea. Si tiene guardado otro % (ej. 15, del % libre
+// anterior), se agrega como "15% (anterior)" para no perderlo al editar.
+export const itemIvaOptions = (value) => {
+  const option = ivaRateToOption(value);
+  if (ITEM_IVA_OPTIONS.some((opt) => opt.value === option)) return ITEM_IVA_OPTIONS;
+  return [...ITEM_IVA_OPTIONS, { value: option, label: `${formatIvaRate(option)} (anterior)` }];
+};
+
 export const priceWithIva = (net, rate) => {
   const r = toIvaRate(rate);
   const n = Number(net) || 0;
   return r === null ? n : round2(n * (1 + r / 100));
-};
-
-// % de una línea: vacío (sin IVA) o un número entre 0 y 99,99 con hasta 2 decimales.
-export const isValidItemIvaRate = (value) => {
-  if (value === null || value === undefined || value === '') return true;
-  const n = Number(String(value).replace(',', '.'));
-  return Number.isFinite(n) && n >= 0 && n <= MAX_ITEM_IVA_RATE && Math.abs(n * 100 - Math.round(n * 100)) < 1e-6;
 };

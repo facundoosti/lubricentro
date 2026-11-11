@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_130002) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -69,6 +69,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_130002) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.decimal "iva_rate", precision: 4, scale: 2
+    t.decimal "margin_percentage", precision: 6, scale: 2, default: "0.0", null: false
     t.index ["budget_id", "position"], name: "index_budget_items_on_budget_id_and_position"
     t.index ["budget_id"], name: "index_budget_items_on_budget_id"
   end
@@ -231,6 +232,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_130002) do
     t.bigint "service_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "margin_percentage", precision: 6, scale: 2, default: "0.0", null: false
     t.index ["product_id"], name: "index_service_record_items_on_product_id"
     t.index ["service_id"], name: "index_service_record_items_on_service_id"
     t.index ["service_record_id", "position"], name: "index_service_record_items_on_service_record_id_and_position"

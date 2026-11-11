@@ -1,4 +1,9 @@
 class DashboardStatsService
+  # Ingreso de la línea con la ganancia (sin IVA), redondeado como ItemizedTotals::Line:
+  # neto = ROUND(cantidad × precio, 2); ganancia = ROUND(neto × ganancia % / 100, 2)
+  ITEM_NET_SQL = "ROUND(service_record_items.quantity * service_record_items.unit_price, 2)".freeze
+  ITEM_REVENUE_SQL = "#{ITEM_NET_SQL} + ROUND(#{ITEM_NET_SQL} * service_record_items.margin_percentage / 100, 2)".freeze
+
   def self.calculate_main_metrics
     current_month = Date.current.beginning_of_month
     previous_month = current_month - 1.month
@@ -266,7 +271,7 @@ class DashboardStatsService
   def self.calculate_revenue_by_service_type
     service_items.joins(:service)
       .group("services.name")
-      .sum("service_record_items.quantity * service_record_items.unit_price")
+      .sum(ITEM_REVENUE_SQL)
       .map { |name, revenue| { name: name, revenue: revenue } }
       .sort_by { |service| -service[:revenue] }
       .first(10)
@@ -275,7 +280,7 @@ class DashboardStatsService
   def self.calculate_revenue_by_product_type
     product_items.joins(:product)
       .group("products.name")
-      .sum("service_record_items.quantity * service_record_items.unit_price")
+      .sum(ITEM_REVENUE_SQL)
       .map { |name, revenue| { name: name, revenue: revenue } }
       .sort_by { |product| -product[:revenue] }
       .first(10)

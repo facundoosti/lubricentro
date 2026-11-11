@@ -5,6 +5,7 @@
 #  id                :bigint           not null, primary key
 #  description       :string(500)      not null
 #  iva_rate          :decimal(4, 2)
+#  margin_percentage :decimal(6, 2)    default(0.0), not null
 #  position          :integer          default(0), not null
 #  quantity          :decimal(10, 2)   default(1.0), not null
 #  total             :decimal(12, 2)   default(0.0), not null
@@ -33,7 +34,8 @@ RSpec.describe ServiceRecordItemSerializer do
   let(:service) { create(:service) }
   let(:item) do
     create(:service_record_item, description: 'Cambio de aceite', quantity: 1.5, unit_price: 1_000,
-                                 iva_rate: 15.75, service: service, position: 2)
+                                 iva_rate: 10.5, margin_percentage: 25, service: service,
+                                 position: 2)
   end
   let(:serialized) { described_class.render_as_hash(item) }
 
@@ -44,7 +46,8 @@ RSpec.describe ServiceRecordItemSerializer do
       description: 'Cambio de aceite',
       quantity: BigDecimal('1.5'),
       unit_price: BigDecimal('1000'),
-      iva_rate: BigDecimal('15.75'),
+      iva_rate: BigDecimal('10.5'),
+      margin_percentage: BigDecimal('25'),
       total: BigDecimal('1500'),
       product_id: nil,
       service_id: service.id
