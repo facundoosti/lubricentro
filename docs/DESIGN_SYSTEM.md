@@ -136,7 +136,7 @@ Sistema semántico oscuro (dark-only). Todos los valores viven en `index.css` co
 |---|---|---|
 | `--color-success-500` | `#12b76a` | Éxito (complementa tertiary) |
 | `--color-warning-500` | `#f79009` | Advertencias |
-| `--color-on-warning` | `#ffffff` | Texto sobre `bg-warning-500` (botón y badge sólidos) |
+| `--color-on-warning` | `#18181b` | Texto sobre `bg-warning-500` (botón y badge sólidos); oscuro para cumplir AA (~8:1) |
 
 ### Alias para shadcn/ui (Base UI)
 

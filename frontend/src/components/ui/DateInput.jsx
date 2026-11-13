@@ -1,12 +1,19 @@
-import { useRef, useState } from 'react';
+import { lazy, Suspense, useRef, useState } from 'react';
 import { format } from 'date-fns';
-import { es } from 'react-day-picker/locale/es';
 import { CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDateDigits, parseDisplayDate, isoToDisplay, isoToDate, INVALID_INPUT } from '@/lib/maskedInput';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/primitives/popover';
-import { Calendar } from '@/components/ui/primitives/calendar';
 import { useDialogPortalContainer } from '@ui/dialogContext';
+
+// react-day-picker + locale se cargan recién al abrir el calendario. Si falla la carga del chunk (red, o un deploy
+// nuevo con otros hashes) se muestra un aviso en el popover en vez de romper la página: no hay Error Boundary.
+const CalendarLoadError = () => (
+  <p role="alert" className="w-[242px] p-4 text-sm text-on-surface-variant">
+    No se pudo cargar el calendario. Recargá la página o tipeá la fecha.
+  </p>
+);
+const DateCalendar = lazy(() => import('@ui/DateCalendar').catch(() => ({ default: CalendarLoadError })));
 
 const inRange = (iso, min, max) => (!min || iso >= min) && (!max || iso <= max);
 
@@ -138,16 +145,15 @@ const DateInput = ({
           className="w-auto p-0"
           finalFocus={inputRef}
         >
-          <Calendar
-            mode="single"
-            locale={es}
-            weekStartsOn={1}
-            selected={selected}
-            defaultMonth={selected ?? new Date()}
-            onSelect={handleSelect}
-            disabled={disabledDays.length ? disabledDays : undefined}
-            autoFocus
-          />
+          <Suspense fallback={<div className="h-[300px] w-[242px]" aria-busy="true" />}>
+            <DateCalendar
+              selected={selected}
+              defaultMonth={selected ?? new Date()}
+              onSelect={handleSelect}
+              disabled={disabledDays.length ? disabledDays : undefined}
+              autoFocus
+            />
+          </Suspense>
         </PopoverContent>
       </Popover>
     </div>

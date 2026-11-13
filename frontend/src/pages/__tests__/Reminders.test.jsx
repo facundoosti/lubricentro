@@ -68,18 +68,20 @@ describe('Reminders — rango de fechas', () => {
     expect(lastListParams().get('end_date')).toBe('2026-11-30');
   });
 
-  it('con una fecha incompleta no aplica el filtro y avisa; al corregirla, sí', async () => {
+  it('con una fecha incompleta aplica el resto de los filtros, no esa fecha, y avisa; al corregirla, sí', async () => {
     const user = userEvent.setup();
     renderWithProviders(<Reminders />);
     await waitFor(() => expect(listCalls()).toHaveLength(1));
     const desde = screen.getByRole('textbox', { name: 'Desde' });
     await user.type(desde, '0111');
+    await user.type(screen.getByRole('textbox', { name: 'Hasta' }), '30112026');
     fireEvent.change(screen.getByPlaceholderText('Cliente o Patente...'), { target: { value: 'Ana' } });
     fireEvent.click(screen.getByRole('button', { name: 'Filtrar' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Revisá las fechas');
     expect(desde).toHaveAttribute('aria-invalid', 'true');
-    expect(listCalls()).toHaveLength(1);
-    expect(lastListParams().has('search')).toBe(false);
+    await waitFor(() => expect(lastListParams().get('search')).toBe('Ana'));
+    expect(lastListParams().get('end_date')).toBe('2026-11-30');
+    expect(lastListParams().has('start_date')).toBe(false);
 
     await user.type(desde, '2026');
     fireEvent.click(screen.getByRole('button', { name: 'Filtrar' }));

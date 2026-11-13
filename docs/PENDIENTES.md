@@ -45,10 +45,6 @@ Mejoras detectadas el 2026-11-12 comparando `BudgetPrint.jsx` con el talonario o
 
 Detectados el 2026-11-13 al cerrar `shadcn-base-ui-fase-2` (commit `225681c`, archivo en `openspec/changes/archive/2026-11-13-shadcn-base-ui-fase-2/`).
 
-> Resueltos el 2026-11-13: borrado de `ServiceRecordForm`, CSS de checkbox nativo y warning de `buttonVariants` (`docs/fixes/2026-11-13-limpieza-post-shadcn-fase-2.md`).
+> Resueltos el 2026-11-13: borrado de `ServiceRecordForm`, CSS de checkbox nativo y warning de `buttonVariants` (`docs/fixes/2026-11-13-limpieza-post-shadcn-fase-2.md`); Calendar con `lazy()`, filtro de Recordatorios con fecha inválida, test de la regla anti-nativos y contraste del warning (`docs/fixes/2026-11-13-pendientes-frontend-fase-2.md`).
 
 - [ ] Migrar `CustomerSearchInput` (~300 líneas, con alta rápida de cliente) y `ProductSearchInput` a Autocomplete de Base UI. Hoy funcionan con portal propio en el diálogo; es un change propio (OpenSpec).
-- [ ] Bundle: +39,5 kB gzip (+5,9 %) por react-day-picker 10 + locale es + `@date-fns/tz`. Evaluar cargar el Calendar con `lazy()` al abrir el popover.
-- [ ] Recordatorios: con una fecha inválida no se aplica **ningún** filtro (tampoco búsqueda ni estado) hasta corregirla. Evaluar aplicar el resto y solo frenar la fecha.
-- [ ] Agregar un test automático de la regla ESLint anti-nativos (`<select>`, `type="date|time|checkbox"`); hoy solo se verificó a mano.
-- [ ] Contraste del warning: blanco (`--color-on-warning`) sobre `warning-500` (`#f79009`) da ~2.3:1 y no cumple AA (Button `warning`, Badge `solid warning`). Oscurecer el token o el fondo (ver `docs/fixes/2026-11-13-shadcn-fase-1-pendientes.md`).

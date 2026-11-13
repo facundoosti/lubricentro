@@ -94,20 +94,16 @@ const Reminders = () => {
   const pagination = data?.data?.pagination;
   const stats = statsData?.data || {};
 
-  // Una fecha tipeada a medias o inexistente no se aplica: se avisa y se deja el filtro como estaba.
+  // Una fecha tipeada a medias o inexistente no se aplica (queda la anterior) y se avisa; el resto de los filtros sí.
   const invalidDates = isInvalidInput(pendingStartDate) || isInvalidInput(pendingEndDate);
   const [showDateError, setShowDateError] = useState(false);
 
   const handleFilter = () => {
-    if (invalidDates) {
-      setShowDateError(true);
-      return;
-    }
-    setShowDateError(false);
+    setShowDateError(invalidDates);
     setSearch(pendingSearch);
     setStatus(pendingStatus);
-    setStartDate(pendingStartDate);
-    setEndDate(pendingEndDate);
+    if (!isInvalidInput(pendingStartDate)) setStartDate(pendingStartDate);
+    if (!isInvalidInput(pendingEndDate)) setEndDate(pendingEndDate);
     setCurrentPage(1);
   };
 

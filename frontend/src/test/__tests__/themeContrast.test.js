@@ -34,6 +34,10 @@ describe('contraste de tokens del tema', () => {
     expect(contrast(token(LIGHT, 'on-primary'), token(LIGHT, 'primary-container'))).toBeGreaterThanOrEqual(4.5);
   });
 
+  it('texto sobre warning-500 (Button warning, Badge solid warning) ≥ 4.5:1', () => {
+    expect(contrast(token(DARK, 'on-warning'), token(DARK, 'warning-500'))).toBeGreaterThanOrEqual(4.5);
+  });
+
   it('H-10 · claro: borde del checkbox (outline) sobre surface-container ≥ 3:1', () => {
     expect(contrast(token(LIGHT, 'outline'), token(LIGHT, 'surface-container'))).toBeGreaterThanOrEqual(3);
   });
