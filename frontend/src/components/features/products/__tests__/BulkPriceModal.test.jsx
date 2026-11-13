@@ -7,13 +7,17 @@ import BulkPriceModal from '@components/features/products/BulkPriceModal';
 vi.mock('@services/suppliersService', () => ({
   useSuppliers: () => ({ data: { data: { suppliers: [{ id: 3, name: 'BERAL SRL' }, { id: 4, name: 'MAXOIL' }] } } }),
 }));
+vi.mock('@services/categoriesService', () => ({
+  useCategories: () => ({ data: { data: { categories: [{ id: 7, name: 'Aceites', parent_id: null }, { id: 8, name: 'Filtros', parent_id: null }] } } }),
+}));
 const previewMock = vi.hoisted(() => vi.fn());
 vi.mock('@services/productsService', () => ({
   useBulkPricePreview: () => ({ mutateAsync: previewMock, isPending: false }),
   useBulkPriceUpdate: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useProducts: () => ({ data: null, isLoading: false }),
+  useProductBrands: () => ({ data: { data: { brands: ['PETRONAS', 'WEGA'] } }, isLoading: false }),
 }));
-vi.mock('@services/notificationService', () => ({ showSuccess: vi.fn(), showError: vi.fn() }));
+vi.mock('@services/notificationService', () => ({ showSuccess: vi.fn(), showError: vi.fn(), parseApiError: () => 'err' }));
 
 const renderModal = (onClose = vi.fn()) => {
   renderWithProviders(<BulkPriceModal isOpen onClose={onClose} target={{ type: 'ids', ids: [1, 2] }} />);
@@ -41,7 +45,7 @@ describe('BulkPriceModal — cierre', () => {
     pressBackdrop();
 
     expect(onClose).not.toHaveBeenCalled();
-    expect(screen.getByRole('dialog', { name: 'Actualización de Precios por Lote' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Actualizar precios por lote' })).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Ej: 15')).toHaveValue(15);
   });
 
@@ -53,7 +57,7 @@ describe('BulkPriceModal — cierre', () => {
 
   it('se renderiza en un portal en document.body, con foco dentro y scroll bloqueado', async () => {
     renderModal();
-    const dialog = screen.getByRole('dialog', { name: 'Actualización de Precios por Lote' });
+    const dialog = screen.getByRole('dialog', { name: 'Actualizar precios por lote' });
     expect(dialog.closest('[data-base-ui-portal]').parentElement).toBe(document.body);
     await waitFor(() => expect(dialog).toHaveFocus());
     await waitFor(() => expect(document.documentElement.style.overflowY || document.body.style.overflowY).toBe('hidden'));
@@ -73,42 +77,54 @@ describe('BulkPriceModal — vista previa con nombres largos', () => {
   });
 });
 
-describe('BulkPriceModal — proveedor (modo libre)', () => {
+describe('BulkPriceModal — filtros (modo libre)', () => {
   beforeEach(() => previewMock.mockReset());
 
-  const pick = async (user, label) => {
-    await user.click(screen.getByRole('combobox', { name: 'Proveedor' }));
+  const pick = async (user, field, label) => {
+    await user.click(screen.getByRole('combobox', { name: field }));
     await user.click(await screen.findByRole('option', { name: label }));
+    await user.keyboard('{Escape}');
     await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
   };
 
-  it('elegir un proveedor lo manda en la vista previa; "Todos los proveedores" lo quita', async () => {
+  it('combina marca, categoría y proveedor en la vista previa', async () => {
     const user = userEvent.setup();
     previewMock.mockResolvedValue({ data: { previews: [] } });
     renderWithProviders(<BulkPriceModal isOpen onClose={vi.fn()} />);
-    const trigger = screen.getByRole('combobox', { name: 'Proveedor' });
-    expect(trigger).toHaveTextContent('Todos los proveedores');
-    expect(trigger).toHaveAttribute('id', 'bulk-price-supplier');
-    expect(screen.getByText('Proveedor', { selector: 'label' })).toHaveAttribute('for', 'bulk-price-supplier');
 
-    await pick(user, 'MAXOIL');
-    expect(trigger).toHaveTextContent('MAXOIL');
+    await pick(user, 'Marca', 'PETRONAS');
+    await pick(user, 'Categoría', 'Aceites');
+    await pick(user, 'Proveedor', 'MAXOIL');
     fireEvent.change(screen.getByPlaceholderText('Ej: 15'), { target: { value: '15' } });
     fireEvent.click(screen.getByRole('button', { name: /Vista previa/ }));
+
     await waitFor(() => expect(previewMock).toHaveBeenCalled());
-    expect(previewMock.mock.calls[0][0]).toMatchObject({ supplier_id: '4', adjustment_value: '15' });
+    expect(previewMock.mock.calls[0][0]).toMatchObject({
+      brand: 'PETRONAS', category_id: '7', supplier_id: '4', adjustment_value: '15',
+    });
+    expect(await screen.findByText(/marca: PETRONAS · categoría: Aceites · proveedor: MAXOIL/)).toBeInTheDocument();
   });
 
-  it('volver a "Todos los proveedores" deja el filtro vacío (pide otro criterio)', async () => {
-    const user = userEvent.setup();
-    const { showError } = await import('@services/notificationService');
+  it('sin criterio ni valor deshabilita la vista previa y explica por qué', () => {
     renderWithProviders(<BulkPriceModal isOpen onClose={vi.fn()} />);
-    await pick(user, 'BERAL SRL');
-    await pick(user, 'Todos los proveedores');
-    expect(screen.getByRole('combobox', { name: 'Proveedor' })).toHaveTextContent('Todos los proveedores');
-    fireEvent.change(screen.getByPlaceholderText('Ej: 15'), { target: { value: '15' } });
+    const btn = screen.getByRole('button', { name: /Vista previa/ });
+    expect(btn).toBeDisabled();
+    expect(screen.getByText('Elegí al menos un criterio para filtrar productos')).toBeInTheDocument();
+  });
+});
+
+describe('BulkPriceModal — filtros del listado (target)', () => {
+  beforeEach(() => previewMock.mockReset());
+
+  it('manda categoría y stock del listado (antes se perdían)', async () => {
+    previewMock.mockResolvedValue({ data: { previews: [] } });
+    renderWithProviders(
+      <BulkPriceModal isOpen onClose={vi.fn()} target={{ type: 'filters', search: '', brand: 'WEGA', supplierId: '', categoryId: '8', active: 'true' }} />,
+    );
+    expect(screen.getByText(/marca: WEGA · categoría: Filtros · con stock/)).toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText('Ej: 15'), { target: { value: '-5' } });
     fireEvent.click(screen.getByRole('button', { name: /Vista previa/ }));
-    expect(showError).toHaveBeenCalledWith('Criterio requerido', expect.any(String));
-    expect(previewMock).not.toHaveBeenCalled();
+    await waitFor(() => expect(previewMock).toHaveBeenCalled());
+    expect(previewMock.mock.calls[0][0]).toMatchObject({ brand: 'WEGA', category_id: '8', active: 'true', adjustment_value: '-5' });
   });
 });

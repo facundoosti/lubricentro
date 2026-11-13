@@ -13,23 +13,7 @@ import {
 import ProductPriceCell from '@components/features/products/ProductPriceCell';
 import ImageLightbox from '@ui/ImageLightbox';
 import Input from '@ui/Input';
-
-const buildCategoryOptions = (categories) => {
-  const byParent = {};
-  categories.forEach((c) => {
-    const key = c.parent_id ?? 'root';
-    if (!byParent[key]) byParent[key] = [];
-    byParent[key].push(c);
-  });
-  const flatten = (parentId, depth) => {
-    const children = byParent[parentId] || [];
-    return children.flatMap((c) => [
-      { value: String(c.id), label: c.name, depth },
-      ...flatten(c.id, depth + 1),
-    ]);
-  };
-  return flatten('root', 0);
-};
+import { buildCategoryOptions } from '@utils/categoryOptions';
 
 // Filtro de stock: "Todos" = sin filtro (''); en la lista usa un valor propio (el Select trata '' como "sin elegir").
 const ALL = 'all';

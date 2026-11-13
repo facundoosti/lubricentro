@@ -129,7 +129,7 @@ const Products = () => {
 
   const handleOpenBulkPriceFromSelection = () => {
     if (selectAllByFilter) {
-      setBulkPriceTarget({ type: 'filters', search, brand: brandsParam, supplierId: supplierIdsParam, categoryId: categoryIdsParam });
+      setBulkPriceTarget({ type: 'filters', search, brand: brandsParam, supplierId: supplierIdsParam, categoryId: categoryIdsParam, active: activeFilter });
     } else {
       setBulkPriceTarget({ type: 'ids', ids: [...selectedIds] });
     }

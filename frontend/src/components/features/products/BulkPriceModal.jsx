@@ -1,361 +1,289 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, X, ChevronRight, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
-import { useSuppliers } from '@services/suppliersService';
+import {
+  TrendingUp, X, ChevronRight, ArrowLeft, CheckCircle, AlertCircle, Percent, DollarSign, Filter,
+} from 'lucide-react';
 import { useBulkPricePreview, useBulkPriceUpdate } from '@services/productsService';
-import { showSuccess, showError } from '@services/notificationService';
-import ProductSearchInput from '@components/features/products/ProductSearchInput';
+import { showSuccess, showError, parseApiError } from '@services/notificationService';
+import BulkPriceFilters from '@components/features/products/BulkPriceFilters';
+import {
+  EMPTY_BULK_FILTERS, hasBulkFilters, useBulkFilterOptions, bulkCriteriaSummary,
+} from '@hooks/useBulkFilterOptions';
 import Dialog from '@ui/Dialog';
-import Select from '@ui/Select';
+import Button from '@ui/Button';
+import Field from '@ui/Field';
 import Input from '@ui/Input';
+import BulkPricePreviewTable from '@components/features/products/BulkPricePreviewTable';
 
 const STEPS = { FILTER: 'filter', PREVIEW: 'preview', DONE: 'done' };
-// "Todos los proveedores" = sin filtro (''); en la lista usa un valor propio (el Select trata '' como "sin elegir").
-const ALL = 'all';
+
+const ADJUSTMENT_TYPES = [
+  { value: 'percentage', label: 'Porcentaje', hint: 'Ej: +15%', icon: Percent },
+  { value: 'fixed', label: 'Monto fijo', hint: 'Ej: +$500', icon: DollarSign },
+];
+
+const plural = (n) => `${n} producto${n !== 1 ? 's' : ''}`;
+const formatARS = (value) =>
+  new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 }).format(value);
 
 // target = null → modo libre (el usuario elige filtros)
 // target = { type: 'ids', ids: [1,2,3] } → productos específicos seleccionados
-// target = { type: 'filters', search, brand, supplierId } → todos los que coincidan con filtros activos
+// target = { type: 'filters', search, brand, supplierId, categoryId, active } → los que coinciden con los filtros del listado
 const BulkPriceModal = ({ isOpen, onClose, target = null }) => {
   const hasTarget = target !== null;
 
   const [step, setStep] = useState(STEPS.FILTER);
-  const [supplierId, setSupplierId] = useState('');
-  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState(EMPTY_BULK_FILTERS);
   const [adjustmentType, setAdjustmentType] = useState('percentage');
   const [adjustmentValue, setAdjustmentValue] = useState('');
   const [previews, setPreviews] = useState([]);
 
-  const { data: suppliersData } = useSuppliers({ per_page: 200 });
-  const suppliers = suppliersData?.data?.suppliers || [];
-
+  const options = useBulkFilterOptions();
   const previewMutation = useBulkPricePreview();
   const updateMutation = useBulkPriceUpdate();
 
   useEffect(() => {
     if (isOpen) {
       setStep(STEPS.FILTER);
-      setSupplierId('');
-      setSearch('');
+      setFilters(EMPTY_BULK_FILTERS);
       setAdjustmentType('percentage');
       setAdjustmentValue('');
       setPreviews([]);
     }
   }, [isOpen]);
 
-  const formatARS = (value) =>
-    new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 }).format(value);
+  const numericValue = parseFloat(adjustmentValue);
+  const hasValue = Number.isFinite(numericValue) && numericValue !== 0;
+  const hasCriteria = hasTarget || hasBulkFilters(filters);
 
   const buildParams = () => {
     const base = { adjustment_type: adjustmentType, adjustment_value: adjustmentValue };
-    if (target?.type === 'ids') {
-      return { ...base, product_ids: target.ids };
-    }
+    if (target?.type === 'ids') return { ...base, product_ids: target.ids };
     if (target?.type === 'filters') {
       return {
         ...base,
-        supplier_id: target.supplierId || undefined,
         search: target.search || undefined,
         brand: target.brand || undefined,
+        supplier_id: target.supplierId || undefined,
+        category_id: target.categoryId || undefined,
+        active: target.active || undefined,
       };
     }
     return {
       ...base,
-      supplier_id: supplierId || undefined,
-      search: search || undefined,
+      search: filters.search || undefined,
+      brand: filters.brands.join(',') || undefined,
+      supplier_id: filters.supplierIds.join(',') || undefined,
+      category_id: filters.categoryIds.join(',') || undefined,
     };
   };
 
-  const handlePreview = async () => {
-    if (!adjustmentValue || parseFloat(adjustmentValue) === 0) {
-      showError('Valor requerido', 'Ingresá un valor de ajuste mayor a 0');
-      return;
-    }
-    if (!hasTarget && !supplierId && !search) {
-      showError('Criterio requerido', 'Seleccioná al menos un proveedor o un criterio de búsqueda');
-      return;
-    }
+  const criteriaSummary = () => bulkCriteriaSummary(target, filters, options);
 
+  const handlePreview = async () => {
     try {
       const data = await previewMutation.mutateAsync(buildParams());
       setPreviews(data.data?.previews || []);
       setStep(STEPS.PREVIEW);
     } catch (err) {
-      showError('Error', err?.response?.data?.message || 'Error al generar la vista previa');
+      showError('Error al generar la vista previa', parseApiError(err));
     }
   };
 
   const handleConfirm = async () => {
     try {
       const data = await updateMutation.mutateAsync(buildParams());
-      showSuccess(`${data.data?.updated} producto(s) actualizados exitosamente`);
+      showSuccess(`${plural(data.data?.updated ?? previews.length)} actualizados`);
       setStep(STEPS.DONE);
     } catch (err) {
-      showError('Error', err?.response?.data?.message || 'Error al actualizar los precios');
+      showError('Error al actualizar los precios', parseApiError(err));
     }
   };
 
-  const handleClose = () => {
-    onClose();
-  };
+  const sign = numericValue >= 0 ? '+' : '−';
+  const absValue = Math.abs(numericValue);
+  const adjustmentLabel = adjustmentType === 'percentage' ? `${sign}${absValue}%` : `${sign}${formatARS(absValue)}`;
 
-  const adjustmentLabel = adjustmentType === 'percentage'
-    ? `${parseFloat(adjustmentValue) >= 0 ? '+' : ''}${adjustmentValue}%`
-    : `${parseFloat(adjustmentValue) >= 0 ? '+' : ''}$${adjustmentValue}`;
+  const subtitle = {
+    [STEPS.FILTER]: hasTarget ? 'Definí el ajuste a aplicar' : 'Elegí los productos y el ajuste a aplicar',
+    [STEPS.PREVIEW]: `Vista previa · ${plural(previews.length)}`,
+    [STEPS.DONE]: 'Actualización completada',
+  }[step];
 
-  // Chip describing what's pre-selected (when target is set)
-  const targetDescription = () => {
-    if (target?.type === 'ids') {
-      return `${target.ids.length} producto${target.ids.length !== 1 ? 's' : ''} seleccionado${target.ids.length !== 1 ? 's' : ''}`;
-    }
-    if (target?.type === 'filters') {
-      const parts = [];
-      if (target.search) parts.push(`nombre: "${target.search}"`);
-      if (target.brand) parts.push(`marca: "${target.brand}"`);
-      if (target.supplierId) {
-        const s = suppliers.find(s => String(s.id) === String(target.supplierId));
-        if (s) parts.push(`proveedor: ${s.name}`);
-      }
-      return parts.length ? `Todos los que coinciden con ${parts.join(', ')}` : 'Todos los productos';
-    }
-    return '';
-  };
+  const disabledReason = !hasCriteria
+    ? 'Elegí al menos un criterio para filtrar productos'
+    : !hasValue ? 'Ingresá un valor distinto de 0' : null;
+
+  const busy = previewMutation.isPending || updateMutation.isPending;
 
   // Pila de diálogos, Escape, foco, fondo no interactuable y scroll lock: Dialog (Base UI).
   // El fondo no cierra (hay datos cargados).
   return (
     <Dialog
       isOpen={isOpen}
-      onClose={handleClose}
+      onClose={onClose}
       bare
+      size="lg"
       closeOnBackdrop={false}
+      closeOnEscape={!updateMutation.isPending}
       ariaLabelledBy="bulk-price-title"
-      className="bg-surface-container border border-outline-variant rounded-xl shadow-2xl max-w-2xl max-h-[90vh] flex flex-col"
+      className="bg-surface-container border border-outline-variant rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden"
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-outline-variant shrink-0">
+      <div className="shrink-0 px-6 py-4 border-b border-outline-variant flex items-center justify-between bg-surface-container-high/30">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-primary-container/20 flex items-center justify-center">
+          <div className="p-2 bg-primary/10 rounded-lg">
             <TrendingUp className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h2 id="bulk-price-title" className="text-base font-semibold text-on-surface">Actualización de Precios por Lote</h2>
-            <p className="text-xs text-secondary">
-              {step === STEPS.FILTER && (hasTarget ? 'Definí el tipo de ajuste' : 'Definí los criterios y el tipo de ajuste')}
-              {step === STEPS.PREVIEW && `Vista previa — ${previews.length} producto(s) afectados`}
-              {step === STEPS.DONE && 'Actualización completada'}
-            </p>
+            <h2 id="bulk-price-title" className="text-xl font-bold text-on-surface tracking-tight">Actualizar precios por lote</h2>
+            <p className="text-xs text-on-surface-variant">{subtitle}</p>
           </div>
         </div>
-        <button type="button" onClick={handleClose} aria-label="Cerrar" className="p-1.5 rounded-md text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors">
-          <X className="w-4 h-4" />
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={updateMutation.isPending}
+          aria-label="Cerrar"
+          className="p-2 text-secondary hover:text-on-surface hover:bg-surface-container-high rounded-full transition-all disabled:opacity-50"
+        >
+          <X className="w-5 h-5" />
         </button>
       </div>
 
-      <div className="overflow-y-auto flex-1 p-6 space-y-5">
-        {/* STEP 1: Filter / Adjust */}
+      <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-6">
         {step === STEPS.FILTER && (
           <>
-            {/* Preselected target chip */}
-            {hasTarget && (
+            {hasTarget ? (
               <div className="flex items-center gap-2 p-3 bg-primary-container/10 border border-primary-container/30 rounded-lg text-sm">
-                <CheckCircle className="w-4 h-4 text-primary shrink-0" />
-                <span className="text-on-surface">{targetDescription()}</span>
+                <Filter className="w-4 h-4 text-primary shrink-0" />
+                <span className="text-on-surface">{criteriaSummary()}</span>
               </div>
+            ) : (
+              <BulkPriceFilters filters={filters} onChange={setFilters} options={options} />
             )}
 
-            {/* Filter criteria — only shown in free mode */}
-            {!hasTarget && (
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium text-on-surface-variant uppercase tracking-wide">Criterios de filtro</h3>
+            <section className="space-y-4" aria-labelledby="bulk-price-adjust-title">
+              <h3 id="bulk-price-adjust-title" className="text-sm font-semibold text-on-surface">Ajuste</h3>
 
-                <div>
-                  <label id="bulk-price-supplier-label" htmlFor="bulk-price-supplier" className="block text-sm font-medium text-on-surface-variant mb-1.5">Proveedor</label>
-                  <Select
-                    id="bulk-price-supplier"
-                    aria-labelledby="bulk-price-supplier-label"
-                    options={[
-                      { value: ALL, label: 'Todos los proveedores' },
-                      ...suppliers.map((s) => ({ value: String(s.id), label: s.name })),
-                    ]}
-                    value={supplierId || ALL}
-                    onChange={(v) => setSupplierId(v === ALL ? '' : v)}
-                    className="border-outline-variant"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-                    Buscar por nombre de producto
-                  </label>
-                  <ProductSearchInput
-                    value={search}
-                    onChange={(text) => setSearch(text)}
-                    onSelect={(product) => product && setSearch(product.name)}
-                    placeholder="Ej: aceite, filtro..."
-                  />
-                  <p className="mt-1 text-xs text-secondary">Podés combinar proveedor y nombre para filtrar mejor</p>
-                </div>
-              </div>
-            )}
-
-            {/* Adjustment type */}
-            <div className="space-y-4 pt-2">
-              <h3 className="text-sm font-medium text-on-surface-variant uppercase tracking-wide">Tipo de ajuste</h3>
-
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { value: 'percentage', label: 'Porcentaje', hint: 'Ej: +15%' },
-                  { value: 'fixed', label: 'Monto fijo', hint: 'Ej: +$500' },
-                ].map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setAdjustmentType(opt.value)}
-                    className={`p-4 rounded-lg border text-left transition-colors ${
-                      adjustmentType === opt.value
-                        ? 'border-primary bg-primary-container/15 text-primary'
-                        : 'border-outline-variant text-on-surface-variant hover:border-primary/40'
-                    }`}
-                  >
-                    <p className="text-sm font-medium">{opt.label}</p>
-                    <p className="text-xs opacity-70 mt-0.5">{opt.hint}</p>
-                  </button>
-                ))}
+              <div role="radiogroup" aria-label="Tipo de ajuste" className="grid grid-cols-2 gap-3">
+                {ADJUSTMENT_TYPES.map(({ value, label, hint, icon: Icon }) => {
+                  const selected = adjustmentType === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      onClick={() => setAdjustmentType(value)}
+                      className={`flex items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors ${
+                        selected
+                          ? 'border-primary bg-primary-container/20 text-primary'
+                          : 'border-outline-variant bg-surface-container-high text-on-surface hover:bg-surface-variant'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4 shrink-0" />
+                      <span>
+                        <span className="block text-sm font-semibold">{label}</span>
+                        <span className="block text-xs opacity-70">{hint}</span>
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-                  Valor del ajuste {adjustmentType === 'percentage' ? '(%)' : '(ARS)'}
-                  <span className="ml-1 text-xs text-secondary font-normal">Usá valores negativos para bajar precios</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-sm">
-                    {adjustmentType === 'percentage' ? '%' : '$'}
-                  </span>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={adjustmentValue}
-                    onChange={(e) => setAdjustmentValue(e.target.value)}
-                    placeholder="Ej: 15"
-                    className="pl-8"
-                  />
-                </div>
-              </div>
-            </div>
+              <Field
+                label={`Valor del ajuste ${adjustmentType === 'percentage' ? '(%)' : '($)'}`}
+                hint="Usá un valor negativo para bajar precios (ej: -10)"
+              >
+                <Input
+                  type="number"
+                  step="0.01"
+                  inputMode="decimal"
+                  startIcon={adjustmentType === 'percentage' ? Percent : DollarSign}
+                  containerClassName="max-w-xs"
+                  value={adjustmentValue}
+                  onChange={(e) => setAdjustmentValue(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !disabledReason && !busy) handlePreview(); }}
+                  placeholder="Ej: 15"
+                />
+              </Field>
+            </section>
           </>
         )}
 
-        {/* STEP 2: Preview */}
         {step === STEPS.PREVIEW && (
           <div className="space-y-4">
-            <div className="flex items-center gap-2 p-3 bg-surface-container-high rounded-lg border border-outline-variant text-sm">
-              <TrendingUp className="w-4 h-4 text-primary shrink-0" />
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 p-3 bg-surface-container-high rounded-lg border border-outline-variant text-sm">
               <span className="text-on-surface-variant">
-                Ajuste: <span className="font-semibold text-on-surface">{adjustmentLabel}</span>
-                {hasTarget
-                  ? ` · ${targetDescription()}`
-                  : (
-                    <>
-                      {supplierId && ` · Proveedor: ${suppliers.find(s => String(s.id) === supplierId)?.name}`}
-                      {search && ` · Búsqueda: "${search}"`}
-                    </>
-                  )}
+                Ajuste: <strong className="text-on-surface">{adjustmentLabel}</strong>
               </span>
+              <span className="text-outline-variant" aria-hidden="true">|</span>
+              <span className="text-on-surface-variant">{criteriaSummary()}</span>
             </div>
 
             {previews.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-8 text-secondary">
                 <AlertCircle className="w-8 h-8 opacity-40" />
-                <p className="text-sm">No se encontraron productos con esos criterios</p>
+                <p className="text-sm">No hay productos que cumplan esos criterios</p>
               </div>
             ) : (
-              <div className="rounded-lg border border-outline-variant overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-outline-variant bg-surface-container-high">
-                      <th className="text-left px-4 py-2.5 text-xs font-medium text-secondary uppercase">SKU</th>
-                      <th className="text-left px-4 py-2.5 text-xs font-medium text-secondary uppercase">Producto</th>
-                      <th className="text-right px-4 py-2.5 text-xs font-medium text-secondary uppercase">Precio actual</th>
-                      <th className="text-right px-4 py-2.5 text-xs font-medium text-secondary uppercase">Precio nuevo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {previews.map((p) => (
-                      <tr key={p.id} className="border-b border-outline-variant last:border-0 hover:bg-surface-container-high/50">
-                        <td className="px-4 py-3 font-mono text-xs text-secondary">{p.sku || '—'}</td>
-                        <td className="px-4 py-3 text-on-surface max-w-md">
-                          <span className="line-clamp-2 break-words" title={p.name}>{p.name}</span>
-                        </td>
-                        <td className="px-4 py-3 text-right text-secondary">{formatARS(p.current_price)}</td>
-                        <td className="px-4 py-3 text-right font-semibold text-tertiary">{formatARS(p.new_price)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <BulkPricePreviewTable previews={previews} formatPrice={formatARS} />
             )}
           </div>
         )}
 
-        {/* STEP 3: Done */}
         {step === STEPS.DONE && (
           <div className="flex flex-col items-center gap-4 py-8">
-            <div className="w-14 h-14 rounded-full bg-tertiary-container/20 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full bg-tertiary/10 flex items-center justify-center">
               <CheckCircle className="w-8 h-8 text-tertiary" />
             </div>
             <div className="text-center">
               <p className="text-base font-semibold text-on-surface">¡Precios actualizados!</p>
-              <p className="text-sm text-secondary mt-1">{previews.length} producto(s) fueron actualizados exitosamente</p>
+              <p className="text-sm text-secondary mt-1">Se actualizaron {plural(previews.length)}</p>
             </div>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="flex justify-between gap-3 p-6 pt-0 border-t border-outline-variant shrink-0 mt-2">
-        <button
-          onClick={step === STEPS.PREVIEW ? () => setStep(STEPS.FILTER) : handleClose}
-          className="px-4 py-2 text-sm bg-surface-container-high border border-outline-variant text-on-surface rounded-lg hover:brightness-110 transition-colors"
-        >
-          {step === STEPS.PREVIEW ? '← Volver' : 'Cancelar'}
-        </button>
+      <div className="shrink-0 px-6 py-4 border-t border-outline-variant bg-surface-container-high/30 flex items-center justify-between gap-3">
+        {step === STEPS.PREVIEW ? (
+          <Button variant="secondary" startIcon={<ArrowLeft className="w-4 h-4" />} onClick={() => setStep(STEPS.FILTER)} disabled={busy}>
+            Volver
+          </Button>
+        ) : step === STEPS.FILTER ? (
+          <Button variant="secondary" onClick={onClose}>Cancelar</Button>
+        ) : <span />}
 
-        <div className="flex gap-3">
+        <div className="flex items-center gap-3">
           {step === STEPS.FILTER && (
-            <button
-              onClick={handlePreview}
-              disabled={previewMutation.isPending}
-              className="flex items-center gap-2 px-4 py-2 text-sm bg-primary-container text-on-primary rounded-lg font-medium hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {previewMutation.isPending ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Calculando...</>
-              ) : (
-                <>Vista previa <ChevronRight className="w-4 h-4" /></>
-              )}
-            </button>
+            <>
+              {disabledReason && <span className="text-xs text-on-surface-variant">{disabledReason}</span>}
+              <Button
+                onClick={handlePreview}
+                loading={previewMutation.isPending}
+                disabled={Boolean(disabledReason)}
+                endIcon={<ChevronRight className="w-4 h-4" />}
+                className="font-bold"
+              >
+                {previewMutation.isPending ? 'Calculando...' : 'Vista previa'}
+              </Button>
+            </>
           )}
 
           {step === STEPS.PREVIEW && previews.length > 0 && (
-            <button
+            <Button
               onClick={handleConfirm}
-              disabled={updateMutation.isPending}
-              className="flex items-center gap-2 px-4 py-2 text-sm bg-primary-container text-on-primary rounded-lg font-medium hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              loading={updateMutation.isPending}
+              startIcon={<CheckCircle className="w-4 h-4" />}
+              className="font-bold"
             >
-              {updateMutation.isPending ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Actualizando...</>
-              ) : (
-                <><CheckCircle className="w-4 h-4" /> Confirmar {previews.length} cambio(s)</>
-              )}
-            </button>
+              {updateMutation.isPending ? 'Actualizando...' : `Confirmar ${plural(previews.length)}`}
+            </Button>
           )}
 
           {step === STEPS.DONE && (
-            <button
-              onClick={handleClose}
-              className="px-4 py-2 text-sm bg-primary-container text-on-primary rounded-lg font-medium hover:brightness-110 transition-colors"
-            >
-              Cerrar
-            </button>
+            <Button onClick={onClose} className="font-bold">Cerrar</Button>
           )}
         </div>
       </div>
