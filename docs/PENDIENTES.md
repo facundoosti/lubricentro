@@ -40,3 +40,15 @@ Mejoras detectadas el 2026-11-12 comparando `BudgetPrint.jsx` con el talonario o
 **Técnico**
 - [ ] El PDF se genera como imagen (html2canvas): texto no seleccionable, pesa más y se corta si supera una A4.
 - [ ] `BudgetPrint.jsx` supera las 300 líneas: extraer `PrintSheet` o el recuadro DÍA/MES/AÑO a un componente propio (review de `presupuesto-impresion-ajustes`).
+
+## Frontend — post shadcn/Base UI fase 2
+
+Detectados el 2026-11-13 al cerrar `shadcn-base-ui-fase-2` (commit `225681c`, archivo en `openspec/changes/archive/2026-11-13-shadcn-base-ui-fase-2/`).
+
+- [ ] Migrar `CustomerSearchInput` (~300 líneas, con alta rápida de cliente) y `ProductSearchInput` a Autocomplete de Base UI. Hoy funcionan con portal propio en el diálogo; es un change propio (OpenSpec).
+- [ ] Borrar `ServiceRecordForm.jsx` y su test: no se usa en ninguna pantalla (las atenciones van por `ServiceRecordFormPage`). Confirmar con `codegraph callers` antes.
+- [ ] Quitar de `src/index.css` los estilos de `input[type="checkbox"]`, que quedaron sin uso tras pasar a `@ui/Checkbox`.
+- [ ] Bundle: +39,5 kB gzip (+5,9 %) por react-day-picker 10 + locale es + `@date-fns/tz`. Evaluar cargar el Calendar con `lazy()` al abrir el popover.
+- [ ] Warning de lint `react-refresh/only-export-components` en `src/components/ui/primitives/button.jsx:39` (exporta `buttonVariants`): mover la constante a otro archivo o silenciarlo.
+- [ ] Recordatorios: con una fecha inválida no se aplica **ningún** filtro (tampoco búsqueda ni estado) hasta corregirla. Evaluar aplicar el resto y solo frenar la fecha.
+- [ ] Agregar un test automático de la regla ESLint anti-nativos (`<select>`, `type="date|time|checkbox"`); hoy solo se verificó a mano.
