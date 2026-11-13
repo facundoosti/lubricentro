@@ -33,7 +33,7 @@ describe('AppointmentForm — errores de validación', () => {
     expect(vehicleSelect).toHaveAttribute('aria-invalid', 'true');
     expect(vehicleSelect.className).toMatch(/\bborder-error\b/);
     expect(vehicleSelect.className).not.toMatch(/\bborder-outline-variant\b/);
-    const customer = screen.getByPlaceholderText('Buscar cliente por nombre o email...');
+    const customer = screen.getByPlaceholderText('Buscar cliente por nombre o correo...');
     await waitFor(() => expect(customer).toHaveAttribute('aria-invalid', 'true'));
     expect(customer.className).toMatch(/\bborder-error\b/);
   });

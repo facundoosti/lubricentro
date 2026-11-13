@@ -173,7 +173,7 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
         <CustomerSearchInput
           value={selectedCustomerId}
           onChange={handleCustomerChange}
-          placeholder="Buscar cliente por nombre o email..."
+          placeholder="Buscar cliente por nombre o correo..."
           error={customerError}
           initialCustomer={initialData?.customer || null}
         />

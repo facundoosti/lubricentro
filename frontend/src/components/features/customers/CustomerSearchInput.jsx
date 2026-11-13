@@ -36,7 +36,7 @@ const CustomerSearchInput = ({
   value, // ID del cliente
   onChange, 
   onSelect, 
-  placeholder = "Buscar cliente por nombre, teléfono o email...",
+  placeholder = "Buscar cliente por nombre, teléfono o correo...",
   error = null,
   disabled = false,
   initialCustomer = null, // Cliente completo si está disponible
@@ -237,6 +237,7 @@ const CustomerSearchInput = ({
           <Search className="h-5 w-5 text-secondary" />
         </div>
         <input
+          autoComplete="off"
           type="text"
           value={inputValue}
           onChange={handleInputChange}

@@ -173,6 +173,7 @@ const SingleSelectSearch = ({
             <div className="relative">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-secondary" />
               <input
+                autoComplete="off"
                 type="text"
                 autoFocus
                 value={inputValue}

@@ -353,6 +353,7 @@ const ServiceRecordFormPage = () => {
                   <div className="relative flex items-center">
                     <Search className="absolute left-3 w-4 h-4 text-secondary pointer-events-none" />
                     <input
+                      autoComplete="off"
                       type="text"
                       value={customerSearch}
                       onChange={(e) => {
@@ -417,6 +418,7 @@ const ServiceRecordFormPage = () => {
                   <div className="relative flex items-center">
                     <Search className="absolute left-3 w-4 h-4 text-secondary pointer-events-none" />
                     <input
+                      autoComplete="off"
                       type="text"
                       value={vehicleSearch}
                       onChange={(e) => {

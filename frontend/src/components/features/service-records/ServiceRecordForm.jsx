@@ -82,7 +82,7 @@ const ServiceRecordForm = ({
         <CustomerSearchInput
           value={selectedCustomerId}
           onChange={handleCustomerChange}
-          placeholder="Buscar cliente por nombre o email..."
+          placeholder="Buscar cliente por nombre o correo..."
           initialCustomer={record?.vehicle?.customer}
         />
       </div>

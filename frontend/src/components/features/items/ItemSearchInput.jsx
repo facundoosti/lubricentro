@@ -168,6 +168,7 @@ const ItemSearchInput = ({ value, onSelect, onChange, inputRef }) => {
           <Search className="h-3.5 w-3.5 text-secondary" />
         </div>
         <input
+          autoComplete="off"
           ref={inputRef}
           type="text"
           role="combobox"

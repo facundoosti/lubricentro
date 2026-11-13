@@ -141,6 +141,7 @@ const Reminders = () => {
         <div className="flex-1 min-w-[220px] relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary" />
           <input
+            autoComplete="off"
             type="text"
             placeholder="Cliente o Patente..."
             value={pendingSearch}

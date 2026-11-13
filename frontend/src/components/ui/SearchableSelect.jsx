@@ -137,6 +137,7 @@ const SearchableSelect = ({ options = [], value, onChange, placeholder = 'Selecc
           <div className="flex items-center gap-2 px-3 py-2 border-b border-outline-variant">
             <Search className="w-3.5 h-3.5 text-secondary shrink-0" />
             <input
+              autoComplete="off"
               ref={inputRef}
               type="text"
               value={search}
