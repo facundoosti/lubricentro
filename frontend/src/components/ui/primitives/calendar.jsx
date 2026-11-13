@@ -4,7 +4,8 @@ import * as React from "react"
 import { DayPicker, getDefaultClassNames } from "react-day-picker"
 import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/primitives/button"
+import { Button } from "@/components/ui/primitives/button"
+import { buttonVariants } from "@/components/ui/primitives/button-variants"
 
 function Calendar({
   className,

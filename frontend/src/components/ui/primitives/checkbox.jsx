@@ -1,5 +1,5 @@
 // Primitiva shadcn/ui (base-nova) sobre Base UI, con las clases ajustadas a los tokens del design system
-// (mismo aspecto que el checkbox nativo estilado de index.css). Suma el indicador de indeterminado:
+// (mismo aspecto que tenía el checkbox nativo estilado). Suma el indicador de indeterminado:
 // caja con fondo de superficie, borde violeta y guion (no se confunde con una casilla marcada).
 // No se importa desde features/ ni pages/: usar el wrapper @ui/Checkbox.
 import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox"
