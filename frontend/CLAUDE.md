@@ -78,6 +78,8 @@ Features never import `@/components/ui/primitives/*` (ESLint `no-restricted-impo
 
 Adding a shadcn primitive: `npx shadcn@latest add <name>` (goes to `ui/primitives/`), then replace its shadcn classes with design-system tokens (`--color-primary`/`--color-secondary` are MD3, not shadcn's) and wrap it in `@ui`. Check the CLI didn't overwrite `src/index.css` or a same-name `@ui` file (macOS is case-insensitive).
 
+The `shadcn` skill (`.claude/skills/shadcn/`) is a reference for the CLI and Base UI docs only. Where it conflicts with this file, **this file wins**: features use the `@ui` wrappers (never shadcn components directly), the code is JavaScript (its examples are TypeScript), styling uses the MD3 tokens, and every `npx shadcn@latest add` runs with `--dry-run` first.
+
 ## API Services
 
 Each domain has its own service file in `src/services/` (e.g., `customersService.js`, `productsService.js`). Services export TanStack Query hooks and plain async functions. The base Axios instance is in `services/api.js`.
