@@ -1,0 +1,1020 @@
+[
+  {
+    "id": "TC-01",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "date": [
+        {
+          "tag": "input",
+          "w": 351,
+          "h": 44,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        }
+      ],
+      "vehicle": [
+        {
+          "tag": "select",
+          "w": 718,
+          "h": 44,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-01-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-01",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "date": [
+        {
+          "tag": "input",
+          "w": 351,
+          "h": 44,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        }
+      ],
+      "vehicle": [
+        {
+          "tag": "select",
+          "w": 718,
+          "h": 44,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-01-desktop-light.jpg"
+  },
+  {
+    "id": "TC-02",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "selects": [
+        {
+          "tag": "select",
+          "w": 351,
+          "h": 41,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "16px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "select",
+          "w": 351,
+          "h": 41,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "16px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "select",
+          "w": 351,
+          "h": 41,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "16px/400",
+          "color": "rgb(250, 250, 250)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-02-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-02",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "selects": [
+        {
+          "tag": "select",
+          "w": 351,
+          "h": 41,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "16px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "select",
+          "w": 351,
+          "h": 41,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "16px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "select",
+          "w": 351,
+          "h": 41,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "16px/400",
+          "color": "rgb(24, 24, 27)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-02-desktop-light.jpg"
+  },
+  {
+    "id": "TC-03",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "selects": [
+        {
+          "tag": "select",
+          "w": 349,
+          "h": 44,
+          "bg": "rgb(24, 24, 27)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-03-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-03",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "selects": [
+        {
+          "tag": "select",
+          "w": 349,
+          "h": 44,
+          "bg": "rgb(250, 250, 250)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-03-desktop-light.jpg"
+  },
+  {
+    "id": "TC-05",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "date": [
+        {
+          "tag": "input",
+          "w": 483,
+          "h": 38,
+          "bg": "rgb(24, 24, 27)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        }
+      ],
+      "status": [
+        {
+          "tag": "select",
+          "w": 483,
+          "h": 38,
+          "bg": "rgb(24, 24, 27)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-05-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-05",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "date": [
+        {
+          "tag": "input",
+          "w": 483,
+          "h": 38,
+          "bg": "rgb(250, 250, 250)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        }
+      ],
+      "status": [
+        {
+          "tag": "select",
+          "w": 483,
+          "h": 38,
+          "bg": "rgb(250, 250, 250)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-05-desktop-light.jpg"
+  },
+  {
+    "id": "TC-06",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "selects": [
+        {
+          "tag": "select",
+          "w": 622,
+          "h": 38,
+          "bg": "rgb(24, 24, 27)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-06-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-06",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "selects": [
+        {
+          "tag": "select",
+          "w": 622,
+          "h": 38,
+          "bg": "rgb(250, 250, 250)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-06-desktop-light.jpg"
+  },
+  {
+    "id": "TC-07",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "filters": [
+        {
+          "tag": "select",
+          "w": 165,
+          "h": 42,
+          "bg": "rgb(9, 9, 11)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "input",
+          "w": 161,
+          "h": 42,
+          "bg": "rgb(9, 9, 11)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "input",
+          "w": 161,
+          "h": 42,
+          "bg": "rgb(9, 9, 11)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-07-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-07",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "filters": [
+        {
+          "tag": "select",
+          "w": 165,
+          "h": 42,
+          "bg": "rgb(255, 255, 255)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "input",
+          "w": 161,
+          "h": 42,
+          "bg": "rgb(255, 255, 255)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "input",
+          "w": 161,
+          "h": 42,
+          "bg": "rgb(255, 255, 255)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-07-desktop-light.jpg"
+  },
+  {
+    "id": "TC-08",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "checkboxes": [
+        {
+          "tag": "input",
+          "w": 16,
+          "h": 16,
+          "bg": "rgb(24, 24, 27)",
+          "border": "rgb(124, 58, 237)",
+          "radius": "4px",
+          "font": "16px/700",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "input",
+          "w": 16,
+          "h": 16,
+          "bg": "rgb(124, 58, 237)",
+          "border": "rgb(124, 58, 237)",
+          "radius": "4px",
+          "font": "16px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "input",
+          "w": 16,
+          "h": 16,
+          "bg": "rgb(18, 18, 21)",
+          "border": "rgb(113, 113, 122)",
+          "radius": "4px",
+          "font": "16px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "input",
+          "w": 16,
+          "h": 16,
+          "bg": "rgb(18, 18, 21)",
+          "border": "rgb(113, 113, 122)",
+          "radius": "4px",
+          "font": "16px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "input",
+          "w": 16,
+          "h": 16,
+          "bg": "rgb(18, 18, 21)",
+          "border": "rgb(113, 113, 122)",
+          "radius": "4px",
+          "font": "16px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "input",
+          "w": 16,
+          "h": 16,
+          "bg": "rgb(18, 18, 21)",
+          "border": "rgb(113, 113, 122)",
+          "radius": "4px",
+          "font": "16px/400",
+          "color": "rgb(250, 250, 250)"
+        }
+      ],
+      "activeFilter": [
+        {
+          "tag": "select",
+          "w": 112,
+          "h": 38,
+          "bg": "rgb(24, 24, 27)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-08-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-08",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "checkboxes": [
+        {
+          "tag": "input",
+          "w": 16,
+          "h": 16,
+          "bg": "rgb(244, 244, 245)",
+          "border": "rgb(124, 58, 237)",
+          "radius": "4px",
+          "font": "16px/700",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "input",
+          "w": 16,
+          "h": 16,
+          "bg": "rgb(124, 58, 237)",
+          "border": "rgb(124, 58, 237)",
+          "radius": "4px",
+          "font": "16px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "input",
+          "w": 16,
+          "h": 16,
+          "bg": "rgb(255, 255, 255)",
+          "border": "rgb(113, 113, 122)",
+          "radius": "4px",
+          "font": "16px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "input",
+          "w": 16,
+          "h": 16,
+          "bg": "rgb(255, 255, 255)",
+          "border": "rgb(113, 113, 122)",
+          "radius": "4px",
+          "font": "16px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "input",
+          "w": 16,
+          "h": 16,
+          "bg": "rgb(255, 255, 255)",
+          "border": "rgb(113, 113, 122)",
+          "radius": "4px",
+          "font": "16px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "input",
+          "w": 16,
+          "h": 16,
+          "bg": "rgb(255, 255, 255)",
+          "border": "rgb(113, 113, 122)",
+          "radius": "4px",
+          "font": "16px/400",
+          "color": "rgb(24, 24, 27)"
+        }
+      ],
+      "activeFilter": [
+        {
+          "tag": "select",
+          "w": 112,
+          "h": 38,
+          "bg": "rgb(250, 250, 250)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-08-desktop-light.jpg"
+  },
+  {
+    "id": "TC-09",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "dates": [
+        {
+          "tag": "input",
+          "w": 419,
+          "h": 38,
+          "bg": "rgb(24, 24, 27)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "input",
+          "w": 419,
+          "h": 38,
+          "bg": "rgb(24, 24, 27)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-09-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-09",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "dates": [
+        {
+          "tag": "input",
+          "w": 419,
+          "h": 38,
+          "bg": "rgb(250, 250, 250)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "input",
+          "w": 419,
+          "h": 38,
+          "bg": "rgb(250, 250, 250)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-09-desktop-light.jpg"
+  },
+  {
+    "id": "TC-10",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "switches": [
+        {
+          "tag": "button",
+          "w": 44,
+          "h": 24,
+          "bg": "rgb(124, 58, 237)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "3.35544e+07px",
+          "font": "16px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "button",
+          "w": 44,
+          "h": 24,
+          "bg": "rgb(124, 58, 237)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "3.35544e+07px",
+          "font": "16px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "button",
+          "w": 44,
+          "h": 24,
+          "bg": "rgb(124, 58, 237)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "3.35544e+07px",
+          "font": "16px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "button",
+          "w": 44,
+          "h": 24,
+          "bg": "rgb(124, 58, 237)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "3.35544e+07px",
+          "font": "16px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "button",
+          "w": 44,
+          "h": 24,
+          "bg": "rgb(124, 58, 237)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "3.35544e+07px",
+          "font": "16px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "button",
+          "w": 44,
+          "h": 24,
+          "bg": "rgb(113, 113, 122)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "3.35544e+07px",
+          "font": "16px/400",
+          "color": "rgb(250, 250, 250)"
+        }
+      ],
+      "times": [
+        {
+          "tag": "input",
+          "w": 124,
+          "h": 31,
+          "bg": "rgb(18, 18, 21)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "4px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "input",
+          "w": 124,
+          "h": 31,
+          "bg": "rgb(18, 18, 21)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "4px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "input",
+          "w": 124,
+          "h": 31,
+          "bg": "rgb(18, 18, 21)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "4px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "input",
+          "w": 124,
+          "h": 31,
+          "bg": "rgb(18, 18, 21)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "4px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "input",
+          "w": 124,
+          "h": 31,
+          "bg": "rgb(18, 18, 21)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "4px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "input",
+          "w": 124,
+          "h": 31,
+          "bg": "rgb(18, 18, 21)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "4px",
+          "font": "14px/400",
+          "color": "rgb(250, 250, 250)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-10-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-10",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "switches": [
+        {
+          "tag": "button",
+          "w": 44,
+          "h": 24,
+          "bg": "rgb(124, 58, 237)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "3.35544e+07px",
+          "font": "16px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "button",
+          "w": 44,
+          "h": 24,
+          "bg": "rgb(124, 58, 237)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "3.35544e+07px",
+          "font": "16px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "button",
+          "w": 44,
+          "h": 24,
+          "bg": "rgb(124, 58, 237)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "3.35544e+07px",
+          "font": "16px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "button",
+          "w": 44,
+          "h": 24,
+          "bg": "rgb(124, 58, 237)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "3.35544e+07px",
+          "font": "16px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "button",
+          "w": 44,
+          "h": 24,
+          "bg": "rgb(124, 58, 237)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "3.35544e+07px",
+          "font": "16px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "button",
+          "w": 44,
+          "h": 24,
+          "bg": "rgb(113, 113, 122)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "3.35544e+07px",
+          "font": "16px/400",
+          "color": "rgb(24, 24, 27)"
+        }
+      ],
+      "times": [
+        {
+          "tag": "input",
+          "w": 124,
+          "h": 31,
+          "bg": "rgb(255, 255, 255)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "4px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "input",
+          "w": 124,
+          "h": 31,
+          "bg": "rgb(255, 255, 255)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "4px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "input",
+          "w": 124,
+          "h": 31,
+          "bg": "rgb(255, 255, 255)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "4px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "input",
+          "w": 124,
+          "h": 31,
+          "bg": "rgb(255, 255, 255)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "4px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "input",
+          "w": 124,
+          "h": 31,
+          "bg": "rgb(255, 255, 255)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "4px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "input",
+          "w": 124,
+          "h": 31,
+          "bg": "rgb(255, 255, 255)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "4px",
+          "font": "14px/400",
+          "color": "rgb(24, 24, 27)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-10-desktop-light.jpg"
+  },
+  {
+    "id": "TC-11",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "themeSwitch": [
+        {
+          "tag": "button",
+          "w": 44,
+          "h": 24,
+          "bg": "rgb(24, 24, 27)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "3.35544e+07px",
+          "font": "16px/400",
+          "color": "rgb(250, 250, 250)"
+        },
+        {
+          "tag": "span",
+          "w": 16,
+          "h": 16,
+          "bg": "rgb(124, 58, 237)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "3.35544e+07px",
+          "font": "16px/400",
+          "color": "rgb(255, 255, 255)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-11-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-11",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "themeSwitch": [
+        {
+          "tag": "button",
+          "w": 44,
+          "h": 24,
+          "bg": "rgb(244, 244, 245)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "3.35544e+07px",
+          "font": "16px/400",
+          "color": "rgb(24, 24, 27)"
+        },
+        {
+          "tag": "span",
+          "w": 16,
+          "h": 16,
+          "bg": "rgb(124, 58, 237)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "3.35544e+07px",
+          "font": "16px/400",
+          "color": "rgb(255, 255, 255)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-11-desktop-light.jpg"
+  },
+  {
+    "id": "TC-12",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "tabs": [
+        {
+          "tag": "button",
+          "w": 119,
+          "h": 38,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(167, 139, 250)",
+          "radius": "0px",
+          "font": "14px/500",
+          "color": "rgb(167, 139, 250)"
+        },
+        {
+          "tag": "button",
+          "w": 136,
+          "h": 38,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "radius": "0px",
+          "font": "14px/500",
+          "color": "rgb(161, 161, 170)"
+        },
+        {
+          "tag": "button",
+          "w": 90,
+          "h": 38,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "radius": "0px",
+          "font": "14px/500",
+          "color": "rgb(161, 161, 170)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-12-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-12",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "tabs": [
+        {
+          "tag": "button",
+          "w": 119,
+          "h": 38,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(124, 58, 237)",
+          "radius": "0px",
+          "font": "14px/500",
+          "color": "rgb(124, 58, 237)"
+        },
+        {
+          "tag": "button",
+          "w": 136,
+          "h": 38,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "radius": "0px",
+          "font": "14px/500",
+          "color": "rgb(82, 82, 91)"
+        },
+        {
+          "tag": "button",
+          "w": 90,
+          "h": 38,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgba(0, 0, 0, 0)",
+          "radius": "0px",
+          "font": "14px/500",
+          "color": "rgb(82, 82, 91)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-2/baseline/TC-12-desktop-light.jpg"
+  }
+]

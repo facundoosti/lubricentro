@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { screen, fireEvent, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, afterEach } from 'vitest';
@@ -143,5 +144,84 @@ describe('ProductsTable — filtros múltiples (marcas, proveedores, categorías
     renderTable({ onFilterChange, brands: ['Shell', 'YPF'] });
     await user.click(screen.getAllByRole('button', { name: 'Quitar Shell' })[0]);
     await waitFor(() => expect(onFilterChange).toHaveBeenCalledWith({ brand: ['YPF'] }));
+  });
+});
+
+describe('ProductsTable — filtro de stock (Select)', () => {
+  const pick = async (user, label) => {
+    await user.click(screen.getByRole('combobox', { name: 'Filtrar por stock' }));
+    await user.click(await screen.findByRole('option', { name: label }));
+    await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+  };
+
+  it('sin filtro muestra "Estado..."; elegir "Sin stock" filtra por active=false', async () => {
+    const user = userEvent.setup();
+    const onFilterChange = vi.fn();
+    renderTable({ onFilterChange });
+    expect(screen.getByRole('combobox', { name: 'Filtrar por stock' })).toHaveTextContent('Estado...');
+    await pick(user, 'Sin stock');
+    expect(onFilterChange).toHaveBeenLastCalledWith({ active: 'false' });
+  });
+
+  it('con filtro activo, "Todos" lo quita (active vacío)', async () => {
+    const user = userEvent.setup();
+    const onFilterChange = vi.fn();
+    renderTable({ onFilterChange, activeFilter: 'true' });
+    expect(screen.getByRole('combobox', { name: 'Filtrar por stock' })).toHaveTextContent('Con stock');
+    await pick(user, 'Todos');
+    expect(onFilterChange).toHaveBeenLastCalledWith({ active: '' });
+  });
+});
+
+describe('ProductsTable — selección (Checkbox con indeterminado)', () => {
+  // Mismo cálculo que la página Productos
+  const SelectionHarness = ({ initial = [] }) => {
+    const [selected, setSelected] = useState(new Set(initial));
+    const allPageSelected = products.length > 0 && products.every((p) => selected.has(p.id));
+    return (
+      <ProductsTable
+        products={products}
+        pagination={{}}
+        onEdit={vi.fn()}
+        onDelete={vi.fn()}
+        onCreate={vi.fn()}
+        onFilterChange={vi.fn()}
+        onPageChange={vi.fn()}
+        selectedIds={selected}
+        allPageSelected={allPageSelected}
+        someSelected={selected.size > 0}
+        onSelectProduct={(id, checked) => setSelected((prev) => {
+          const next = new Set(prev);
+          if (checked) next.add(id); else next.delete(id);
+          return next;
+        })}
+        onSelectAll={(checked) => setSelected(checked ? new Set(products.map((p) => p.id)) : new Set())}
+      />
+    );
+  };
+
+  const header = () => screen.getByRole('checkbox', { name: 'Seleccionar todos los productos de la página' });
+
+  it('marcar una fila la selecciona y deja la cabecera indeterminada', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SelectionHarness />);
+    expect(header()).toHaveAttribute('aria-checked', 'false');
+    await user.click(screen.getByRole('checkbox', { name: 'Seleccionar Aceite 10W40' }));
+    expect(screen.getByRole('checkbox', { name: 'Seleccionar Aceite 10W40' })).toHaveAttribute('aria-checked', 'true');
+    expect(header()).toHaveAttribute('aria-checked', 'mixed');
+    expect(screen.getByText('1 producto seleccionado')).toBeInTheDocument();
+  });
+
+  it('con una fila elegida, la cabecera selecciona toda la página', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SelectionHarness initial={[1]} />);
+    await user.click(header());
+    expect(header()).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('checkbox', { name: 'Seleccionar Neumático 175' })).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('sin productos la cabecera está deshabilitada', () => {
+    renderTable({ products: [] });
+    expect(header()).toHaveAttribute('aria-disabled', 'true');
   });
 });

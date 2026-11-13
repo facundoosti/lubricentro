@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
+import { format } from 'date-fns';
 import PhotosUpload from '@ui/PhotosUpload';
+import DateInput from '@ui/DateInput';
+import { validInput } from '@/lib/maskedInput';
 import { ArrowLeft, Car, User, Search, X, ImageIcon, FileText } from 'lucide-react';
 import ItemsEditor from '@components/features/items/ItemsEditor';
 import ItemsTotalsBar from '@components/features/items/ItemsTotalsBar';
@@ -18,7 +21,8 @@ import { api } from '@services/api';
 import { emptyItem, hasFilledItems } from '@utils/items';
 import { budgetToFormItems, toServiceRecordFormItems, toServiceRecordPayload } from '@utils/serviceRecord';
 
-const today = new Date().toISOString().split('T')[0];
+// Fecha local (no UTC): a las 22 h en Argentina toISOString ya da el día siguiente.
+const todayIso = () => format(new Date(), 'yyyy-MM-dd');
 const FORM_ID = 'service-record-form';
 
 const ServiceRecordFormPage = () => {
@@ -65,7 +69,7 @@ const ServiceRecordFormPage = () => {
 
   const { register, control, handleSubmit, watch, setValue, getValues, reset, formState: { errors } } = useForm({
     defaultValues: {
-      service_date: today,
+      service_date: todayIso(),
       mileage: '',
       notes: '',
       next_service_date: '',
@@ -85,7 +89,7 @@ const ServiceRecordFormPage = () => {
       setValue('customer_id', appointment.customer?.id || '');
       setValue('vehicle_id', appointment.vehicle?.id || '');
       setValue('appointment_id', appointment.id);
-      setValue('service_date', today);
+      setValue('service_date', todayIso());
     }
   }, [appointment, isEditing, setValue]);
 
@@ -94,7 +98,7 @@ const ServiceRecordFormPage = () => {
     if (isEditing && existingData?.data) {
       const r = existingData.data;
       reset({
-        service_date: r.service_date || today,
+        service_date: r.service_date || todayIso(),
         mileage: r.mileage || '',
         notes: r.notes || '',
         next_service_date: r.next_service_date || '',
@@ -488,13 +492,25 @@ const ServiceRecordFormPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Fecha de atención */}
             <div>
-              <label className="block text-sm font-medium text-on-surface mb-1">
+              <label id="service-date-label" className="block text-sm font-medium text-on-surface mb-1">
                 Fecha de atención <span className="text-error">*</span>
               </label>
-              <input
-                type="date"
-                {...register('service_date', { required: 'La fecha es obligatoria' })}
-                className={inputClass}
+              <Controller
+                name="service_date"
+                control={control}
+                rules={{ required: 'La fecha es obligatoria', validate: validInput() }}
+                render={({ field }) => (
+                  <DateInput
+                    ref={field.ref}
+                    name={field.name}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    aria-labelledby="service-date-label"
+                    error={!!errors.service_date}
+                    className={inputClass}
+                  />
+                )}
               />
               {errors.service_date && (
                 <p className="text-error text-xs mt-1">{errors.service_date.message}</p>
@@ -522,14 +538,29 @@ const ServiceRecordFormPage = () => {
 
             {/* Próximo servicio */}
             <div>
-              <label className="block text-sm font-medium text-on-surface mb-1">
+              <label id="next-service-date-label" className="block text-sm font-medium text-on-surface mb-1">
                 Próximo servicio
               </label>
-              <input
-                type="date"
-                {...register('next_service_date')}
-                className={inputClass}
+              <Controller
+                name="next_service_date"
+                control={control}
+                rules={{ validate: validInput() }}
+                render={({ field }) => (
+                  <DateInput
+                    ref={field.ref}
+                    name={field.name}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    aria-labelledby="next-service-date-label"
+                    error={!!errors.next_service_date}
+                    className={inputClass}
+                  />
+                )}
               />
+              {errors.next_service_date && (
+                <p className="text-error text-xs mt-1">{errors.next_service_date.message}</p>
+              )}
             </div>
           </div>
 

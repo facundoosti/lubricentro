@@ -1,6 +1,7 @@
 import { screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Routes, Route } from 'react-router-dom';
+import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
 import BudgetForm from '@pages/BudgetForm';
 
@@ -62,14 +63,22 @@ const renderForm = (route = '/budgets/new') =>
   );
 
 const items = () => screen.getAllByTestId('item-row');
-const fillItem = (index, { description, quantity, price, iva, margin }) => {
+const IVA_LABELS = { '21': '21%', '10.5': '10,5%', '': 'Sin IVA' };
+// Elige una opción de un Select de @ui (trigger con rol combobox).
+const pickOption = async (trigger, label) => {
+  const user = userEvent.setup();
+  await user.click(trigger);
+  await user.click(await screen.findByRole('option', { name: label }));
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+};
+const fillItem = async (index, { description, quantity, price, iva, margin }) => {
   const row = items()[index];
   if (description !== undefined) {
     fireEvent.change(within(row).getByRole('combobox', { name: 'Producto o servicio' }), { target: { value: description } });
   }
   if (quantity !== undefined) fireEvent.change(within(row).getByLabelText(/Cantidad/), { target: { value: quantity } });
   if (price !== undefined) fireEvent.change(within(row).getByLabelText(/Precio unit/), { target: { value: price } });
-  if (iva !== undefined) fireEvent.change(within(row).getByLabelText(/% IVA/), { target: { value: iva } });
+  if (iva !== undefined) await pickOption(within(row).getByRole('combobox', { name: /% IVA/ }), IVA_LABELS[iva]);
   if (margin !== undefined) fireEvent.change(within(row).getByLabelText(/% Ganancia/), { target: { value: margin } });
 };
 const submit = () => fireEvent.click(screen.getByRole('button', { name: 'Crear presupuesto' }));
@@ -97,10 +106,10 @@ describe('BudgetForm — nuevo', () => {
     expect(document.body.textContent).not.toMatch(/Artículos/);
   });
 
-  it('la ganancia recalcula la línea y los totales (1 × $1.000, 21%, 30%, recargo 10%)', () => {
+  it('la ganancia recalcula la línea y los totales (1 × $1.000, 21%, 30%, recargo 10%)', async () => {
     renderForm();
     fireEvent.change(screen.getByLabelText(/Recargo tarjeta/), { target: { value: '10' } });
-    fillItem(0, { description: 'Mano de obra', quantity: '1', price: '1000', iva: '21', margin: '30' });
+    await fillItem(0, { description: 'Mano de obra', quantity: '1', price: '1000', iva: '21', margin: '30' });
     expect(screen.getByTestId('line-total')).toHaveTextContent('$1.510');
     expect(screen.getByTestId('total-list')).toHaveTextContent('$1.510');
     expect(screen.getByTestId('total-card')).toHaveTextContent('$1.661');
@@ -112,9 +121,9 @@ describe('BudgetForm — nuevo', () => {
 
   it('envía la alícuota elegida en el select y la ganancia de cada línea', async () => {
     renderForm();
-    fillItem(0, { description: 'Mano de obra', price: '1000', iva: '10.5', margin: '30' });
+    await fillItem(0, { description: 'Mano de obra', price: '1000', iva: '10.5', margin: '30' });
     fireEvent.click(screen.getByRole('button', { name: 'Agregar ítem' }));
-    fillItem(1, { description: 'Lavado', price: '500', iva: '' });
+    await fillItem(1, { description: 'Lavado', price: '500', iva: '' });
     submit();
 
     await waitFor(() => expect(mocks.create).toHaveBeenCalled());
@@ -127,16 +136,16 @@ describe('BudgetForm — nuevo', () => {
 
   it('una ganancia fuera de rango muestra el mensaje propio (sin burbuja nativa)', async () => {
     renderForm();
-    fillItem(0, { description: 'Mano de obra', price: '1000', margin: '1000' });
+    await fillItem(0, { description: 'Mano de obra', price: '1000', margin: '1000' });
     submit();
     expect(await screen.findByText('% Ganancia inválido (0 a 999,99)')).toBeInTheDocument();
     expect(mocks.create).not.toHaveBeenCalled();
   });
 
-  it('calcula los totales con IVA en vivo', () => {
+  it('calcula los totales con IVA en vivo', async () => {
     renderForm();
     fireEvent.change(screen.getByLabelText(/Recargo tarjeta/), { target: { value: '10' } });
-    fillItem(0, { description: 'Aceite', quantity: '2', price: '10000', iva: '21' });
+    await fillItem(0, { description: 'Aceite', quantity: '2', price: '10000', iva: '21' });
 
     expect(screen.getByTestId('total-list')).toHaveTextContent('$24.200');
     expect(screen.getByTestId('total-card')).toHaveTextContent('$26.620');
@@ -149,12 +158,12 @@ describe('BudgetForm — nuevo', () => {
     expect(screen.getByTestId('line-total')).toHaveTextContent('$24.200');
   });
 
-  it('al pasar una línea a "Sin IVA" recalcula y la muestra en el desglose', () => {
+  it('al pasar una línea a "Sin IVA" recalcula y la muestra en el desglose', async () => {
     renderForm();
-    fillItem(0, { description: 'Mano de obra', quantity: '1', price: '15000', iva: '21' });
+    await fillItem(0, { description: 'Mano de obra', quantity: '1', price: '15000', iva: '21' });
     expect(screen.getByTestId('total-list')).toHaveTextContent('$18.150');
 
-    fillItem(0, { iva: '' });
+    await fillItem(0, { iva: '' });
     expect(screen.getByTestId('total-list')).toHaveTextContent('$15.000');
 
     fireEvent.click(screen.getByRole('button', { name: /Desglose/ }));
@@ -163,9 +172,9 @@ describe('BudgetForm — nuevo', () => {
     expect(screen.queryByTestId('iva-21')).toBeNull();
   });
 
-  it('Enter en el precio de la última línea agrega otra sin enviar', () => {
+  it('Enter en el precio de la última línea agrega otra sin enviar', async () => {
     renderForm();
-    fillItem(0, { description: 'Aceite', price: '100' });
+    await fillItem(0, { description: 'Aceite', price: '100' });
     fireEvent.keyDown(within(items()[0]).getByLabelText(/Precio unit/), { key: 'Enter' });
 
     expect(items()).toHaveLength(2);
@@ -173,9 +182,9 @@ describe('BudgetForm — nuevo', () => {
     expect(within(items()[1]).getByRole('combobox', { name: 'Producto o servicio' })).toHaveFocus();
   });
 
-  it('borrar la única línea deja una vacía', () => {
+  it('borrar la única línea deja una vacía', async () => {
     renderForm();
-    fillItem(0, { description: 'Aceite', price: '100' });
+    await fillItem(0, { description: 'Aceite', price: '100' });
     fireEvent.click(screen.getByRole('button', { name: 'Quitar línea 1' }));
 
     expect(items()).toHaveLength(1);
@@ -185,8 +194,8 @@ describe('BudgetForm — nuevo', () => {
   it('vincula el vehículo elegido y envía la alícuota de cada línea', async () => {
     renderForm();
     fireEvent.click(screen.getByRole('button', { name: 'elegir Juan' }));
-    fireEvent.change(screen.getByLabelText('Vehículo'), { target: { value: '10' } });
-    fillItem(0, { description: 'Neumático', price: '4000', iva: '10.5' });
+    await pickOption(screen.getByRole('combobox', { name: 'Vehículo' }), 'Ford Ka 2015 (AB123CD)');
+    await fillItem(0, { description: 'Neumático', price: '4000', iva: '10.5' });
     submit();
 
     await waitFor(() => expect(mocks.create).toHaveBeenCalled());
@@ -197,10 +206,10 @@ describe('BudgetForm — nuevo', () => {
     ]);
   });
 
-  it('al cambiar de cliente limpia el vehículo', () => {
+  it('al cambiar de cliente limpia el vehículo', async () => {
     renderForm();
     fireEvent.click(screen.getByRole('button', { name: 'elegir Juan' }));
-    fireEvent.change(screen.getByLabelText('Vehículo'), { target: { value: '10' } });
+    await pickOption(screen.getByRole('combobox', { name: 'Vehículo' }), 'Ford Ka 2015 (AB123CD)');
     fireEvent.click(screen.getByRole('button', { name: 'elegir Ana' }));
 
     // Ana no tiene vehículos: queda texto libre y vacío
@@ -218,9 +227,9 @@ describe('BudgetForm — desde el perfil del cliente', () => {
     renderForm('/budgets/new?customer_id=3&vehicle_id=10');
 
     expect(screen.getByTestId('customer-value')).toHaveTextContent('3');
-    await waitFor(() => expect(screen.getByLabelText('Vehículo')).toHaveValue('10'));
+    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Vehículo' })).toHaveTextContent('Ford Ka 2015 (AB123CD)'));
 
-    fillItem(0, { description: 'Aceite', price: '100' });
+    await fillItem(0, { description: 'Aceite', price: '100' });
     submit();
     await waitFor(() => expect(mocks.create).toHaveBeenCalled());
     expect(mocks.create.mock.calls[0][0]).toMatchObject({
@@ -275,11 +284,65 @@ describe('BudgetForm — edición', () => {
     ]);
   });
 
+  it('muestra la fecha guardada en dd/mm/aaaa y envía la tipeada en ISO', async () => {
+    const user = userEvent.setup();
+    renderForm('/budgets/5/edit');
+    const date = screen.getByLabelText(/Fecha/);
+    expect(date).toHaveValue('01/11/2026');
+    await user.clear(date);
+    await user.type(date, '20112026');
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
+    await waitFor(() => expect(mocks.update).toHaveBeenCalled());
+    expect(mocks.update.mock.calls[0][0].data).toMatchObject({ date: '2026-11-20' });
+  });
+
+  it('muestra estado y vehículo guardados; cambiar el estado lo envía', async () => {
+    renderForm('/budgets/5/edit');
+    const status = screen.getByRole('combobox', { name: 'Estado' });
+    expect(status).toHaveTextContent('Borrador');
+    expect(screen.getByRole('combobox', { name: 'Vehículo' })).toHaveTextContent('Ford Ka 2015 (AB123CD)');
+    await pickOption(status, 'Aprobado');
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
+    await waitFor(() => expect(mocks.update).toHaveBeenCalled());
+    expect(mocks.update.mock.calls[0][0].data).toMatchObject({ status: 'approved', vehicle_id: 10 });
+  });
+
+  it('"Sin vehículo" quita el vehículo guardado', async () => {
+    renderForm('/budgets/5/edit');
+    await pickOption(screen.getByRole('combobox', { name: 'Vehículo' }), 'Sin vehículo');
+    expect(screen.getByRole('combobox', { name: 'Vehículo' })).toHaveTextContent('Seleccionar vehículo...');
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
+    await waitFor(() => expect(mocks.update).toHaveBeenCalled());
+    expect(mocks.update.mock.calls[0][0].data).toMatchObject({ vehicle_id: null, vehicle_description: '' });
+  });
+
+  it('un vehículo guardado que ya no está entre los del cliente muestra su descripción, no el id', () => {
+    mocks.useBudget.mockReturnValue({
+      data: { data: { ...budget, vehicle_id: 77, vehicle_description: 'Peugeot 208 (AA000AA)' } },
+      isLoading: false,
+      isError: false,
+    });
+    renderForm('/budgets/5/edit');
+    const trigger = screen.getByRole('combobox', { name: 'Vehículo' });
+    expect(trigger).toHaveTextContent('Peugeot 208 (AA000AA)');
+    expect(trigger).not.toHaveTextContent('77');
+  });
+
+  it('una fecha inválida no se envía y muestra "Fecha inválida"', async () => {
+    const user = userEvent.setup();
+    renderForm('/budgets/5/edit');
+    const date = screen.getByLabelText(/Fecha/);
+    await user.clear(date);
+    await user.type(date, '31022026');
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
+    expect(await screen.findByText('Fecha inválida')).toBeInTheDocument();
+    expect(mocks.update).not.toHaveBeenCalled();
+  });
+
   it('muestra el % anterior de una línea vieja y su ganancia', () => {
     renderForm('/budgets/5/edit');
     const row = items()[2];
-    expect(within(row).getByLabelText('% IVA línea 3')).toHaveValue('15');
-    expect(within(row).getByRole('option', { name: '15% (anterior)' }).selected).toBe(true);
+    expect(within(row).getByRole('combobox', { name: '% IVA línea 3' })).toHaveTextContent('15% (anterior)');
     expect(within(row).getByLabelText('% Ganancia línea 3')).toHaveValue(30);
     expect(within(row).getByTestId('line-total')).toHaveTextContent('$145');
   });

@@ -5,6 +5,7 @@ import { useServiceRecords } from '@services/serviceRecordsService';
 import { useBudgets } from '@services/budgetsService';
 import { useAppointments } from '@services/appointmentsService';
 import { formatCurrency } from '@utils/money';
+import Tabs from '@ui/Tabs';
 
 const HISTORY_LIMIT = 5;
 
@@ -156,40 +157,29 @@ const AppointmentsTab = ({ customerId, navigate }) => {
 };
 
 const TABS = [
-  { key: 'service_records', label: 'Atenciones', icon: ClipboardList, Panel: ServiceRecordsTab },
-  { key: 'budgets', label: 'Presupuestos', icon: FileText, Panel: BudgetsTab },
-  { key: 'appointments', label: 'Turnos', icon: CalendarDays, Panel: AppointmentsTab },
+  { value: 'service_records', label: 'Atenciones', icon: ClipboardList, Panel: ServiceRecordsTab },
+  { value: 'budgets', label: 'Presupuestos', icon: FileText, Panel: BudgetsTab },
+  { value: 'appointments', label: 'Turnos', icon: CalendarDays, Panel: AppointmentsTab },
 ];
 
 // Historial del cliente. Cada pestaña consulta su listado recién al abrirse.
 const CustomerHistoryCard = ({ customerId }) => {
   const navigate = useNavigate();
-  const [active, setActive] = useState(TABS[0].key);
-  const { Panel } = TABS.find((tab) => tab.key === active);
+  const [active, setActive] = useState(TABS[0].value);
+  const { Panel } = TABS.find((tab) => tab.value === active);
 
   return (
     <section className="p-5 border border-outline-variant rounded-lg bg-surface-container lg:p-6">
       <h4 className="text-base font-semibold text-on-surface mb-4">Historial</h4>
-      <div role="tablist" className="flex gap-1 border-b border-outline-variant">
-        {TABS.map(({ key, label, icon: Icon }) => (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            aria-selected={active === key}
-            onClick={() => setActive(key)}
-            className={`flex min-w-0 flex-auto items-center justify-center gap-1.5 whitespace-nowrap border-b-2 px-1 py-2 text-xs sm:flex-none sm:px-3 sm:text-sm font-medium transition-colors ${
-              active === key ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'
-            }`}
-          >
-            <Icon className="hidden w-4 h-4 shrink-0 sm:inline" />
-            <span className="truncate">{label}</span>
-          </button>
-        ))}
-      </div>
-      <div role="tabpanel" className="pt-2">
+      <Tabs
+        items={TABS}
+        value={active}
+        onValueChange={setActive}
+        tabClassName="min-w-0 flex-auto px-1 py-2 text-xs sm:flex-none sm:px-3 sm:text-sm"
+        panelClassName="pt-2"
+      >
         <Panel customerId={customerId} navigate={navigate} />
-      </div>
+      </Tabs>
     </section>
   );
 };

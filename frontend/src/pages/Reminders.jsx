@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { CheckCheck, Clock, AlertCircle, Search, Filter, Send } from "lucide-react";
 import { useServiceReminders, useReminderStatistics } from "@services/remindersService";
 import PageError from "@ui/PageError";
+import Select from "@ui/Select";
+import DateInput from "@ui/DateInput";
+import { isInvalidInput } from "@/lib/maskedInput";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const STATUS_CONFIG = {
@@ -22,6 +25,13 @@ const STATUS_CONFIG = {
     dot: "bg-error",
   },
 };
+
+// "Todos los estados" = sin filtro (''); en la lista usa un valor propio (el Select trata '' como "sin elegir").
+const ALL = "all";
+const STATUS_OPTIONS = [
+  { value: ALL, label: "Todos los estados" },
+  ...Object.entries(STATUS_CONFIG).map(([value, { label }]) => ({ value, label })),
+];
 
 const initials = (name = "") =>
   name
@@ -84,7 +94,16 @@ const Reminders = () => {
   const pagination = data?.data?.pagination;
   const stats = statsData?.data || {};
 
+  // Una fecha tipeada a medias o inexistente no se aplica: se avisa y se deja el filtro como estaba.
+  const invalidDates = isInvalidInput(pendingStartDate) || isInvalidInput(pendingEndDate);
+  const [showDateError, setShowDateError] = useState(false);
+
   const handleFilter = () => {
+    if (invalidDates) {
+      setShowDateError(true);
+      return;
+    }
+    setShowDateError(false);
     setSearch(pendingSearch);
     setStatus(pendingStatus);
     setStartDate(pendingStartDate);
@@ -151,30 +170,28 @@ const Reminders = () => {
           />
         </div>
 
-        <div className="relative">
-          <select
-            value={pendingStatus}
-            onChange={(e) => setPendingStatus(e.target.value)}
-            className="appearance-none bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2.5 pr-8 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            <option value="">Todos los estados</option>
-            <option value="sent">Enviado</option>
-            <option value="pending">Pendiente</option>
-            <option value="failed">Fallido</option>
-          </select>
-        </div>
-
-        <input
-          type="date"
-          value={pendingStartDate}
-          onChange={(e) => setPendingStartDate(e.target.value)}
-          className="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+        <Select
+          aria-label="Estado del recordatorio"
+          options={STATUS_OPTIONS}
+          value={pendingStatus || ALL}
+          onChange={(v) => setPendingStatus(v === ALL ? "" : v)}
+          className="w-auto bg-surface-container-lowest border-outline-variant pl-4 pr-2 py-2.5"
+          contentClassName="w-auto min-w-(--anchor-width)"
         />
-        <input
-          type="date"
+
+        <DateInput
+          aria-label="Desde"
+          value={pendingStartDate}
+          onChange={setPendingStartDate}
+          error={showDateError && isInvalidInput(pendingStartDate)}
+          className="w-[161px] bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2.5 text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+        <DateInput
+          aria-label="Hasta"
           value={pendingEndDate}
-          onChange={(e) => setPendingEndDate(e.target.value)}
-          className="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+          onChange={setPendingEndDate}
+          error={showDateError && isInvalidInput(pendingEndDate)}
+          className="w-[161px] bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2.5 text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-1 focus:ring-primary"
         />
 
         <button
@@ -185,6 +202,9 @@ const Reminders = () => {
           Filtrar
         </button>
       </div>
+      {showDateError && invalidDates && (
+        <p role="alert" className="text-xs text-error -mt-4">Revisá las fechas: usá dd/mm/aaaa.</p>
+      )}
 
       {/* Table */}
       <div id="tour-reminders-table" className="bg-surface-container border border-outline-variant rounded-xl overflow-hidden">

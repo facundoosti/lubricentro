@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@ui/Table";
 import Pagination from "@ui/Pagination";
 import Combobox from "@ui/Combobox";
+import Select from "@ui/Select";
+import Checkbox from "@ui/Checkbox";
 import { useSuppliers } from '@services/suppliersService';
 import { useProductBrands } from '@services/productsService';
 import { useCategories } from '@services/categoriesService';
@@ -27,6 +29,14 @@ const buildCategoryOptions = (categories) => {
   };
   return flatten('root', 0);
 };
+
+// Filtro de stock: "Todos" = sin filtro (''); en la lista usa un valor propio (el Select trata '' como "sin elegir").
+const ALL = 'all';
+const ACTIVE_FILTER_OPTIONS = [
+  { value: ALL, label: 'Todos' },
+  { value: 'true', label: 'Con stock' },
+  { value: 'false', label: 'Sin stock' },
+];
 
 const ProductsTable = ({
   products = [],
@@ -62,7 +72,6 @@ const ProductsTable = ({
   const [supplierSearch, setSupplierSearch] = useState('');
   const [categorySearch, setCategorySearch] = useState('');
   const [lightboxProductId, setLightboxProductId] = useState(null);
-  const headerCheckRef = useRef(null);
   const searchDebounceRef = useRef(null);
 
   const { data: brandsData, isLoading: brandsLoading } = useProductBrands(brandSearch);
@@ -80,13 +89,8 @@ const ProductsTable = ({
   // Sync local search when URL param changes externally (browser back/forward)
   useEffect(() => { setLocalSearch(search); }, [search]);
 
-  // Indeterminate state on header checkbox
-  useEffect(() => {
-    if (headerCheckRef.current) {
-      const someChecked = products.some(p => selectedIds.has(p.id));
-      headerCheckRef.current.indeterminate = someChecked && !allPageSelected;
-    }
-  }, [products, selectedIds, allPageSelected]);
+  // Cabecera indeterminada: algunos (no todos) los productos de la página elegidos
+  const somePageSelected = products.some((p) => selectedIds.has(p.id));
 
   // Debounced search on input change
   const handleSearchChange = useCallback((e) => {
@@ -211,15 +215,15 @@ const ProductsTable = ({
         />
 
         {/* Filtro activo */}
-        <select
+        <Select
+          aria-label="Filtrar por stock"
+          options={ACTIVE_FILTER_OPTIONS}
           value={activeFilter}
-          onChange={(e) => onFilterChange({ active: e.target.value })}
-          className="px-3 py-2 text-sm bg-surface-variant border border-outline-variant rounded-lg text-on-surface focus:ring-2 focus:ring-primary focus:border-transparent shrink-0"
-        >
-          <option value="">Estado...</option>
-          <option value="true">Con stock</option>
-          <option value="false">Sin stock</option>
-        </select>
+          onChange={(v) => onFilterChange({ active: v === ALL ? '' : v })}
+          placeholder="Estado..."
+          className="w-auto min-w-28 shrink-0 border-outline-variant"
+          contentClassName="w-auto min-w-(--anchor-width)"
+        />
 
         {/* Nuevo producto */}
         <button
@@ -315,13 +319,12 @@ const ProductsTable = ({
             <TableHeader className="border-b border-outline-variant">
               <TableRow>
                 <TableCell isHeader className="px-4 py-3 w-10">
-                  <input
-                    ref={headerCheckRef}
-                    type="checkbox"
+                  <Checkbox
+                    aria-label="Seleccionar todos los productos de la página"
                     checked={allPageSelected}
-                    onChange={(e) => onSelectAll(e.target.checked)}
+                    indeterminate={somePageSelected && !allPageSelected}
+                    onCheckedChange={onSelectAll}
                     disabled={products.length === 0}
-                    className="w-4 h-4 rounded border-outline-variant accent-primary cursor-pointer disabled:cursor-not-allowed"
                   />
                 </TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-secondary text-start text-xs uppercase tracking-wide">
@@ -371,11 +374,10 @@ const ProductsTable = ({
                       className={`transition-colors ${isSelected ? 'bg-primary-container/5' : 'hover:bg-surface-container-high/50'} ${!isActive ? 'opacity-60' : ''}`}
                     >
                       <TableCell className="px-4 py-3 w-10">
-                        <input
-                          type="checkbox"
+                        <Checkbox
+                          aria-label={`Seleccionar ${product.name}`}
                           checked={isSelected}
-                          onChange={(e) => onSelectProduct(product.id, e.target.checked)}
-                          className="w-4 h-4 rounded border-outline-variant accent-primary cursor-pointer"
+                          onCheckedChange={(checked) => onSelectProduct(product.id, checked)}
                         />
                       </TableCell>
 

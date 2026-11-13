@@ -1,0 +1,20 @@
+Línea base del bundle (npm run build, vite 6.4.1) — antes de la fase 2 (controles nativos → @ui) · 2026-11-13
+
+dist/assets/index-*.js            1,412.82 kB │ gzip: 428.46 kB   (chunk principal)
+dist/assets/jspdf.es.min-*.js       390.45 kB │ gzip: 128.78 kB
+dist/assets/html2canvas.esm-*.js    202.30 kB │ gzip:  48.03 kB
+dist/assets/index.es-*.js           159.61 kB │ gzip:  53.53 kB
+dist/assets/purify.es-*.js           22.77 kB │ gzip:   8.79 kB
+dist/assets/index-*.css             109.32 kB │ gzip:  18.80 kB
+
+JS total: 2,187.95 kB · gzip 667.59 kB
+
+Después del change (task 7.2) — misma build, react-day-picker 10.0.2 (+ @date-fns/tz) + Popover/Switch/Checkbox/Tabs de Base UI
+
+dist/assets/index-*.js            1,542.98 kB │ gzip: 467.98 kB   (+130.16 kB · gzip +39.52 kB)
+dist/assets/index-*.css             114.95 kB │ gzip:  19.72 kB   (+5.63 kB · gzip +0.92 kB)
+(jspdf, html2canvas, index.es, purify sin cambios)
+
+JS total: 2,318.11 kB · gzip 707.11 kB  →  +130.16 kB · gzip +39.52 kB (+5.9 %)
+Más que los ~15 kB gzip estimados para react-day-picker: suma Popover/Switch/Checkbox/Tabs de Base UI, el locale `es`
+y @date-fns/tz. Todo va al chunk principal; candidato a code-splitting (manualChunks / lazy del calendario), no se hizo acá.

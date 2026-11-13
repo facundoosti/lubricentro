@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { Loader2, Sparkles } from 'lucide-react';
 import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
 import CustomerModal from '@components/features/customers/CustomerModal';
 import PlateStatus from '@components/features/vehicles/PlateStatus';
 import ImageUpload from '@ui/ImageUpload';
+import Select from '@ui/Select';
 import { useVehiclePlate } from '@hooks/useVehiclePlate';
 import { useCreateCustomer } from '@services/customersService';
 import { showCustomerSuccess, showCustomerError, parseApiError } from '@services/notificationService';
@@ -43,7 +44,7 @@ const VehicleForm = ({
 
   const currentYear = new Date().getFullYear();
 
-  const { register, handleSubmit, formState: { errors }, reset, setValue, getValues, watch } = useForm({
+  const { register, control, handleSubmit, formState: { errors }, reset, setValue, getValues, watch } = useForm({
     defaultValues: {
       brand: vehicle?.brand ?? '',
       model: vehicle?.model ?? '',
@@ -138,9 +139,13 @@ const VehicleForm = ({
   };
 
   const isLookingUp = lookupStatus === 'loading';
+  const yearOptions = Array.from({ length: currentYear - MIN_VEHICLE_YEAR + 1 }, (_, i) => {
+    const year = String(currentYear - i);
+    return { value: year, label: year };
+  });
   const autoFieldClass = (field) => `${inputClass(!!errors[field])} transition-opacity ${isLookingUp ? 'opacity-50' : ''}`;
   const autoLabel = (field, text) => (
-    <label htmlFor={field} className={labelClass}>
+    <label id={`${field}-label`} htmlFor={field} className={labelClass}>
       {text}
       {autoFilled[field] && !isLookingUp && <AutoFilledBadge />}
       {isLookingUp && <Loader2 className="w-3 h-3 animate-spin text-primary" />}
@@ -219,23 +224,33 @@ const VehicleForm = ({
           {/* Año */}
           <div>
             {autoLabel('year', 'Año *')}
-            <select
-              id="year"
-              {...fieldRegister('year', {
+            <Controller
+              name="year"
+              control={control}
+              rules={{
                 required: 'El año es requerido',
                 validate: (value) => {
                   const year = parseInt(value, 10);
                   return (year >= MIN_VEHICLE_YEAR && year <= currentYear + 1) ||
                     `El año debe estar entre ${MIN_VEHICLE_YEAR} y ${currentYear}`;
                 },
-              })}
-              className={autoFieldClass('year')}
-            >
-              <option value="">Seleccionar año</option>
-              {Array.from({ length: currentYear - MIN_VEHICLE_YEAR + 1 }, (_, i) => currentYear - i).map((year) => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
+              }}
+              render={({ field }) => (
+                <Select
+                  id="year"
+                  aria-labelledby="year-label"
+                  options={yearOptions}
+                  value={field.value}
+                  onChange={(value) => {
+                    setAutoFilled((prev) => (prev.year ? { ...prev, year: false } : prev));
+                    field.onChange(value);
+                  }}
+                  placeholder="Seleccionar año"
+                  error={!!errors.year}
+                  className={autoFieldClass('year')}
+                />
+              )}
+            />
             {errors.year && <p className="mt-1 text-sm text-error">{errors.year.message}</p>}
           </div>
 

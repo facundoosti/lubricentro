@@ -1,6 +1,7 @@
 import { screen, waitFor, fireEvent, within } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Routes, Route } from 'react-router-dom';
+import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
 import ServiceRecordFormPage from '@pages/ServiceRecordFormPage';
 
@@ -114,14 +115,21 @@ const presetCustomer = () => {
 };
 
 const rows = () => screen.getAllByTestId('item-row');
-const fillItem = (index, { description, quantity, price, iva, margin }) => {
+const IVA_LABELS = { '21': '21%', '10.5': '10,5%', '': 'Sin IVA' };
+const pickOption = async (trigger, label) => {
+  const user = userEvent.setup();
+  await user.click(trigger);
+  await user.click(await screen.findByRole('option', { name: label }));
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+};
+const fillItem = async (index, { description, quantity, price, iva, margin }) => {
   const row = rows()[index];
   if (description !== undefined) {
     fireEvent.change(within(row).getByRole('combobox', { name: 'Producto o servicio' }), { target: { value: description } });
   }
   if (quantity !== undefined) fireEvent.change(within(row).getByLabelText(/Cantidad/), { target: { value: quantity } });
   if (price !== undefined) fireEvent.change(within(row).getByLabelText(/Precio unit/), { target: { value: price } });
-  if (iva !== undefined) fireEvent.change(within(row).getByLabelText(/% IVA/), { target: { value: iva } });
+  if (iva !== undefined) await pickOption(within(row).getByRole('combobox', { name: /% IVA/ }), IVA_LABELS[iva]);
   if (margin !== undefined) fireEvent.change(within(row).getByLabelText(/% Ganancia/), { target: { value: margin } });
 };
 
@@ -169,16 +177,16 @@ describe('ServiceRecordFormPage — Productos y Servicios', () => {
     expect(screen.queryByTestId('total-card')).toBeNull();
   });
 
-  it('una línea de 1 × $10.000 al 21% da Total $12.100', () => {
+  it('una línea de 1 × $10.000 al 21% da Total $12.100', async () => {
     renderPage('/service-records/new');
-    fillItem(0, { description: 'Aceite 5W30', price: '10000', iva: '21' });
+    await fillItem(0, { description: 'Aceite 5W30', price: '10000', iva: '21' });
     expect(screen.getByTestId('line-total')).toHaveTextContent('$12.100');
     expect(screen.getByTestId('total-list')).toHaveTextContent('$12.100');
   });
 
-  it('una línea 1 × $1.000 al 21% con ganancia 30% da Total $1.510', () => {
+  it('una línea 1 × $1.000 al 21% con ganancia 30% da Total $1.510', async () => {
     renderPage('/service-records/new');
-    fillItem(0, { description: 'Aceite 5W30', price: '1000', iva: '21', margin: '30' });
+    await fillItem(0, { description: 'Aceite 5W30', price: '1000', iva: '21', margin: '30' });
     expect(screen.getByTestId('line-total')).toHaveTextContent('$1.510');
     expect(screen.getByTestId('total-list')).toHaveTextContent('$1.510');
   });
@@ -186,7 +194,7 @@ describe('ServiceRecordFormPage — Productos y Servicios', () => {
   it('envía items_attributes sin total_amount ni budget_id', async () => {
     renderPage('/service-records/new?customer_id=3&vehicle_id=10');
     await waitFor(() => expect(screen.getByPlaceholderText('Buscar cliente...')).toHaveValue('Juan Pérez'));
-    fillItem(0, { description: 'Lavado de motor', price: '5000', iva: '', margin: '20' });
+    await fillItem(0, { description: 'Lavado de motor', price: '5000', iva: '', margin: '20' });
     fireEvent.click(screen.getByRole('button', { name: 'Registrar atención' }));
 
     await waitFor(() => expect(mocks.create).toHaveBeenCalled());
@@ -208,15 +216,15 @@ describe('ServiceRecordFormPage — Productos y Servicios', () => {
     await waitFor(() => expect(rows()).toHaveLength(3));
     expect(within(rows()[1]).getByRole('combobox', { name: 'Producto o servicio' })).toHaveValue('Neumático');
     expect(within(rows()[0]).getByLabelText(/% Ganancia/)).toHaveValue(30);
-    expect(within(rows()[1]).getByLabelText(/% IVA/)).toHaveValue('10.5');
-    expect(within(rows()[2]).getByLabelText(/% IVA/)).toHaveValue('');
+    expect(within(rows()[1]).getByRole('combobox', { name: /% IVA/ })).toHaveTextContent('10,5%');
+    expect(within(rows()[2]).getByRole('combobox', { name: /% IVA/ })).toHaveTextContent('Sin IVA');
     // 43.620 sin ganancia + 30% de $20.000 = $49.620
     expect(screen.getByTestId('total-list')).toHaveTextContent('$49.620');
     expect(screen.getByDisplayValue('Fiat Uno — ABC123')).toBeInTheDocument();
     expect(screen.getByText('Desde presupuesto #7')).toBeInTheDocument();
 
     // Editar después de copiar recalcula el total
-    fillItem(2, { quantity: '2' });
+    await fillItem(2, { quantity: '2' });
     expect(screen.getByTestId('total-list')).toHaveTextContent('$64.620');
 
     fireEvent.click(screen.getByRole('button', { name: 'Registrar atención' }));
@@ -241,7 +249,7 @@ describe('ServiceRecordFormPage — Productos y Servicios', () => {
 
   it('pide confirmar antes de reemplazar líneas cargadas', async () => {
     renderPage('/service-records/new');
-    fillItem(0, { description: 'Algo cargado', price: '100' });
+    await fillItem(0, { description: 'Algo cargado', price: '100' });
     await copyBudget();
 
     expect(screen.getByText(/se reemplazan por las del presupuesto/)).toBeInTheDocument();
@@ -317,7 +325,7 @@ describe('ServiceRecordFormPage — validación propia del formulario', () => {
   it('una ganancia fuera de rango muestra el mensaje propio (sin burbuja nativa)', async () => {
     renderPage('/service-records/new?customer_id=3&vehicle_id=10');
     await waitFor(() => expect(screen.getByPlaceholderText('Buscar cliente...')).toHaveValue('Juan Pérez'));
-    fillItem(0, { description: 'Mano de obra', price: '1000', margin: '1000' });
+    await fillItem(0, { description: 'Mano de obra', price: '1000', margin: '1000' });
     fireEvent.click(screen.getByRole('button', { name: 'Registrar atención' }));
     expect(await screen.findByText('% Ganancia inválido (0 a 999,99)')).toBeInTheDocument();
     expect(mocks.create).not.toHaveBeenCalled();
@@ -352,10 +360,36 @@ describe('ServiceRecordFormPage — edición de una atención migrada', () => {
     renderPage('/service-records/4/edit');
     await waitFor(() => expect(rows()).toHaveLength(2));
     expect(within(rows()[0]).getByRole('combobox', { name: 'Producto o servicio' })).toHaveValue('Cambio de aceite');
-    rows().forEach((row) => expect(within(row).getByLabelText(/% IVA/)).toHaveValue(''));
+    rows().forEach((row) => expect(within(row).getByRole('combobox', { name: /% IVA/ })).toHaveTextContent('Sin IVA'));
     expect(screen.getByTestId('total-list')).toHaveTextContent('$14.000');
     expect(screen.queryByRole('button', { name: 'Copiar desde presupuesto' })).toBeNull();
     expect(screen.queryByText(/Desde presupuesto/)).toBeNull();
+  });
+
+  it('muestra las fechas guardadas en dd/mm/aaaa y las envía en ISO', async () => {
+    mocks.useServiceRecord.mockReturnValue({ data: { data: { ...record, next_service_date: '2027-04-01' } }, isLoading: false });
+    renderPage('/service-records/4/edit');
+    await waitFor(() => expect(screen.getByRole('textbox', { name: /Fecha de atención/ })).toHaveValue('01/10/2026'));
+    expect(screen.getByRole('textbox', { name: 'Próximo servicio' })).toHaveValue('01/04/2027');
+    const user = userEvent.setup();
+    const next = screen.getByRole('textbox', { name: 'Próximo servicio' });
+    await user.clear(next);
+    await user.type(next, '15052027');
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+    await waitFor(() => expect(mocks.update).toHaveBeenCalled());
+    expect(mocks.update.mock.calls[0][0].data).toMatchObject({ service_date: '2026-10-01', next_service_date: '2027-05-15' });
+  });
+
+  it('un próximo servicio inválido no se guarda y muestra "Fecha inválida"', async () => {
+    const user = userEvent.setup();
+    renderPage('/service-records/4/edit');
+    await waitFor(() => expect(screen.getByRole('textbox', { name: /Fecha de atención/ })).toHaveValue('01/10/2026'));
+    const next = screen.getByRole('textbox', { name: 'Próximo servicio' });
+    await user.type(next, '31022027');
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+    expect(await screen.findByText('Fecha inválida')).toBeInTheDocument();
+    expect(next).toHaveAttribute('aria-invalid', 'true');
+    expect(mocks.update).not.toHaveBeenCalled();
   });
 
   it('al guardar manda _destroy de la línea quitada, conserva el catálogo y no toca budget_id', async () => {
@@ -372,5 +406,16 @@ describe('ServiceRecordFormPage — edición de una atención migrada', () => {
       { id: 21, _destroy: true },
     ]);
     expect(data).not.toHaveProperty('budget_id');
+  });
+});
+
+describe('ServiceRecordFormPage — fecha de hoy', () => {
+  afterEach(() => vi.useRealTimers());
+
+  it('a las 22:00 hora local la fecha de atención por defecto es la de hoy (no la UTC del día siguiente)', () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 10, 13, 22, 0, 0));
+    renderPage('/service-records/new');
+    expect(screen.getByRole('textbox', { name: /Fecha de atención/ })).toHaveValue('13/11/2026');
   });
 });

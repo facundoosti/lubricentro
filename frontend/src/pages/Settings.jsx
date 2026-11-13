@@ -7,6 +7,8 @@ import { useSetting, useUpdateSetting } from "@services/settingsService";
 import { showSettingSuccess, showSettingError } from "@services/notificationService";
 import PageHeader from "@ui/PageHeader";
 import PageError from "@ui/PageError";
+import TimeInput from "@ui/TimeInput";
+import Switch from "@ui/Switch";
 
 const DAYS = [
   { key: "lunes", label: "Lunes" },
@@ -23,7 +25,18 @@ const DEFAULT_OPENING_HOURS = DAYS.reduce((acc, { key }) => {
   return acc;
 }, {});
 
+// Día abierto: "desde" y "hasta" son obligatorios y válidos (TimeInput entrega INVALID_INPUT si no lo son).
+const HOUR_MESSAGE = "Completá desde y hasta con una hora válida (hh:mm)";
+const timeField = yup.string().when("open", {
+  is: true,
+  then: (s) => s.required(HOUR_MESSAGE).matches(/^([01]\d|2[0-3]):[0-5]\d$/, HOUR_MESSAGE),
+});
+const daySchema = yup.object({ open: yup.boolean(), from: timeField, to: timeField });
+
 const schema = yup.object({
+  opening_hours: yup.object(
+    DAYS.reduce((acc, { key }) => ({ ...acc, [key]: daySchema.default(undefined) }), {}),
+  ),
   lubricentro_name: yup.string().max(150),
   phone: yup.string().max(30),
   mobile: yup.string().max(30),
@@ -252,6 +265,8 @@ const Settings = () => {
             <div className="space-y-2">
               {DAYS.map(({ key, label }) => {
                 const day = openingHours[key] || { open: false, from: "09:00", to: "18:00" };
+                const dayErrors = errors.opening_hours?.[key];
+                const dayError = dayErrors?.from?.message || dayErrors?.to?.message;
                 return (
                   <div
                     key={key}
@@ -261,22 +276,11 @@ const Settings = () => {
                         : "border-outline-variant bg-surface-container-high"
                     }`}
                   >
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={!!day.open}
+                    <Switch
                       aria-label={label}
-                      onClick={() => toggleDay(key)}
-                      className={`relative inline-flex w-11 h-6 rounded-full flex-shrink-0 transition-colors duration-200 overflow-hidden ${
-                        day.open ? "bg-primary-container" : "bg-outline"
-                      }`}
-                    >
-                      <span
-                        className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-surface-container shadow-sm transition-transform duration-200 ${
-                          day.open ? "translate-x-5" : "translate-x-0"
-                        }`}
-                      />
-                    </button>
+                      checked={!!day.open}
+                      onCheckedChange={() => toggleDay(key)}
+                    />
                     <span
                       className={`w-24 text-sm font-medium ${
                         day.open ? "text-on-surface" : "text-secondary"
@@ -285,20 +289,23 @@ const Settings = () => {
                       {label}
                     </span>
                     {day.open ? (
-                      <div className="flex items-center gap-2 flex-1">
-                        <input
-                          type="time"
+                      <div className="flex items-center gap-2 flex-1 flex-wrap">
+                        <TimeInput
+                          aria-label={`${label} desde`}
                           value={day.from}
-                          onChange={(e) => setDayTime(key, "from", e.target.value)}
-                          className="px-2 py-1 bg-surface-container border border-outline-variant text-on-surface rounded text-sm focus:outline-none focus:border-primary"
+                          onChange={(value) => setDayTime(key, "from", value)}
+                          error={!!dayErrors?.from}
+                          className="w-[124px] h-[31px] px-2 py-1 bg-surface-container border border-outline-variant text-on-surface rounded text-sm focus:outline-none focus:border-primary"
                         />
                         <span className="text-secondary text-sm">a</span>
-                        <input
-                          type="time"
+                        <TimeInput
+                          aria-label={`${label} hasta`}
                           value={day.to}
-                          onChange={(e) => setDayTime(key, "to", e.target.value)}
-                          className="px-2 py-1 bg-surface-container border border-outline-variant text-on-surface rounded text-sm focus:outline-none focus:border-primary"
+                          onChange={(value) => setDayTime(key, "to", value)}
+                          error={!!dayErrors?.to}
+                          className="w-[124px] h-[31px] px-2 py-1 bg-surface-container border border-outline-variant text-on-surface rounded text-sm focus:outline-none focus:border-primary"
                         />
+                        {dayError && <p className="text-xs text-error">{dayError}</p>}
                       </div>
                     ) : (
                       <span className="text-secondary text-sm">Cerrado</span>

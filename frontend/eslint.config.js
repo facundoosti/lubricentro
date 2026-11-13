@@ -59,4 +59,29 @@ export default [
       ],
     },
   },
+  {
+    // Controles nativos o hechos a mano → wrappers de @ui (fase 2 de shadcn/Base UI)
+    files: ['src/components/features/**/*.{js,jsx}', 'src/pages/**/*.{js,jsx}', 'src/layout/**/*.{js,jsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "JSXOpeningElement[name.name='select']",
+          message: 'No uses <select> nativo: usá @ui/Select (o @ui/Combobox si necesita búsqueda).',
+        },
+        {
+          selector: "JSXOpeningElement[name.name='input'] > JSXAttribute[name.name='type'][value.value='date']",
+          message: 'No uses <input type="date">: usá @ui/DateInput (dd/mm/aaaa + calendario, valor ISO).',
+        },
+        {
+          selector: "JSXOpeningElement[name.name='input'] > JSXAttribute[name.name='type'][value.value='time']",
+          message: 'No uses <input type="time">: usá @ui/TimeInput (hh:mm).',
+        },
+        {
+          selector: "JSXOpeningElement[name.name='input'] > JSXAttribute[name.name='type'][value.value='checkbox']",
+          message: 'No uses <input type="checkbox">: usá @ui/Checkbox (con indeterminate).',
+        },
+      ],
+    },
+  },
 ]

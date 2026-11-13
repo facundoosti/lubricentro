@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import ImageUpload from '@ui/ImageUpload';
 import Combobox from '@ui/Combobox';
+import Select from '@ui/Select';
 import { useSuppliers } from '@services/suppliersService';
 import { useCategories } from '@services/categoriesService';
 import { ivaRateToOption, DEFAULT_IVA_RATE } from '@utils/iva';
@@ -25,6 +26,11 @@ const buildCategoryOptions = (categories) => {
 
   return flatten('root', 0);
 };
+
+// "Sin proveedor" es '' en el formulario; en la lista usa un valor propio (el Select trata '' como "sin elegir").
+const NO_SUPPLIER = 'none';
+// Ídem "Sin unidad" (la unidad es opcional en el backend).
+const NO_UNIT = 'none';
 
 const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
   const [imageFile, setImageFile] = useState(null);
@@ -84,8 +90,16 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
       hasError ? 'border-error' : 'border-outline-variant'
     }`;
 
+  // Mismo aspecto que los <select> nativos que reemplazan (fondo transparente, texto 16px, 41px de alto)
+  const selectClass = (hasError) => `${inputClass(hasError)} h-[41px] bg-transparent text-base`;
+
+  const supplierOptions = [
+    { value: NO_SUPPLIER, label: 'Sin proveedor' },
+    ...suppliers.map((s) => ({ value: String(s.id), label: s.name })),
+  ];
+
   const commonUnits = [
-    { value: '', label: 'Seleccionar unidad' },
+    { value: NO_UNIT, label: 'Sin unidad' },
     { value: 'unidad', label: 'Unidad' },
     { value: 'litro', label: 'Litro' },
     { value: 'kg', label: 'Kilogramo' },
@@ -157,21 +171,23 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
       {/* Proveedor + Categoría */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="supplier_id" className="block text-sm font-medium text-on-surface mb-1.5">
+          <label id="supplier_id-label" htmlFor="supplier_id" className="block text-sm font-medium text-on-surface mb-1.5">
             Proveedor
           </label>
-          <select
-            id="supplier_id"
-            {...register('supplier_id')}
-            className={inputClass(false)}
-          >
-            <option value="">Sin proveedor</option>
-            {suppliers.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
+          <Controller
+            name="supplier_id"
+            control={control}
+            render={({ field }) => (
+              <Select
+                id="supplier_id"
+                aria-labelledby="supplier_id-label"
+                options={supplierOptions}
+                value={field.value ? String(field.value) : NO_SUPPLIER}
+                onChange={(v) => field.onChange(v === NO_SUPPLIER ? '' : v)}
+                className={selectClass(false)}
+              />
+            )}
+          />
         </div>
 
         <div>
@@ -239,20 +255,26 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
         </div>
 
         <div>
-          <label htmlFor="unit" className="block text-sm font-medium text-on-surface mb-1.5">
+          <label id="unit-label" htmlFor="unit" className="block text-sm font-medium text-on-surface mb-1.5">
             Unidad
           </label>
-          <select
-            id="unit"
-            {...register('unit', {
-              maxLength: { value: 50, message: 'La unidad no puede exceder 50 caracteres' },
-            })}
-            className={inputClass(errors.unit)}
-          >
-            {commonUnits.map((u) => (
-              <option key={u.value} value={u.value}>{u.label}</option>
-            ))}
-          </select>
+          <Controller
+            name="unit"
+            control={control}
+            rules={{ maxLength: { value: 50, message: 'La unidad no puede exceder 50 caracteres' } }}
+            render={({ field }) => (
+              <Select
+                id="unit"
+                aria-labelledby="unit-label"
+                options={commonUnits}
+                value={field.value}
+                onChange={(v) => field.onChange(v === NO_UNIT ? '' : v)}
+                placeholder="Seleccionar unidad"
+                error={!!errors.unit}
+                className={selectClass(errors.unit)}
+              />
+            )}
+          />
           {errors.unit && <p className="mt-1 text-sm text-error">{errors.unit.message}</p>}
         </div>
       </div>
@@ -279,10 +301,10 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
         </div>
 
         <ProductIvaField
-          register={register}
+          control={control}
           unitPrice={watch('unit_price')}
           ivaRate={watch('iva_rate')}
-          className={inputClass(false)}
+          className={selectClass(false)}
         />
       </div>
 

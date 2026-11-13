@@ -44,6 +44,13 @@ describe('Select', () => {
     expect(trigger).not.toHaveTextContent('Seleccionar hora');
   });
 
+  it('orphanLabel reemplaza el valor crudo cuando no está entre las opciones', () => {
+    const { rerender } = render(<Select aria-label="Hora" options={HOURS} value="08:30" orphanLabel="Turno viejo" />);
+    expect(screen.getByRole('combobox', { name: 'Hora' })).toHaveTextContent('Turno viejo');
+    rerender(<Select aria-label="Hora" options={HOURS} value="09:00" orphanLabel="Turno viejo" />);
+    expect(screen.getByRole('combobox', { name: 'Hora' })).toHaveTextContent('9:00 AM');
+  });
+
   it('el nombre accesible es el texto de la etiqueta (aria-labelledby)', () => {
     render(
       <>
@@ -147,5 +154,13 @@ describe('Select — scroll con la lista abierta', () => {
     fireEvent.scroll(listbox);
     await new Promise((r) => setTimeout(r, 0));
     expect(screen.getByRole('listbox')).toBeInTheDocument();
+  });
+
+  it('acepta aria-label (sin etiqueta visible) y puede ocultar la flecha', () => {
+    const { container } = render(
+      <Select options={HOURS} value="08:00" onChange={vi.fn()} aria-label="Estado del presupuesto #1" showIcon={false} />,
+    );
+    expect(screen.getByRole('combobox', { name: 'Estado del presupuesto #1' })).toHaveTextContent('8:00 AM');
+    expect(container.querySelector('svg')).toBeNull();
   });
 });

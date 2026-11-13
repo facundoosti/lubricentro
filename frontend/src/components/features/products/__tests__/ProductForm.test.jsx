@@ -13,37 +13,45 @@ vi.mock('@services/categoriesService', () => ({
 
 const submitForm = () => fireEvent.submit(document.getElementById('product-form'));
 
+const pick = async (user, name, option) => {
+  await user.click(screen.getByRole('combobox', { name }));
+  await user.click(await screen.findByRole('option', { name: option }));
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+};
+
 describe('ProductForm — IVA', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('arranca en 21% para un producto nuevo', () => {
     renderWithProviders(<ProductForm onSubmit={vi.fn()} />);
-    expect(screen.getByLabelText('IVA')).toHaveValue('21');
+    expect(screen.getByRole('combobox', { name: 'IVA' })).toHaveTextContent('21%');
   });
 
   it('muestra la alícuota del producto que se edita', () => {
     renderWithProviders(
       <ProductForm onSubmit={vi.fn()} product={{ id: 1, name: 'Neumático', unit_price: '1000', iva_rate: '10.5' }} />,
     );
-    expect(screen.getByLabelText('IVA')).toHaveValue('10.5');
+    expect(screen.getByRole('combobox', { name: 'IVA' })).toHaveTextContent('10,5%');
   });
 
-  it('muestra el precio con IVA mientras se escribe', () => {
+  it('muestra el precio con IVA mientras se escribe', async () => {
+    const user = userEvent.setup();
     renderWithProviders(<ProductForm onSubmit={vi.fn()} />);
     fireEvent.change(screen.getByLabelText(/Precio sin IVA/), { target: { value: '10000' } });
     expect(screen.getByTestId('price-with-iva')).toHaveTextContent('$12.100');
 
-    fireEvent.change(screen.getByLabelText('IVA'), { target: { value: '10.5' } });
+    await pick(user, 'IVA', '10,5%');
     expect(screen.getByTestId('price-with-iva')).toHaveTextContent('$11.050');
   });
 
   it('envía la alícuota elegida como número', async () => {
+    const user = userEvent.setup();
     const onSubmit = vi.fn().mockResolvedValue();
     renderWithProviders(<ProductForm onSubmit={onSubmit} />);
 
     fireEvent.change(screen.getByLabelText(/Nombre del Producto/), { target: { value: 'Neumático 175' } });
     fireEvent.change(screen.getByLabelText(/Precio sin IVA/), { target: { value: '1000' } });
-    fireEvent.change(screen.getByLabelText('IVA'), { target: { value: '10.5' } });
+    await pick(user, 'IVA', '10,5%');
     submitForm();
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalled());
@@ -107,5 +115,80 @@ describe('ProductForm — Categoría (Combobox)', () => {
     submitForm();
     await waitFor(() => expect(onSubmit).toHaveBeenCalled());
     expect(onSubmit.mock.calls[0][0]).toMatchObject({ category_id: '2' });
+  });
+});
+
+describe('ProductForm — Proveedor y Unidad (Select)', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    const { useSuppliers } = await import('@services/suppliersService');
+    useSuppliers.mockReturnValue({ data: { data: { suppliers: [{ id: 3, name: 'BERAL SRL' }, { id: 4, name: 'MAXOIL' }] } } });
+  });
+
+  const product = { id: 1, name: 'Filtro', unit_price: '1000', iva_rate: '21', supplier_id: 3, unit: 'litro' };
+
+  it('al editar muestra el proveedor y la unidad guardados y los envía sin cambios', async () => {
+    const onSubmit = vi.fn().mockResolvedValue();
+    renderWithProviders(<ProductForm onSubmit={onSubmit} product={product} />);
+    expect(screen.getByRole('combobox', { name: 'Proveedor' })).toHaveTextContent('BERAL SRL');
+    expect(screen.getByRole('combobox', { name: 'Unidad' })).toHaveTextContent('Litro');
+    submitForm();
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    expect(onSubmit.mock.calls[0][0]).toMatchObject({ supplier_id: 3, unit: 'litro' });
+  });
+
+  it('producto nuevo: "Sin proveedor" y unidad sin elegir; elegir valores los envía', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn().mockResolvedValue();
+    renderWithProviders(<ProductForm onSubmit={onSubmit} />);
+    expect(screen.getByRole('combobox', { name: 'Proveedor' })).toHaveTextContent('Sin proveedor');
+    expect(screen.getByRole('combobox', { name: 'Unidad' })).toHaveTextContent('Seleccionar unidad');
+
+    await pick(user, 'Proveedor', 'MAXOIL');
+    await pick(user, 'Unidad', 'Kilogramo');
+    fireEvent.change(screen.getByLabelText(/Nombre del Producto/), { target: { value: 'Grasa' } });
+    fireEvent.change(screen.getByLabelText(/Precio sin IVA/), { target: { value: '500' } });
+    submitForm();
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    expect(onSubmit.mock.calls[0][0]).toMatchObject({ supplier_id: '4', unit: 'kg' });
+  });
+
+  it('volver a "Sin proveedor" envía supplier_id null y el reset tras guardar limpia los selects', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn().mockResolvedValue();
+    renderWithProviders(<ProductForm onSubmit={onSubmit} />);
+    await pick(user, 'Proveedor', 'MAXOIL');
+    await pick(user, 'Proveedor', 'Sin proveedor');
+    await pick(user, 'Unidad', 'Caja');
+    fireEvent.change(screen.getByLabelText(/Nombre del Producto/), { target: { value: 'Grasa' } });
+    fireEvent.change(screen.getByLabelText(/Precio sin IVA/), { target: { value: '500' } });
+    submitForm();
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    expect(onSubmit.mock.calls[0][0]).toMatchObject({ supplier_id: null, unit: 'caja' });
+    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Unidad' })).toHaveTextContent('Seleccionar unidad'));
+  });
+
+  it('al editar, "Sin proveedor" y "Sin unidad" envían supplier_id null y unit vacía', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn().mockResolvedValue();
+    renderWithProviders(<ProductForm onSubmit={onSubmit} product={product} />);
+    await pick(user, 'Proveedor', 'Sin proveedor');
+    await pick(user, 'Unidad', 'Sin unidad');
+    submitForm();
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    expect(onSubmit.mock.calls[0][0]).toMatchObject({ supplier_id: null, unit: '' });
+  });
+
+  it('click en las etiquetas Proveedor, Unidad e IVA activa su lista (label htmlFor → trigger)', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<ProductForm onSubmit={vi.fn()} product={product} />);
+    for (const name of ['Proveedor', 'Unidad', 'IVA']) {
+      const label = screen.getByText(name, { selector: 'label' });
+      expect(label).toHaveAttribute('for', screen.getByRole('combobox', { name }).id);
+      await user.click(label);
+      await waitFor(() => expect(screen.getByRole('combobox', { name })).toHaveAttribute('aria-expanded', 'true'));
+      await user.keyboard('{Escape}');
+      await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+    }
   });
 });

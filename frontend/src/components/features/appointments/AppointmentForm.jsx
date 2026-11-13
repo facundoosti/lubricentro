@@ -1,6 +1,8 @@
 import { useForm, Controller } from 'react-hook-form';
 import { useVehicles } from '@services/vehiclesService';
 import Select from '@ui/Select';
+import DateInput from '@ui/DateInput';
+import { isInvalidInput, validInput } from '@/lib/maskedInput';
 import TextArea from '@ui/TextArea';
 import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
 import { useEffect, useState, useMemo } from 'react';
@@ -22,15 +24,6 @@ const HOUR_OPTIONS = Array.from({ length: 13 }, (_, i) => {
   return { value, label: formatHour(value) };
 });
 
-// Abre el calendario nativo al hacer click en cualquier parte del campo
-const openPicker = (e) => {
-  try {
-    e.currentTarget.showPicker?.();
-  } catch {
-    // showPicker puede lanzar si el navegador no lo permite; el input sigue funcionando
-  }
-};
-
 const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' }) => {
   // Fecha actual (la hora arranca vacía: se elige siempre)
   const getCurrentDateTime = () => {
@@ -46,7 +39,7 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
 
   const [submitted, setSubmitted] = useState(false);
 
-  const { register, handleSubmit, control, formState: { errors }, watch, setValue, trigger, reset } = useForm({
+  const { register, handleSubmit, control, formState: { errors }, watch, setValue, trigger, reset, clearErrors } = useForm({
     defaultValues: {
       customer_id: '',
       vehicle_id: '',
@@ -80,6 +73,20 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
     }
     return [];
   }, [selectedCustomerId, vehiclesData]);
+
+  const vehicleOptions = vehicles.map((vehicle) => ({
+    value: String(vehicle.id),
+    label: `${vehicle.brand} ${vehicle.model} - ${vehicle.license_plate}`,
+  }));
+  const vehiclePlaceholder = !selectedCustomerId
+    ? 'Primero selecciona un cliente'
+    : vehiclesLoading
+      ? 'Cargando vehículos...'
+      : vehiclesError
+        ? 'Error al cargar vehículos'
+        : vehicles.length === 0
+          ? 'No hay vehículos registrados para este cliente'
+          : 'Seleccionar vehículo';
 
   // Turnos viejos con minutos (p. ej. 10:30): se agrega su horario para poder mostrarlo
   const selectedTime = watch('scheduled_time');
@@ -195,7 +202,7 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
 
       {/* Vehículo */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-on-surface">
+        <label id="appointment-vehicle-label" className="mb-1.5 block text-sm font-medium text-on-surface">
           Vehículo *
           {vehiclesLoading && selectedCustomerId && (
             <span className="ml-2 text-xs text-on-surface-variant">
@@ -203,30 +210,25 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
             </span>
           )}
         </label>
-        <select
-          {...register('vehicle_id', { required: 'Vehículo es requerido' })}
-          className={fieldClass(!!errors.vehicle_id)}
-          aria-invalid={!!errors.vehicle_id}
-          disabled={vehiclesLoading || !selectedCustomerId}
-        >
-          <option value="">
-            {!selectedCustomerId 
-              ? 'Primero selecciona un cliente' 
-              : vehiclesLoading 
-                ? 'Cargando vehículos...' 
-                : vehiclesError
-                  ? 'Error al cargar vehículos'
-                  : vehicles.length === 0 
-                    ? 'No hay vehículos registrados para este cliente'
-                    : 'Seleccionar vehículo'
-            }
-          </option>
-          {Array.isArray(vehicles) && vehicles.map((vehicle) => (
-            <option key={vehicle.id} value={vehicle.id}>
-              {vehicle.brand} {vehicle.model} - {vehicle.license_plate}
-            </option>
-          ))}
-        </select>
+        <Controller
+          name="vehicle_id"
+          control={control}
+          rules={{ required: 'Vehículo es requerido' }}
+          render={({ field }) => (
+            <Select
+              options={vehicleOptions}
+              value={field.value}
+              onChange={field.onChange}
+              placeholder={vehiclePlaceholder}
+              disabled={vehiclesLoading || !selectedCustomerId}
+              aria-labelledby="appointment-vehicle-label"
+              error={!!errors.vehicle_id}
+              // Deshabilitado como el <select> nativo que reemplaza: transparente y con el texto pleno
+              className="h-11 px-4 disabled:bg-transparent disabled:opacity-100"
+              valueClassName={vehiclesLoading || !selectedCustomerId ? 'data-placeholder:text-on-surface' : undefined}
+            />
+          )}
+        />
         {errors.vehicle_id && (
           <p className="mt-1 text-sm text-error">
             {errors.vehicle_id.message}
@@ -238,15 +240,36 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Fecha */}
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-on-surface">
+          <label id="appointment-date-label" className="mb-1.5 block text-sm font-medium text-on-surface">
             Fecha *
           </label>
-          <input
-            type="date"
-            {...register('scheduled_date', { required: 'Fecha es requerida' })}
-            onClick={openPicker}
-            className={`${fieldClass(!!errors.scheduled_date)} cursor-pointer`}
-            aria-invalid={!!errors.scheduled_date}
+          <Controller
+            name="scheduled_date"
+            control={control}
+            rules={{ required: 'Fecha es requerida', validate: validInput() }}
+            render={({ field }) => (
+              <DateInput
+                ref={field.ref}
+                name={field.name}
+                value={field.value}
+                // mode 'onChange': una fecha a medio tipear no muestra error; se valida al salir o al enviar.
+                onChange={(value) => {
+                  if (isInvalidInput(value)) {
+                    setValue('scheduled_date', value, { shouldDirty: true });
+                    clearErrors('scheduled_date');
+                  } else {
+                    field.onChange(value);
+                  }
+                }}
+                onBlur={() => {
+                  field.onBlur();
+                  if (isInvalidInput(field.value)) trigger('scheduled_date');
+                }}
+                aria-labelledby="appointment-date-label"
+                error={!!errors.scheduled_date}
+                className={fieldClass(!!errors.scheduled_date)}
+              />
+            )}
           />
           {errors.scheduled_date && (
             <p className="mt-1 text-sm text-error">

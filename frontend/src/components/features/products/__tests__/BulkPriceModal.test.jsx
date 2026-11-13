@@ -1,15 +1,17 @@
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
 import BulkPriceModal from '@components/features/products/BulkPriceModal';
 
 vi.mock('@services/suppliersService', () => ({
-  useSuppliers: () => ({ data: { data: { suppliers: [] } } }),
+  useSuppliers: () => ({ data: { data: { suppliers: [{ id: 3, name: 'BERAL SRL' }, { id: 4, name: 'MAXOIL' }] } } }),
 }));
 const previewMock = vi.hoisted(() => vi.fn());
 vi.mock('@services/productsService', () => ({
   useBulkPricePreview: () => ({ mutateAsync: previewMock, isPending: false }),
   useBulkPriceUpdate: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useProducts: () => ({ data: null, isLoading: false }),
 }));
 vi.mock('@services/notificationService', () => ({ showSuccess: vi.fn(), showError: vi.fn() }));
 
@@ -68,5 +70,45 @@ describe('BulkPriceModal — vista previa con nombres largos', () => {
     fireEvent.change(screen.getByPlaceholderText('Ej: 15'), { target: { value: '15' } });
     fireEvent.click(screen.getByRole('button', { name: /Vista previa/ }));
     expect(await screen.findByTitle(name)).toHaveTextContent(name);
+  });
+});
+
+describe('BulkPriceModal — proveedor (modo libre)', () => {
+  beforeEach(() => previewMock.mockReset());
+
+  const pick = async (user, label) => {
+    await user.click(screen.getByRole('combobox', { name: 'Proveedor' }));
+    await user.click(await screen.findByRole('option', { name: label }));
+    await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+  };
+
+  it('elegir un proveedor lo manda en la vista previa; "Todos los proveedores" lo quita', async () => {
+    const user = userEvent.setup();
+    previewMock.mockResolvedValue({ data: { previews: [] } });
+    renderWithProviders(<BulkPriceModal isOpen onClose={vi.fn()} />);
+    const trigger = screen.getByRole('combobox', { name: 'Proveedor' });
+    expect(trigger).toHaveTextContent('Todos los proveedores');
+    expect(trigger).toHaveAttribute('id', 'bulk-price-supplier');
+    expect(screen.getByText('Proveedor', { selector: 'label' })).toHaveAttribute('for', 'bulk-price-supplier');
+
+    await pick(user, 'MAXOIL');
+    expect(trigger).toHaveTextContent('MAXOIL');
+    fireEvent.change(screen.getByPlaceholderText('Ej: 15'), { target: { value: '15' } });
+    fireEvent.click(screen.getByRole('button', { name: /Vista previa/ }));
+    await waitFor(() => expect(previewMock).toHaveBeenCalled());
+    expect(previewMock.mock.calls[0][0]).toMatchObject({ supplier_id: '4', adjustment_value: '15' });
+  });
+
+  it('volver a "Todos los proveedores" deja el filtro vacío (pide otro criterio)', async () => {
+    const user = userEvent.setup();
+    const { showError } = await import('@services/notificationService');
+    renderWithProviders(<BulkPriceModal isOpen onClose={vi.fn()} />);
+    await pick(user, 'BERAL SRL');
+    await pick(user, 'Todos los proveedores');
+    expect(screen.getByRole('combobox', { name: 'Proveedor' })).toHaveTextContent('Todos los proveedores');
+    fireEvent.change(screen.getByPlaceholderText('Ej: 15'), { target: { value: '15' } });
+    fireEvent.click(screen.getByRole('button', { name: /Vista previa/ }));
+    expect(showError).toHaveBeenCalledWith('Criterio requerido', expect.any(String));
+    expect(previewMock).not.toHaveBeenCalled();
   });
 });

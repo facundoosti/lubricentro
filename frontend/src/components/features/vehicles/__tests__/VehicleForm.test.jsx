@@ -1,5 +1,6 @@
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
 import VehicleForm from '@components/features/vehicles/VehicleForm';
 import VehicleModal from '@components/features/vehicles/VehicleModal';
@@ -49,13 +50,37 @@ describe('VehicleForm', () => {
     setupApi();
   });
 
-  it('ofrece años hasta 1950', () => {
+  it('ofrece años hasta 1950', async () => {
+    const user = userEvent.setup();
     renderWithProviders(<VehicleForm onSubmit={vi.fn()} />);
-    const years = [...screen.getByLabelText(/Año/).options].map((o) => o.value);
+    const trigger = screen.getByRole('combobox', { name: /Año/ });
+    expect(trigger).toHaveTextContent('Seleccionar año');
+    await user.click(trigger);
+    await screen.findByRole('listbox');
+    const years = screen.getAllByRole('option').map((o) => o.textContent);
     expect(years).toContain('1986');
     expect(years).toContain('1950');
     expect(years).not.toContain('1949');
-    expect(years[1]).toBe(String(new Date().getFullYear()));
+    expect(years[0]).toBe(String(new Date().getFullYear()));
+  });
+
+  it('al editar muestra el año guardado y lo envía sin cambios', async () => {
+    const onSubmit = vi.fn().mockResolvedValue();
+    const vehicle = { id: 3, brand: 'Fiat', model: 'Uno', license_plate: 'AB123CD', year: 2010, customer_id: 8, customer: { id: 8, name: 'María Gómez' } };
+    renderWithProviders(<VehicleForm onSubmit={onSubmit} vehicle={vehicle} />);
+    expect(screen.getByRole('combobox', { name: /Año/ })).toHaveTextContent('2010');
+    fireEvent.submit(document.getElementById('vehicle-form'));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    expect(onSubmit.mock.calls[0][0]).toMatchObject({ year: '2010', brand: 'Fiat', customer_id: 8 });
+  });
+
+  it('exige el año al enviar', async () => {
+    const onSubmit = vi.fn();
+    renderWithProviders(<VehicleForm onSubmit={onSubmit} />);
+    fireEvent.submit(document.getElementById('vehicle-form'));
+    expect(await screen.findByText('El año es requerido')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: /Año/ })).toHaveAttribute('aria-invalid', 'true');
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 
   it('autocompleta marca, modelo y año al escribir una patente válida', async () => {
@@ -65,7 +90,7 @@ describe('VehicleForm', () => {
 
     await waitFor(() => expect(screen.getByLabelText(/Marca/)).toHaveValue('Toyota'));
     expect(screen.getByLabelText(/Modelo/)).toHaveValue('Corolla');
-    expect(screen.getByLabelText(/Año/)).toHaveValue('2018');
+    expect(screen.getByRole('combobox', { name: /Año/ })).toHaveTextContent('2018');
     expect(screen.getAllByText('Autocompletado')).toHaveLength(3);
   });
 
@@ -133,11 +158,14 @@ describe('VehicleForm', () => {
   });
 
   it('crea un cliente en línea, lo elige y conserva los datos del vehículo', async () => {
+    const user = userEvent.setup();
     api.post.mockResolvedValue({ data: { success: true, data: { id: 99, name: 'Carlos Ruiz', phone: '1155551234' } } });
     renderWithProviders(<VehicleModal isOpen onClose={vi.fn()} />);
     fireEvent.change(screen.getByLabelText(/Marca/), { target: { value: 'Ford' } });
     fireEvent.change(screen.getByLabelText(/Modelo/), { target: { value: 'Focus' } });
-    fireEvent.change(screen.getByLabelText(/Año/), { target: { value: '1986' } });
+    await user.click(screen.getByRole('combobox', { name: /Año/ }));
+    await user.click(await screen.findByRole('option', { name: '1986' }));
+    await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
 
     fireEvent.change(screen.getByPlaceholderText(/cliente/), { target: { value: 'Carlos Ruiz' } });
     fireEvent.click(await screen.findByRole('button', { name: /Crear cliente "Carlos Ruiz"/ }));
@@ -151,6 +179,6 @@ describe('VehicleForm', () => {
     expect(api.post).toHaveBeenCalledWith('/customers', { customer: expect.objectContaining({ name: 'Carlos Ruiz', phone: '1155551234' }) });
     expect(screen.getByPlaceholderText(/cliente/)).toHaveValue('Carlos Ruiz - 1155551234');
     expect(screen.getByLabelText(/Marca/)).toHaveValue('Ford');
-    expect(screen.getByLabelText(/Año/)).toHaveValue('1986');
+    expect(screen.getByRole('combobox', { name: /Año/ })).toHaveTextContent('1986');
   });
 });

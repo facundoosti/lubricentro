@@ -1,4 +1,5 @@
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderWithProviders } from '@/test/utils';
 import CustomerHistoryCard from '@components/features/customers/CustomerHistoryCard';
@@ -40,6 +41,26 @@ describe('CustomerHistoryCard', () => {
     expect(mocks.useBudgets).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: /Nueva atención/ }));
     expect(mocks.navigate).toHaveBeenCalledWith('/service-records/new?customer_id=4');
+  });
+
+  it('flecha derecha + Enter pasa a Presupuestos y muestra su panel', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<CustomerHistoryCard customerId={4} />);
+    screen.getByRole('tab', { name: /Atenciones/ }).focus();
+    await user.keyboard('{ArrowRight}');
+    await waitFor(() => expect(screen.getByRole('tab', { name: /Presupuestos/ })).toHaveFocus());
+    await user.keyboard('{Enter}');
+    expect(screen.getByRole('tab', { name: /Presupuestos/ })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText('#1 · 01/10/2026')).toBeInTheDocument();
+  });
+
+  it('el panel se llama como la pestaña activa y solo hay uno montado', () => {
+    renderWithProviders(<CustomerHistoryCard customerId={4} />);
+    expect(screen.getAllByRole('tabpanel')).toHaveLength(1);
+    expect(screen.getByRole('tabpanel')).toHaveAccessibleName(/Atenciones/);
+    fireEvent.click(screen.getByRole('tab', { name: /Turnos/ }));
+    expect(screen.getByRole('tabpanel')).toHaveAccessibleName(/Turnos/);
+    expect(mocks.useBudgets).not.toHaveBeenCalled();
   });
 
   it('pestaña Presupuestos: fecha, estado, total y abre la edición', () => {

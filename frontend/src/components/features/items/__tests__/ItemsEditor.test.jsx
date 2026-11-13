@@ -1,4 +1,5 @@
-import { screen, fireEvent, act, within } from '@testing-library/react';
+import { screen, fireEvent, act, within, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useForm } from 'react-hook-form';
 import { renderWithProviders } from '@/test/utils';
@@ -70,7 +71,7 @@ describe('ItemsEditor', () => {
     search(rows()[0], 'ace');
     fireEvent.mouseDown(screen.getByRole('option', { name: /Aceite 5W30/ }));
 
-    expect(within(rows()[0]).getByLabelText('% IVA línea 1')).toHaveValue('10.5');
+    expect(within(rows()[0]).getByRole('combobox', { name: '% IVA línea 1' })).toHaveTextContent('10,5%');
     expect(within(rows()[0]).getByLabelText('% Ganancia línea 1')).toHaveValue(30);
     // 10.000 + 30% ganancia (3.000) + 10,5% IVA (1.050)
     expect(within(rows()[0]).getByTestId('line-total')).toHaveTextContent('$14.050');
@@ -84,7 +85,7 @@ describe('ItemsEditor', () => {
     search(rows()[0], 'lav');
     fireEvent.mouseDown(screen.getByRole('option', { name: /Lavado de motor/ }));
 
-    expect(within(rows()[0]).getByLabelText('% IVA línea 1')).toHaveValue('');
+    expect(within(rows()[0]).getByRole('combobox', { name: '% IVA línea 1' })).toHaveTextContent('Sin IVA');
     expect(within(rows()[0]).getByLabelText('% Ganancia línea 1')).toHaveValue(0);
     expect(formApi.getValues('items_attributes.0')).toMatchObject({ margin_percentage: 0, product_id: null, service_id: 7 });
   });
@@ -95,12 +96,19 @@ describe('ItemsEditor', () => {
     expect(formApi.getValues('items_attributes.0')).toMatchObject({ description: 'Mano de obra', margin_percentage: 0 });
   });
 
-  it('cambiar la alícuota recalcula el importe de la línea', () => {
+  it('cambiar la alícuota recalcula el importe de la línea', async () => {
+    vi.useRealTimers();
+    const user = userEvent.setup();
+    const pickIva = async (label) => {
+      await user.click(within(rows()[0]).getByRole('combobox', { name: '% IVA línea 1' }));
+      await user.click(await screen.findByRole('option', { name: label }));
+      await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+    };
     renderWithProviders(<Harness items={[{ ...emptyItem(0), description: 'Mano de obra', unit_price: 1000 }]} />);
     expect(within(rows()[0]).getByTestId('line-total')).toHaveTextContent('$1.210');
-    fireEvent.change(within(rows()[0]).getByLabelText('% IVA línea 1'), { target: { value: '10.5' } });
+    await pickIva('10,5%');
     expect(within(rows()[0]).getByTestId('line-total')).toHaveTextContent('$1.105');
-    fireEvent.change(within(rows()[0]).getByLabelText('% IVA línea 1'), { target: { value: '' } });
+    await pickIva('Sin IVA');
     expect(within(rows()[0]).getByTestId('line-total')).toHaveTextContent('$1.000');
     expect(formApi.getValues('items_attributes.0.iva_rate')).toBe('');
   });
@@ -118,8 +126,7 @@ describe('ItemsEditor', () => {
 
   it('muestra un % guardado fuera de la lista como "(anterior)"', () => {
     renderWithProviders(<Harness items={[{ ...emptyItem(0), description: 'Viejo', unit_price: 1000, iva_rate: '15' }]} />);
-    expect(within(rows()[0]).getByLabelText('% IVA línea 1')).toHaveValue('15');
-    expect(within(rows()[0]).getByRole('option', { name: '15% (anterior)' }).selected).toBe(true);
+    expect(within(rows()[0]).getByRole('combobox', { name: '% IVA línea 1' })).toHaveTextContent('15% (anterior)');
     expect(within(rows()[0]).getByTestId('line-total')).toHaveTextContent('$1.150');
   });
 
@@ -169,7 +176,7 @@ describe('ItemsEditor', () => {
     renderWithProviders(<Harness />);
     fireEvent.click(screen.getByRole('button', { name: 'Agregar ítem' }));
     expect(rows()).toHaveLength(2);
-    expect(within(rows()[1]).getByLabelText('% IVA línea 2')).toHaveValue('21');
+    expect(within(rows()[1]).getByRole('combobox', { name: '% IVA línea 2' })).toHaveTextContent('21%');
     expect(within(rows()[1]).getByLabelText('% Ganancia línea 2')).toHaveValue(0);
   });
 });

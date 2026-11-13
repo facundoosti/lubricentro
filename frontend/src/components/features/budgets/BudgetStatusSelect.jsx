@@ -1,3 +1,4 @@
+import Select from '@ui/Select';
 import { useUpdateBudgetStatus } from '@services/budgetsService';
 import { showBudgetSuccess, showBudgetError, parseApiError } from '@services/notificationService';
 import { BUDGET_STATUSES } from '@utils/budget';
@@ -13,8 +14,7 @@ const STATUS_STYLES = {
 const BudgetStatusSelect = ({ budget }) => {
   const mutation = useUpdateBudgetStatus();
 
-  const handleChange = async (e) => {
-    const status = e.target.value;
+  const handleChange = async (status) => {
     if (status === budget.status) return;
     try {
       await mutation.mutateAsync({ id: budget.id, status });
@@ -25,19 +25,19 @@ const BudgetStatusSelect = ({ budget }) => {
   };
 
   return (
-    <select
+    <Select
+      options={BUDGET_STATUSES}
       value={budget.status}
       onChange={handleChange}
       disabled={mutation.isPending}
       aria-label={`Estado del presupuesto #${budget.id}`}
-      className={`appearance-none cursor-pointer rounded border px-2 py-0.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60 ${
+      showIcon={false}
+      valueClassName="text-inherit"
+      contentClassName="w-auto min-w-(--anchor-width)"
+      className={`w-auto cursor-pointer gap-0 rounded border px-2 py-0.5 text-xs font-medium hover:border-current focus:border-current focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60 ${
         STATUS_STYLES[budget.status] || 'text-secondary border-outline-variant'
       }`}
-    >
-      {BUDGET_STATUSES.map((s) => (
-        <option key={s.value} value={s.value}>{s.label}</option>
-      ))}
-    </select>
+    />
   );
 };
 

@@ -1,7 +1,13 @@
 import { useRef } from 'react';
+import Select from '@ui/Select';
 import { ITEM_IVA_OPTIONS, itemIvaOptions, ivaRateToOption } from '@utils/iva';
 
 const isStandard = (option) => ITEM_IVA_OPTIONS.some((opt) => opt.value === option);
+
+// "Sin IVA" es '' en el formulario; en la lista usa un valor propio (el Select trata '' como "sin elegir").
+const NONE = 'none';
+const toSelect = (option) => (option === '' ? NONE : option);
+const fromSelect = (value) => (value === NONE ? '' : value);
 
 /**
  * IvaRateSelect — alícuota de una línea (presupuesto y atención): 21% · 10,5% · Sin IVA
@@ -17,20 +23,17 @@ const IvaRateSelect = ({ id, value, onChange, className = '', 'aria-label': aria
   // queda como opción "(anterior)" aunque se elija otra alícuota.
   const legacy = useRef(null);
   if (!isStandard(current)) legacy.current = current;
-  const options = itemIvaOptions(legacy.current ?? current);
+  const options = itemIvaOptions(legacy.current ?? current).map((opt) => ({ ...opt, value: toSelect(opt.value) }));
 
   return (
-    <select
+    <Select
       id={id}
       aria-label={ariaLabel}
-      value={current}
-      onChange={(e) => onChange(e.target.value)}
-      className={`w-full px-2 py-1.5 bg-surface-variant border border-outline-variant rounded text-on-surface text-sm focus:outline-none focus:border-primary ${className}`}
-    >
-      {options.map((opt) => (
-        <option key={opt.value || 'none'} value={opt.value}>{opt.label}</option>
-      ))}
-    </select>
+      options={options}
+      value={toSelect(current)}
+      onChange={(next) => onChange(fromSelect(next))}
+      className={`rounded px-2 py-1.5 ${className}`}
+    />
   );
 };
 

@@ -126,3 +126,6 @@ CLAUDE.local.md
 .claude/skills/frontend-design
 .claude/skills/nodejs-backend-patterns
 .claude/skills/nodejs-best-practices
+
+# Sesión cacheada del qa-runner (token de QA)
+**/.auth.json

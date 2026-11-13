@@ -1,18 +1,23 @@
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
+import { format } from 'date-fns';
 import { useVehicles } from '@services/vehiclesService';
 import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
 import PhotosUpload from '@ui/PhotosUpload';
+import Select from '@ui/Select';
+import DateInput from '@ui/DateInput';
+import { validInput } from '@/lib/maskedInput';
 
 const ServiceRecordForm = ({
   record = null,
   onSubmit,
   formId = 'service-record-form',
 }) => {
-  const today = new Date().toISOString().split('T')[0];
+  // Fecha local (no UTC): a las 22 h en Argentina toISOString ya da el día siguiente.
+  const today = format(new Date(), 'yyyy-MM-dd');
   const [photoFiles, setPhotoFiles] = useState([]);
 
-  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm({
+  const { register, control, handleSubmit, formState: { errors }, watch, setValue } = useForm({
     defaultValues: {
       customer_id: record?.vehicle?.customer_id || '',
       vehicle_id: record?.vehicle_id || '',
@@ -89,32 +94,37 @@ const ServiceRecordForm = ({
 
       {/* Vehículo */}
       <div>
-        <label className="block text-sm font-medium text-on-surface mb-2">
+        <label id="service-record-vehicle-label" className="block text-sm font-medium text-on-surface mb-2">
           Vehículo *
           {vehiclesLoading && selectedCustomerId && (
             <span className="ml-2 text-xs text-on-surface-variant">(Cargando...)</span>
           )}
         </label>
-        <select
-          {...register('vehicle_id', { required: 'Vehículo es requerido' })}
-          disabled={vehiclesLoading || !selectedCustomerId}
-          className={inputClass(errors.vehicle_id)}
-        >
-          <option value="">
-            {!selectedCustomerId
-              ? 'Primero selecciona un cliente'
-              : vehiclesLoading
-                ? 'Cargando vehículos...'
-                : vehicles.length === 0
-                  ? 'No hay vehículos para este cliente'
-                  : 'Seleccionar vehículo'}
-          </option>
-          {vehicles.map((v) => (
-            <option key={v.id} value={v.id}>
-              {v.brand} {v.model} - {v.license_plate}
-            </option>
-          ))}
-        </select>
+        <Controller
+          name="vehicle_id"
+          control={control}
+          rules={{ required: 'Vehículo es requerido' }}
+          render={({ field }) => (
+            <Select
+              options={vehicles.map((v) => ({ value: String(v.id), label: `${v.brand} ${v.model} - ${v.license_plate}` }))}
+              value={field.value}
+              onChange={field.onChange}
+              placeholder={
+                !selectedCustomerId
+                  ? 'Primero selecciona un cliente'
+                  : vehiclesLoading
+                    ? 'Cargando vehículos...'
+                    : vehicles.length === 0
+                      ? 'No hay vehículos para este cliente'
+                      : 'Seleccionar vehículo'
+              }
+              disabled={vehiclesLoading || !selectedCustomerId}
+              aria-labelledby="service-record-vehicle-label"
+              error={!!errors.vehicle_id}
+              className={`${inputClass(errors.vehicle_id)} bg-transparent text-base`}
+            />
+          )}
+        />
         {errors.vehicle_id && (
           <p className="mt-1 text-sm text-error">{errors.vehicle_id.message}</p>
         )}
@@ -123,13 +133,25 @@ const ServiceRecordForm = ({
       {/* Fecha de atención y Kilometraje */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-on-surface mb-2">
+          <label id="service-record-date-label" className="block text-sm font-medium text-on-surface mb-2">
             Fecha de atención *
           </label>
-          <input
-            type="date"
-            {...register('service_date', { required: 'Fecha es requerida' })}
-            className={inputClass(errors.service_date)}
+          <Controller
+            name="service_date"
+            control={control}
+            rules={{ required: 'Fecha es requerida', validate: validInput() }}
+            render={({ field }) => (
+              <DateInput
+                ref={field.ref}
+                name={field.name}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                aria-labelledby="service-record-date-label"
+                error={!!errors.service_date}
+                className={inputClass(errors.service_date)}
+              />
+            )}
           />
           {errors.service_date && (
             <p className="mt-1 text-sm text-error">{errors.service_date.message}</p>
@@ -180,14 +202,29 @@ const ServiceRecordForm = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-on-surface mb-2">
+          <label id="service-record-next-date-label" className="block text-sm font-medium text-on-surface mb-2">
             Próximo servicio
           </label>
-          <input
-            type="date"
-            {...register('next_service_date')}
-            className={inputClass(errors.next_service_date)}
+          <Controller
+            name="next_service_date"
+            control={control}
+            rules={{ validate: validInput() }}
+            render={({ field }) => (
+              <DateInput
+                ref={field.ref}
+                name={field.name}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                aria-labelledby="service-record-next-date-label"
+                error={!!errors.next_service_date}
+                className={inputClass(errors.next_service_date)}
+              />
+            )}
           />
+          {errors.next_service_date && (
+            <p className="mt-1 text-sm text-error">{errors.next_service_date.message}</p>
+          )}
         </div>
       </div>
 

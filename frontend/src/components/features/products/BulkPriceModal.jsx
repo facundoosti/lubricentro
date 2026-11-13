@@ -5,8 +5,11 @@ import { useBulkPricePreview, useBulkPriceUpdate } from '@services/productsServi
 import { showSuccess, showError } from '@services/notificationService';
 import ProductSearchInput from '@components/features/products/ProductSearchInput';
 import Dialog from '@ui/Dialog';
+import Select from '@ui/Select';
 
 const STEPS = { FILTER: 'filter', PREVIEW: 'preview', DONE: 'done' };
+// "Todos los proveedores" = sin filtro (''); en la lista usa un valor propio (el Select trata '' como "sin elegir").
+const ALL = 'all';
 
 // target = null → modo libre (el usuario elige filtros)
 // target = { type: 'ids', ids: [1,2,3] } → productos específicos seleccionados
@@ -165,17 +168,18 @@ const BulkPriceModal = ({ isOpen, onClose, target = null }) => {
                 <h3 className="text-sm font-medium text-on-surface-variant uppercase tracking-wide">Criterios de filtro</h3>
 
                 <div>
-                  <label className="block text-sm font-medium text-on-surface-variant mb-1.5">Proveedor</label>
-                  <select
-                    value={supplierId}
-                    onChange={(e) => setSupplierId(e.target.value)}
-                    className="w-full px-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
-                  >
-                    <option value="">Todos los proveedores</option>
-                    {suppliers.map((s) => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
+                  <label id="bulk-price-supplier-label" htmlFor="bulk-price-supplier" className="block text-sm font-medium text-on-surface-variant mb-1.5">Proveedor</label>
+                  <Select
+                    id="bulk-price-supplier"
+                    aria-labelledby="bulk-price-supplier-label"
+                    options={[
+                      { value: ALL, label: 'Todos los proveedores' },
+                      ...suppliers.map((s) => ({ value: String(s.id), label: s.name })),
+                    ]}
+                    value={supplierId || ALL}
+                    onChange={(v) => setSupplierId(v === ALL ? '' : v)}
+                    className="border-outline-variant"
+                  />
                 </div>
 
                 <div>

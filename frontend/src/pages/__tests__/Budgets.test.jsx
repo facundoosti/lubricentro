@@ -1,5 +1,6 @@
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
 import Budgets from '@pages/Budgets';
 
@@ -44,8 +45,12 @@ describe('Budgets', () => {
 
   it('cambia el estado desde la fila', async () => {
     mocks.updateStatus.mockResolvedValue({});
+    const user = userEvent.setup();
     renderWithProviders(<Budgets />);
-    fireEvent.change(screen.getByLabelText('Estado del presupuesto #1'), { target: { value: 'sent' } });
+    const badge = screen.getByRole('combobox', { name: 'Estado del presupuesto #1' });
+    expect(badge).toHaveTextContent('Borrador');
+    await user.click(badge);
+    await user.click(await screen.findByRole('option', { name: 'Enviado' }));
 
     await waitFor(() => expect(mocks.updateStatus).toHaveBeenCalledWith({ id: 1, status: 'sent' }));
     expect(mocks.success).toHaveBeenCalledWith('STATUS_UPDATED');
@@ -53,8 +58,10 @@ describe('Budgets', () => {
 
   it('avisa si falla el cambio de estado', async () => {
     mocks.updateStatus.mockRejectedValue(new Error('boom'));
+    const user = userEvent.setup();
     renderWithProviders(<Budgets />);
-    fireEvent.change(screen.getByLabelText('Estado del presupuesto #1'), { target: { value: 'rejected' } });
+    await user.click(screen.getByRole('combobox', { name: 'Estado del presupuesto #1' }));
+    await user.click(await screen.findByRole('option', { name: 'Rechazado' }));
     await waitFor(() => expect(mocks.error).toHaveBeenCalledWith('ERROR_STATUS', 'boom'));
   });
 
