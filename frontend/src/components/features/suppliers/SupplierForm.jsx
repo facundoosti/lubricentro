@@ -23,7 +23,7 @@ const SupplierForm = ({ supplier = null, onSubmit, formId = 'supplier-form' }) =
   };
 
   const inputClass = (hasError) =>
-    `w-full px-3 py-2 bg-surface-variant border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface placeholder:text-secondary ${
+    `w-full px-3 py-2 bg-surface-variant border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface placeholder:text-secondary ${
       hasError ? 'border-error' : 'border-outline-variant'
     }`;
 

@@ -86,7 +86,7 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
   };
 
   const inputClass = (hasError) =>
-    `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+    `w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
       hasError ? 'border-error' : 'border-outline-variant'
     }`;
 

@@ -147,6 +147,11 @@
     @apply font-geist font-normal bg-background text-on-surface;
   }
 
+  /* ── Foco: outline nativo con el color del tema (no el azul del navegador) ── */
+  :focus-visible {
+    outline-color: var(--color-ring);
+  }
+
   /* ── Autofill: respetar el fondo del tema ───────────────────── */
   input:-webkit-autofill,
   textarea:-webkit-autofill,

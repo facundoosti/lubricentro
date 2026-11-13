@@ -236,7 +236,7 @@ const BulkPriceModal = ({ isOpen, onClose, target = null }) => {
                     value={adjustmentValue}
                     onChange={(e) => setAdjustmentValue(e.target.value)}
                     placeholder="Ej: 15"
-                    className="w-full pl-8 pr-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface placeholder:text-secondary text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full pl-8 pr-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface placeholder:text-secondary text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                 </div>
               </div>

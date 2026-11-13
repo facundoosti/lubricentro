@@ -212,7 +212,7 @@ export function ConversationDetail({ conversation }) {
               placeholder={canSend ? 'Respondé como agente...' : 'Conversación archivada'}
               disabled={!canSend}
               rows={1}
-              className="w-full bg-surface-container border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-xl py-3 px-4 pr-20 text-sm text-on-surface resize-none h-12 disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-secondary"
+              className="w-full bg-surface-container border border-outline-variant focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary rounded-xl py-3 px-4 pr-20 text-sm text-on-surface resize-none h-12 disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-secondary"
             />
             <div className="absolute right-3 top-2.5 flex items-center gap-2">
               <button className="text-secondary hover:text-on-surface-variant" disabled={!canSend}>

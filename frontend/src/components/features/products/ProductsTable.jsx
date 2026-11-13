@@ -169,7 +169,7 @@ const ProductsTable = ({
             placeholder="Buscar por nombre..."
             value={localSearch}
             onChange={handleSearchChange}
-            className="w-full pl-9 pr-8 py-2 text-sm bg-surface-variant border border-outline-variant rounded-lg text-on-surface placeholder:text-secondary focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="w-full pl-9 pr-8 py-2 text-sm bg-surface-variant border border-outline-variant rounded-lg text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
           {localSearch && (
             <button onClick={handleClearSearch} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface">
