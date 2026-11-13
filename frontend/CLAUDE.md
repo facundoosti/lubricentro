@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 React 19 · Vite 6 · Tailwind CSS v4 · TanStack Query v5 · React Router v7  
 State: **Zustand** (auth + sidebar + theme stores) · Forms: React Hook Form + Yup  
 HTTP: Axios · Icons: Lucide React · Alerts/Toasts: **Sileo**  
-Calendar: FullCalendar · Charts: ApexCharts
+Calendar: FullCalendar · Charts: ApexCharts  
+UI primitives: **shadcn/ui on Base UI** (`@base-ui/react`, JavaScript, `components.json`) · `cn()` in `src/lib/utils.js` (clsx + tailwind-merge)
 
 ## Commands
 
@@ -48,7 +49,9 @@ npm run lint:fix
 ```
 src/
 ├── components/
-│   ├── ui/           # Reusable primitives (Button, Modal, Table, PageHeader, PageError, etc.)
+│   ├── ui/           # Reusable wrappers = the API features use (Button, Dialog, ConfirmDialog,
+│   │                 #   Combobox, Select, Table, PageHeader, PageError, etc.)
+│   │   └── primitives/  # shadcn/ui vendor code over Base UI (lowercase files). Only @ui wrappers import it
 │   ├── common/       # Shared layout pieces
 │   └── features/     # Domain components: customers/, vehicles/, appointments/,
 │                     #   services/, products/, service-records/
@@ -61,6 +64,19 @@ src/
 ├── contexts/         # QueryProvider only (React Query)
 └── utils/
 ```
+
+## Dialogs and selection lists (shadcn/ui + Base UI)
+
+Features never import `@/components/ui/primitives/*` (ESLint `no-restricted-imports` in `features/` and `pages/`); use the `@ui` wrappers:
+
+- **`@ui/Dialog`** — every dialog. Form mode (`formId`, `submitLabel`, `isLoading`, `submitDisabled`): fixed header + Cancel/Save footer, backdrop click doesn't close. Free mode (no `formId`): `title` → simple header; `bare` + `ariaLabelledBy` → consumer renders everything. Props: `size` (`sm|md|lg|xl|full`), `closeOnBackdrop`, `closeOnEscape`, `showCloseButton`, `ariaLabel`, `className`. Stacking, Escape of the top one, focus trap/return, inert background and scroll lock come from Base UI.
+- **Stacking depends on nesting in the React tree**, not on open order: a `Dialog`/`ConfirmDialog`/list stacks on top (narrower, darker backdrop, its own Escape, lists portaled into the top popup) only if it is rendered *inside* the other dialog's content. Sibling dialogs opened at the same time are not stacked. `Dialog` and `ConfirmDialog` both provide `DialogLevelContext` + `DialogPortalContainer` (`@ui/dialogContext`).
+- **`@ui/ConfirmDialog`** — confirmations (AlertDialog): `onConfirm`, `title`, `message`, `confirmText`, `cancelText`, `variant`, `isLoading`.
+- **`@ui/Combobox`** — searchable list, single or `multiple` (chips). `onSearch` = remote search (debounced, no local filter), `loading`, `clearable`.
+- **`@ui/Select`** — short list without search (`options`, `value`, `onChange`, `aria-labelledby`).
+- Autocompletes with their own portal (`CustomerSearchInput`) render their list into `useDialogPortalContainer()` (`@ui/dialogContext`) when inside a Dialog.
+
+Adding a shadcn primitive: `npx shadcn@latest add <name>` (goes to `ui/primitives/`), then replace its shadcn classes with design-system tokens (`--color-primary`/`--color-secondary` are MD3, not shadcn's) and wrap it in `@ui`. Check the CLI didn't overwrite `src/index.css` or a same-name `@ui` file (macOS is case-insensitive).
 
 ## API Services
 
@@ -88,10 +104,12 @@ Keep components under 300 lines — extract to sub-components or hooks if larger
 
 ## Testing
 
-Test setup lives in `src/test/`: `setup.js` (global config) and `utils.jsx` (exports `renderWithProviders` wrapper with QueryClient + Router). Use `renderWithProviders` instead of plain `render` for components that need those contexts.
+Test setup lives in `src/test/`: `setup.js` (global config + jsdom polyfills for Base UI) and `utils.jsx` (exports `renderWithProviders` wrapper with QueryClient + Router). Use `renderWithProviders` instead of plain `render` for components that need those contexts.
 
 ```javascript
 import { renderWithProviders } from '@/test/utils'
 ```
+
+Base UI in jsdom: focus moves, closing and scroll lock are async (use `waitFor`); backdrop clicks are detected on `pointerdown`/`mousedown`; `Tab` trapping goes through focus guards (wait a tick after `user.tab()`); lower stacked dialogs are `aria-hidden` (query with `{ hidden: true }`).
 
 CI: Vitest + coverage on push/PR. Deploy target: **Railway**.

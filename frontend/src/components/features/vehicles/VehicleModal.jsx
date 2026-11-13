@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Car } from 'lucide-react';
-import FormDialog from '@ui/FormDialog';
+import Dialog from '@ui/Dialog';
 import VehicleForm from '@components/features/vehicles/VehicleForm';
 import { useCreateVehicle, useUpdateVehicle } from '@services/vehiclesService';
 import { showVehicleSuccess, showVehicleError, parseApiError } from '@services/notificationService';
@@ -34,7 +34,7 @@ const VehicleModal = ({ isOpen, onClose, vehicle = null, customerId = null, init
   };
 
   return (
-    <FormDialog
+    <Dialog
       isOpen={isOpen}
       onClose={onClose}
       title={isEditing ? 'Editar Vehículo' : 'Nuevo Vehículo'}
@@ -54,7 +54,7 @@ const VehicleModal = ({ isOpen, onClose, vehicle = null, customerId = null, init
         formId={FORM_ID}
         onPlateConflictChange={setPlateConflict}
       />
-    </FormDialog>
+    </Dialog>
   );
 };
 

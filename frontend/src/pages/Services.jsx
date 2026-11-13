@@ -4,7 +4,7 @@ import PageHeader from '@ui/PageHeader';
 import PageError from '@ui/PageError';
 import ServicesTable from '@components/features/services/ServicesTable';
 import ServiceModal from '@components/features/services/ServiceModal';
-import ConfirmModal from '@ui/ConfirmModal';
+import ConfirmDialog from '@ui/ConfirmDialog';
 import { useServices, useDeleteService } from '@services/servicesService';
 import { showServiceSuccess } from '@services/notificationService';
 
@@ -72,7 +72,7 @@ const Services = () => {
         onSuccess={handleModalClose}
       />
 
-      <ConfirmModal
+      <ConfirmDialog
         isOpen={isDeleteModalOpen}
         onClose={handleDeleteModalClose}
         onConfirm={handleDeleteConfirm}

@@ -7,7 +7,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import PageMeta from '@components/common/PageMeta';
 import AppointmentModal from '@components/features/appointments/AppointmentModal';
-import ConfirmModal from '@ui/ConfirmModal';
+import ConfirmDialog from '@ui/ConfirmDialog';
 import { CalendarDays, List, Plus, Edit, Trash2, ClipboardList, Eye } from 'lucide-react';
 import { parseApiError } from '@services/notificationService';
 import {
@@ -469,7 +469,7 @@ const Appointments = () => {
         isLoading={createAppointmentMutation.isPending || updateAppointmentMutation.isPending}
       />
 
-      <ConfirmModal
+      <ConfirmDialog
         isOpen={isDeleteModalOpen}
         onClose={() => { setIsDeleteModalOpen(false); setAppointmentToDelete(null); }}
         onConfirm={handleDeleteAppointment}

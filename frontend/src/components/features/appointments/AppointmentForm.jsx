@@ -1,6 +1,6 @@
 import { useForm, Controller } from 'react-hook-form';
 import { useVehicles } from '@services/vehiclesService';
-import SearchableSelect from '@ui/SearchableSelect';
+import Select from '@ui/Select';
 import TextArea from '@ui/TextArea';
 import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
 import { useEffect, useState, useMemo } from 'react';
@@ -265,13 +265,11 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
             control={control}
             rules={{ required: 'Hora es requerida' }}
             render={({ field }) => (
-              <SearchableSelect
+              <Select
                 options={hourOptions}
                 value={field.value}
                 onChange={field.onChange}
                 placeholder="Seleccionar hora"
-                searchable={false}
-                clearable={false}
                 aria-labelledby="appointment-time-label"
                 error={!!errors.scheduled_time}
                 className="h-11 px-4"
@@ -295,12 +293,10 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
           name="status"
           control={control}
           render={({ field }) => (
-            <SearchableSelect
+            <Select
               options={statusOptions}
               value={field.value}
               onChange={field.onChange}
-              searchable={false}
-              clearable={false}
               aria-labelledby="appointment-status-label"
               className="h-11 px-4"
             />

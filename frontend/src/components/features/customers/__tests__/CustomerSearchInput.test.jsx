@@ -1,8 +1,9 @@
 import { screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderWithProviders } from '@/test/utils';
 import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
-import FormDialog from '@ui/FormDialog';
+import Dialog from '@ui/Dialog';
 import { useCustomers, useCustomer } from '@services/customersService';
 
 vi.mock('@services/customersService', () => ({
@@ -103,9 +104,9 @@ describe('CustomerSearchInput — Escape dentro de un diálogo', () => {
   it('con la lista abierta, Escape cierra solo la lista; con la lista cerrada, cierra el diálogo', () => {
     const close = vi.fn();
     renderWithProviders(
-      <FormDialog isOpen onClose={close} title="Nuevo turno">
+      <Dialog isOpen onClose={close} title="Nuevo turno" formId="appointment-form">
         <CustomerSearchInput value="" />
-      </FormDialog>,
+      </Dialog>,
     );
     const input = screen.getByRole('textbox');
     fireEvent.change(input, { target: { value: 'Carlos' } });
@@ -120,7 +121,7 @@ describe('CustomerSearchInput — Escape dentro de un diálogo', () => {
   });
 });
 
-describe('CustomerSearchInput — lista en portal (no la recorta el cuerpo del diálogo)', () => {
+describe('CustomerSearchInput — lista en portal dentro del Dialog (no la recorta el cuerpo del diálogo)', () => {
   const customer = { id: 3, name: 'Ana Gómez', phone: '1144440000' };
 
   beforeEach(() => {
@@ -128,25 +129,66 @@ describe('CustomerSearchInput — lista en portal (no la recorta el cuerpo del d
     useCustomers.mockReturnValue({ data: { data: { customers: [customer] } }, isLoading: false });
   });
 
-  const openListInDialog = (props = {}) => {
+  const openListInDialog = (props = {}, { stacked = false } = {}) => {
     const close = vi.fn();
-    renderWithProviders(
-      <FormDialog isOpen onClose={close} title="Nuevo Vehículo">
+    const closeBottom = vi.fn();
+    const content = (
+      <Dialog isOpen onClose={close} title="Nuevo Vehículo" formId="vehicle-form">
         <CustomerSearchInput value="" {...props} />
-      </FormDialog>,
+      </Dialog>
+    );
+    renderWithProviders(
+      stacked ? (
+        <Dialog isOpen onClose={closeBottom} title="Base" formId="base-form">{content}</Dialog>
+      ) : content,
     );
     const input = screen.getByRole('textbox');
     fireEvent.change(input, { target: { value: 'Ana' } });
-    return { input, close };
+    return { input, close, closeBottom };
   };
 
-  it('renderiza la lista en document.body, fuera del diálogo, con position fixed y z-index alto', () => {
+  it('renderiza la lista en el panel del diálogo (portal), con position fixed y z-index propio', () => {
     openListInDialog();
     const list = screen.getByTestId('customer-search-results');
-    expect(list.parentElement).toBe(document.body);
-    expect(screen.getByRole('dialog')).not.toContainElement(list);
+    expect(list.parentElement).toBe(screen.getByRole('dialog'));
     expect(list.style.position).toBe('fixed');
-    expect(Number(list.style.zIndex)).toBeGreaterThan(50);
+    expect(Number(list.style.zIndex)).toBeGreaterThan(0);
+  });
+
+  it('fuera de un diálogo la lista va a document.body', () => {
+    renderWithProviders(<CustomerSearchInput value="" />);
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Ana' } });
+    expect(screen.getByTestId('customer-search-results').parentElement).toBe(document.body);
+  });
+
+  it('en un diálogo apilado: click en una opción selecciona y Escape cierra solo la lista', () => {
+    const onSelect = vi.fn();
+    const { input, close, closeBottom } = openListInDialog({ onSelect }, { stacked: true });
+    const list = screen.getByTestId('customer-search-results');
+    expect(screen.getByRole('dialog', { name: 'Nuevo Vehículo' })).toContainElement(list);
+    fireEvent.click(screen.getByRole('button', { name: /Ana Gómez/ }));
+    expect(onSelect).toHaveBeenCalledWith(customer);
+
+    fireEvent.change(input, { target: { value: 'An' } });
+    fireEvent.keyDown(input, { key: 'Escape' });
+    expect(screen.queryByTestId('customer-search-results')).not.toBeInTheDocument();
+    expect(close).not.toHaveBeenCalled();
+    expect(closeBottom).not.toHaveBeenCalled();
+    expect(screen.getAllByRole('dialog', { hidden: true })).toHaveLength(2);
+  });
+
+  it('en un diálogo apilado la lista va al panel del de arriba y un click real (puntero) elige el cliente con ambos abiertos', async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+    const { close, closeBottom } = openListInDialog({ onSelect }, { stacked: true });
+    const list = screen.getByTestId('customer-search-results');
+    expect(list.parentElement).toBe(screen.getByRole('dialog', { name: 'Nuevo Vehículo' }));
+    await user.click(screen.getByRole('button', { name: /Ana Gómez/ }));
+    expect(onSelect).toHaveBeenCalledWith(customer);
+    expect(close).not.toHaveBeenCalled();
+    expect(closeBottom).not.toHaveBeenCalled();
+    expect(screen.getByRole('dialog', { name: 'Nuevo Vehículo' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Base', hidden: true })).toBeInTheDocument();
   });
 
   it('click en una opción selecciona el cliente (el mousedown en la lista no la cierra antes)', () => {

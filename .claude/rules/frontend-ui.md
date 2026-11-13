@@ -24,4 +24,6 @@ Tema claro/oscuro (switch en el header, clase `.dark` en `<html>`, store `useThe
 - Badge activo: `bg-primary-container/20 text-primary` · éxito: `bg-tertiary/10 text-tertiary` · error: `bg-error-container text-on-error-container`
 - Input: `bg-surface-variant border border-outline-variant text-on-surface placeholder:text-secondary`
 
-Desktop-first: la app se usa en notebook (referencia 1440×900); diseñá para esa pantalla y no agregues breakpoints para mobile/tablet salvo pedido explícito. Reutilizá primitivas de `@ui` (Button, Modal, Table, PageHeader, PageError) antes de crear nuevas.
+Desktop-first: la app se usa en notebook (referencia 1440×900); diseñá para esa pantalla y no agregues breakpoints para mobile/tablet salvo pedido explícito. Reutilizá los componentes de `@ui` (Button, Dialog, ConfirmDialog, Combobox, Select, Table, PageHeader, PageError) antes de crear nuevos.
+
+**Diálogos y listas (shadcn/ui sobre Base UI):** todo diálogo es `@ui/Dialog` (formulario con `formId`, libre, `bare`) o `@ui/ConfirmDialog`; listas con buscador → `@ui/Combobox` (`multiple` para chips), sin buscador → `@ui/Select`. **No importes `@/components/ui/primitives/*` desde `features/` ni `pages/`** (ESLint lo bloquea): las primitivas solo las usan los wrappers de `@ui`. No armes diálogos con `createPortal` ni manejes Escape/foco/scroll a mano.

@@ -9,7 +9,7 @@ import {
 } from "@services/notificationService";
 import PageHeader from "@ui/PageHeader";
 import PageError from "@ui/PageError";
-import ConfirmModal from "@ui/ConfirmModal";
+import ConfirmDialog from "@ui/ConfirmDialog";
 import BudgetActions from "@components/features/budgets/BudgetActions";
 import BudgetStatusSelect from "@components/features/budgets/BudgetStatusSelect";
 import BudgetStatusFilter from "@components/features/budgets/BudgetStatusFilter";
@@ -245,7 +245,7 @@ const Budgets = () => {
         )}
       </div>
 
-      <ConfirmModal
+      <ConfirmDialog
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}

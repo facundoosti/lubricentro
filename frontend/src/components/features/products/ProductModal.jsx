@@ -1,5 +1,5 @@
 import { Package } from "lucide-react";
-import FormDialog from "@ui/FormDialog";
+import Dialog from "@ui/Dialog";
 import ProductForm from "@components/features/products/ProductForm";
 import { useCreateProduct, useUpdateProduct } from "@services/productsService";
 import {
@@ -35,7 +35,7 @@ const ProductModal = ({ isOpen, onClose, product = null, onSuccess }) => {
   };
 
   return (
-    <FormDialog
+    <Dialog
       isOpen={isOpen}
       onClose={onClose}
       title={isEditing ? "Editar Producto" : "Nuevo Producto"}
@@ -53,7 +53,7 @@ const ProductModal = ({ isOpen, onClose, product = null, onSuccess }) => {
         loading={isLoading}
         formId={FORM_ID}
       />
-    </FormDialog>
+    </Dialog>
   );
 };
 

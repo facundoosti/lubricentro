@@ -38,9 +38,9 @@ function App() {
           roundness: 10,
         }}
       />
-      {/* Contenido de la app: queda inert con un diálogo abierto (useDialogLayer). El Toaster va fuera
-          para seguir clickeable; `isolate` mantiene los z-index de la app por debajo de los diálogos. */}
-      <div data-app-content className="isolate">
+      {/* `isolate` mantiene los z-index de la app (header, sidebar) por debajo de los diálogos, que Base UI
+          portea al body. El Toaster va fuera para quedar por encima de todo y seguir clickeable. */}
+      <div className="isolate">
         <QueryProvider>
           <Router>
             <Routes>

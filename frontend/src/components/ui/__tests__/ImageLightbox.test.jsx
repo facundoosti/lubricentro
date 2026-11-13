@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import ImageLightbox from '@ui/ImageLightbox';
-import Modal from '@ui/Modal';
+import Dialog from '@ui/Dialog';
 
 const images = [
   { src: '/a.jpg', alt: 'Aceite', title: 'Aceite', subtitle: 'A1' },
@@ -47,7 +48,7 @@ describe('ImageLightbox', () => {
   it('navega con flechas, teclado (con vuelta) y miniaturas', () => {
     render(<Harness />);
     expect(counter()).toBe('1 / 3');
-    fireEvent.keyDown(document, { key: 'ArrowLeft' });
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'ArrowLeft' });
     expect(counter()).toBe('3 / 3');
     fireEvent.click(screen.getByRole('button', { name: 'Imagen siguiente' }));
     expect(counter()).toBe('1 / 3');
@@ -60,7 +61,7 @@ describe('ImageLightbox', () => {
     render(<Harness />);
     fireEvent.click(bigImg());
     expect(bigImg().style.transform).toBe('scale(2.5)');
-    fireEvent.keyDown(document, { key: 'ArrowRight' });
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'ArrowRight' });
     expect(bigImg().style.transform).toBe('scale(1)');
   });
 
@@ -74,54 +75,62 @@ describe('ImageLightbox', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('bloquea el scroll y lo restaura al cerrar', () => {
-    document.body.style.overflow = 'auto';
+  it('bloquea el scroll y lo restaura al cerrar', async () => {
+    const locked = () => document.documentElement.style.overflowY === 'hidden' || document.body.style.overflowY === 'hidden';
     render(<Harness />);
-    expect(document.body.style.overflow).toBe('hidden');
+    await waitFor(() => expect(locked()).toBe(true));
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar' }));
-    expect(document.body.style.overflow).toBe('auto');
+    await waitFor(() => expect(locked()).toBe(false));
   });
 
-  it('enfoca Cerrar al abrir, atrapa Tab y devuelve el foco al cerrar', () => {
+  it('enfoca Cerrar al abrir, atrapa Tab y devuelve el foco al cerrar', async () => {
+    const user = userEvent.setup();
     render(<Harness start={null} />);
     const opener = screen.getByRole('button', { name: 'Abrir' });
-    opener.focus();
-    fireEvent.click(opener);
+    await user.click(opener);
     const close = screen.getByRole('button', { name: 'Cerrar' });
-    expect(close).toHaveFocus();
+    await waitFor(() => expect(close).toHaveFocus());
 
     const buttons = within(screen.getByRole('dialog')).getAllByRole('button');
     buttons[buttons.length - 1].focus();
-    fireEvent.keyDown(document, { key: 'Tab' });
-    expect(buttons[0]).toHaveFocus();
+    await user.tab();
+    await waitFor(() => expect(buttons[0]).toHaveFocus());
 
-    fireEvent.keyDown(document, { key: 'Escape' });
-    expect(opener).toHaveFocus();
+    await user.keyboard('{Escape}');
+    await waitFor(() => expect(opener).toHaveFocus());
   });
 
-  it('Shift+Tab desde el primer botón va al último', () => {
+  it('Shift+Tab desde el primer botón va al último', async () => {
+    const user = userEvent.setup();
     render(<Harness />);
     const buttons = within(screen.getByRole('dialog')).getAllByRole('button');
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Cerrar' })).toHaveFocus());
     buttons[0].focus();
-    fireEvent.keyDown(buttons[0], { key: 'Tab', shiftKey: true });
-    expect(buttons[buttons.length - 1]).toHaveFocus();
+    await user.tab({ shift: true });
+    await waitFor(() => expect(buttons[buttons.length - 1]).toHaveFocus());
   });
 
   it('con otro diálogo encima, las flechas y Escape no actúan sobre el visor', () => {
     const onClose = vi.fn();
-    const closeModal = vi.fn();
-    render(
-      <>
-        <Harness onClose={onClose} />
-        <Modal isOpen onClose={closeModal} title="Encima">contenido</Modal>
-      </>,
-    );
-    const viewer = screen.getByRole('dialog', { name: 'Imagen de Aceite' });
-    expect(viewer).toHaveAttribute('inert');
-    fireEvent.keyDown(document, { key: 'ArrowRight' });
+    const closeTop = vi.fn();
+    const Page = ({ topOpen }) => {
+      const [index, setIndex] = useState(0);
+      return (
+        <>
+          <ImageLightbox images={images} index={index} onIndexChange={setIndex} onClose={onClose} />
+          <Dialog isOpen={topOpen} onClose={closeTop} title="Encima">contenido</Dialog>
+        </>
+      );
+    };
+    const { rerender } = render(<Page topOpen={false} />);
+    rerender(<Page topOpen />);
+    const viewer = screen.getByRole('dialog', { name: 'Imagen de Aceite', hidden: true });
+    const top = screen.getByRole('dialog', { name: 'Encima' });
+    // el foco está atrapado en el de arriba: el teclado le llega a él, no al visor
+    fireEvent.keyDown(top, { key: 'ArrowRight' });
     expect(within(viewer).getByText('1 / 3')).toBeInTheDocument();
-    fireEvent.keyDown(document, { key: 'Escape' });
-    expect(closeModal).toHaveBeenCalledTimes(1);
+    fireEvent.keyDown(top, { key: 'Escape' });
+    expect(closeTop).toHaveBeenCalledTimes(1);
     expect(onClose).not.toHaveBeenCalled();
   });
 });

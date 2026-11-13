@@ -3,6 +3,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderWithProviders } from '@/test/utils';
 import BulkIvaModal from '@components/features/products/BulkIvaModal';
 
+// Base UI detecta el click en el fondo en pointerdown/mousedown
+const pressBackdrop = () => {
+  const backdrop = screen.getByTestId('dialog-backdrop');
+  fireEvent.pointerDown(backdrop);
+  fireEvent.mouseDown(backdrop);
+  fireEvent.click(backdrop);
+};
+
 const mocks = vi.hoisted(() => ({ mutateAsync: vi.fn(), showSuccess: vi.fn(), showError: vi.fn() }));
 
 vi.mock('@services/productsService', () => ({
@@ -78,10 +86,10 @@ describe('BulkIvaModal', () => {
   it('click en el fondo no cierra; Escape sí', () => {
     const onClose = vi.fn();
     renderWithProviders(<BulkIvaModal isOpen onClose={onClose} count={2} target={{ type: 'ids', ids: [1, 2] }} />);
-    fireEvent.click(screen.getByTestId('modal-backdrop'));
+    pressBackdrop();
     expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByRole('dialog', { name: 'Cambiar IVA' })).toBeInTheDocument();
-    fireEvent.keyDown(document, { key: 'Escape' });
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Car, User } from 'lucide-react';
-import Modal from '@ui/Modal';
+import Dialog from '@ui/Dialog';
 import Button from '@ui/Button';
 
 // Aviso después de crear un cliente con los siguientes pasos habituales.
@@ -15,7 +15,7 @@ const CustomerCreatedDialog = ({ customer, onClose }) => {
   };
 
   return (
-    <Modal isOpen onClose={onClose} className="max-w-sm! mx-4" showCloseButton={false} ariaLabel="Cliente creado">
+    <Dialog isOpen onClose={onClose} size="sm" className="max-w-sm" showCloseButton={false} ariaLabel="Cliente creado">
       <div className="flex flex-col items-center text-center gap-3">
         <div className="w-12 h-12 rounded-full bg-tertiary/10 flex items-center justify-center">
           <CheckCircle2 className="w-6 h-6 text-tertiary" />
@@ -34,7 +34,7 @@ const CustomerCreatedDialog = ({ customer, onClose }) => {
           <Button variant="ghost" onClick={onClose}>Cerrar</Button>
         </div>
       </div>
-    </Modal>
+    </Dialog>
   );
 };
 

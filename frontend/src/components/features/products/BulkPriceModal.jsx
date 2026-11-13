@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { TrendingUp, X, ChevronRight, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import { useSuppliers } from '@services/suppliersService';
 import { useBulkPricePreview, useBulkPriceUpdate } from '@services/productsService';
 import { showSuccess, showError } from '@services/notificationService';
 import ProductSearchInput from '@components/features/products/ProductSearchInput';
-import { useDialogLayer } from '@hooks/useDialogLayer';
+import Dialog from '@ui/Dialog';
 
 const STEPS = { FILTER: 'filter', PREVIEW: 'preview', DONE: 'done' };
 
@@ -95,11 +94,6 @@ const BulkPriceModal = ({ isOpen, onClose, target = null }) => {
     onClose();
   };
 
-  // Pila de diálogos, Escape, foco, inert y scroll lock. El fondo no cierra (hay datos cargados).
-  const { panelRef, layerRef, zIndex } = useDialogLayer({ isOpen, onClose: handleClose });
-
-  if (!isOpen) return null;
-
   const adjustmentLabel = adjustmentType === 'percentage'
     ? `${parseFloat(adjustmentValue) >= 0 ? '+' : ''}${adjustmentValue}%`
     : `${parseFloat(adjustmentValue) >= 0 ? '+' : ''}$${adjustmentValue}`;
@@ -122,247 +116,245 @@ const BulkPriceModal = ({ isOpen, onClose, target = null }) => {
     return '';
   };
 
-  return createPortal(
-    <div ref={layerRef} className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex }}>
-      <div data-testid="bulk-price-backdrop" className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <div
-        ref={panelRef}
-        tabIndex={-1}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="bulk-price-title"
-        className="relative bg-surface-container border border-outline-variant rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col outline-none"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-outline-variant shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary-container/20 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h2 id="bulk-price-title" className="text-base font-semibold text-on-surface">Actualización de Precios por Lote</h2>
-              <p className="text-xs text-secondary">
-                {step === STEPS.FILTER && (hasTarget ? 'Definí el tipo de ajuste' : 'Definí los criterios y el tipo de ajuste')}
-                {step === STEPS.PREVIEW && `Vista previa — ${previews.length} producto(s) afectados`}
-                {step === STEPS.DONE && 'Actualización completada'}
-              </p>
-            </div>
+  // Pila de diálogos, Escape, foco, fondo no interactuable y scroll lock: Dialog (Base UI).
+  // El fondo no cierra (hay datos cargados).
+  return (
+    <Dialog
+      isOpen={isOpen}
+      onClose={handleClose}
+      bare
+      closeOnBackdrop={false}
+      ariaLabelledBy="bulk-price-title"
+      className="bg-surface-container border border-outline-variant rounded-xl shadow-2xl max-w-2xl max-h-[90vh] flex flex-col"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between p-6 border-b border-outline-variant shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-primary-container/20 flex items-center justify-center">
+            <TrendingUp className="w-5 h-5 text-primary" />
           </div>
-          <button type="button" onClick={handleClose} aria-label="Cerrar" className="p-1.5 rounded-md text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors">
-            <X className="w-4 h-4" />
-          </button>
+          <div>
+            <h2 id="bulk-price-title" className="text-base font-semibold text-on-surface">Actualización de Precios por Lote</h2>
+            <p className="text-xs text-secondary">
+              {step === STEPS.FILTER && (hasTarget ? 'Definí el tipo de ajuste' : 'Definí los criterios y el tipo de ajuste')}
+              {step === STEPS.PREVIEW && `Vista previa — ${previews.length} producto(s) afectados`}
+              {step === STEPS.DONE && 'Actualización completada'}
+            </p>
+          </div>
         </div>
+        <button type="button" onClick={handleClose} aria-label="Cerrar" className="p-1.5 rounded-md text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
 
-        <div className="overflow-y-auto flex-1 p-6 space-y-5">
-          {/* STEP 1: Filter / Adjust */}
-          {step === STEPS.FILTER && (
-            <>
-              {/* Preselected target chip */}
-              {hasTarget && (
-                <div className="flex items-center gap-2 p-3 bg-primary-container/10 border border-primary-container/30 rounded-lg text-sm">
-                  <CheckCircle className="w-4 h-4 text-primary shrink-0" />
-                  <span className="text-on-surface">{targetDescription()}</span>
-                </div>
-              )}
+      <div className="overflow-y-auto flex-1 p-6 space-y-5">
+        {/* STEP 1: Filter / Adjust */}
+        {step === STEPS.FILTER && (
+          <>
+            {/* Preselected target chip */}
+            {hasTarget && (
+              <div className="flex items-center gap-2 p-3 bg-primary-container/10 border border-primary-container/30 rounded-lg text-sm">
+                <CheckCircle className="w-4 h-4 text-primary shrink-0" />
+                <span className="text-on-surface">{targetDescription()}</span>
+              </div>
+            )}
 
-              {/* Filter criteria — only shown in free mode */}
-              {!hasTarget && (
-                <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-on-surface-variant uppercase tracking-wide">Criterios de filtro</h3>
+            {/* Filter criteria — only shown in free mode */}
+            {!hasTarget && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-on-surface-variant uppercase tracking-wide">Criterios de filtro</h3>
 
-                  <div>
-                    <label className="block text-sm font-medium text-on-surface-variant mb-1.5">Proveedor</label>
-                    <select
-                      value={supplierId}
-                      onChange={(e) => setSupplierId(e.target.value)}
-                      className="w-full px-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
-                    >
-                      <option value="">Todos los proveedores</option>
-                      {suppliers.map((s) => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-                      Buscar por nombre de producto
-                    </label>
-                    <ProductSearchInput
-                      value={search}
-                      onChange={(text) => setSearch(text)}
-                      onSelect={(product) => product && setSearch(product.name)}
-                      placeholder="Ej: aceite, filtro..."
-                    />
-                    <p className="mt-1 text-xs text-secondary">Podés combinar proveedor y nombre para filtrar mejor</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Adjustment type */}
-              <div className="space-y-4 pt-2">
-                <h3 className="text-sm font-medium text-on-surface-variant uppercase tracking-wide">Tipo de ajuste</h3>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { value: 'percentage', label: 'Porcentaje', hint: 'Ej: +15%' },
-                    { value: 'fixed', label: 'Monto fijo', hint: 'Ej: +$500' },
-                  ].map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => setAdjustmentType(opt.value)}
-                      className={`p-4 rounded-lg border text-left transition-colors ${
-                        adjustmentType === opt.value
-                          ? 'border-primary bg-primary-container/15 text-primary'
-                          : 'border-outline-variant text-on-surface-variant hover:border-primary/40'
-                      }`}
-                    >
-                      <p className="text-sm font-medium">{opt.label}</p>
-                      <p className="text-xs opacity-70 mt-0.5">{opt.hint}</p>
-                    </button>
-                  ))}
+                <div>
+                  <label className="block text-sm font-medium text-on-surface-variant mb-1.5">Proveedor</label>
+                  <select
+                    value={supplierId}
+                    onChange={(e) => setSupplierId(e.target.value)}
+                    className="w-full px-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    <option value="">Todos los proveedores</option>
+                    {suppliers.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-                    Valor del ajuste {adjustmentType === 'percentage' ? '(%)' : '(ARS)'}
-                    <span className="ml-1 text-xs text-secondary font-normal">Usá valores negativos para bajar precios</span>
+                    Buscar por nombre de producto
                   </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-sm">
-                      {adjustmentType === 'percentage' ? '%' : '$'}
-                    </span>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={adjustmentValue}
-                      onChange={(e) => setAdjustmentValue(e.target.value)}
-                      placeholder="Ej: 15"
-                      className="w-full pl-8 pr-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface placeholder:text-secondary text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  </div>
+                  <ProductSearchInput
+                    value={search}
+                    onChange={(text) => setSearch(text)}
+                    onSelect={(product) => product && setSearch(product.name)}
+                    placeholder="Ej: aceite, filtro..."
+                  />
+                  <p className="mt-1 text-xs text-secondary">Podés combinar proveedor y nombre para filtrar mejor</p>
                 </div>
               </div>
-            </>
-          )}
+            )}
 
-          {/* STEP 2: Preview */}
-          {step === STEPS.PREVIEW && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 p-3 bg-surface-container-high rounded-lg border border-outline-variant text-sm">
-                <TrendingUp className="w-4 h-4 text-primary shrink-0" />
-                <span className="text-on-surface-variant">
-                  Ajuste: <span className="font-semibold text-on-surface">{adjustmentLabel}</span>
-                  {hasTarget
-                    ? ` · ${targetDescription()}`
-                    : (
-                      <>
-                        {supplierId && ` · Proveedor: ${suppliers.find(s => String(s.id) === supplierId)?.name}`}
-                        {search && ` · Búsqueda: "${search}"`}
-                      </>
-                    )}
-                </span>
+            {/* Adjustment type */}
+            <div className="space-y-4 pt-2">
+              <h3 className="text-sm font-medium text-on-surface-variant uppercase tracking-wide">Tipo de ajuste</h3>
+
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: 'percentage', label: 'Porcentaje', hint: 'Ej: +15%' },
+                  { value: 'fixed', label: 'Monto fijo', hint: 'Ej: +$500' },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setAdjustmentType(opt.value)}
+                    className={`p-4 rounded-lg border text-left transition-colors ${
+                      adjustmentType === opt.value
+                        ? 'border-primary bg-primary-container/15 text-primary'
+                        : 'border-outline-variant text-on-surface-variant hover:border-primary/40'
+                    }`}
+                  >
+                    <p className="text-sm font-medium">{opt.label}</p>
+                    <p className="text-xs opacity-70 mt-0.5">{opt.hint}</p>
+                  </button>
+                ))}
               </div>
 
-              {previews.length === 0 ? (
-                <div className="flex flex-col items-center gap-2 py-8 text-secondary">
-                  <AlertCircle className="w-8 h-8 opacity-40" />
-                  <p className="text-sm">No se encontraron productos con esos criterios</p>
+              <div>
+                <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
+                  Valor del ajuste {adjustmentType === 'percentage' ? '(%)' : '(ARS)'}
+                  <span className="ml-1 text-xs text-secondary font-normal">Usá valores negativos para bajar precios</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-sm">
+                    {adjustmentType === 'percentage' ? '%' : '$'}
+                  </span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={adjustmentValue}
+                    onChange={(e) => setAdjustmentValue(e.target.value)}
+                    placeholder="Ej: 15"
+                    className="w-full pl-8 pr-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface placeholder:text-secondary text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
                 </div>
-              ) : (
-                <div className="rounded-lg border border-outline-variant overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-outline-variant bg-surface-container-high">
-                        <th className="text-left px-4 py-2.5 text-xs font-medium text-secondary uppercase">SKU</th>
-                        <th className="text-left px-4 py-2.5 text-xs font-medium text-secondary uppercase">Producto</th>
-                        <th className="text-right px-4 py-2.5 text-xs font-medium text-secondary uppercase">Precio actual</th>
-                        <th className="text-right px-4 py-2.5 text-xs font-medium text-secondary uppercase">Precio nuevo</th>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* STEP 2: Preview */}
+        {step === STEPS.PREVIEW && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 p-3 bg-surface-container-high rounded-lg border border-outline-variant text-sm">
+              <TrendingUp className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-on-surface-variant">
+                Ajuste: <span className="font-semibold text-on-surface">{adjustmentLabel}</span>
+                {hasTarget
+                  ? ` · ${targetDescription()}`
+                  : (
+                    <>
+                      {supplierId && ` · Proveedor: ${suppliers.find(s => String(s.id) === supplierId)?.name}`}
+                      {search && ` · Búsqueda: "${search}"`}
+                    </>
+                  )}
+              </span>
+            </div>
+
+            {previews.length === 0 ? (
+              <div className="flex flex-col items-center gap-2 py-8 text-secondary">
+                <AlertCircle className="w-8 h-8 opacity-40" />
+                <p className="text-sm">No se encontraron productos con esos criterios</p>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-outline-variant overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-outline-variant bg-surface-container-high">
+                      <th className="text-left px-4 py-2.5 text-xs font-medium text-secondary uppercase">SKU</th>
+                      <th className="text-left px-4 py-2.5 text-xs font-medium text-secondary uppercase">Producto</th>
+                      <th className="text-right px-4 py-2.5 text-xs font-medium text-secondary uppercase">Precio actual</th>
+                      <th className="text-right px-4 py-2.5 text-xs font-medium text-secondary uppercase">Precio nuevo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {previews.map((p) => (
+                      <tr key={p.id} className="border-b border-outline-variant last:border-0 hover:bg-surface-container-high/50">
+                        <td className="px-4 py-3 font-mono text-xs text-secondary">{p.sku || '—'}</td>
+                        <td className="px-4 py-3 text-on-surface max-w-md">
+                          <span className="line-clamp-2 break-words" title={p.name}>{p.name}</span>
+                        </td>
+                        <td className="px-4 py-3 text-right text-secondary">{formatARS(p.current_price)}</td>
+                        <td className="px-4 py-3 text-right font-semibold text-tertiary">{formatARS(p.new_price)}</td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {previews.map((p) => (
-                        <tr key={p.id} className="border-b border-outline-variant last:border-0 hover:bg-surface-container-high/50">
-                          <td className="px-4 py-3 font-mono text-xs text-secondary">{p.sku || '—'}</td>
-                          <td className="px-4 py-3 text-on-surface max-w-md">
-                            <span className="line-clamp-2 break-words" title={p.name}>{p.name}</span>
-                          </td>
-                          <td className="px-4 py-3 text-right text-secondary">{formatARS(p.current_price)}</td>
-                          <td className="px-4 py-3 text-right font-semibold text-tertiary">{formatARS(p.new_price)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* STEP 3: Done */}
-          {step === STEPS.DONE && (
-            <div className="flex flex-col items-center gap-4 py-8">
-              <div className="w-14 h-14 rounded-full bg-tertiary-container/20 flex items-center justify-center">
-                <CheckCircle className="w-8 h-8 text-tertiary" />
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <div className="text-center">
-                <p className="text-base font-semibold text-on-surface">¡Precios actualizados!</p>
-                <p className="text-sm text-secondary mt-1">{previews.length} producto(s) fueron actualizados exitosamente</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex justify-between gap-3 p-6 pt-0 border-t border-outline-variant shrink-0 mt-2">
-          <button
-            onClick={step === STEPS.PREVIEW ? () => setStep(STEPS.FILTER) : handleClose}
-            className="px-4 py-2 text-sm bg-surface-container-high border border-outline-variant text-on-surface rounded-lg hover:brightness-110 transition-colors"
-          >
-            {step === STEPS.PREVIEW ? '← Volver' : 'Cancelar'}
-          </button>
-
-          <div className="flex gap-3">
-            {step === STEPS.FILTER && (
-              <button
-                onClick={handlePreview}
-                disabled={previewMutation.isPending}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-primary-container text-on-primary rounded-lg font-medium hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {previewMutation.isPending ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Calculando...</>
-                ) : (
-                  <>Vista previa <ChevronRight className="w-4 h-4" /></>
-                )}
-              </button>
-            )}
-
-            {step === STEPS.PREVIEW && previews.length > 0 && (
-              <button
-                onClick={handleConfirm}
-                disabled={updateMutation.isPending}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-primary-container text-on-primary rounded-lg font-medium hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {updateMutation.isPending ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Actualizando...</>
-                ) : (
-                  <><CheckCircle className="w-4 h-4" /> Confirmar {previews.length} cambio(s)</>
-                )}
-              </button>
-            )}
-
-            {step === STEPS.DONE && (
-              <button
-                onClick={handleClose}
-                className="px-4 py-2 text-sm bg-primary-container text-on-primary rounded-lg font-medium hover:brightness-110 transition-colors"
-              >
-                Cerrar
-              </button>
             )}
           </div>
+        )}
+
+        {/* STEP 3: Done */}
+        {step === STEPS.DONE && (
+          <div className="flex flex-col items-center gap-4 py-8">
+            <div className="w-14 h-14 rounded-full bg-tertiary-container/20 flex items-center justify-center">
+              <CheckCircle className="w-8 h-8 text-tertiary" />
+            </div>
+            <div className="text-center">
+              <p className="text-base font-semibold text-on-surface">¡Precios actualizados!</p>
+              <p className="text-sm text-secondary mt-1">{previews.length} producto(s) fueron actualizados exitosamente</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="flex justify-between gap-3 p-6 pt-0 border-t border-outline-variant shrink-0 mt-2">
+        <button
+          onClick={step === STEPS.PREVIEW ? () => setStep(STEPS.FILTER) : handleClose}
+          className="px-4 py-2 text-sm bg-surface-container-high border border-outline-variant text-on-surface rounded-lg hover:brightness-110 transition-colors"
+        >
+          {step === STEPS.PREVIEW ? '← Volver' : 'Cancelar'}
+        </button>
+
+        <div className="flex gap-3">
+          {step === STEPS.FILTER && (
+            <button
+              onClick={handlePreview}
+              disabled={previewMutation.isPending}
+              className="flex items-center gap-2 px-4 py-2 text-sm bg-primary-container text-on-primary rounded-lg font-medium hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {previewMutation.isPending ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Calculando...</>
+              ) : (
+                <>Vista previa <ChevronRight className="w-4 h-4" /></>
+              )}
+            </button>
+          )}
+
+          {step === STEPS.PREVIEW && previews.length > 0 && (
+            <button
+              onClick={handleConfirm}
+              disabled={updateMutation.isPending}
+              className="flex items-center gap-2 px-4 py-2 text-sm bg-primary-container text-on-primary rounded-lg font-medium hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {updateMutation.isPending ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Actualizando...</>
+              ) : (
+                <><CheckCircle className="w-4 h-4" /> Confirmar {previews.length} cambio(s)</>
+              )}
+            </button>
+          )}
+
+          {step === STEPS.DONE && (
+            <button
+              onClick={handleClose}
+              className="px-4 py-2 text-sm bg-primary-container text-on-primary rounded-lg font-medium hover:brightness-110 transition-colors"
+            >
+              Cerrar
+            </button>
+          )}
         </div>
       </div>
-    </div>,
-    document.body,
+    </Dialog>
   );
 };
 

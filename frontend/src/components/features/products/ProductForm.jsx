@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import ImageUpload from '@ui/ImageUpload';
-import SingleSelectSearch from '@ui/SingleSelectSearch';
+import Combobox from '@ui/Combobox';
 import { useSuppliers } from '@services/suppliersService';
 import { useCategories } from '@services/categoriesService';
 import { ivaRateToOption, DEFAULT_IVA_RATE } from '@utils/iva';
@@ -175,14 +175,15 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-on-surface mb-1.5">
+          <label id="product-category-label" className="block text-sm font-medium text-on-surface mb-1.5">
             Categoría
           </label>
           <Controller
             name="category_id"
             control={control}
             render={({ field }) => (
-              <SingleSelectSearch
+              <Combobox
+                aria-labelledby="product-category-label"
                 options={categoryOptions}
                 value={field.value}
                 onChange={field.onChange}

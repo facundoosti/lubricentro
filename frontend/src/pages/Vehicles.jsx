@@ -5,7 +5,7 @@ import PageHeader from '@ui/PageHeader';
 import PageError from '@ui/PageError';
 import VehiclesTable from '@components/features/vehicles/VehiclesTable';
 import VehicleModal from '@components/features/vehicles/VehicleModal';
-import ConfirmModal from '@ui/ConfirmModal';
+import ConfirmDialog from '@ui/ConfirmDialog';
 import { useVehicles, useDeleteVehicle } from '@services/vehiclesService';
 import { showVehicleSuccess, showError } from '@services/notificationService';
 
@@ -85,7 +85,7 @@ const Vehicles = () => {
         onSuccess={handleModalClose}
       />
 
-      <ConfirmModal
+      <ConfirmDialog
         isOpen={isDeleteModalOpen}
         onClose={handleDeleteModalClose}
         onConfirm={handleDeleteConfirm}

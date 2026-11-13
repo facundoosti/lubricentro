@@ -4,7 +4,7 @@ import PageHeader from '@ui/PageHeader';
 import PageError from '@ui/PageError';
 import SuppliersTable from '@components/features/suppliers/SuppliersTable';
 import SupplierModal from '@components/features/suppliers/SupplierModal';
-import ConfirmModal from '@ui/ConfirmModal';
+import ConfirmDialog from '@ui/ConfirmDialog';
 import { useSuppliers, useDeleteSupplier } from '@services/suppliersService';
 import { showSupplierSuccess } from '@services/notificationService';
 
@@ -72,7 +72,7 @@ const Suppliers = () => {
         onSuccess={handleModalClose}
       />
 
-      <ConfirmModal
+      <ConfirmDialog
         isOpen={isDeleteModalOpen}
         onClose={handleDeleteModalClose}
         onConfirm={handleDeleteConfirm}

@@ -108,6 +108,28 @@
   color-scheme: dark;
 }
 
+/* ── Alias de tokens para las primitivas de shadcn/ui (Base UI) ─────────────
+   Los nombres que esperan las primitivas apuntan a los tokens MD3 de arriba.
+   `inline`: la utilidad usa el var() del token MD3, así el modo claro se hereda solo.
+   No redefinir --color-primary / --color-secondary: ya existen con significado MD3
+   (las primitivas se ajustan a los tokens del design system). Ver docs/DESIGN_SYSTEM.md. */
+@theme inline {
+  --color-foreground: var(--color-on-surface);
+  --color-popover: var(--color-surface-container-highest);
+  --color-popover-foreground: var(--color-on-surface);
+  --color-card: var(--color-surface-container);
+  --color-card-foreground: var(--color-on-surface);
+  --color-muted: var(--color-surface-container-high);
+  --color-muted-foreground: var(--color-on-surface-variant);
+  --color-accent: var(--color-surface-container-high);
+  --color-accent-foreground: var(--color-on-surface);
+  --color-primary-foreground: var(--color-on-primary);
+  --color-destructive: var(--color-error);
+  --color-border: var(--color-outline-variant);
+  --color-input: var(--color-outline-variant);
+  --color-ring: var(--color-primary);
+}
+
 @layer base {
   *,
   ::after,

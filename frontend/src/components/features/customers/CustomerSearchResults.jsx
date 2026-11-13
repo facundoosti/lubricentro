@@ -4,10 +4,12 @@ import { UserPlus } from 'lucide-react';
 
 /**
  * CustomerSearchResults - Lista flotante de resultados de CustomerSearchInput.
- * Se renderiza en un portal al body para que el overflow del diálogo contenedor no la recorte.
+ * Se renderiza en un portal (con position fixed) para que el overflow del diálogo contenedor no la recorte:
+ * dentro de un diálogo va al panel del diálogo (`container`), así sigue interactiva; fuera, al body.
  * "+ Crear cliente" (si canCreate) es la última opción, con índice customers.length.
  */
 const CustomerSearchResults = ({
+  container,
   listRef,
   style,
   isLoading,
@@ -66,7 +68,7 @@ const CustomerSearchResults = ({
       </button>
     )}
   </div>,
-  document.body,
+  container ?? document.body,
 );
 
 export default CustomerSearchResults;

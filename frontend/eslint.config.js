@@ -3,6 +3,11 @@ import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
+const RELATIVE_IMPORTS = {
+  group: ['../*', './*'],
+  message: 'Usa alias de importación (@ui, @services, @components, etc.) en lugar de rutas relativas. Ver frontend/CLAUDE.md.',
+}
+
 export default [
   { ignores: ['dist'] },
   {
@@ -31,10 +36,23 @@ export default [
       'no-restricted-imports': [
         'error',
         {
+          patterns: [RELATIVE_IMPORTS],
+        },
+      ],
+    },
+  },
+  {
+    // Las features usan los wrappers de @ui (Dialog, ConfirmDialog, Combobox, Select), nunca las primitivas de shadcn
+    files: ['src/components/features/**/*.{js,jsx}', 'src/pages/**/*.{js,jsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
           patterns: [
+            RELATIVE_IMPORTS,
             {
-              group: ['../*', './*'],
-              message: 'Usa alias de importación (@ui, @services, @components, etc.) en lugar de rutas relativas. Ver frontend/CLAUDE.md.',
+              group: ['@/components/ui/primitives', '@/components/ui/primitives/*', '@ui/primitives', '@ui/primitives/*'],
+              message: 'Las primitivas de shadcn/Base UI no se importan desde features/ ni pages/: usá los wrappers de @ui.',
             },
           ],
         },

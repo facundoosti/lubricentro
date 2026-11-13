@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Percent } from 'lucide-react';
-import Modal from '@ui/Modal';
+import Dialog from '@ui/Dialog';
 import { useBulkIvaUpdate } from '@services/productsService';
 import { showSuccess, showError, parseApiError } from '@services/notificationService';
 import { PRODUCT_IVA_OPTIONS } from '@utils/iva';
@@ -43,7 +43,7 @@ const BulkIvaModal = ({ isOpen, onClose, target, count, onDone }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="max-w-md!" title="Cambiar IVA" closeOnBackdrop={false}>
+    <Dialog isOpen={isOpen} onClose={onClose} size="sm" title="Cambiar IVA" closeOnBackdrop={false}>
       <div className="space-y-5">
         <p className="text-sm text-on-surface-variant">
           Se cambia solo la alícuota de <strong className="text-on-surface">{plural(count)}</strong>.
@@ -91,7 +91,7 @@ const BulkIvaModal = ({ isOpen, onClose, target, count, onDone }) => {
           </button>
         </div>
       </div>
-    </Modal>
+    </Dialog>
   );
 };
 

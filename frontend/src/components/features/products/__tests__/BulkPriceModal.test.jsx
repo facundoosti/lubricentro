@@ -1,4 +1,4 @@
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderWithProviders } from '@/test/utils';
 import BulkPriceModal from '@components/features/products/BulkPriceModal';
@@ -21,15 +21,22 @@ const renderModal = (onClose = vi.fn()) => {
 describe('BulkPriceModal — cierre', () => {
   beforeEach(() => {
     previewMock.mockReset();
-    document.body.style.overflow = '';
   });
+
+  // Base UI detecta el click en el fondo en pointerdown/mousedown
+  const pressBackdrop = () => {
+    const backdrop = screen.getByTestId('dialog-backdrop');
+    fireEvent.pointerDown(backdrop);
+    fireEvent.mouseDown(backdrop);
+    fireEvent.click(backdrop);
+  };
 
   it('click en el fondo no cierra y conserva el valor cargado', () => {
     const onClose = renderModal();
     const input = screen.getByPlaceholderText('Ej: 15');
     fireEvent.change(input, { target: { value: '15' } });
 
-    fireEvent.click(screen.getByTestId('bulk-price-backdrop'));
+    pressBackdrop();
 
     expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByRole('dialog', { name: 'Actualización de Precios por Lote' })).toBeInTheDocument();
@@ -38,16 +45,16 @@ describe('BulkPriceModal — cierre', () => {
 
   it('Escape cierra', () => {
     const onClose = renderModal();
-    fireEvent.keyDown(document, { key: 'Escape' });
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('se renderiza en document.body con foco dentro y scroll bloqueado', () => {
+  it('se renderiza en un portal en document.body, con foco dentro y scroll bloqueado', async () => {
     renderModal();
     const dialog = screen.getByRole('dialog', { name: 'Actualización de Precios por Lote' });
-    expect(dialog).toHaveFocus();
-    expect(screen.getByTestId('bulk-price-backdrop').parentElement.parentElement).toBe(document.body);
-    expect(document.body.style.overflow).toBe('hidden');
+    expect(dialog.closest('[data-base-ui-portal]').parentElement).toBe(document.body);
+    await waitFor(() => expect(dialog).toHaveFocus());
+    await waitFor(() => expect(document.documentElement.style.overflowY || document.body.style.overflowY).toBe('hidden'));
   });
 });
 

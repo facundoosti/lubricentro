@@ -1,0 +1,392 @@
+[
+  {
+    "id": "TC-01",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 768,
+          "h": 428,
+          "bg": "rgb(18, 18, 21)",
+          "radius": "16px",
+          "border": "rgb(39, 39, 42)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-01-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-01",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 768,
+          "h": 428,
+          "bg": "rgb(255, 255, 255)",
+          "radius": "16px",
+          "border": "rgb(228, 228, 231)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-01-desktop-light.jpg"
+  },
+  {
+    "id": "TC-02",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 768,
+          "h": 666,
+          "bg": "rgb(18, 18, 21)",
+          "radius": "16px",
+          "border": "rgb(39, 39, 42)"
+        },
+        {
+          "w": 576,
+          "h": 428,
+          "bg": "rgb(18, 18, 21)",
+          "radius": "16px",
+          "border": "rgb(39, 39, 42)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-02-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-02",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 768,
+          "h": 666,
+          "bg": "rgb(255, 255, 255)",
+          "radius": "16px",
+          "border": "rgb(228, 228, 231)"
+        },
+        {
+          "w": 576,
+          "h": 428,
+          "bg": "rgb(255, 255, 255)",
+          "radius": "16px",
+          "border": "rgb(228, 228, 231)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-02-desktop-light.jpg"
+  },
+  {
+    "id": "TC-03",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 768,
+          "h": 810,
+          "bg": "rgb(18, 18, 21)",
+          "radius": "16px",
+          "border": "rgb(39, 39, 42)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-03-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-03",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 768,
+          "h": 810,
+          "bg": "rgb(255, 255, 255)",
+          "radius": "16px",
+          "border": "rgb(228, 228, 231)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-03-desktop-light.jpg"
+  },
+  {
+    "id": "TC-04",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 768,
+          "h": 693,
+          "bg": "rgb(18, 18, 21)",
+          "radius": "16px",
+          "border": "rgb(39, 39, 42)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-04-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-04",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 768,
+          "h": 693,
+          "bg": "rgb(255, 255, 255)",
+          "radius": "16px",
+          "border": "rgb(228, 228, 231)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-04-desktop-light.jpg"
+  },
+  {
+    "id": "TC-05",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 448,
+          "h": 250,
+          "bg": "rgb(18, 18, 21)",
+          "radius": "24px",
+          "border": "rgb(39, 39, 42)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-05-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-05",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 448,
+          "h": 250,
+          "bg": "rgb(255, 255, 255)",
+          "radius": "24px",
+          "border": "rgb(228, 228, 231)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-05-desktop-light.jpg"
+  },
+  {
+    "id": "TC-07",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 448,
+          "h": 276,
+          "bg": "rgb(18, 18, 21)",
+          "radius": "24px",
+          "border": "rgb(39, 39, 42)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-07-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-07",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 448,
+          "h": 276,
+          "bg": "rgb(255, 255, 255)",
+          "radius": "24px",
+          "border": "rgb(228, 228, 231)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-07-desktop-light.jpg"
+  },
+  {
+    "id": "TC-08",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 672,
+          "h": 626,
+          "bg": "rgb(18, 18, 21)",
+          "radius": "12px",
+          "border": "rgb(39, 39, 42)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-08-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-08",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 672,
+          "h": 626,
+          "bg": "rgb(255, 255, 255)",
+          "radius": "12px",
+          "border": "rgb(228, 228, 231)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-08-desktop-light.jpg"
+  },
+  {
+    "id": "TC-09",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 512,
+          "h": 443,
+          "bg": "rgb(18, 18, 21)",
+          "radius": "12px",
+          "border": "rgb(39, 39, 42)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-09-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-09",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 512,
+          "h": 443,
+          "bg": "rgb(255, 255, 255)",
+          "radius": "12px",
+          "border": "rgb(228, 228, 231)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-09-desktop-light.jpg"
+  },
+  {
+    "id": "TC-10",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 1440,
+          "h": 900,
+          "bg": "oklab(0 0 0 / 0.9)",
+          "radius": "0px",
+          "border": "rgb(39, 39, 42)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-10-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-10",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 1440,
+          "h": 900,
+          "bg": "oklab(0 0 0 / 0.9)",
+          "radius": "0px",
+          "border": "rgb(228, 228, 231)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-10-desktop-light.jpg"
+  },
+  {
+    "id": "TC-11",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {},
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-11-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-11",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {},
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-11-desktop-light.jpg"
+  },
+  {
+    "id": "TC-06",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 384,
+          "h": 306,
+          "bg": "rgb(18, 18, 21)",
+          "radius": "24px",
+          "border": "rgb(39, 39, 42)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-06-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-06",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "dialogs": [
+        {
+          "w": 384,
+          "h": 306,
+          "bg": "rgb(255, 255, 255)",
+          "radius": "24px",
+          "border": "rgb(228, 228, 231)"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/shadcn-base-ui-fase-1/baseline/TC-06-desktop-light.jpg"
+  }
+]

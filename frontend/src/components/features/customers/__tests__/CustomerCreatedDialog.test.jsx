@@ -3,6 +3,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderWithProviders } from '@/test/utils';
 import CustomerCreatedDialog from '@components/features/customers/CustomerCreatedDialog';
 
+// Base UI detecta el click en el fondo en pointerdown/mousedown
+const pressBackdrop = () => {
+  const backdrop = screen.getByTestId('dialog-backdrop');
+  fireEvent.pointerDown(backdrop);
+  fireEvent.mouseDown(backdrop);
+  fireEvent.click(backdrop);
+};
+
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async (importOriginal) => ({
   ...(await importOriginal()),
@@ -36,9 +44,9 @@ describe('CustomerCreatedDialog', () => {
     const onClose = vi.fn();
     renderWithProviders(<CustomerCreatedDialog customer={{ id: 5, name: 'Carlos Ruiz' }} onClose={onClose} />);
     expect(screen.getByRole('dialog', { name: 'Cliente creado' })).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('modal-backdrop'));
+    pressBackdrop();
     expect(onClose).toHaveBeenCalledTimes(1);
-    fireEvent.keyDown(document, { key: 'Escape' });
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
     expect(onClose).toHaveBeenCalledTimes(2);
   });
 });

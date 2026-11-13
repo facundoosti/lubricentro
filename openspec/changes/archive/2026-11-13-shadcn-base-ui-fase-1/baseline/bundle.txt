@@ -1,0 +1,20 @@
+Línea base del bundle (npm run build, vite 6.4.1) — antes de shadcn/Base UI · 2026-11-13
+
+dist/assets/index-*.js            1,216.19 kB │ gzip: 358.78 kB   (chunk principal)
+dist/assets/jspdf.es.min-*.js       390.45 kB │ gzip: 128.78 kB
+dist/assets/html2canvas.esm-*.js    202.30 kB │ gzip:  48.03 kB
+dist/assets/index.es-*.js           159.61 kB │ gzip:  53.53 kB
+dist/assets/purify.es-*.js           22.77 kB │ gzip:   8.79 kB
+dist/assets/index-*.css             102.75 kB │ gzip:  17.78 kB
+
+JS total: 1,991.32 kB · gzip 597.91 kB
+
+Después del change (task 6.1) — misma build, @base-ui/react 1.9.0 + clsx + tailwind-merge + class-variance-authority
+
+dist/assets/index-*.js            1,412.03 kB │ gzip: 428.20 kB   (+195.84 kB · gzip +69.42 kB)
+dist/assets/index-*.css             105.13 kB │ gzip:  18.16 kB   (+2.38 kB · gzip +0.38 kB)
+(jspdf, html2canvas, index.es, purify sin cambios)
+
+JS total: 2,187.16 kB · gzip 667.33 kB  →  +195.84 kB · gzip +69.42 kB (+11.6 %)
+El aumento es todo del chunk principal: Base UI (Dialog/AlertDialog/Combobox/Select + floating-ui interno).
+Candidato a code-splitting (manualChunks) si molesta; no se hizo en este change.

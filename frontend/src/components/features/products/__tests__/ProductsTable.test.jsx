@@ -71,7 +71,7 @@ describe('ProductsTable — zoom de imágenes', () => {
     expect(within(dialog).getByText('2 / 2')).toBeInTheDocument();
     expect(within(dialog).getByRole('img', { name: 'Neumático 175' })).toBeInTheDocument();
 
-    fireEvent.keyDown(document, { key: 'ArrowRight' });
+    fireEvent.keyDown(dialog, { key: 'ArrowRight' });
     expect(within(dialog).getByText('1 / 2')).toBeInTheDocument();
   });
 

@@ -62,15 +62,15 @@ describe('AppointmentForm — pickers y Estado', () => {
   it('la Hora es una lista de horas en punto con AM/PM, arranca vacía y permite elegir', async () => {
     const { container } = renderForm();
     expect(container.querySelector('select[name="scheduled_time"]')).toBeNull();
-    const trigger = screen.getByRole('button', { name: /Hora/ });
+    const trigger = screen.getByRole('combobox', { name: /Hora/ });
     expect(trigger).toHaveTextContent('Seleccionar hora');
     await userEvent.click(trigger);
-    const labels = within(screen.getByRole('listbox')).getAllByRole('option').map((o) => o.textContent);
+    const labels = within(await screen.findByRole('listbox')).getAllByRole('option').map((o) => o.textContent);
     expect(labels[0]).toBe('8 AM');
     expect(labels).toContain('12 PM');
     expect(labels.at(-1)).toBe('8 PM');
     expect(labels.every((l) => !l.includes(':'))).toBe(true);
-    await userEvent.click(screen.getByRole('option', { name: '3 PM' }));
+    await userEvent.click(await screen.findByRole('option', { name: '3 PM' }));
     expect(trigger).toHaveTextContent('3 PM');
   });
 
@@ -78,30 +78,30 @@ describe('AppointmentForm — pickers y Estado', () => {
     const { container } = renderForm();
     fireEvent.submit(container.querySelector('form'));
     expect(await screen.findByText('Hora es requerida')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Hora/ }).className).toMatch(/\bborder-error\b/);
+    expect(screen.getByRole('combobox', { name: /Hora/ }).className).toMatch(/\bborder-error\b/);
   });
 
   it('Estado usa el dropdown de la app (no un select nativo) y permite cambiarlo', async () => {
     const { container } = renderForm();
     expect(container.querySelector('select[name="status"]')).toBeNull();
-    const trigger = screen.getByRole('button', { name: 'Estado' });
+    const trigger = screen.getByRole('combobox', { name: 'Estado' });
     expect(trigger).toHaveTextContent('Agendado');
     await userEvent.click(trigger);
     expect(screen.queryByPlaceholderText('Buscar...')).toBeNull();
-    await userEvent.click(screen.getByRole('option', { name: 'Confirmado' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Confirmado' }));
     expect(trigger).toHaveTextContent('Confirmado');
   });
 
   it('Estado se puede manejar con teclado', async () => {
     renderForm();
     const user = userEvent.setup();
-    const trigger = screen.getByRole('button', { name: 'Estado' });
+    const trigger = screen.getByRole('combobox', { name: 'Estado' });
     trigger.focus();
     await user.keyboard('{Enter}');
-    expect(screen.getByRole('option', { name: 'Agendado' })).toHaveFocus();
+    await waitFor(() => expect(screen.getByRole('option', { name: 'Agendado' })).toHaveFocus());
     await user.keyboard('{ArrowDown}{ArrowDown}{Enter}');
     expect(trigger).toHaveTextContent('Completado');
-    expect(screen.queryByRole('listbox')).toBeNull();
+    await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull());
   });
 
   it('en edición carga estado y hora, y envía el estado elegido', async () => {
@@ -123,16 +123,16 @@ describe('AppointmentForm — pickers y Estado', () => {
         }}
       />
     );
-    const trigger = screen.getByRole('button', { name: 'Estado' });
+    const trigger = screen.getByRole('combobox', { name: 'Estado' });
     expect(trigger).toHaveTextContent('Confirmado');
     // turno viejo con minutos: se muestra igual
-    expect(screen.getByRole('button', { name: /Hora/ })).toHaveTextContent('10:30 AM');
+    expect(screen.getByRole('combobox', { name: /Hora/ })).toHaveTextContent('10:30 AM');
     await waitFor(() => expect(container.querySelector('select[name="vehicle_id"]')).toHaveValue('5'));
 
     await userEvent.click(trigger);
-    await userEvent.click(screen.getByRole('option', { name: 'Completado' }));
-    await userEvent.click(screen.getByRole('button', { name: /Hora/ }));
-    await userEvent.click(screen.getByRole('option', { name: '3 PM' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Completado' }));
+    await userEvent.click(screen.getByRole('combobox', { name: /Hora/ }));
+    await userEvent.click(await screen.findByRole('option', { name: '3 PM' }));
     fireEvent.submit(container.querySelector('form'));
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalled());

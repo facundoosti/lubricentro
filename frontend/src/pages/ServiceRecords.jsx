@@ -6,7 +6,7 @@ import { useServiceRecords, useDeleteServiceRecord } from "@services/serviceReco
 import { showServiceRecordSuccess, showServiceRecordError } from "@services/notificationService";
 import PageHeader from "@ui/PageHeader";
 import PageError from "@ui/PageError";
-import ConfirmModal from "@ui/ConfirmModal";
+import ConfirmDialog from "@ui/ConfirmDialog";
 
 const ServiceRecords = () => {
   const navigate = useNavigate();
@@ -101,7 +101,7 @@ const ServiceRecords = () => {
         loading={isLoading || deleteServiceRecordMutation.isPending}
       />
 
-      <ConfirmModal
+      <ConfirmDialog
         isOpen={isDeleteModalOpen}
         onClose={() => { setIsDeleteModalOpen(false); setRecordToDelete(null); }}
         onConfirm={handleDeleteConfirm}

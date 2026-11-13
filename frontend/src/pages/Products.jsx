@@ -10,7 +10,7 @@ import ProductModal from '@components/features/products/ProductModal';
 import ProductImportModal from '@components/features/products/ProductImportModal';
 import BulkPriceModal from '@components/features/products/BulkPriceModal';
 import BulkIvaModal from '@components/features/products/BulkIvaModal';
-import ConfirmModal from '@ui/ConfirmModal';
+import ConfirmDialog from '@ui/ConfirmDialog';
 import { useProducts, useDeleteProduct } from '@services/productsService';
 import { showProductSuccess } from '@services/notificationService';
 
@@ -249,7 +249,7 @@ const Products = () => {
         onDone={handleClearSelection}
       />
 
-      <ConfirmModal
+      <ConfirmDialog
         isOpen={isDeleteModalOpen}
         onClose={handleDeleteModalClose}
         onConfirm={handleDeleteConfirm}

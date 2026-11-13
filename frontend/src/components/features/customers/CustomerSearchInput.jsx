@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useCustomers, useCustomer } from '@services/customersService';
 import { useFloatingPosition } from '@hooks/useFloatingPosition';
+import { useDialogPortalContainer } from '@ui/dialogContext';
 import { Search, ChevronDown, X } from 'lucide-react';
 import CustomerSearchResults from '@components/features/customers/CustomerSearchResults';
 
 // Altura máxima de la lista (max-h-60 = 15rem = 240px) y separación con el input
 const LIST_MAX_HEIGHT = 240;
 const LIST_GAP = 4;
-// Por encima de cualquier FormDialog apilado (50 + nivel * 10), igual que SearchableSelect
-const LIST_Z_INDEX = 9999;
+// Por encima del contenido: del panel del diálogo (si está en uno) o de la página (header/sidebar z-50)
+const LIST_Z_INDEX = 50;
 
 const formatCustomerDisplay = (customer) => {
   if (!customer) return '';
@@ -52,6 +53,8 @@ const CustomerSearchInput = ({
   const wrapperRef = useRef(null);
   const anchorRef = useRef(null);
   const listRef = useRef(null);
+  // Dentro de un Dialog la lista se portea a su panel: fuera de él quedaría no interactiva (modal)
+  const portalContainer = useDialogPortalContainer();
   const debounceTimeoutRef = useRef(null);
 
   // --- DATA FETCHING ---
@@ -278,6 +281,7 @@ const CustomerSearchInput = ({
       {/* Dropdown de resultados — portal al body para que el overflow del diálogo no lo recorte */}
       {isOpen && (
         <CustomerSearchResults
+          container={portalContainer}
           listRef={listRef}
           style={listStyle}
           isLoading={isLoadingSearch}

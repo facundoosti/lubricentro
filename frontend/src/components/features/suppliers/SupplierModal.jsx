@@ -1,5 +1,5 @@
 import { Truck } from 'lucide-react';
-import FormDialog from '@ui/FormDialog';
+import Dialog from '@ui/Dialog';
 import SupplierForm from '@components/features/suppliers/SupplierForm';
 import { useCreateSupplier, useUpdateSupplier } from '@services/suppliersService';
 import { showSupplierSuccess, showSupplierError, parseApiError } from '@services/notificationService';
@@ -31,7 +31,7 @@ const SupplierModal = ({ isOpen, onClose, supplier = null, onSuccess }) => {
   };
 
   return (
-    <FormDialog
+    <Dialog
       isOpen={isOpen}
       onClose={onClose}
       title={isEditing ? 'Editar Proveedor' : 'Nuevo Proveedor'}
@@ -42,7 +42,7 @@ const SupplierModal = ({ isOpen, onClose, supplier = null, onSuccess }) => {
       isLoading={isLoading}
     >
       <SupplierForm supplier={supplier} onSubmit={handleSubmit} formId={FORM_ID} />
-    </FormDialog>
+    </Dialog>
   );
 };
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@ui/Table";
 import Pagination from "@ui/Pagination";
-import MultiSelectSearch from "@ui/MultiSelectSearch";
+import Combobox from "@ui/Combobox";
 import { useSuppliers } from '@services/suppliersService';
 import { useProductBrands } from '@services/productsService';
 import { useCategories } from '@services/categoriesService';
@@ -175,7 +175,8 @@ const ProductsTable = ({
         </div>
 
         {/* Brand multi-select */}
-        <MultiSelectSearch
+        <Combobox
+          multiple
           className="flex-1 min-w-0"
           placeholder="Marcas..."
           options={brandOptions}
@@ -186,7 +187,8 @@ const ProductsTable = ({
         />
 
         {/* Supplier multi-select */}
-        <MultiSelectSearch
+        <Combobox
+          multiple
           className="flex-1 min-w-0"
           placeholder="Proveedores..."
           options={supplierOptions}
@@ -197,7 +199,8 @@ const ProductsTable = ({
         />
 
         {/* Category multi-select */}
-        <MultiSelectSearch
+        <Combobox
+          multiple
           className="flex-1 min-w-0"
           placeholder="Categorías..."
           options={categoryOptions}

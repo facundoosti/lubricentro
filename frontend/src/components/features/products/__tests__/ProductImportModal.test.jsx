@@ -161,7 +161,7 @@ describe('ProductImportModal', () => {
     it('Escape cierra cuando no está subiendo', () => {
       const onClose = vi.fn();
       renderWithProviders(<ProductImportModal isOpen onClose={onClose} />);
-      fireEvent.keyDown(document, { key: 'Escape' });
+      fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
       expect(onClose).toHaveBeenCalledTimes(1);
     });
 
@@ -169,7 +169,7 @@ describe('ProductImportModal', () => {
       mocks.isPending = true;
       const onClose = vi.fn();
       renderWithProviders(<ProductImportModal isOpen onClose={onClose} />);
-      fireEvent.keyDown(document, { key: 'Escape' });
+      fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
       expect(onClose).not.toHaveBeenCalled();
       expect(screen.getByRole('dialog')).toBeInTheDocument();
       screen.getAllByRole('button', { name: /^(cerrar|cancelar)$/i }).forEach((b) => expect(b).toBeDisabled());
@@ -178,7 +178,11 @@ describe('ProductImportModal', () => {
     it('click en el fondo no cierra', () => {
       const onClose = vi.fn();
       renderWithProviders(<ProductImportModal isOpen onClose={onClose} />);
-      fireEvent.click(screen.getByTestId('product-import-backdrop'));
+      // Base UI detecta el click en el fondo en pointerdown/mousedown
+      const backdrop = screen.getByTestId('dialog-backdrop');
+      fireEvent.pointerDown(backdrop);
+      fireEvent.mouseDown(backdrop);
+      fireEvent.click(backdrop);
       expect(onClose).not.toHaveBeenCalled();
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });

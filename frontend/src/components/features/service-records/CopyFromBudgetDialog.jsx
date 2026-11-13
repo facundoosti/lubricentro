@@ -1,6 +1,6 @@
 import { useEffect, useId, useState } from 'react';
 import { AlertTriangle, FileText, Search } from 'lucide-react';
-import FormDialog from '@ui/FormDialog';
+import Dialog from '@ui/Dialog';
 import { useBudget, useBudgets } from '@services/budgetsService';
 import { formatCurrency } from '@utils/money';
 
@@ -100,7 +100,7 @@ const CopyFromBudgetDialog = ({ isOpen, onClose, customerId, hasFilledItems, onC
   };
 
   return (
-    <FormDialog
+    <Dialog
       isOpen={isOpen}
       onClose={onClose}
       title="Copiar desde presupuesto"
@@ -152,7 +152,7 @@ const CopyFromBudgetDialog = ({ isOpen, onClose, customerId, hasFilledItems, onC
           </div>
         )}
       </form>
-    </FormDialog>
+    </Dialog>
   );
 };
 

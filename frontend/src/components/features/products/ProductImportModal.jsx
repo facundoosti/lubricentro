@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react';
-import { createPortal } from 'react-dom';
 import { Upload, Download, FileSpreadsheet, X, Loader2 } from 'lucide-react';
 import { useImportProducts, useDownloadImportTemplate, productKeys } from '@services/productsService';
 import { useImportProgress } from '@hooks/useImportProgress';
@@ -7,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { showError } from '@services/notificationService';
 import ProductImportResult from '@components/features/products/ProductImportResult';
 import { notifyImportResult } from '@components/features/products/importResult';
-import { useDialogLayer } from '@hooks/useDialogLayer';
+import Dialog from '@ui/Dialog';
 
 const ProductImportModal = ({ isOpen, onClose }) => {
   const [file, setFile] = useState(null);
@@ -66,14 +65,6 @@ const ProductImportModal = ({ isOpen, onClose }) => {
 
   const isUploading = importMutation.isPending;
 
-  // Pila de diálogos, foco, inert y scroll lock. Mientras sube el archivo no cierra con Escape
-  // (✕ y Cancelar también quedan deshabilitados); el fondo nunca cierra.
-  const { panelRef, layerRef, zIndex } = useDialogLayer({
-    isOpen,
-    onClose: handleClose,
-    closeOnEscape: !isUploading,
-  });
-
   const handleDrop = (e) => {
     e.preventDefault();
     const dropped = e.dataTransfer.files?.[0];
@@ -88,161 +79,158 @@ const ProductImportModal = ({ isOpen, onClose }) => {
     ? Math.round((progress.processed / progress.total) * 100)
     : 0;
 
-  if (!isOpen) return null;
+  // Pila de diálogos, foco, fondo no interactuable y scroll lock: Dialog (Base UI). Mientras sube el
+  // archivo no cierra con Escape (✕ y Cancelar también quedan deshabilitados); el fondo nunca cierra.
+  return (
+    <Dialog
+      isOpen={isOpen}
+      onClose={handleClose}
+      bare
+      closeOnBackdrop={false}
+      closeOnEscape={!isUploading}
+      ariaLabelledBy="product-import-title"
+      className="bg-surface-container border border-outline-variant rounded-xl shadow-2xl max-w-lg"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between p-6 border-b border-outline-variant">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-primary-container/20 flex items-center justify-center">
+            <FileSpreadsheet className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h2 id="product-import-title" className="text-base font-semibold text-on-surface">Importar Productos</h2>
+            <p className="text-xs text-secondary">Cargá un archivo Excel con productos</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          aria-label="Cerrar"
+          onClick={handleClose}
+          disabled={isUploading}
+          className="p-1.5 rounded-md text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
 
-  return createPortal(
-    <div ref={layerRef} className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex }}>
-      <div data-testid="product-import-backdrop" className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <div
-        ref={panelRef}
-        tabIndex={-1}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="product-import-title"
-        className="relative bg-surface-container border border-outline-variant rounded-xl shadow-2xl w-full max-w-lg outline-none"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-outline-variant">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary-container/20 flex items-center justify-center">
-              <FileSpreadsheet className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h2 id="product-import-title" className="text-base font-semibold text-on-surface">Importar Productos</h2>
-              <p className="text-xs text-secondary">Cargá un archivo Excel con productos</p>
-            </div>
+      <div className="p-6 space-y-5">
+        {/* Download template */}
+        <div className="flex items-center justify-between p-3 bg-surface-container-high rounded-lg border border-outline-variant">
+          <div>
+            <p className="text-sm font-medium text-on-surface">Template de importación</p>
+            <p className="text-xs text-secondary">Descargá el formato con las columnas requeridas</p>
           </div>
           <button
-            type="button"
-            aria-label="Cerrar"
-            onClick={handleClose}
-            disabled={isUploading}
-            className="p-1.5 rounded-md text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            onClick={downloadTemplate}
+            disabled={isImporting}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-surface-container border border-outline-variant text-on-surface rounded-lg hover:bg-surface-container-high transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <X className="w-4 h-4" />
+            <Download className="w-3.5 h-3.5" />
+            Descargar
           </button>
         </div>
 
-        <div className="p-6 space-y-5">
-          {/* Download template */}
-          <div className="flex items-center justify-between p-3 bg-surface-container-high rounded-lg border border-outline-variant">
-            <div>
-              <p className="text-sm font-medium text-on-surface">Template de importación</p>
-              <p className="text-xs text-secondary">Descargá el formato con las columnas requeridas</p>
-            </div>
-            <button
-              onClick={downloadTemplate}
-              disabled={isImporting}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-surface-container border border-outline-variant text-on-surface rounded-lg hover:bg-surface-container-high transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <Download className="w-3.5 h-3.5" />
-              Descargar
-            </button>
+        {/* Drop zone */}
+        {!isImporting && !result && (
+          <div
+            onDrop={handleDrop}
+            onDragOver={(e) => e.preventDefault()}
+            onClick={() => fileInputRef.current?.click()}
+            className="border-2 border-dashed border-outline-variant rounded-lg p-8 text-center cursor-pointer hover:border-primary hover:bg-primary-container/5 transition-colors"
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            {file ? (
+              <div className="flex flex-col items-center gap-2">
+                <FileSpreadsheet className="w-10 h-10 text-primary" />
+                <p className="text-sm font-medium text-on-surface">{file.name}</p>
+                <p className="text-xs text-secondary">{(file.size / 1024).toFixed(1)} KB</p>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2">
+                <Upload className="w-10 h-10 text-secondary opacity-50" />
+                <p className="text-sm text-on-surface">Arrastrá tu archivo aquí o hacé click</p>
+                <p className="text-xs text-secondary">Soporta .xlsx y .xls</p>
+              </div>
+            )}
           </div>
+        )}
 
-          {/* Drop zone */}
-          {!isImporting && !result && (
-            <div
-              onDrop={handleDrop}
-              onDragOver={(e) => e.preventDefault()}
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-outline-variant rounded-lg p-8 text-center cursor-pointer hover:border-primary hover:bg-primary-container/5 transition-colors"
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".xlsx,.xls"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-              {file ? (
-                <div className="flex flex-col items-center gap-2">
-                  <FileSpreadsheet className="w-10 h-10 text-primary" />
-                  <p className="text-sm font-medium text-on-surface">{file.name}</p>
-                  <p className="text-xs text-secondary">{(file.size / 1024).toFixed(1)} KB</p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-2">
-                  <Upload className="w-10 h-10 text-secondary opacity-50" />
-                  <p className="text-sm text-on-surface">Arrastrá tu archivo aquí o hacé click</p>
-                  <p className="text-xs text-secondary">Soporta .xlsx y .xls</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Progress */}
-          {isImporting && (
-            <div className="space-y-3">
-              <div role="status" aria-live="polite" className="flex items-center gap-3 p-3 bg-primary-container/10 border border-primary/20 rounded-lg">
-                <Loader2 className="w-4 h-4 text-primary animate-spin shrink-0" aria-hidden="true" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-on-surface">
-                    {progress
-                      ? `Procesando fila ${progress.processed} de ${progress.total}`
-                      : 'Iniciando importación...'}
-                  </p>
-                  {progress && (
-                    <p className="text-xs text-secondary mt-0.5">
-                      {progress.imported} importados · {progress.errors_count} errores
-                    </p>
-                  )}
-                </div>
+        {/* Progress */}
+        {isImporting && (
+          <div className="space-y-3">
+            <div role="status" aria-live="polite" className="flex items-center gap-3 p-3 bg-primary-container/10 border border-primary/20 rounded-lg">
+              <Loader2 className="w-4 h-4 text-primary animate-spin shrink-0" aria-hidden="true" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-on-surface">
+                  {progress
+                    ? `Procesando fila ${progress.processed} de ${progress.total}`
+                    : 'Iniciando importación...'}
+                </p>
                 {progress && (
-                  <span className="text-sm font-semibold text-primary shrink-0">{progressPercent}%</span>
+                  <p className="text-xs text-secondary mt-0.5">
+                    {progress.imported} importados · {progress.errors_count} errores
+                  </p>
                 )}
               </div>
-              {progress?.total > 0 && (
-                <div
-                  role="progressbar"
-                  aria-label="Progreso de la importación"
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-valuenow={progressPercent}
-                  className="h-1.5 bg-surface-container-high rounded-full overflow-hidden"
-                >
-                  <div
-                    className="h-full bg-primary rounded-full transition-all duration-200"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-              )}
-              {jobId && (
-                <p className="text-xs text-on-surface-variant">
-                  Podés cerrar esta ventana: la importación sigue en el servidor y te avisamos al terminar.
-                </p>
+              {progress && (
+                <span className="text-sm font-semibold text-primary shrink-0">{progressPercent}%</span>
               )}
             </div>
-          )}
+            {progress?.total > 0 && (
+              <div
+                role="progressbar"
+                aria-label="Progreso de la importación"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={progressPercent}
+                className="h-1.5 bg-surface-container-high rounded-full overflow-hidden"
+              >
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-200"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            )}
+            {jobId && (
+              <p className="text-xs text-on-surface-variant">
+                Podés cerrar esta ventana: la importación sigue en el servidor y te avisamos al terminar.
+              </p>
+            )}
+          </div>
+        )}
 
-          {/* Result */}
-          {result && <ProductImportResult result={result} />}
-        </div>
-
-        {/* Footer */}
-        <div className="flex justify-end gap-3 p-6 pt-0">
-          <button
-            type="button"
-            onClick={handleClose}
-            disabled={isUploading}
-            className="px-4 py-2 text-sm bg-surface-container-high border border-outline-variant text-on-surface rounded-lg hover:brightness-110 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {result || isImporting ? 'Cerrar' : 'Cancelar'}
-          </button>
-          {!result && !isImporting && (
-            <button
-              onClick={handleImport}
-              disabled={!file}
-              className="flex items-center gap-2 px-4 py-2 text-sm bg-primary-container text-on-primary rounded-lg font-medium hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <Upload className="w-4 h-4" />
-              Importar
-            </button>
-          )}
-        </div>
+        {/* Result */}
+        {result && <ProductImportResult result={result} />}
       </div>
-    </div>,
-    document.body,
+
+      {/* Footer */}
+      <div className="flex justify-end gap-3 p-6 pt-0">
+        <button
+          type="button"
+          onClick={handleClose}
+          disabled={isUploading}
+          className="px-4 py-2 text-sm bg-surface-container-high border border-outline-variant text-on-surface rounded-lg hover:brightness-110 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {result || isImporting ? 'Cerrar' : 'Cancelar'}
+        </button>
+        {!result && !isImporting && (
+          <button
+            onClick={handleImport}
+            disabled={!file}
+            className="flex items-center gap-2 px-4 py-2 text-sm bg-primary-container text-on-primary rounded-lg font-medium hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <Upload className="w-4 h-4" />
+            Importar
+          </button>
+        )}
+      </div>
+    </Dialog>
   );
 };
 

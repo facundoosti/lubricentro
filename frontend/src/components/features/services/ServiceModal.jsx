@@ -1,5 +1,5 @@
 import { Wrench } from 'lucide-react';
-import FormDialog from '@ui/FormDialog';
+import Dialog from '@ui/Dialog';
 import ServiceForm from '@components/features/services/ServiceForm';
 import { useCreateService, useUpdateService } from '@services/servicesService';
 import { showServiceSuccess, showServiceError, parseApiError } from '@services/notificationService';
@@ -31,7 +31,7 @@ const ServiceModal = ({ isOpen, onClose, service = null, onSuccess }) => {
   };
 
   return (
-    <FormDialog
+    <Dialog
       isOpen={isOpen}
       onClose={onClose}
       title={isEditing ? 'Editar Servicio' : 'Nuevo Servicio'}
@@ -42,7 +42,7 @@ const ServiceModal = ({ isOpen, onClose, service = null, onSuccess }) => {
       isLoading={isLoading}
     >
       <ServiceForm service={service} onSubmit={handleSubmit} loading={isLoading} formId={FORM_ID} />
-    </FormDialog>
+    </Dialog>
   );
 };
 

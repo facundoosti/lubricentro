@@ -33,6 +33,29 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 })
 
+// Polyfills mínimos para Base UI (shadcn) en jsdom: animaciones, scroll de listas y pointer capture.
+// Los tests prueban comportamiento (rol, foco, Escape), no animaciones.
+if (!Element.prototype.getAnimations) {
+  Element.prototype.getAnimations = () => []
+}
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => {}
+}
+if (!Element.prototype.hasPointerCapture) {
+  Element.prototype.hasPointerCapture = () => false
+  Element.prototype.setPointerCapture = () => {}
+  Element.prototype.releasePointerCapture = () => {}
+}
+if (!globalThis.PointerEvent) {
+  globalThis.PointerEvent = class PointerEvent extends MouseEvent {
+    constructor(type, init = {}) {
+      super(type, init)
+      this.pointerId = init.pointerId ?? 1
+      this.pointerType = init.pointerType ?? 'mouse'
+    }
+  }
+}
+
 // Mock de console.error para evitar warnings en tests
 const originalError = console.error
 beforeAll(() => {

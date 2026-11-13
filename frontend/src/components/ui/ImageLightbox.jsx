@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { createPortal } from "react-dom";
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
-import { useDialogLayer } from "@hooks/useDialogLayer";
+import Dialog from "@ui/Dialog";
 
 const ZOOM_SCALE = 2.5;
 
@@ -36,27 +35,11 @@ const ImageLightbox = ({ images = [], index, onClose, onIndexChange }) => {
     [hasMany, index, total, onIndexChange],
   );
 
-  // Pila de diálogos, Escape, foco (inicial en Cerrar, trampa de Tab y retorno), inert y scroll lock
-  const { panelRef, zIndex, isTop } = useDialogLayer({ isOpen, onClose, initialFocusRef: closeBtnRef });
-
-  // ← / → navegan (solo si el visor es el diálogo de arriba)
-  useEffect(() => {
-    if (!isOpen || !isTop) return undefined;
-    const onKey = (e) => {
-      if (e.key === "ArrowLeft") go(-1);
-      else if (e.key === "ArrowRight") go(1);
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [isOpen, isTop, go]);
-
   // Mantener visible la miniatura activa
   useEffect(() => {
     const active = thumbsRef.current?.querySelector('[aria-current="true"]');
     active?.scrollIntoView?.({ block: "nearest", inline: "center", behavior: "smooth" });
   }, [index]);
-
-  if (!isOpen) return null;
 
   const current = images[index];
 
@@ -94,19 +77,30 @@ const ImageLightbox = ({ images = [], index, onClose, onIndexChange }) => {
     onClose();
   };
 
+  // ← / → navegan. El teclado llega al panel solo si el visor es el diálogo de arriba (el foco está
+  // atrapado en el de arriba).
+  const handleKeyDown = (e) => {
+    if (e.key === "ArrowLeft") go(-1);
+    else if (e.key === "ArrowRight") go(1);
+  };
+
   const iconBtn =
     "flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60";
 
-  return createPortal(
-    <div
-      ref={panelRef}
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Imagen de ${current.title || current.alt || "producto"}`}
-      tabIndex={-1}
-      className="fixed inset-0 flex flex-col bg-black/90 backdrop-blur-sm outline-none"
-      style={{ zIndex }}
+  if (!isOpen) return null;
+
+  // Pila de diálogos, Escape, foco (inicial en Cerrar, trampa de Tab y retorno) y scroll lock: Dialog.
+  return (
+    <Dialog
+      isOpen
+      onClose={onClose}
+      size="full"
+      bare
+      ariaLabel={`Imagen de ${current.title || current.alt || "producto"}`}
+      initialFocus={closeBtnRef}
       onClick={handleOverlayClick}
+      onKeyDown={handleKeyDown}
+      className="flex flex-col rounded-none bg-black/90 text-white backdrop-blur-sm"
     >
       {/* Barra superior */}
       <div className="flex items-center justify-between gap-4 px-6 py-4 text-white">
@@ -192,8 +186,7 @@ const ImageLightbox = ({ images = [], index, onClose, onIndexChange }) => {
       ) : (
         <div className="h-6" />
       )}
-    </div>,
-    document.body,
+    </Dialog>
   );
 };
 

@@ -137,6 +137,27 @@ Sistema semántico oscuro (dark-only). Todos los valores viven en `index.css` co
 | `--color-success-500` | `#12b76a` | Éxito (complementa tertiary) |
 | `--color-warning-500` | `#f79009` | Advertencias |
 
+### Alias para shadcn/ui (Base UI)
+
+Las primitivas de shadcn (`src/components/ui/primitives/`) usan nombres propios. En `index.css` hay un bloque
+`@theme inline` que los apunta con `var()` a los tokens MD3, así que cambian solos con el tema (claro/oscuro).
+**No se renombró ni cambió ningún token existente.** En código de la app seguí usando los tokens MD3.
+
+| Alias shadcn | Token MD3 |
+|---|---|
+| `--color-foreground` | `--color-on-surface` (`--color-background` ya existía) |
+| `--color-popover` / `--color-popover-foreground` | `--color-surface-container-highest` / `--color-on-surface` |
+| `--color-card` / `--color-card-foreground` | `--color-surface-container` / `--color-on-surface` |
+| `--color-muted` / `--color-muted-foreground` | `--color-surface-container-high` / `--color-on-surface-variant` |
+| `--color-accent` / `--color-accent-foreground` | `--color-surface-container-high` / `--color-on-surface` |
+| `--color-primary-foreground` | `--color-on-primary` |
+| `--color-destructive` | `--color-error` |
+| `--color-border` / `--color-input` | `--color-outline-variant` |
+| `--color-ring` | `--color-primary` |
+
+⚠️ `--color-primary` y `--color-secondary` **no se aliasan**: ya existen con significado MD3 (violeta y gris de
+placeholders). Las primitivas copiadas se ajustan a mano (ej. CTA = `bg-primary-container text-on-primary`).
+
 ---
 
 ## Border Radius
@@ -315,4 +336,4 @@ focus: border-primary ring-primary/20
 - [ ] `Card` — tarjeta estándar con dark tokens
 - [ ] `Table` — header/row/cell con nuevo sistema
 - [ ] `Input` / `SearchBar` — estilo dark
-- [ ] `Modal` — overlay dark con `bg-surface-container-highest`
+- [x] `Dialog` / `ConfirmDialog` / `Combobox` / `Select` — sobre shadcn/ui + Base UI (`@ui`), con el look de los anteriores

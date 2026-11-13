@@ -2,19 +2,19 @@ import { screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { renderWithProviders } from '@/test/utils';
 import ProductSearchInput from '@components/features/products/ProductSearchInput';
-import Modal from '@ui/Modal';
+import Dialog from '@ui/Dialog';
 
 vi.mock('@services/productsService', () => ({
   useProducts: () => ({ data: null, isLoading: true }),
 }));
 
 describe('ProductSearchInput — Escape', () => {
-  it('dentro de un Modal, Escape con la lista abierta cierra solo la lista; con la lista cerrada cierra el Modal', () => {
+  it('dentro de un Dialog, Escape con la lista abierta cierra solo la lista; con la lista cerrada cierra el Dialog', () => {
     const close = vi.fn();
     renderWithProviders(
-      <Modal isOpen onClose={close} title="Precios">
+      <Dialog isOpen onClose={close} title="Precios" closeOnBackdrop={false}>
         <ProductSearchInput onChange={vi.fn()} onSelect={vi.fn()} />
-      </Modal>,
+      </Dialog>,
     );
     const input = screen.getByPlaceholderText('Buscar producto...');
     fireEvent.change(input, { target: { value: 'ace' } });

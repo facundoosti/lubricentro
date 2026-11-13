@@ -1,5 +1,6 @@
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
 import ProductForm from '@components/features/products/ProductForm';
 
@@ -78,5 +79,33 @@ describe('ProductForm — nombre', () => {
 
     expect(await screen.findByText('El nombre no puede exceder 500 caracteres')).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
+  });
+});
+
+describe('ProductForm — Categoría (Combobox)', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    const { useCategories } = await import('@services/categoriesService');
+    useCategories.mockReturnValue({
+      data: { data: { categories: [{ id: 1, name: 'Aceites', parent_id: null }, { id: 2, name: 'Filtros', parent_id: null }] } },
+    });
+  });
+
+  it('escribir "Filt" busca en el backend y elegir "Filtros" envía su id', async () => {
+    const { useCategories } = await import('@services/categoriesService');
+    const user = userEvent.setup();
+    const onSubmit = vi.fn().mockResolvedValue();
+    renderWithProviders(<ProductForm onSubmit={onSubmit} />);
+    await user.click(screen.getByRole('combobox', { name: 'Categoría' }));
+    await user.type(await screen.findByRole('combobox', { name: 'Buscar' }), 'Filt');
+    await waitFor(() => expect(useCategories).toHaveBeenLastCalledWith('Filt'));
+    await user.click(screen.getByRole('option', { name: 'Filtros' }));
+    expect(screen.getByRole('combobox', { name: 'Categoría' })).toHaveTextContent('Filtros');
+
+    fireEvent.change(screen.getByLabelText(/Nombre del Producto/), { target: { value: 'Filtro de aceite' } });
+    fireEvent.change(screen.getByLabelText(/Precio sin IVA/), { target: { value: '1000' } });
+    submitForm();
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    expect(onSubmit.mock.calls[0][0]).toMatchObject({ category_id: '2' });
   });
 });

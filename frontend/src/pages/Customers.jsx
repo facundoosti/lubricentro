@@ -5,7 +5,7 @@ import PageHeader from '@ui/PageHeader';
 import PageError from '@ui/PageError';
 import CustomersTable from '@components/features/customers/CustomersTable';
 import CustomerModal from '@components/features/customers/CustomerModal';
-import ConfirmModal from '@ui/ConfirmModal';
+import ConfirmDialog from '@ui/ConfirmDialog';
 import CustomerCreatedDialog from '@components/features/customers/CustomerCreatedDialog';
 import {
   useCustomers,
@@ -102,7 +102,7 @@ const Customers = () => {
 
       <CustomerCreatedDialog customer={createdCustomer} onClose={() => setCreatedCustomer(null)} />
 
-      <ConfirmModal
+      <ConfirmDialog
         isOpen={isDeleteModalOpen}
         onClose={handleDeleteModalClose}
         onConfirm={handleDeleteConfirm}
