@@ -47,4 +47,3 @@ Detectados el 2026-11-13 al cerrar `shadcn-base-ui-fase-2` (commit `225681c`, ar
 
 > Resueltos el 2026-11-13: borrado de `ServiceRecordForm`, CSS de checkbox nativo y warning de `buttonVariants` (`docs/fixes/2026-11-13-limpieza-post-shadcn-fase-2.md`); Calendar con `lazy()`, filtro de Recordatorios con fecha inválida, test de la regla anti-nativos y contraste del warning (`docs/fixes/2026-11-13-pendientes-frontend-fase-2.md`).
 
-- [ ] Migrar `CustomerSearchInput` (~300 líneas, con alta rápida de cliente) y `ProductSearchInput` a Autocomplete de Base UI. Hoy funcionan con portal propio en el diálogo; es un change propio (OpenSpec).

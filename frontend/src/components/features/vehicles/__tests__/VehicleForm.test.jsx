@@ -167,8 +167,8 @@ describe('VehicleForm', () => {
     await user.click(await screen.findByRole('option', { name: '1986' }));
     await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
 
-    fireEvent.change(screen.getByPlaceholderText(/cliente/), { target: { value: 'Carlos Ruiz' } });
-    fireEvent.click(await screen.findByRole('button', { name: /Crear cliente "Carlos Ruiz"/ }));
+    await user.type(screen.getByPlaceholderText(/cliente/), 'Carlos Ruiz');
+    await user.click(await screen.findByRole('option', { name: /Crear cliente "Carlos Ruiz"/ }));
 
     expect(await screen.findByRole('dialog', { name: 'Nuevo Cliente' })).toBeInTheDocument();
     expect(screen.getByLabelText(/Nombre completo/)).toHaveValue('Carlos Ruiz');

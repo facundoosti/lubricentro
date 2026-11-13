@@ -24,6 +24,16 @@ describe('inputs de búsqueda', () => {
     expect(searchInputsWithoutAutocompleteOff()).toEqual([]);
   });
 
+  it('los inputs de las primitivas de búsqueda (Combobox/Autocomplete de Base UI) traen autoComplete="off"', () => {
+    const offenders = Object.entries(sources).flatMap(([file, code]) =>
+      (code.match(/<(?:Combobox|Autocomplete)Primitive\.Input\b[\s\S]*?\/>/g) || [])
+        .filter((tag) => !/autoComplete="off"/.test(tag))
+        .map(() => file),
+    );
+    expect(offenders).toEqual([]);
+    expect(sources['/src/components/ui/primitives/autocomplete.jsx']).toMatch(/AutocompletePrimitive\.Input[\s\S]*?autoComplete="off"/);
+  });
+
   it('no dicen "email" en el placeholder (Chromium los toma como campo de email)', () => {
     const offenders = Object.entries(sources).flatMap(([file, code]) =>
       (code.match(/placeholder\s*=\s*\{?\s*["'][^"']*Buscar[^"']*["']/g) || [])

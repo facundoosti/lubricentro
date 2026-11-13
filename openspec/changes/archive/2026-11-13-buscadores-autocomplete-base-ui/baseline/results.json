@@ -1,0 +1,396 @@
+[
+  {
+    "id": "TC-01",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "input": [
+        {
+          "w": 718,
+          "h": 44,
+          "x": 361,
+          "y": 232,
+          "bg": "rgb(24, 24, 27)",
+          "border": "rgba(0, 0, 0, 0)",
+          "radius": "8px",
+          "font": "14px/400",
+          "pad": "0px 64px 0px 40px"
+        }
+      ],
+      "list": [
+        {
+          "w": 718,
+          "h": 240,
+          "x": 361,
+          "y": 261,
+          "bg": "rgb(18, 18, 21)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "16px/400",
+          "pad": "0px"
+        }
+      ],
+      "option": [
+        {
+          "w": 716,
+          "h": 60,
+          "x": 362,
+          "y": 262,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "0px",
+          "font": "16px/400",
+          "pad": "8px 16px"
+        },
+        {
+          "w": 716,
+          "h": 60,
+          "x": 362,
+          "y": 322,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "0px",
+          "font": "16px/400",
+          "pad": "8px 16px"
+        },
+        {
+          "w": 716,
+          "h": 60,
+          "x": 362,
+          "y": 382,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "0px",
+          "font": "16px/400",
+          "pad": "8px 16px"
+        },
+        {
+          "w": 716,
+          "h": 60,
+          "x": 362,
+          "y": 442,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "0px",
+          "font": "16px/400",
+          "pad": "8px 16px"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/buscadores-autocomplete-base-ui/baseline/TC-01-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-01",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "input": [
+        {
+          "w": 718,
+          "h": 44,
+          "x": 361,
+          "y": 232,
+          "bg": "rgb(250, 250, 250)",
+          "border": "rgba(0, 0, 0, 0)",
+          "radius": "8px",
+          "font": "14px/400",
+          "pad": "0px 64px 0px 40px"
+        }
+      ],
+      "list": [
+        {
+          "w": 718,
+          "h": 240,
+          "x": 361,
+          "y": 261,
+          "bg": "rgb(255, 255, 255)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "16px/400",
+          "pad": "0px"
+        }
+      ],
+      "option": [
+        {
+          "w": 716,
+          "h": 60,
+          "x": 362,
+          "y": 262,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "0px",
+          "font": "16px/400",
+          "pad": "8px 16px"
+        },
+        {
+          "w": 716,
+          "h": 60,
+          "x": 362,
+          "y": 322,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "0px",
+          "font": "16px/400",
+          "pad": "8px 16px"
+        },
+        {
+          "w": 716,
+          "h": 60,
+          "x": 362,
+          "y": 382,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "0px",
+          "font": "16px/400",
+          "pad": "8px 16px"
+        },
+        {
+          "w": 716,
+          "h": 60,
+          "x": 362,
+          "y": 442,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "0px",
+          "font": "16px/400",
+          "pad": "8px 16px"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/buscadores-autocomplete-base-ui/baseline/TC-01-desktop-light.jpg"
+  },
+  {
+    "id": "TC-02",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "input": [
+        {
+          "w": 718,
+          "h": 44,
+          "x": 361,
+          "y": 507,
+          "bg": "rgb(24, 24, 27)",
+          "border": "rgba(0, 0, 0, 0)",
+          "radius": "8px",
+          "font": "14px/400",
+          "pad": "0px 64px 0px 40px"
+        }
+      ],
+      "list": [
+        {
+          "w": 718,
+          "h": 79,
+          "x": 361,
+          "y": 536,
+          "bg": "rgb(18, 18, 21)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "8px",
+          "font": "16px/400",
+          "pad": "0px"
+        }
+      ],
+      "create": [
+        {
+          "w": 716,
+          "h": 41,
+          "x": 362,
+          "y": 573,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "0px",
+          "font": "14px/500",
+          "pad": "10px 16px"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/buscadores-autocomplete-base-ui/baseline/TC-02-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-02",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "input": [
+        {
+          "w": 718,
+          "h": 44,
+          "x": 361,
+          "y": 507,
+          "bg": "rgb(250, 250, 250)",
+          "border": "rgba(0, 0, 0, 0)",
+          "radius": "8px",
+          "font": "14px/400",
+          "pad": "0px 64px 0px 40px"
+        }
+      ],
+      "list": [
+        {
+          "w": 718,
+          "h": 79,
+          "x": 361,
+          "y": 536,
+          "bg": "rgb(255, 255, 255)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "8px",
+          "font": "16px/400",
+          "pad": "0px"
+        }
+      ],
+      "create": [
+        {
+          "w": 716,
+          "h": 41,
+          "x": 362,
+          "y": 573,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "0px",
+          "font": "14px/500",
+          "pad": "10px 16px"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/buscadores-autocomplete-base-ui/baseline/TC-02-desktop-light.jpg"
+  },
+  {
+    "id": "TC-03",
+    "combo": "desktop-dark",
+    "status": "pass",
+    "facts": {
+      "input": [
+        {
+          "w": 622,
+          "h": 38,
+          "x": 409,
+          "y": 393,
+          "bg": "rgb(24, 24, 27)",
+          "border": "rgba(0, 0, 0, 0)",
+          "radius": "8px",
+          "font": "14px/400",
+          "pad": "8px 32px 8px 36px"
+        }
+      ],
+      "option": [
+        {
+          "w": 620,
+          "h": 59,
+          "x": 410,
+          "y": 436,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "0px",
+          "font": "16px/400",
+          "pad": "10px 12px"
+        },
+        {
+          "w": 620,
+          "h": 59,
+          "x": 410,
+          "y": 495,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "0px",
+          "font": "16px/400",
+          "pad": "10px 12px"
+        },
+        {
+          "w": 620,
+          "h": 59,
+          "x": 410,
+          "y": 554,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "0px",
+          "font": "16px/400",
+          "pad": "10px 12px"
+        },
+        {
+          "w": 620,
+          "h": 59,
+          "x": 410,
+          "y": 613,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(39, 39, 42)",
+          "radius": "0px",
+          "font": "16px/400",
+          "pad": "10px 12px"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/buscadores-autocomplete-base-ui/baseline/TC-03-desktop-dark.jpg"
+  },
+  {
+    "id": "TC-03",
+    "combo": "desktop-light",
+    "status": "pass",
+    "facts": {
+      "input": [
+        {
+          "w": 622,
+          "h": 38,
+          "x": 409,
+          "y": 393,
+          "bg": "rgb(250, 250, 250)",
+          "border": "rgba(0, 0, 0, 0)",
+          "radius": "8px",
+          "font": "14px/400",
+          "pad": "8px 32px 8px 36px"
+        }
+      ],
+      "option": [
+        {
+          "w": 620,
+          "h": 59,
+          "x": 410,
+          "y": 436,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "0px",
+          "font": "16px/400",
+          "pad": "10px 12px"
+        },
+        {
+          "w": 620,
+          "h": 59,
+          "x": 410,
+          "y": 495,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "0px",
+          "font": "16px/400",
+          "pad": "10px 12px"
+        },
+        {
+          "w": 620,
+          "h": 59,
+          "x": 410,
+          "y": 554,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "0px",
+          "font": "16px/400",
+          "pad": "10px 12px"
+        },
+        {
+          "w": 620,
+          "h": 59,
+          "x": 410,
+          "y": 613,
+          "bg": "rgba(0, 0, 0, 0)",
+          "border": "rgb(228, 228, 231)",
+          "radius": "0px",
+          "font": "16px/400",
+          "pad": "10px 12px"
+        }
+      ]
+    },
+    "failures": [],
+    "evidence": "openspec/changes/buscadores-autocomplete-base-ui/baseline/TC-03-desktop-light.jpg"
+  }
+]

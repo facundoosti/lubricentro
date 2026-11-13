@@ -1,4 +1,4 @@
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderWithProviders } from '@/test/utils';
@@ -7,238 +7,224 @@ import Dialog from '@ui/Dialog';
 import { useCustomers, useCustomer } from '@services/customersService';
 
 vi.mock('@services/customersService', () => ({
-  useCustomers: vi.fn(() => ({ data: { data: { customers: [] } }, isLoading: false })),
+  useCustomers: vi.fn(),
   useCustomer: vi.fn(() => ({ data: undefined, isLoading: false })),
 }));
 
-describe('CustomerSearchInput — crear cliente', () => {
+const ANA = { id: 1, name: 'Ana Pérez', email: 'ana@mail.com' };
+const ANA_G = { id: 3, name: 'Ana Gómez', phone: '1144440000' };
+
+// Devuelve resultados solo cuando se buscó algo (como el backend real)
+const mockResults = (customers) => {
+  useCustomers.mockImplementation(({ search }) => ({
+    data: search ? { data: { customers } } : undefined,
+    isLoading: false,
+  }));
+};
+
+const input = () => screen.getByRole('combobox', { name: '' });
+
+const typeAndWait = async (user, text) => {
+  await user.type(input(), text);
+  await screen.findByRole('listbox');
+};
+
+describe('CustomerSearchInput', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    useCustomers.mockReturnValue({ data: { data: { customers: [] } }, isLoading: false });
+    mockResults([]);
+    useCustomer.mockReturnValue({ data: undefined, isLoading: false });
   });
 
-  it('ofrece crear un cliente con el texto buscado', async () => {
-    const onCreateNew = vi.fn();
-    renderWithProviders(<CustomerSearchInput value="" onCreateNew={onCreateNew} />);
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Carlos Ruiz' } });
-
-    const option = await screen.findByRole('button', { name: /Crear cliente "Carlos Ruiz"/ });
-    fireEvent.click(option);
-    expect(onCreateNew).toHaveBeenCalledWith('Carlos Ruiz');
+  it('↓↓ Enter elige el segundo cliente, muestra "<nombre> - <contacto>" y cierra la lista', async () => {
+    mockResults([ANA, ANA_G]);
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const onSelect = vi.fn();
+    renderWithProviders(<CustomerSearchInput value="" onChange={onChange} onSelect={onSelect} />);
+    await user.type(input(), 'Ana');
+    await screen.findByRole('option', { name: /Ana Gómez/ });
+    await user.keyboard('{ArrowDown}{ArrowDown}{Enter}');
+    expect(onSelect).toHaveBeenCalledWith(ANA_G);
+    expect(onChange).toHaveBeenCalledWith(3);
+    expect(input()).toHaveValue('Ana Gómez - 1144440000');
+    await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
   });
 
-  it('no ofrece crear sin la prop onCreateNew', () => {
+  it('click en una opción elige el cliente', async () => {
+    mockResults([ANA_G]);
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+    renderWithProviders(<CustomerSearchInput value="" onSelect={onSelect} />);
+    await user.type(input(), 'Ana');
+    await user.click(await screen.findByRole('option', { name: /Ana Gómez/ }));
+    expect(onSelect).toHaveBeenCalledWith(ANA_G);
+    expect(input()).toHaveValue('Ana Gómez - 1144440000');
+  });
+
+  it('sin resultados muestra "No se encontraron clientes"', async () => {
+    const user = userEvent.setup();
     renderWithProviders(<CustomerSearchInput value="" />);
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Carlos' } });
-    expect(screen.queryByText(/Crear cliente/)).not.toBeInTheDocument();
+    await typeAndWait(user, 'Zzz');
+    expect(await screen.findByText('No se encontraron clientes')).toBeInTheDocument();
   });
 
-  it('muestra los resultados y también la opción de crear', async () => {
-    useCustomers.mockReturnValue({
-      data: { data: { customers: [{ id: 1, name: 'Carlos Ruiz', phone: '1155551234' }] } },
-      isLoading: false,
-    });
-    renderWithProviders(<CustomerSearchInput value="" onCreateNew={vi.fn()} />);
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Carlos' } });
-    await waitFor(() => expect(screen.getByText('1155551234')).toBeInTheDocument());
-    expect(screen.getByRole('button', { name: /Crear cliente "Carlos"/ })).toBeInTheDocument();
+  it('antes de buscar muestra "Escribe para buscar"', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<CustomerSearchInput value="" />);
+    await user.click(input());
+    expect(await screen.findByText('Escribe para buscar')).toBeInTheDocument();
   });
 
-  it('sin resultados, flecha abajo + Enter elige "+ Crear cliente"', async () => {
+  it('limpiar deja el campo vacío y avisa con "" / null', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const onSelect = vi.fn();
+    renderWithProviders(<CustomerSearchInput value="1" initialCustomer={ANA} onChange={onChange} onSelect={onSelect} />);
+    expect(input()).toHaveValue('Ana Pérez - ana@mail.com');
+    expect(input().className).toMatch(/\bborder-tertiary\b/);
+    expect(input().className).toMatch(/\bpr-16\b/);
+    await user.click(screen.getByRole('button', { name: 'Limpiar selección' }));
+    expect(onChange).toHaveBeenCalledWith('');
+    expect(onSelect).toHaveBeenCalledWith(null);
+    expect(input()).toHaveValue('');
+  });
+
+  it('"+ Crear cliente" con ↓ Enter cuando no hay resultados', async () => {
+    const user = userEvent.setup();
     const onCreateNew = vi.fn();
     renderWithProviders(<CustomerSearchInput value="" onCreateNew={onCreateNew} />);
-    const input = screen.getByRole('textbox');
-    fireEvent.change(input, { target: { value: 'Carlos Ruiz' } });
-    await screen.findByRole('button', { name: /Crear cliente "Carlos Ruiz"/ });
-
-    fireEvent.keyDown(input, { key: 'ArrowDown' });
-    fireEvent.keyDown(input, { key: 'Enter' });
+    await user.type(input(), 'Carlos Ruiz');
+    await screen.findByRole('option', { name: /Crear cliente "Carlos Ruiz"/ });
+    await user.keyboard('{ArrowDown}{Enter}');
     expect(onCreateNew).toHaveBeenCalledWith('Carlos Ruiz');
   });
 
-  it('con resultados, "+ Crear cliente" es la opción después del último cliente', async () => {
-    useCustomers.mockReturnValue({
-      data: { data: { customers: [{ id: 1, name: 'Carlos Ruiz', phone: '1155551234' }] } },
-      isLoading: false,
-    });
+  it('"+ Crear cliente" va después del último cliente', async () => {
+    mockResults([ANA]);
+    const user = userEvent.setup();
     const onCreateNew = vi.fn();
     const onSelect = vi.fn();
     renderWithProviders(<CustomerSearchInput value="" onCreateNew={onCreateNew} onSelect={onSelect} />);
-    const input = screen.getByRole('textbox');
-    fireEvent.change(input, { target: { value: 'Carlos' } });
-    await waitFor(() => expect(screen.getByText('1155551234')).toBeInTheDocument());
-
-    fireEvent.keyDown(input, { key: 'ArrowDown' });
-    fireEvent.keyDown(input, { key: 'ArrowDown' });
-    fireEvent.keyDown(input, { key: 'ArrowDown' }); // no pasa de la última opción
-    fireEvent.keyDown(input, { key: 'Enter' });
-    expect(onCreateNew).toHaveBeenCalledWith('Carlos');
+    await user.type(input(), 'Ana');
+    await screen.findByRole('option', { name: /Ana Pérez/ });
+    const options = screen.getAllByRole('option');
+    expect(options.at(-1)).toHaveTextContent('+ Crear cliente "Ana"');
+    await user.keyboard('{ArrowDown}{ArrowDown}{Enter}');
+    expect(onCreateNew).toHaveBeenCalledWith('Ana');
     expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it('no ofrece crear sin la prop onCreateNew', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<CustomerSearchInput value="" />);
+    await typeAndWait(user, 'Carlos');
+    expect(screen.queryByText(/Crear cliente/)).not.toBeInTheDocument();
   });
 
   it('carga el cliente por id (respuesta de /customers/:id con el cliente en data)', async () => {
     useCustomer.mockReturnValue({ data: { data: { id: 7, name: 'Juan Pérez', phone: '1155551234' } }, isLoading: false });
     renderWithProviders(<CustomerSearchInput value="7" />);
-    await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue('Juan Pérez - 1155551234'));
+    await waitFor(() => expect(input()).toHaveValue('Juan Pérez - 1155551234'));
   });
-});
 
-describe('CustomerSearchInput — botón de limpiar', () => {
-  it('deja lugar para la X y la flecha cuando hay texto (el texto no queda debajo)', () => {
+  it('muestra "Cliente no encontrado" si el id no existe', async () => {
+    useCustomer.mockReturnValue({ data: undefined, isLoading: false });
+    renderWithProviders(<CustomerSearchInput value="99" />);
+    await waitFor(() => expect(input()).toHaveValue('Cliente no encontrado'));
+  });
+
+  it('Escape con la lista cerrada no borra el cliente elegido', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const onSelect = vi.fn();
+    renderWithProviders(<CustomerSearchInput value="1" initialCustomer={ANA} onChange={onChange} onSelect={onSelect} />);
+    input().focus();
+    await user.keyboard('{Escape}');
+    expect(onChange).not.toHaveBeenCalled();
+    expect(onSelect).not.toHaveBeenCalled();
+    expect(input()).toHaveValue('Ana Pérez - ana@mail.com');
+  });
+
+  it('al reabrir después de elegir muestra "Escribe para buscar" (no "No se encontraron")', async () => {
+    mockResults([ANA_G]);
+    const user = userEvent.setup();
     renderWithProviders(<CustomerSearchInput value="" />);
-    const input = screen.getByRole('textbox');
-    expect(input.className).toMatch(/\bpr-10\b/);
-    fireEvent.change(input, { target: { value: 'Carlos' } });
-    expect(screen.getByRole('button', { name: 'Limpiar selección' })).toBeInTheDocument();
-    expect(input.className).toMatch(/\bpr-16\b/);
-    expect(input.className).not.toMatch(/\bpr-10\b/);
+    await user.type(input(), 'Ana');
+    await user.click(await screen.findByRole('option', { name: /Ana Gómez/ }));
+    await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+    await user.click(screen.getByRole('button', { name: 'Mostrar/ocultar opciones' }));
+    expect(await screen.findByText('Escribe para buscar')).toBeInTheDocument();
+    expect(screen.queryByText('No se encontraron clientes')).not.toBeInTheDocument();
+  });
+
+  it('editar el texto conserva la selección si contiene el nombre y deselecciona si no', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const onSelect = vi.fn();
+    renderWithProviders(<CustomerSearchInput value="1" initialCustomer={ANA} onChange={onChange} onSelect={onSelect} />);
+    await user.type(input(), 'x');
+    expect(onChange).not.toHaveBeenCalled();
+    expect(input().className).toMatch(/\bborder-tertiary\b/);
+    await user.clear(input());
+    await user.type(input(), 'Ana P');
+    expect(onChange).toHaveBeenCalledWith('');
+    expect(onSelect).toHaveBeenCalledWith(null);
+    expect(input().className).not.toMatch(/\bborder-tertiary\b/);
+  });
+
+  it('initialCustomer prellena sin pedir GET /customers/:id', () => {
+    renderWithProviders(<CustomerSearchInput value="1" initialCustomer={ANA} />);
+    expect(input()).toHaveValue('Ana Pérez - ana@mail.com');
+    expect(useCustomer).toHaveBeenCalledWith('1', { enabled: false });
+  });
+
+  it('el campo desactiva el autocompletado del navegador y muestra el error', () => {
+    renderWithProviders(<CustomerSearchInput value="" error="Requerido" />);
+    expect(input()).toHaveAttribute('autocomplete', 'off');
+    expect(input()).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByText('Requerido')).toBeInTheDocument();
   });
 });
 
-describe('CustomerSearchInput — Escape dentro de un diálogo', () => {
+describe('CustomerSearchInput — dentro de un Dialog', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    useCustomers.mockReturnValue({ data: { data: { customers: [] } }, isLoading: false });
+    mockResults([ANA_G]);
   });
 
-  it('con la lista abierta, Escape cierra solo la lista; con la lista cerrada, cierra el diálogo', () => {
+  it('la lista va al panel del diálogo y Escape cierra solo la lista', async () => {
+    const user = userEvent.setup();
     const close = vi.fn();
     renderWithProviders(
-      <Dialog isOpen onClose={close} title="Nuevo turno" formId="appointment-form">
+      <Dialog isOpen onClose={close} title="Nuevo Vehículo" formId="vehicle-form">
         <CustomerSearchInput value="" />
       </Dialog>,
     );
-    const input = screen.getByRole('textbox');
-    fireEvent.change(input, { target: { value: 'Carlos' } });
-    expect(screen.getByText('Escribe para buscar')).toBeInTheDocument();
-
-    fireEvent.keyDown(input, { key: 'Escape' });
-    expect(screen.queryByText('Escribe para buscar')).not.toBeInTheDocument();
+    await user.type(input(), 'Ana');
+    const listbox = await screen.findByRole('listbox');
+    expect(screen.getByRole('dialog', { name: 'Nuevo Vehículo' })).toContainElement(listbox);
+    await act(async () => { await user.keyboard('{Escape}'); });
+    await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
     expect(close).not.toHaveBeenCalled();
-
-    fireEvent.keyDown(input, { key: 'Escape' });
-    expect(close).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('CustomerSearchInput — lista en portal dentro del Dialog (no la recorta el cuerpo del diálogo)', () => {
-  const customer = { id: 3, name: 'Ana Gómez', phone: '1144440000' };
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    useCustomers.mockReturnValue({ data: { data: { customers: [customer] } }, isLoading: false });
   });
 
-  const openListInDialog = (props = {}, { stacked = false } = {}) => {
-    const close = vi.fn();
-    const closeBottom = vi.fn();
-    const content = (
-      <Dialog isOpen onClose={close} title="Nuevo Vehículo" formId="vehicle-form">
-        <CustomerSearchInput value="" {...props} />
-      </Dialog>
-    );
-    renderWithProviders(
-      stacked ? (
-        <Dialog isOpen onClose={closeBottom} title="Base" formId="base-form">{content}</Dialog>
-      ) : content,
-    );
-    const input = screen.getByRole('textbox');
-    fireEvent.change(input, { target: { value: 'Ana' } });
-    return { input, close, closeBottom };
-  };
-
-  it('renderiza la lista en el panel del diálogo (portal), con position fixed y z-index propio', () => {
-    openListInDialog();
-    const list = screen.getByTestId('customer-search-results');
-    expect(list.parentElement).toBe(screen.getByRole('dialog'));
-    expect(list.style.position).toBe('fixed');
-    expect(Number(list.style.zIndex)).toBeGreaterThan(0);
-  });
-
-  it('fuera de un diálogo la lista va a document.body', () => {
-    renderWithProviders(<CustomerSearchInput value="" />);
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Ana' } });
-    expect(screen.getByTestId('customer-search-results').parentElement).toBe(document.body);
-  });
-
-  it('en un diálogo apilado: click en una opción selecciona y Escape cierra solo la lista', () => {
-    const onSelect = vi.fn();
-    const { input, close, closeBottom } = openListInDialog({ onSelect }, { stacked: true });
-    const list = screen.getByTestId('customer-search-results');
-    expect(screen.getByRole('dialog', { name: 'Nuevo Vehículo' })).toContainElement(list);
-    fireEvent.click(screen.getByRole('button', { name: /Ana Gómez/ }));
-    expect(onSelect).toHaveBeenCalledWith(customer);
-
-    fireEvent.change(input, { target: { value: 'An' } });
-    fireEvent.keyDown(input, { key: 'Escape' });
-    expect(screen.queryByTestId('customer-search-results')).not.toBeInTheDocument();
-    expect(close).not.toHaveBeenCalled();
-    expect(closeBottom).not.toHaveBeenCalled();
-    expect(screen.getAllByRole('dialog', { hidden: true })).toHaveLength(2);
-  });
-
-  it('en un diálogo apilado la lista va al panel del de arriba y un click real (puntero) elige el cliente con ambos abiertos', async () => {
+  it('en un diálogo apilado, un click elige el cliente con ambos abiertos', async () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
-    const { close, closeBottom } = openListInDialog({ onSelect }, { stacked: true });
-    const list = screen.getByTestId('customer-search-results');
-    expect(list.parentElement).toBe(screen.getByRole('dialog', { name: 'Nuevo Vehículo' }));
-    await user.click(screen.getByRole('button', { name: /Ana Gómez/ }));
-    expect(onSelect).toHaveBeenCalledWith(customer);
+    const close = vi.fn();
+    const closeBottom = vi.fn();
+    renderWithProviders(
+      <Dialog isOpen onClose={closeBottom} title="Base" formId="base-form">
+        <Dialog isOpen onClose={close} title="Nuevo Vehículo" formId="vehicle-form">
+          <CustomerSearchInput value="" onSelect={onSelect} />
+        </Dialog>
+      </Dialog>,
+    );
+    await user.type(input(), 'Ana');
+    await user.click(await screen.findByRole('option', { name: /Ana Gómez/ }));
+    expect(onSelect).toHaveBeenCalledWith(ANA_G);
     expect(close).not.toHaveBeenCalled();
     expect(closeBottom).not.toHaveBeenCalled();
-    expect(screen.getByRole('dialog', { name: 'Nuevo Vehículo' })).toBeInTheDocument();
-    expect(screen.getByRole('dialog', { name: 'Base', hidden: true })).toBeInTheDocument();
-  });
-
-  it('click en una opción selecciona el cliente (el mousedown en la lista no la cierra antes)', () => {
-    const onSelect = vi.fn();
-    const onChange = vi.fn();
-    const { input } = openListInDialog({ onSelect, onChange });
-    const option = screen.getByRole('button', { name: /Ana Gómez/ });
-
-    fireEvent.mouseDown(option);
-    expect(screen.getByTestId('customer-search-results')).toBeInTheDocument();
-
-    fireEvent.click(option);
-    expect(onSelect).toHaveBeenCalledWith(customer);
-    expect(onChange).toHaveBeenCalledWith(3);
-    expect(input).toHaveValue('Ana Gómez - 1144440000');
-    expect(screen.queryByTestId('customer-search-results')).not.toBeInTheDocument();
-  });
-
-  it('click afuera de input y lista cierra la lista', () => {
-    openListInDialog();
-    fireEvent.mouseDown(screen.getByRole('heading', { name: 'Nuevo Vehículo' }));
-    expect(screen.queryByTestId('customer-search-results')).not.toBeInTheDocument();
-  });
-
-  it('navegación con teclado + Enter selecciona desde la lista en portal', () => {
-    const onSelect = vi.fn();
-    const { input } = openListInDialog({ onSelect });
-    fireEvent.keyDown(input, { key: 'ArrowDown' });
-    fireEvent.keyDown(input, { key: 'Enter' });
-    expect(onSelect).toHaveBeenCalledWith(customer);
-  });
-
-  it('Escape cierra solo la lista, no el diálogo', () => {
-    const { input, close } = openListInDialog();
-    fireEvent.keyDown(input, { key: 'Escape' });
-    expect(screen.queryByTestId('customer-search-results')).not.toBeInTheDocument();
-    expect(close).not.toHaveBeenCalled();
-  });
-
-  it('abre hacia arriba si abajo no hay lugar para la lista', () => {
-    const rectSpy = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
-      top: window.innerHeight - 60, bottom: window.innerHeight - 16, left: 100, right: 500,
-      width: 400, height: 44, x: 100, y: window.innerHeight - 60,
-    });
-    openListInDialog();
-    const list = screen.getByTestId('customer-search-results');
-    expect(list.style.top).toBe('');
-    expect(list.style.bottom).toBe('64px');
-    expect(list.style.left).toBe('100px');
-    expect(list.style.width).toBe('400px');
-    rectSpy.mockRestore();
   });
 });
