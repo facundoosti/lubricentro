@@ -127,4 +127,13 @@ describe('Settings — contacto', () => {
     expect(within(aside).getByRole('heading', { name: 'Planes de cuotas' })).toBeInTheDocument();
     expect(within(aside).queryByPlaceholderText('Ej: Lubricentro El Rápido')).toBeNull();
   });
+
+  it('el botón Guardar va debajo de las dos columnas y envía el form', async () => {
+    renderWithProviders(<Settings />);
+    const aside = await screen.findByRole('complementary', { name: 'Horarios y planes de cuotas' });
+    const save = screen.getByRole('button', { name: /Guardar cambios/ });
+    expect(save.closest('form')).toBeNull();
+    expect(save).toHaveAttribute('form', 'settings-form');
+    expect(aside.compareDocumentPosition(save) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
 });

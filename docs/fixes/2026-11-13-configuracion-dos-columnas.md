@@ -26,4 +26,4 @@ La página de Configuración usaba `max-w-3xl` y dejaba vacío el resto del anch
 
 ## Seguimiento
 - `Settings.jsx` supera 300 líneas (ya lo hacía): extraer `OpeningHoursCard`.
-- Botón Guardar queda en la columna izquierda aunque también guarda horarios; evaluar footer común con `form="settings-form"`.
+- ~~Botón Guardar en la columna izquierda~~ → movido debajo de ambas columnas con `form="settings-form"` (TC-03 ✅).
