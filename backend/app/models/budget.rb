@@ -67,6 +67,20 @@ class Budget < ApplicationRecord
     self.total_card = (total_list * (1 + (card_surcharge_percentage || 0) / 100)).round(2)
   end
 
+  # Una opción por plan activo, en orden: total con recargo y valor de cada cuota (2 decimales).
+  def installment_options(plans = InstallmentPlan.active.ordered)
+    plans.map do |plan|
+      plan_total = (total_list.to_d * (1 + plan.surcharge_percentage.to_d / 100)).round(2)
+      {
+        id: plan.id,
+        name: plan.name,
+        installments: plan.installments,
+        installment_amount: (plan_total / plan.installments).round(2),
+        total: plan_total
+      }
+    end
+  end
+
   def status_label
     case status
     when "draft"    then "Borrador"

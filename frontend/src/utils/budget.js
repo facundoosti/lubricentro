@@ -42,5 +42,5 @@ export const toPayload = (formData, removedIds = []) => ({
   ...formData,
   customer_id: formData.customer_id || null,
   vehicle_id: formData.vehicle_id || null,
-  items_attributes: toItemsAttributes(formData.items_attributes, removedIds),
+  items_attributes: toItemsAttributes(formData.items_attributes, removedIds, { withProductCode: true }),
 });

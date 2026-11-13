@@ -2,13 +2,15 @@
 #
 # Table name: customers
 #
-#  id         :bigint           not null, primary key
-#  address    :text
-#  email      :string(100)
-#  name       :string(100)      not null
-#  phone      :string(20)
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
+#  id           :bigint           not null, primary key
+#  address      :text
+#  cuit         :string(13)
+#  email        :string(100)
+#  invoice_type :string(2)
+#  name         :string(100)      not null
+#  phone        :string(20)
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
 #
 # Indexes
 #
@@ -174,6 +176,40 @@ RSpec.describe Customer, type: :model do
       it 'returns nothing for a blank phone' do
         expect(Customer.by_phone('--')).to be_empty
       end
+    end
+  end
+
+  describe 'datos fiscales' do
+    it 'normaliza un CUIT de 11 dígitos sin guiones' do
+      expect(build(:customer, cuit: '20284561234').cuit).to eq('20-28456123-4')
+    end
+
+    it 'acepta un CUIT ya formateado' do
+      expect(build(:customer, cuit: '20-28456123-4')).to be_valid
+    end
+
+    it 'rechaza un CUIT inválido' do
+      customer = build(:customer, cuit: '123')
+      expect(customer).not_to be_valid
+      expect(customer.errors[:cuit]).to be_present
+    end
+
+    it 'guarda un CUIT vacío como nil' do
+      expect(build(:customer, cuit: '  ').cuit).to be_nil
+    end
+
+    it 'acepta los tipos de factura A, B, C y CF' do
+      %w[A B C CF].each { |t| expect(build(:customer, invoice_type: t)).to be_valid }
+    end
+
+    it 'normaliza el tipo de factura a mayúsculas' do
+      expect(build(:customer, invoice_type: 'b').invoice_type).to eq('B')
+    end
+
+    it 'rechaza un tipo de factura inválido' do
+      customer = build(:customer, invoice_type: 'Z')
+      expect(customer).not_to be_valid
+      expect(customer.errors[:invoice_type]).to be_present
     end
   end
 end

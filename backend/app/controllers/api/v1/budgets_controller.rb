@@ -10,7 +10,7 @@ class Api::V1::BudgetsController < ApplicationController
     @budgets = @budgets.recent
 
     @pagy, @budgets = pagy(@budgets, items: safe_per_page(params[:per_page]))
-    @serializer = BudgetSerializer.render_as_hash(@budgets, root: :budgets, view: :with_items)
+    @serializer = BudgetSerializer.render_as_hash(@budgets, root: :budgets, view: :with_items, installment_plans: InstallmentPlan.active.ordered.to_a)
     render_json(@serializer)
   end
 
@@ -54,7 +54,7 @@ class Api::V1::BudgetsController < ApplicationController
     copy = @budget.dup
     copy.assign_attributes(status: "draft", date: Date.current)
     @budget.items.each do |item|
-      copied = copy.items.build(item.attributes.slice("position", "quantity", "description", "unit_price", "iva_rate", "margin_percentage"))
+      copied = copy.items.build(item.attributes.slice("position", "quantity", "description", "unit_price", "iva_rate", "margin_percentage", "product_code"))
       copied.legacy_iva_rate_ok = true # conserva un % anterior (p. ej. 15)
     end
 
@@ -78,7 +78,7 @@ class Api::V1::BudgetsController < ApplicationController
     params.require(:budgets).permit(
       :customer_id, :vehicle_id, :vehicle_description,
       :date, :status, :notes, :card_surcharge_percentage,
-      items_attributes: [ :id, :position, :quantity, :description, :unit_price, :iva_rate, :margin_percentage, :_destroy ]
+      items_attributes: [ :id, :position, :quantity, :description, :unit_price, :iva_rate, :margin_percentage, :product_code, :_destroy ]
     )
   end
 end

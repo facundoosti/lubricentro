@@ -15,7 +15,18 @@ vi.mock('@services/settingsService', () => ({
   useSetting: () => settingQuery,
   useUpdateSetting: () => ({ mutateAsync: updateMock, isPending: false }),
 }));
-vi.mock('@services/notificationService', () => ({ showSettingSuccess: vi.fn(), showSettingError: vi.fn() }));
+vi.mock('@services/notificationService', () => ({
+  showSettingSuccess: vi.fn(),
+  showSettingError: vi.fn(),
+  showSuccess: vi.fn(),
+  showError: vi.fn(),
+}));
+vi.mock('@services/installmentPlansService', () => ({
+  useInstallmentPlans: () => ({ data: { data: { installment_plans: [] } }, isLoading: false }),
+  useCreateInstallmentPlan: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateInstallmentPlan: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useDeleteInstallmentPlan: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}));
 
 describe('Settings — horarios', () => {
   it('cada día es un switch accesible que refleja y cambia su estado', async () => {
@@ -81,5 +92,31 @@ describe('Settings — horarios', () => {
     fireEvent.click(screen.getByRole('button', { name: /Guardar cambios/ }));
     await waitFor(() => expect(updateMock).toHaveBeenCalled());
     expect(updateMock.mock.calls[0][0].opening_hours.lunes).toMatchObject({ open: false });
+  });
+});
+
+describe('Settings — contacto', () => {
+  it('guarda email e Instagram', async () => {
+    updateMock.mockResolvedValue({});
+    renderWithProviders(<Settings />);
+    fireEvent.change(await screen.findByPlaceholderText(/lubricentro@gmail.com/), { target: { value: 'a@b.com' } });
+    fireEvent.change(screen.getByPlaceholderText(/sin @/), { target: { value: 'killamet' } });
+    fireEvent.click(screen.getByRole('button', { name: /Guardar cambios/ }));
+    await waitFor(() => expect(updateMock).toHaveBeenCalled());
+    expect(updateMock.mock.calls.at(-1)[0]).toMatchObject({ email: 'a@b.com', instagram: 'killamet' });
+  });
+
+  it('no guarda un email inválido', async () => {
+    updateMock.mockClear();
+    renderWithProviders(<Settings />);
+    fireEvent.change(await screen.findByPlaceholderText(/lubricentro@gmail.com/), { target: { value: 'nope' } });
+    fireEvent.click(screen.getByRole('button', { name: /Guardar cambios/ }));
+    expect(await screen.findByText('Ingresá un email válido')).toBeInTheDocument();
+    expect(updateMock).not.toHaveBeenCalled();
+  });
+
+  it('muestra la sección de planes de cuotas', async () => {
+    renderWithProviders(<Settings />);
+    expect(await screen.findByRole('heading', { name: 'Planes de cuotas' })).toBeInTheDocument();
   });
 });

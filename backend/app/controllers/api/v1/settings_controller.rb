@@ -18,7 +18,7 @@ class Api::V1::SettingsController < ApplicationController
   def setting_params
     params.require(:setting).permit(
       :lubricentro_name, :phone, :mobile, :address,
-      :latitude, :longitude, :cuit, :owner_name,
+      :latitude, :longitude, :cuit, :owner_name, :email, :instagram,
       opening_hours: {}
     )
   end

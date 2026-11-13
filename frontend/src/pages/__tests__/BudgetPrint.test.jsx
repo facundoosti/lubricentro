@@ -6,7 +6,8 @@ import BudgetPrint from '@pages/BudgetPrint';
 
 const mocks = vi.hoisted(() => ({ useBudget: vi.fn() }));
 vi.mock('@services/budgetsService', () => ({ useBudget: mocks.useBudget }));
-vi.mock('@services/settingsService', () => ({ useSetting: () => ({ data: { data: { cuit: '20-1', address: 'Calle 1' } } }) }));
+const settingMock = vi.hoisted(() => ({ value: { cuit: '20-1', address: 'Calle 1', phone: '2245 44', mobile: '2245 15' } }));
+vi.mock('@services/settingsService', () => ({ useSetting: () => ({ data: { data: settingMock.value } }) }));
 
 const mixed = {
   id: 7,
@@ -52,21 +53,25 @@ const renderPrint = (budget) => {
 };
 
 describe('BudgetPrint', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    settingMock.value = { cuit: '20-1', address: 'Calle 1', phone: '2245 44', mobile: '2245 15' };
+  });
 
-  it('muestra precio unitario e importe finales, sin columna IVA, y el IVA por alícuota sin base', () => {
+  it('muestra solo el importe final, sin precio unitario ni columna IVA, y el IVA por alícuota sin base', () => {
     renderPrint(mixed);
     const headers = screen.getAllByRole('columnheader').map((th) => th.textContent);
-    expect(headers).toEqual(['CANT', 'ARTÍCULO', 'P. UNIT.', 'IMPORTE']);
+    expect(headers).toEqual(['CANT', 'ARTÍCULO', 'IMPORTE']);
+    expect(document.body.textContent).not.toContain('P. UNIT.');
 
     const neumatico = screen.getByText('Neumático').closest('tr');
-    expect(within(neumatico).getAllByText('$4.420')).toHaveLength(2);
+    expect(within(neumatico).getAllByText('$4.420')).toHaveLength(1);
     expect(within(neumatico).queryByText('10,5%')).toBeNull();
     const aceite = screen.getByText('Aceite').closest('tr');
-    expect(within(aceite).getByText('$12.100')).toBeInTheDocument();
+    expect(within(aceite).queryByText('$12.100')).toBeNull();
     expect(within(aceite).getByText('$24.200')).toBeInTheDocument();
     const mano = screen.getByText('Mano de obra').closest('tr');
-    expect(within(mano).getAllByText('$15.000')).toHaveLength(2);
+    expect(within(mano).getAllByText('$15.000')).toHaveLength(1);
     expect(within(mano).queryByText('s/IVA')).toBeNull();
 
     expect(screen.getByText('IVA 21%')).toBeInTheDocument();
@@ -99,7 +104,7 @@ describe('BudgetPrint', () => {
       ],
     });
     const row = screen.getByText('Filtro').closest('tr');
-    expect(within(row).getAllByText('$1.510')).toHaveLength(2);
+    expect(within(row).getAllByText('$1.510')).toHaveLength(1);
     expect(screen.getByText('IVA 21%')).toBeInTheDocument();
     expect(screen.getByTestId('print-iva-21')).toHaveTextContent('$210');
     expect(screen.getByTestId('print-total-list')).toHaveTextContent('$1.510');
@@ -131,8 +136,8 @@ describe('BudgetPrint', () => {
         { id: 2, quantity: '1.0', description: 'Repuesto', unit_price: '1000.0', iva_rate: '15.75', total: '1000.0' },
       ],
     });
-    expect(within(screen.getByText('Mano de obra').closest('tr')).getAllByText('$1.150')).toHaveLength(2);
-    expect(within(screen.getByText('Repuesto').closest('tr')).getAllByText('$1.157,50')).toHaveLength(2);
+    expect(within(screen.getByText('Mano de obra').closest('tr')).getAllByText('$1.150')).toHaveLength(1);
+    expect(within(screen.getByText('Repuesto').closest('tr')).getAllByText('$1.157,50')).toHaveLength(1);
     expect(screen.getByText('IVA 15%')).toBeInTheDocument();
     expect(screen.getByTestId('print-iva-15')).toHaveTextContent('$150');
     expect(screen.getByText('IVA 15,75%')).toBeInTheDocument();
@@ -143,7 +148,9 @@ describe('BudgetPrint', () => {
     renderPrint(legacy);
     expect(screen.queryByTestId('print-iva-breakdown')).toBeNull();
     expect(document.body.textContent).not.toMatch(/IVA/);
-    expect(within(screen.getByText('Service').closest('tr')).getByText('$25.000')).toBeInTheDocument();
+    const service = screen.getByText('Service').closest('tr');
+    expect(within(service).getByText('$50.000')).toBeInTheDocument();
+    expect(within(service).queryByText('$25.000')).toBeNull();
     expect(screen.getByTestId('print-total-list')).toHaveTextContent('$50.000');
     expect(screen.getByTestId('print-total-card')).toHaveTextContent('$55.000');
   });
@@ -176,5 +183,92 @@ describe('BudgetPrint', () => {
   it('avisa si no existe', () => {
     renderPrint(null);
     expect(screen.getByText('Presupuesto no encontrado.')).toBeInTheDocument();
+  });
+
+  describe('rediseño del talonario', () => {
+    it('muestra el código del producto junto a la descripción, y solo la descripción si no tiene', () => {
+      renderPrint({
+        ...legacy,
+        items: [
+          { id: 1, quantity: '1.0', description: 'Filtro de aceite', product_code: 'PH10044', unit_price: '100.0', iva_rate: null },
+          { id: 2, quantity: '1.0', description: 'Mano de obra', product_code: null, unit_price: '100.0', iva_rate: null },
+        ],
+      });
+      const filtro = screen.getByText('Filtro de aceite').closest('td');
+      expect(filtro).toHaveTextContent('PH10044Filtro de aceite');
+      expect(screen.getAllByTestId('print-product-code')).toHaveLength(1);
+      expect(screen.getByText('Mano de obra').closest('td')).toHaveTextContent(/^Mano de obra$/);
+    });
+
+    it('usa las etiquetas del talonario en los totales y muestra la leyenda', () => {
+      renderPrint(legacy);
+      expect(screen.getByText('PRECIO D/LISTA – EFT/DEB')).toBeInTheDocument();
+      expect(screen.getByText('TARJETA D/CRED')).toBeInTheDocument();
+      expect(screen.getByTestId('print-legend')).toHaveTextContent('NO VÁLIDO COMO COMPROBANTE DE FACTURACIÓN');
+    });
+
+    it('muestra hasta 3 planes de cuotas con el valor de cada cuota', () => {
+      renderPrint({
+        ...legacy,
+        installment_options: [
+          { name: 'VISA', installments: 3, installment_amount: '44000.0', total: '132000.0' },
+          { name: 'VISA', installments: 6, installment_amount: '24000.0', total: '144000.0' },
+          { name: 'MASTER', installments: 12, installment_amount: '12000.0', total: '144000.0' },
+          { name: 'NARANJA', installments: 18, installment_amount: '9000.0', total: '162000.0' },
+        ],
+      });
+      const rows = screen.getAllByTestId('print-installment');
+      expect(rows).toHaveLength(3);
+      expect(rows[0]).toHaveTextContent('VISA 3 cuotas de$44.000');
+      expect(document.body.textContent).not.toContain('NARANJA');
+    });
+
+    it('sin planes no muestra renglones de cuotas', () => {
+      renderPrint({ ...legacy, installment_options: [] });
+      expect(screen.queryByTestId('print-installment')).toBeNull();
+    });
+
+    it('muestra CUIT y tipo de factura del cliente', () => {
+      renderPrint({ ...legacy, customer: { name: 'Juan', phone: '11', cuit: '20-28456123-4', invoice_type: 'B' } });
+      const fiscal = screen.getByTestId('print-customer-fiscal');
+      expect(fiscal).toHaveTextContent('CUIT: 20-28456123-4');
+      expect(fiscal).toHaveTextContent('FACT: B');
+    });
+
+    it('sin datos fiscales no muestra las etiquetas', () => {
+      renderPrint({ ...legacy, customer: { name: 'Juan', phone: '11' } });
+      expect(screen.queryByTestId('print-customer-fiscal')).toBeNull();
+      expect(document.body.textContent).not.toContain('FACT:');
+    });
+
+    it('el pie muestra email e Instagram con @, sin dirección ni teléfono', () => {
+      settingMock.value = { ...settingMock.value, email: 'a@b.com', instagram: 'killamet' };
+      renderPrint(legacy);
+      const footer = screen.getByTestId('print-footer');
+      expect(footer).toHaveTextContent('a@b.com');
+      expect(footer).toHaveTextContent('@killamet');
+      expect(footer).not.toHaveTextContent('Calle 1');
+      expect(footer).not.toHaveTextContent('2245');
+      expect(screen.getByTestId('print-address')).toHaveTextContent('Calle 1');
+    });
+
+    it('el pie va en el flujo de la hoja (no absoluto) para no pisar los totales', () => {
+      settingMock.value = { ...settingMock.value, email: 'a@b.com', instagram: 'killamet' };
+      renderPrint(legacy);
+      const sheet = document.getElementById('budget-print-sheet');
+      const footer = screen.getByTestId('print-footer');
+      expect(sheet.style.display).toBe('flex');
+      expect(sheet.style.flexDirection).toBe('column');
+      expect(footer.style.position).toBe('');
+      expect(footer.style.marginTop).toBe('auto');
+      expect(sheet.lastElementChild).toBe(footer);
+      // La leyenda (fin de los totales) queda antes del pie en el DOM.
+      expect(screen.getByTestId('print-legend').compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it('sin email ni Instagram no muestra el pie', () => {
+      renderPrint(legacy);
+      expect(screen.queryByTestId('print-footer')).toBeNull();
+    });
   });
 });

@@ -71,6 +71,7 @@ Rails.application.routes.draw do
       end
 
       resource :setting, only: [ :show, :update ]
+      resources :installment_plans, only: %i[index show create update destroy]
 
       resources :conversations, only: [ :index, :show ] do
         member do

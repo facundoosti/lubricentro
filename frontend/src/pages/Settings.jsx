@@ -9,6 +9,7 @@ import PageHeader from "@ui/PageHeader";
 import PageError from "@ui/PageError";
 import TimeInput from "@ui/TimeInput";
 import Switch from "@ui/Switch";
+import InstallmentPlansSection from "@components/features/settings/InstallmentPlansSection";
 
 const DAYS = [
   { key: "lunes", label: "Lunes" },
@@ -54,6 +55,8 @@ const schema = yup.object({
     .max(180)
     .nullable(),
   cuit: yup.string().max(20),
+  email: yup.string().trim().email("Ingresá un email válido").max(100),
+  instagram: yup.string().trim().max(60),
   owner_name: yup.string().max(150),
 });
 
@@ -99,6 +102,8 @@ const Settings = () => {
       longitude: "",
       cuit: "",
       owner_name: "",
+      email: "",
+      instagram: "",
       opening_hours: DEFAULT_OPENING_HOURS,
     },
   });
@@ -117,6 +122,8 @@ const Settings = () => {
         longitude: s.longitude || "",
         cuit: s.cuit || "",
         owner_name: s.owner_name || "",
+        email: s.email || "",
+        instagram: s.instagram || "",
         opening_hours: s.opening_hours && Object.keys(s.opening_hours).length > 0
           ? s.opening_hours
           : DEFAULT_OPENING_HOURS,
@@ -160,7 +167,7 @@ const Settings = () => {
     <div className="space-y-6 max-w-3xl">
       <PageHeader
         title="Configuración"
-        description="Datos del lubricentro y horarios de atención"
+        description="Datos del lubricentro, horarios de atención y planes de cuotas"
       />
 
       {isLoading ? (
@@ -170,7 +177,7 @@ const Settings = () => {
           ))}
         </div>
       ) : (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
           {/* Datos del Lubricentro */}
           <div className="bg-surface-container border border-outline-variant rounded-lg p-5">
             <SectionTitle icon={SettingsIcon} title="Datos del Lubricentro" />
@@ -216,6 +223,21 @@ const Settings = () => {
                 <input
                   {...register("mobile")}
                   placeholder="Ej: 11-5678-9012"
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Email" error={errors.email?.message}>
+                <input
+                  {...register("email")}
+                  type="email"
+                  placeholder="Ej: lubricentro@gmail.com"
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Instagram" error={errors.instagram?.message}>
+                <input
+                  {...register("instagram")}
+                  placeholder="Ej: killamet.dolores (sin @)"
                   className={inputCls}
                 />
               </Field>
@@ -329,6 +351,8 @@ const Settings = () => {
           </div>
         </form>
       )}
+
+      {!isLoading && <InstallmentPlansSection />}
     </div>
   );
 };

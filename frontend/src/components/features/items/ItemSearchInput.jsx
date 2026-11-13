@@ -20,6 +20,7 @@ const toSelection = (item) => {
       stock: item.stock ?? null,
       product_id: item.id,
       service_id: null,
+      product_code: item.sku || null,
     };
   }
   return {
@@ -30,6 +31,7 @@ const toSelection = (item) => {
     stock: null,
     product_id: null,
     service_id: item.id,
+    product_code: null,
   };
 };
 

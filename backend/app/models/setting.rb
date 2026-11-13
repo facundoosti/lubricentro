@@ -5,6 +5,8 @@
 #  id               :bigint           not null, primary key
 #  address          :string
 #  cuit             :string
+#  email            :string
+#  instagram        :string
 #  latitude         :decimal(10, 7)
 #  longitude        :decimal(10, 7)
 #  lubricentro_name :string
@@ -21,6 +23,12 @@ class Setting < ApplicationRecord
   validates :owner_name, length: { maximum: 150 }
   validates :phone, length: { maximum: 30 }
   validates :mobile, length: { maximum: 30 }
+  validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, length: { maximum: 100 }, allow_blank: true
+  validates :instagram, length: { maximum: 60 }, allow_blank: true
+
+  normalizes :email, with: ->(email) { email.strip.downcase.presence }
+  # Se guarda sin "@" (la hoja lo agrega)
+  normalizes :instagram, with: ->(ig) { ig.strip.delete_prefix("@").strip.presence }
 
   # Singleton — always use Setting.instance to read/write
   def self.instance

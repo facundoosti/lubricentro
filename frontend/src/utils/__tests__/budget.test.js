@@ -14,8 +14,8 @@ describe('toPayload', () => {
     });
     expect(payload.customer_id).toBeNull();
     expect(payload.items_attributes).toEqual([
-      { position: 0, quantity: 2, description: 'Aceite', unit_price: 10000, iva_rate: 21, margin_percentage: 30 },
-      { position: 1, quantity: 1, description: 'Mano de obra', unit_price: 15000, iva_rate: null, margin_percentage: 0 },
+      { position: 0, quantity: 2, description: 'Aceite', unit_price: 10000, iva_rate: 21, margin_percentage: 30, product_code: null },
+      { position: 1, quantity: 1, description: 'Mano de obra', unit_price: 15000, iva_rate: null, margin_percentage: 0, product_code: null },
     ]);
   });
 
@@ -43,10 +43,20 @@ describe('toPayload', () => {
       [9],
     );
     expect(payload.items_attributes).toEqual([
-      { id: 5, position: 0, quantity: 1, description: 'Filtro', unit_price: 100, iva_rate: 10.5, margin_percentage: 0 },
+      { id: 5, position: 0, quantity: 1, description: 'Filtro', unit_price: 100, iva_rate: 10.5, margin_percentage: 0, product_code: null },
       { id: 9, _destroy: true },
       { id: 7, _destroy: true },
     ]);
+  });
+});
+
+describe('toPayload — código de producto', () => {
+  it('envía el SKU copiado del catálogo', () => {
+    const payload = toPayload({
+      date: '2026-11-13', status: 'draft', customer_id: 1, vehicle_id: null, card_surcharge_percentage: 0,
+      items_attributes: [{ quantity: 1, description: 'Filtro', unit_price: 100, iva_rate: '21', product_code: 'PH10044' }],
+    });
+    expect(payload.items_attributes[0].product_code).toBe('PH10044');
   });
 });
 

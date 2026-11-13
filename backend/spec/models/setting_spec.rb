@@ -5,6 +5,8 @@
 #  id               :bigint           not null, primary key
 #  address          :string
 #  cuit             :string
+#  email            :string
+#  instagram        :string
 #  latitude         :decimal(10, 7)
 #  longitude        :decimal(10, 7)
 #  lubricentro_name :string
@@ -42,6 +44,28 @@ RSpec.describe Setting, type: :model do
     it 'creates a record if none exists' do
       Setting.delete_all
       expect { Setting.instance }.to change(Setting, :count).by(1)
+    end
+  end
+
+  describe 'contacto' do
+    subject(:setting) { Setting.instance }
+
+    it 'saca el @ del Instagram' do
+      setting.instagram = '@killamet'
+      expect(setting.instagram).to eq('killamet')
+    end
+
+    it 'rechaza un email con formato inválido' do
+      setting.email = 'no-es-email'
+      expect(setting).not_to be_valid
+      expect(setting.errors[:email]).to be_present
+    end
+
+    it 'acepta email e Instagram vacíos' do
+      setting.assign_attributes(email: '', instagram: '')
+      expect(setting).to be_valid
+      expect(setting.email).to be_nil
+      expect(setting.instagram).to be_nil
     end
   end
 end

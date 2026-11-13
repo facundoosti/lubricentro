@@ -7,6 +7,7 @@
 #  iva_rate          :decimal(4, 2)
 #  margin_percentage :decimal(6, 2)    default(0.0), not null
 #  position          :integer          default(0), not null
+#  product_code      :string(50)
 #  quantity          :decimal(10, 2)   default(1.0), not null
 #  total             :decimal(12, 2)   default(0.0), not null
 #  unit_price        :decimal(12, 2)   default(0.0), not null
@@ -26,5 +27,5 @@
 class BudgetItemSerializer < Blueprinter::Base
   identifier :id
 
-  fields :budget_id, :position, :quantity, :description, :unit_price, :iva_rate, :margin_percentage, :total
+  fields :budget_id, :position, :quantity, :description, :unit_price, :iva_rate, :margin_percentage, :total, :product_code
 end

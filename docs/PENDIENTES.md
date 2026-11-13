@@ -18,28 +18,10 @@ Backlog de mejoras detectadas y diferidas. Al tomar uno, movelo a un change de O
 
 ## Hoja de presupuesto (impresión/PDF)
 
-Mejoras detectadas el 2026-11-12 comparando `BudgetPrint.jsx` con el talonario original (foto del 2026-11-10, impresión más nueva; `docs/presupuesto.jpeg` es una versión anterior en rojo).
+Rediseño del talonario implementado en el change `presupuesto-hoja-rediseno` (2026-11-13): estilo nuevo, SKU, cuotas, datos fiscales del cliente, email e Instagram.
 
-**Visual (fix chico, sin migración)**
-- [ ] Color de marca: el talonario nuevo es naranja (~`#F04E23`), el viejo rojo; confirmar con el dueño antes de cambiar `#cc2200`.
-- [ ] Encabezado con fondo gris degradado en vez de negro (gasta menos tinta).
-- [ ] Bordes redondeados en franja PRESUPUESTO y encabezado de la tabla.
-- [ ] Tabla con fondo gris claro y renglones blancos; renglón "Vehículo" con fondo gris.
-- [ ] Marca de agua opcional: logo Killamet muy tenue detrás de la tabla.
-- [ ] Ícono de ubicación junto a la dirección y ciudad: "Bs. As. 820 (Dolores)".
-- [ ] Pie: no repetir dirección/teléfono del encabezado; usarlo para email/Instagram.
-- [ ] Mostrar el código del producto (ej. PH10044) junto al nombre o en columna propia.
-- [ ] Columna P. UNIT. solo si algún ítem tiene cantidad > 1 (a evaluar).
-- [ ] Totales en recuadro alineado con la columna IMPORTE; etiquetas "PRECIO D/LISTA – EFT/DEB" y "TARJETA D/CRED", ambas resaltadas en amarillo.
-
-**Funcional (OpenSpec, requiere migración)**
-- [ ] Planes de cuotas en los totales (ej. VISA 3 y 6 cuotas con recargo); hoy el dueño los anota a mano. Requiere configurar recargos.
-- [ ] CUIT y tipo de factura (FACT) del cliente arriba a la izquierda; `customers` no tiene CUIT.
-- [ ] Instagram y email del lubricentro en `settings` (hoy no existen esos campos).
-
-**Técnico**
-- [ ] El PDF se genera como imagen (html2canvas): texto no seleccionable, pesa más y se corta si supera una A4.
-- [ ] `BudgetPrint.jsx` supera las 300 líneas: extraer `PrintSheet` o el recuadro DÍA/MES/AÑO a un componente propio (review de `presupuesto-impresion-ajustes`).
+- [ ] Confirmar con el dueño el color de marca naranja `#F04E23` (talonario nuevo; el viejo era rojo `#cc2200`). Se cambia en `frontend/src/components/features/budgets/printTheme.js`.
+- [ ] El PDF se genera como imagen (html2canvas): texto no seleccionable, pesa más y se corta si supera una A4. Generarlo como texto.
 
 ## Frontend — post shadcn/Base UI fase 2
 

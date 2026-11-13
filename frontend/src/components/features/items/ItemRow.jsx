@@ -74,15 +74,17 @@ const ItemRow = ({ name, index, control, register, setValue, errors, onRemove, o
             if (!text) {
               set('product_id', null);
               set('service_id', null);
+              set('product_code', null);
             }
           }}
-          onSelect={({ description, unit_price, iva_rate, margin_percentage, product_id, service_id }) => {
+          onSelect={({ description, unit_price, iva_rate, margin_percentage, product_id, service_id, product_code }) => {
             set('description', description);
             set('unit_price', unit_price);
             set('iva_rate', ivaRateToOption(iva_rate));
             set('margin_percentage', margin_percentage ?? 0);
             set('product_id', product_id ?? null);
             set('service_id', service_id ?? null);
+            set('product_code', product_code ?? null);
           }}
         />
       </div>

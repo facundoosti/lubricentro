@@ -23,8 +23,8 @@ describe('utils/serviceRecord', () => {
       ],
     });
     expect(items).toEqual([
-      { id: 1, position: 0, description: 'Cambio de aceite', quantity: 1, unit_price: 8000, iva_rate: '', margin_percentage: 0, product_id: null, service_id: 9 },
-      { id: 2, position: 1, description: 'Filtro', quantity: 2, unit_price: 3000, iva_rate: '', margin_percentage: 20, product_id: 4, service_id: null },
+      { id: 1, position: 0, description: 'Cambio de aceite', quantity: 1, unit_price: 8000, iva_rate: '', margin_percentage: 0, product_id: null, service_id: 9, product_code: null },
+      { id: 2, position: 1, description: 'Filtro', quantity: 2, unit_price: 3000, iva_rate: '', margin_percentage: 20, product_id: 4, service_id: null, product_code: null },
     ]);
   });
 
@@ -38,7 +38,7 @@ describe('utils/serviceRecord', () => {
       items: [{ id: 50, position: 0, description: 'Aceite', quantity: '4.0', unit_price: '10000.0', iva_rate: '21.0', margin_percentage: '30.0' }],
     });
     expect(items).toEqual([
-      { position: 0, description: 'Aceite', quantity: 4, unit_price: 10000, iva_rate: '21', margin_percentage: 30, product_id: null, service_id: null },
+      { position: 0, description: 'Aceite', quantity: 4, unit_price: 10000, iva_rate: '21', margin_percentage: 30, product_id: null, service_id: null, product_code: null },
     ]);
   });
 

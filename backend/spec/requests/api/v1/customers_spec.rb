@@ -327,4 +327,23 @@ RSpec.describe "Api::V1::Customers", type: :request do
   def json_response
     JSON.parse(response.body, symbolize_names: true)
   end
+
+  describe 'datos fiscales' do
+    it 'guarda CUIT normalizado y tipo de factura' do
+      post '/api/v1/customers', params: { customer: { name: 'Juan', cuit: '20284561234', invoice_type: 'B' } }, headers: auth_headers(user)
+
+      expect(response).to have_http_status(:created)
+      expect(json_response[:data]).to include(cuit: '20-28456123-4', invoice_type: 'B')
+    end
+
+    it 'responde 422 con CUIT inválido' do
+      post '/api/v1/customers', params: { customer: { name: 'Juan', cuit: '123' } }, headers: auth_headers(user)
+      expect(response).to have_http_status(:unprocessable_content)
+    end
+
+    it 'responde 422 con tipo de factura inválido' do
+      post '/api/v1/customers', params: { customer: { name: 'Juan', invoice_type: 'Z' } }, headers: auth_headers(user)
+      expect(response).to have_http_status(:unprocessable_content)
+    end
+  end
 end

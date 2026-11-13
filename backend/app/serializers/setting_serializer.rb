@@ -5,6 +5,8 @@
 #  id               :bigint           not null, primary key
 #  address          :string
 #  cuit             :string
+#  email            :string
+#  instagram        :string
 #  latitude         :decimal(10, 7)
 #  longitude        :decimal(10, 7)
 #  lubricentro_name :string
@@ -19,7 +21,7 @@ class SettingSerializer < Blueprinter::Base
   identifier :id
 
   fields :lubricentro_name, :phone, :mobile, :address,
-         :cuit, :owner_name, :opening_hours, :updated_at
+         :cuit, :owner_name, :email, :instagram, :opening_hours, :updated_at
 
   field :latitude do |setting|
     setting.latitude&.to_s

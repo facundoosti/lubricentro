@@ -12,7 +12,7 @@ vi.mock('@services/servicesService', () => ({ useServices: vi.fn() }));
 import { useProducts } from '@services/productsService';
 import { useServices } from '@services/servicesService';
 
-const products = [{ id: 1, name: 'Aceite 5W30', unit_price: '10000.0', iva_rate: '10.5', stock: 3 }];
+const products = [{ id: 1, name: 'Aceite 5W30', sku: 'ELF-5W30', unit_price: '10000.0', iva_rate: '10.5', stock: 3 }];
 const services = [{ id: 7, name: 'Lavado de motor', base_price: '5000.0' }];
 
 let formApi;
@@ -76,7 +76,7 @@ describe('ItemsEditor', () => {
     // 10.000 + 30% ganancia (3.000) + 10,5% IVA (1.050)
     expect(within(rows()[0]).getByTestId('line-total')).toHaveTextContent('$14.050');
     expect(formApi.getValues('items_attributes.0')).toMatchObject({
-      description: 'Aceite 5W30', unit_price: 10000, iva_rate: '10.5', margin_percentage: 30, product_id: 1, service_id: null,
+      description: 'Aceite 5W30', unit_price: 10000, iva_rate: '10.5', margin_percentage: 30, product_id: 1, service_id: null, product_code: 'ELF-5W30',
     });
   });
 
@@ -87,7 +87,7 @@ describe('ItemsEditor', () => {
 
     expect(within(rows()[0]).getByRole('combobox', { name: '% IVA línea 1' })).toHaveTextContent('Sin IVA');
     expect(within(rows()[0]).getByLabelText('% Ganancia línea 1')).toHaveValue(0);
-    expect(formApi.getValues('items_attributes.0')).toMatchObject({ margin_percentage: 0, product_id: null, service_id: 7 });
+    expect(formApi.getValues('items_attributes.0')).toMatchObject({ margin_percentage: 0, product_id: null, service_id: 7, product_code: null });
   });
 
   it('el texto libre no cambia la ganancia (línea nueva = 0)', () => {
@@ -153,10 +153,10 @@ describe('ItemsEditor', () => {
     fireEvent.mouseDown(screen.getByRole('option', { name: /Aceite 5W30/ }));
 
     search(rows()[0], 'Aceite 5W30 sintético');
-    expect(formApi.getValues('items_attributes.0')).toMatchObject({ description: 'Aceite 5W30 sintético', product_id: 1 });
+    expect(formApi.getValues('items_attributes.0')).toMatchObject({ description: 'Aceite 5W30 sintético', product_id: 1, product_code: 'ELF-5W30' });
 
     search(rows()[0], '');
-    expect(formApi.getValues('items_attributes.0')).toMatchObject({ description: '', product_id: null, service_id: null });
+    expect(formApi.getValues('items_attributes.0')).toMatchObject({ description: '', product_id: null, service_id: null, product_code: null });
   });
 
   it('avisa los ids guardados que se quitan', () => {

@@ -2,13 +2,15 @@
 #
 # Table name: customers
 #
-#  id         :bigint           not null, primary key
-#  address    :text
-#  email      :string(100)
-#  name       :string(100)      not null
-#  phone      :string(20)
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
+#  id           :bigint           not null, primary key
+#  address      :text
+#  cuit         :string(13)
+#  email        :string(100)
+#  invoice_type :string(2)
+#  name         :string(100)      not null
+#  phone        :string(20)
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
 #
 # Indexes
 #
@@ -26,6 +28,16 @@ class Customer < ApplicationRecord
   # Email vacío → NULL para no chocar con el índice único de customers.email
   normalizes :email, with: ->(email) { email.strip.downcase.presence }
   normalizes :phone, with: ->(phone) { phone.strip.presence }
+  # 11 dígitos (con o sin guiones) → NN-NNNNNNNN-N; otro formato queda tal cual y falla la validación
+  normalizes :cuit, with: ->(cuit) {
+    digits = cuit.gsub(/\D/, "")
+    next cuit.strip.presence unless digits.length == 11 && cuit.strip.match?(/\A[\d\-\s]+\z/)
+
+    "#{digits[0, 2]}-#{digits[2, 8]}-#{digits[10]}"
+  }
+  normalizes :invoice_type, with: ->(type) { type.strip.upcase.presence }
+
+  INVOICE_TYPES = %w[A B C CF].freeze
 
   # Validaciones (siguiendo BD constraints)
   validates :name, presence: true, length: { maximum: 100 }
@@ -36,6 +48,8 @@ class Customer < ApplicationRecord
     format: { with: URI::MailTo::EMAIL_REGEXP },
     allow_blank: true
   validates :address, length: { maximum: 255 }, allow_blank: true
+  validates :cuit, format: { with: /\A\d{2}-\d{8}-\d\z/, message: "debe tener 11 dígitos" }, allow_blank: true
+  validates :invoice_type, inclusion: { in: INVOICE_TYPES }, allow_blank: true
 
   # Scopes útiles
   scope :with_email, -> { where.not(email: [ nil, "" ]) }

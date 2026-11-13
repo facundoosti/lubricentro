@@ -7,6 +7,7 @@
 #  iva_rate          :decimal(4, 2)
 #  margin_percentage :decimal(6, 2)    default(0.0), not null
 #  position          :integer          default(0), not null
+#  product_code      :string(50)
 #  quantity          :decimal(10, 2)   default(1.0), not null
 #  total             :decimal(12, 2)   default(0.0), not null
 #  unit_price        :decimal(12, 2)   default(0.0), not null
@@ -27,4 +28,8 @@ class BudgetItem < ApplicationRecord
   include ItemizedTotals::Line
 
   belongs_to :budget
+
+  normalizes :product_code, with: ->(code) { code.strip.presence }
+
+  validates :product_code, length: { maximum: 50 }, allow_blank: true
 end

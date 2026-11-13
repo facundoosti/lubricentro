@@ -10,6 +10,7 @@ export const emptyItem = (position = 0) => ({
   margin_percentage: 0,
   product_id: null,
   service_id: null,
+  product_code: null,
   position,
 });
 
@@ -29,6 +30,7 @@ export const toFormItems = (items, { keepIds = true } = {}) =>
           margin_percentage: toMarginPercentage(item.margin_percentage),
           product_id: item.product_id ?? null,
           service_id: item.service_id ?? null,
+          product_code: item.product_code ?? null,
         }))
     : [emptyItem(0)];
 
@@ -38,7 +40,8 @@ export const hasFilledItems = (items = []) => items.some((item) => item?.descrip
 // Form -> `items_attributes`. Las líneas sin descripción no se envían (si ya estaban
 // guardadas, se borran); los ids quitados van con _destroy.
 // `withCatalog` agrega product_id / service_id (atención; el presupuesto no los guarda).
-export const toItemsAttributes = (items = [], removedIds = [], { withCatalog = false } = {}) => {
+// `withProductCode` agrega la copia del SKU (presupuesto; la atención no la guarda).
+export const toItemsAttributes = (items = [], removedIds = [], { withCatalog = false, withProductCode = false } = {}) => {
   const kept = items.filter((item) => item.description?.trim());
   const blankSaved = items.filter((item) => !item.description?.trim() && item.id).map((item) => item.id);
 
@@ -52,6 +55,7 @@ export const toItemsAttributes = (items = [], removedIds = [], { withCatalog = f
       iva_rate: toIvaRate(item.iva_rate),
       margin_percentage: toMarginPercentage(item.margin_percentage),
       ...(withCatalog ? { product_id: item.product_id || null, service_id: item.service_id || null } : {}),
+      ...(withProductCode ? { product_code: item.product_code || null } : {}),
     })),
     ...[...removedIds, ...blankSaved].map((id) => ({ id, _destroy: true })),
   ];

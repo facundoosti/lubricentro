@@ -410,4 +410,55 @@ RSpec.describe "Api::V1::Budgets", type: :request do
       end
     end
   end
+
+  describe "presupuesto impreso: SKU, cuotas y datos fiscales" do
+    it "guarda y devuelve product_code de los ítems" do
+      attrs = valid_attributes.deep_dup
+      attrs[:budgets][:items_attributes] = [ { description: "Filtro", quantity: 1, unit_price: 100, product_code: "PH10044" } ]
+      post "/api/v1/budgets", params: attrs, headers: auth_headers(user)
+
+      expect(response).to have_http_status(:created)
+      expect(json_response[:data][:items].first[:product_code]).to eq("PH10044")
+    end
+
+    it "responde 422 con un product_code de más de 50 caracteres" do
+      attrs = valid_attributes.deep_dup
+      attrs[:budgets][:items_attributes] = [ { description: "Filtro", quantity: 1, unit_price: 100, product_code: "A" * 51 } ]
+      expect {
+        post "/api/v1/budgets", params: attrs, headers: auth_headers(user)
+      }.not_to change(Budget, :count)
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(json_response[:success]).to be false
+    end
+
+    it "duplica el product_code" do
+      budget = create(:budget, customer: customer, vehicle: vehicle)
+      create(:budget_item, budget: budget, product_code: "PH10044")
+      post "/api/v1/budgets/#{budget.id}/duplicate", headers: auth_headers(user)
+
+      expect(json_response[:data][:items].first[:product_code]).to eq("PH10044")
+    end
+
+    it "devuelve installment_options de los planes activos" do
+      create(:installment_plan, name: "VISA", installments: 3, surcharge_percentage: 10)
+      create(:installment_plan, name: "Off", active: false)
+      budget = create(:budget, customer: customer, vehicle: vehicle)
+      create(:budget_item, budget: budget, quantity: 1, unit_price: 120_000, iva_rate: nil)
+      budget.reload.save!
+      get "/api/v1/budgets/#{budget.id}", headers: auth_headers(user)
+
+      options = json_response[:data][:installment_options]
+      expect(options.size).to eq(1)
+      expect(options.first).to include(name: "VISA", installments: 3, installment_amount: "44000.0", total: "132000.0")
+    end
+
+    it "incluye CUIT y tipo de factura del cliente" do
+      customer.update!(cuit: "20284561234", invoice_type: "B")
+      budget = create(:budget, customer: customer, vehicle: vehicle)
+      get "/api/v1/budgets/#{budget.id}", headers: auth_headers(user)
+
+      expect(json_response[:data][:customer]).to include(cuit: "20-28456123-4", invoice_type: "B")
+    end
+  end
 end

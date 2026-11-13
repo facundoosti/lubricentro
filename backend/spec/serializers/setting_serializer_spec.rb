@@ -5,6 +5,8 @@
 #  id               :bigint           not null, primary key
 #  address          :string
 #  cuit             :string
+#  email            :string
+#  instagram        :string
 #  latitude         :decimal(10, 7)
 #  longitude        :decimal(10, 7)
 #  lubricentro_name :string

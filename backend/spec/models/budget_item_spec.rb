@@ -7,6 +7,7 @@
 #  iva_rate          :decimal(4, 2)
 #  margin_percentage :decimal(6, 2)    default(0.0), not null
 #  position          :integer          default(0), not null
+#  product_code      :string(50)
 #  quantity          :decimal(10, 2)   default(1.0), not null
 #  total             :decimal(12, 2)   default(0.0), not null
 #  unit_price        :decimal(12, 2)   default(0.0), not null
@@ -87,6 +88,21 @@ RSpec.describe BudgetItem, type: :model do
       item = build(:budget_item, iva_rate: 15)
       item.legacy_iva_rate_ok = true
       expect(item).to be_valid
+    end
+
+    it { is_expected.to validate_length_of(:product_code).is_at_most(50) }
+
+    it 'acepta un SKU de 50 caracteres y rechaza 51' do
+      expect(build(:budget_item, product_code: 'A' * 50)).to be_valid
+      item = build(:budget_item, product_code: 'A' * 51)
+      expect(item).not_to be_valid
+      expect(item.errors[:product_code]).to be_present
+    end
+
+    it 'normaliza el SKU: recorta espacios y guarda nil si queda vacío' do
+      expect(build(:budget_item, product_code: '  PH10044  ').product_code).to eq('PH10044')
+      expect(build(:budget_item, product_code: '   ').product_code).to be_nil
+      expect(build(:budget_item, product_code: nil).product_code).to be_nil
     end
 
     it 'rechaza una ganancia de -5' do

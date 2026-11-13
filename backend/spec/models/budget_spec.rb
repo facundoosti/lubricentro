@@ -235,4 +235,30 @@ RSpec.describe Budget, type: :model do
     it { expect(build(:budget, status: 'approved').status_label).to eq('Aprobado') }
     it { expect(build(:budget, status: 'rejected').status_label).to eq('Rechazado') }
   end
+
+  describe '#installment_options' do
+    let(:budget) { build(:budget) }
+
+    before { budget.total_list = 120_000 }
+
+    it 'calcula el total con recargo y el valor de cada cuota' do
+      plan = create(:installment_plan, name: 'VISA', installments: 3, surcharge_percentage: 10)
+      expect(budget.installment_options).to eq([
+        { id: plan.id, name: 'VISA', installments: 3, installment_amount: BigDecimal('44000'), total: BigDecimal('132000') }
+      ])
+    end
+
+    it 'redondea a 2 decimales' do
+      budget.total_list = 100
+      create(:installment_plan, installments: 3, surcharge_percentage: 0)
+      expect(budget.installment_options.first[:installment_amount]).to eq(BigDecimal('33.33'))
+    end
+
+    it 'omite los planes inactivos y respeta el orden' do
+      create(:installment_plan, name: 'Segundo', position: 2)
+      create(:installment_plan, name: 'Primero', position: 1)
+      create(:installment_plan, name: 'Inactivo', position: 0, active: false)
+      expect(budget.installment_options.map { |o| o[:name] }).to eq(%w[Primero Segundo])
+    end
+  end
 end

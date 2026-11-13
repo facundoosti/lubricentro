@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_13_100004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -70,6 +70,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_150000) do
     t.datetime "updated_at", null: false
     t.decimal "iva_rate", precision: 4, scale: 2
     t.decimal "margin_percentage", precision: 6, scale: 2, default: "0.0", null: false
+    t.string "product_code", limit: 50
     t.index ["budget_id", "position"], name: "index_budget_items_on_budget_id_and_position"
     t.index ["budget_id"], name: "index_budget_items_on_budget_id"
   end
@@ -124,8 +125,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_150000) do
     t.text "address"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "cuit", limit: 13
+    t.string "invoice_type", limit: 2
     t.index ["email"], name: "index_customers_on_email", unique: true
     t.index ["name"], name: "index_customers_on_name"
+  end
+
+  create_table "installment_plans", force: :cascade do |t|
+    t.string "name", limit: 50, null: false
+    t.integer "installments", null: false
+    t.decimal "surcharge_percentage", precision: 5, scale: 2, default: "0.0", null: false
+    t.boolean "active", default: true, null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active", "position"], name: "index_installment_plans_on_active_and_position"
+    t.check_constraint "installments > 1", name: "installment_plans_installments_gt_1"
+    t.check_constraint "surcharge_percentage >= 0::numeric", name: "installment_plans_surcharge_non_negative"
   end
 
   create_table "messages", force: :cascade do |t|
@@ -295,6 +311,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_150000) do
     t.string "owner_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "email"
+    t.string "instagram"
   end
 
   create_table "solid_cable_messages", force: :cascade do |t|

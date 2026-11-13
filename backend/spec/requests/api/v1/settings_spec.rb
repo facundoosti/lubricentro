@@ -65,4 +65,18 @@ RSpec.describe "Api::V1::Settings", type: :request do
       end
     end
   end
+
+  describe "contacto (email e Instagram)" do
+    it "guarda el email y el Instagram sin @" do
+      patch "/api/v1/setting", params: { setting: { email: "a@b.com", instagram: "@killamet" } }, headers: auth_headers(user)
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response[:data]).to include(email: "a@b.com", instagram: "killamet")
+    end
+
+    it "responde 422 con un email inválido" do
+      patch "/api/v1/setting", params: { setting: { email: "nope" } }, headers: auth_headers(user)
+      expect(response).to have_http_status(:unprocessable_content)
+    end
+  end
 end

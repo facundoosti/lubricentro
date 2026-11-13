@@ -1,4 +1,5 @@
 import { screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderWithProviders } from '@/test/utils';
 import CustomerForm from '@components/features/customers/CustomerForm';
@@ -72,5 +73,55 @@ describe('CustomerForm', () => {
     );
     fireEvent.blur(screen.getByLabelText(/Teléfono/));
     expect(screen.queryByText(/Ya existe/)).not.toBeInTheDocument();
+  });
+
+  describe('datos fiscales', () => {
+    const fillRequired = () => {
+      fireEvent.change(screen.getByLabelText(/Nombre completo/), { target: { value: 'Juan Pérez' } });
+      fireEvent.change(screen.getByLabelText(/Teléfono/), { target: { value: '11 5555-1234' } });
+    };
+
+    it('envía el CUIT y el tipo de factura elegido', async () => {
+      const user = userEvent.setup();
+      const onSubmit = vi.fn();
+      renderWithProviders(<CustomerForm onSubmit={onSubmit} />);
+      fillRequired();
+      fireEvent.change(screen.getByLabelText('CUIT'), { target: { value: '20284561234' } });
+      await user.click(screen.getByRole('combobox', { name: 'Tipo de factura' }));
+      await user.click(await screen.findByRole('option', { name: 'B' }));
+      submitForm();
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+      expect(onSubmit.mock.calls[0][0]).toMatchObject({ cuit: '20284561234', invoice_type: 'B' });
+    });
+
+    it('sin datos fiscales envía vacíos', async () => {
+      const onSubmit = vi.fn();
+      renderWithProviders(<CustomerForm onSubmit={onSubmit} />);
+      fillRequired();
+      submitForm();
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+      expect(onSubmit.mock.calls[0][0]).toMatchObject({ cuit: '', invoice_type: '' });
+    });
+
+    it('rechaza un CUIT que no tiene 11 dígitos', async () => {
+      const onSubmit = vi.fn();
+      renderWithProviders(<CustomerForm onSubmit={onSubmit} />);
+      fillRequired();
+      fireEvent.change(screen.getByLabelText('CUIT'), { target: { value: '123' } });
+      submitForm();
+
+      expect(await screen.findByText(/Ingresá 11 dígitos/)).toBeInTheDocument();
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    it('al editar muestra los datos guardados', () => {
+      renderWithProviders(
+        <CustomerForm onSubmit={vi.fn()} initialData={{ id: 1, name: 'Juan', phone: '11', cuit: '20-28456123-4', invoice_type: 'CF' }} />,
+      );
+      expect(screen.getByLabelText('CUIT')).toHaveValue('20-28456123-4');
+      expect(screen.getByRole('combobox', { name: 'Tipo de factura' })).toHaveTextContent('Consumidor final');
+    });
   });
 });

@@ -1,12 +1,24 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, ChevronDown } from 'lucide-react';
 import ImageUpload from '@ui/ImageUpload';
+import Select from '@ui/Select';
 import { useCustomersByPhone } from '@services/customersService';
 import { inputClass, labelClass } from '@utils/formStyles';
 
-const EMPTY_CUSTOMER = { name: '', phone: '', email: '', address: '' };
+const EMPTY_CUSTOMER = { name: '', phone: '', email: '', address: '', cuit: '', invoice_type: '' };
+
+const NO_INVOICE_TYPE = 'none';
+const INVOICE_TYPE_OPTIONS = [
+  { value: NO_INVOICE_TYPE, label: 'Sin especificar' },
+  { value: 'A', label: 'A' },
+  { value: 'B', label: 'B' },
+  { value: 'C', label: 'C' },
+  { value: 'CF', label: 'Consumidor final' },
+];
+// 11 dígitos, con o sin guiones (el backend lo guarda como NN-NNNNNNNN-N)
+const CUIT_PATTERN = /^(\d{11}|\d{2}-\d{8}-\d)$/;
 
 const DuplicatePhoneWarning = ({ customer }) => (
   <p role="status" className="mt-1 flex items-start gap-1.5 text-xs text-on-surface-variant">
@@ -27,6 +39,7 @@ const CustomerForm = ({ onSubmit, initialData = null, formId = 'customer-form' }
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm({
@@ -105,6 +118,40 @@ const CustomerForm = ({ onSubmit, initialData = null, formId = 'customer-form' }
             id="address"
             className={inputClass(false)}
             placeholder="Opcional"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="cuit" className={labelClass}>CUIT</label>
+          <input
+            {...register('cuit', {
+              setValueAs: (v) => (v ?? '').trim(),
+              validate: (v) => !v || CUIT_PATTERN.test(v) || 'Ingresá 11 dígitos (ej: 20-28456123-4)',
+            })}
+            type="text"
+            id="cuit"
+            inputMode="numeric"
+            autoComplete="off"
+            className={inputClass(!!errors.cuit)}
+            placeholder="Opcional"
+          />
+          {errors.cuit && <p className="mt-1 text-xs text-error">{errors.cuit.message}</p>}
+        </div>
+
+        <div>
+          <label id="invoice_type-label" className={labelClass}>Tipo de factura</label>
+          <Controller
+            name="invoice_type"
+            control={control}
+            render={({ field }) => (
+              <Select
+                aria-labelledby="invoice_type-label"
+                options={INVOICE_TYPE_OPTIONS}
+                value={field.value || NO_INVOICE_TYPE}
+                onChange={(v) => field.onChange(v === NO_INVOICE_TYPE ? '' : v)}
+                className={`${inputClass(false)} h-[41px] bg-transparent text-base`}
+              />
+            )}
           />
         </div>
       </div>

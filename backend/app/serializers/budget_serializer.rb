@@ -75,6 +75,14 @@ class BudgetSerializer < Blueprinter::Base
       obj.iva_breakdown.map { |row| row.transform_values { |v| v.to_d.to_s } }
     end
 
+    # En colecciones, pasar `installment_plans:` en las options (planes cargados una sola vez); si no, cada
+    # presupuesto consulta InstallmentPlan por su cuenta (N+1).
+    field :installment_options do |obj, options|
+      obj.installment_options(options[:installment_plans] || InstallmentPlan.active.ordered).map do |opt|
+        opt.merge(installment_amount: opt[:installment_amount].to_s, total: opt[:total].to_s)
+      end
+    end
+
     association :items, blueprint: BudgetItemSerializer
     association :customer, blueprint: CustomerSerializer, view: :summary
     association :vehicle, blueprint: VehicleSerializer, view: :summary
