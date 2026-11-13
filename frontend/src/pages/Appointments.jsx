@@ -337,18 +337,6 @@ const Appointments = () => {
                   })}
                 </div>
               </div>
-
-              {/* Quick actions */}
-              <div className="bg-surface border border-outline-variant rounded-xl p-5">
-                <h3 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-4">Acciones</h3>
-                <button
-                  onClick={openCreate}
-                  className="w-full bg-primary-container text-on-primary font-bold py-2.5 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity text-sm"
-                >
-                  <Plus className="w-4 h-4" />
-                  Nuevo Turno
-                </button>
-              </div>
             </div>
           </div>
         )}

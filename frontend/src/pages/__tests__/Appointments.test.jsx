@@ -50,6 +50,15 @@ const hoverEvent = () => {
   expect(screen.getByText(/· AB123CD/)).toBeInTheDocument();
 };
 
+describe('Appointments — acciones', () => {
+  it('muestra un único botón "Nuevo Turno" (sin card de Acciones duplicada)', () => {
+    renderWithProviders(<Appointments />);
+    // getByRole falla si hay más de un botón que coincide.
+    const newBtn = screen.getByRole('button', { name: /Nuevo Turno/ });
+    expect(newBtn).toHaveAttribute('id', 'tour-appointments-new-btn');
+  });
+});
+
 describe('Appointments — tooltip del calendario', () => {
   it('se oculta al cambiar de mes aunque el puntero no salga del evento', () => {
     renderWithProviders(<Appointments />);
