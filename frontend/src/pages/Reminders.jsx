@@ -7,6 +7,7 @@ import Select from "@ui/Select";
 import DateInput from "@ui/DateInput";
 import { isInvalidInput } from "@/lib/maskedInput";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Input from "@ui/Input";
 
 const STATUS_CONFIG = {
   sent: {
@@ -153,18 +154,15 @@ const Reminders = () => {
 
       {/* Filters */}
       <div id="tour-reminders-filters" className="bg-surface-container border border-outline-variant p-4 rounded-xl flex flex-wrap items-center gap-4">
-        <div className="flex-1 min-w-[220px] relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary" />
-          <input
-            autoComplete="off"
-            type="text"
-            placeholder="Cliente o Patente..."
-            value={pendingSearch}
-            onChange={(e) => setPendingSearch(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleFilter()}
-            className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg pl-10 pr-4 py-2.5 text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-        </div>
+        <Input
+          startIcon={Search}
+          containerClassName="flex-1 min-w-[220px]"
+          autoComplete="off"
+          placeholder="Cliente o Patente..."
+          value={pendingSearch}
+          onChange={(e) => setPendingSearch(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleFilter()}
+        />
 
         <Select
           aria-label="Estado del recordatorio"

@@ -6,6 +6,7 @@ import { showSuccess, showError } from '@services/notificationService';
 import ProductSearchInput from '@components/features/products/ProductSearchInput';
 import Dialog from '@ui/Dialog';
 import Select from '@ui/Select';
+import Input from '@ui/Input';
 
 const STEPS = { FILTER: 'filter', PREVIEW: 'preview', DONE: 'done' };
 // "Todos los proveedores" = sin filtro (''); en la lista usa un valor propio (el Select trata '' como "sin elegir").
@@ -230,13 +231,13 @@ const BulkPriceModal = ({ isOpen, onClose, target = null }) => {
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-sm">
                     {adjustmentType === 'percentage' ? '%' : '$'}
                   </span>
-                  <input
+                  <Input
                     type="number"
                     step="0.01"
                     value={adjustmentValue}
                     onChange={(e) => setAdjustmentValue(e.target.value)}
                     placeholder="Ej: 15"
-                    className="w-full pl-8 pr-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface placeholder:text-secondary text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="pl-8"
                   />
                 </div>
               </div>

@@ -2,14 +2,13 @@ import { useEffect, useMemo } from 'react';
 import { Controller, useWatch } from 'react-hook-form';
 import Select from '@ui/Select';
 import DateInput from '@ui/DateInput';
+import Field from '@ui/Field';
+import Input from '@ui/Input';
+import Textarea from '@ui/Textarea';
 import { validInput } from '@/lib/maskedInput';
 import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
 import { useVehicles } from '@services/vehiclesService';
 import { BUDGET_STATUSES, formatVehicle } from '@utils/budget';
-
-const fieldClass =
-  'w-full px-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary placeholder:text-secondary';
-const labelClass = 'block text-sm font-medium text-on-surface mb-1';
 
 // "Sin vehículo" quita el vehículo; en la lista usa un valor propio (el Select trata '' como "sin elegir").
 const NO_VEHICLE = 'none';
@@ -59,10 +58,7 @@ const BudgetGeneralSection = ({ control, register, setValue, errors, initialCust
       <h2 className="text-sm font-semibold text-on-surface-variant uppercase tracking-wide">Datos generales</h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="budget-date" className={labelClass}>
-            Fecha <span className="text-error">*</span>
-          </label>
+        <Field id="budget-date" label="Fecha" required error={errors?.date?.message}>
           <Controller
             name="date"
             control={control}
@@ -76,15 +72,12 @@ const BudgetGeneralSection = ({ control, register, setValue, errors, initialCust
                 onChange={field.onChange}
                 onBlur={field.onBlur}
                 error={!!errors?.date}
-                className={fieldClass}
               />
             )}
           />
-          {errors?.date && <p className="text-error text-xs mt-1">{errors.date.message}</p>}
-        </div>
+        </Field>
 
-        <div>
-          <label id="budget-status-label" className={labelClass}>Estado</label>
+        <Field id="budget-status" label="Estado">
           <Controller
             name="status"
             control={control}
@@ -95,14 +88,12 @@ const BudgetGeneralSection = ({ control, register, setValue, errors, initialCust
                 options={BUDGET_STATUSES}
                 value={field.value}
                 onChange={field.onChange}
-                className={fieldClass}
               />
             )}
           />
-        </div>
+        </Field>
 
-        <div>
-          <span className={labelClass}>Cliente</span>
+        <Field id="budget-customer" label="Cliente">
           <CustomerSearchInput
             value={customerId || ''}
             onChange={handleCustomerChange}
@@ -111,45 +102,42 @@ const BudgetGeneralSection = ({ control, register, setValue, errors, initialCust
               initialCustomer && String(initialCustomer.id) === String(customerId) ? initialCustomer : null
             }
           />
-        </div>
+        </Field>
 
-        <div>
-          <label id="budget-vehicle-label" htmlFor="budget-vehicle" className={labelClass}>Vehículo</label>
+        <Field id="budget-vehicle" label="Vehículo">
           {useSelect ? (
-            <>
-              <Select
-                id="budget-vehicle"
-                aria-labelledby="budget-vehicle-label"
-                options={[
-                  { value: NO_VEHICLE, label: 'Sin vehículo' },
-                  ...vehicles.map((v) => ({ value: String(v.id), label: formatVehicle(v) })),
-                ]}
-                value={vehicleId ? String(vehicleId) : ''}
-                // Vehículo guardado que ya no está entre los del cliente: se muestra su descripción, no el id.
-                orphanLabel={vehicleDescription || undefined}
-                onChange={handleVehicleChange}
-                placeholder="Seleccionar vehículo..."
-                className={fieldClass}
-              />
-              {!vehicleId && vehicleDescription && (
-                <p className="text-xs text-secondary mt-1">Guardado como: {vehicleDescription}</p>
-              )}
-            </>
-          ) : (
-            <input
+            <Select
               id="budget-vehicle"
-              type="text"
+              aria-labelledby="budget-vehicle-label"
+              options={[
+                { value: NO_VEHICLE, label: 'Sin vehículo' },
+                ...vehicles.map((v) => ({ value: String(v.id), label: formatVehicle(v) })),
+              ]}
+              value={vehicleId ? String(vehicleId) : ''}
+              // Vehículo guardado que ya no está entre los del cliente: se muestra su descripción, no el id.
+              orphanLabel={vehicleDescription || undefined}
+              onChange={handleVehicleChange}
+              placeholder="Seleccionar vehículo..."
+            />
+          ) : (
+            <Input
+              id="budget-vehicle"
               disabled={!!customerId && loadingVehicles}
               placeholder={customerId ? 'Sin vehículos registrados: escribilo' : 'Ej: Ford Falcon 1986'}
               {...register('vehicle_description', { maxLength: 200 })}
-              className={fieldClass}
             />
           )}
-        </div>
+          {useSelect && !vehicleId && vehicleDescription && (
+            <p className="text-xs text-secondary">Guardado como: {vehicleDescription}</p>
+          )}
+        </Field>
 
-        <div>
-          <label htmlFor="budget-surcharge" className={labelClass}>Recargo tarjeta de crédito (%)</label>
-          <input
+        <Field
+          id="budget-surcharge"
+          label="Recargo tarjeta de crédito (%)"
+          error={errors?.card_surcharge_percentage && 'El recargo debe estar entre 0 y 100'}
+        >
+          <Input
             id="budget-surcharge"
             type="number"
             min="0"
@@ -157,24 +145,19 @@ const BudgetGeneralSection = ({ control, register, setValue, errors, initialCust
             step="0.1"
             inputMode="decimal"
             {...register('card_surcharge_percentage', { min: 0, max: 100 })}
-            className={`${fieldClass} sm:max-w-32`}
+            className="sm:max-w-32"
           />
-          {errors?.card_surcharge_percentage && (
-            <p className="text-error text-xs mt-1">El recargo debe estar entre 0 y 100</p>
-          )}
-        </div>
+        </Field>
       </div>
 
-      <div>
-        <label htmlFor="budget-notes" className={labelClass}>Notas</label>
-        <textarea
+      <Field id="budget-notes" label="Notas">
+        <Textarea
           id="budget-notes"
           {...register('notes')}
           rows={2}
           placeholder="Observaciones..."
-          className={`${fieldClass} resize-none`}
         />
-      </div>
+      </Field>
     </section>
   );
 };

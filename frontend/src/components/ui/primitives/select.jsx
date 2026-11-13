@@ -3,6 +3,7 @@
 import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { ChevronDownIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { inputVariants } from "@ui/inputVariants"
 
 const Select = SelectPrimitive.Root
 
@@ -21,7 +22,9 @@ function SelectTrigger({ className, children, showIcon = true, ...props }) {
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       className={cn(
-        "flex w-full items-center justify-between gap-2 rounded-lg border border-input bg-surface-variant px-3 py-2 text-sm transition-colors outline-none hover:border-outline focus:border-primary data-popup-open:border-primary disabled:cursor-not-allowed disabled:opacity-50",
+        // Caja = la de los campos de texto (inputVariants); acá solo layout, hover y estado abierto
+        inputVariants(),
+        "flex items-center justify-between gap-2 hover:border-outline data-popup-open:border-primary",
         className
       )}
       {...props}

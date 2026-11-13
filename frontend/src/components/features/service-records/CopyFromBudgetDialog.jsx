@@ -3,6 +3,7 @@ import { AlertTriangle, FileText, Search } from 'lucide-react';
 import Dialog from '@ui/Dialog';
 import { useBudget, useBudgets } from '@services/budgetsService';
 import { formatCurrency } from '@utils/money';
+import Input from '@ui/Input';
 
 const DEBOUNCE_MS = 300;
 const PER_PAGE = 20;
@@ -112,18 +113,15 @@ const CopyFromBudgetDialog = ({ isOpen, onClose, customerId, hasFilledItems, onC
       submitDisabled={!budget}
     >
       <form id={formId} onSubmit={handleSubmit} className="space-y-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary pointer-events-none" />
-          <input
-            autoComplete="off"
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label="Buscar presupuesto"
-            placeholder="Buscar por cliente, vehículo o notas..."
-            className="w-full pl-9 pr-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary placeholder:text-secondary"
-          />
-        </div>
+        <Input
+          startIcon={Search}
+          autoComplete="off"
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          aria-label="Buscar presupuesto"
+          placeholder="Buscar por cliente, vehículo o notas..."
+        />
 
         <div
           role="radiogroup"

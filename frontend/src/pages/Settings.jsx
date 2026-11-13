@@ -21,7 +21,8 @@ import PageError from "@ui/PageError";
 import TimeInput from "@ui/TimeInput";
 import Switch from "@ui/Switch";
 import InstallmentPlansSection from "@components/features/settings/InstallmentPlansSection";
-import { Field, inputCls } from "@components/features/settings/SettingsField";
+import Field from "@ui/Field";
+import Input from "@ui/Input";
 
 const DAYS = [
   { key: "lunes", label: "Lunes" },
@@ -225,28 +226,25 @@ const Settings = () => {
                       label="Nombre del Lubricentro"
                       error={errors.lubricentro_name?.message}
                     >
-                      <input
+                      <Input
                         {...register("lubricentro_name")}
                         placeholder="Ej: Lubricentro El Rápido"
-                        className={inputCls}
                       />
                     </Field>
                   </div>
                   <Field label="CUIT / CUIL" error={errors.cuit?.message}>
-                    <input
+                    <Input
                       {...register("cuit")}
                       placeholder="20-12345678-9"
-                      className={inputCls}
                     />
                   </Field>
                   <Field
                     label="Nombre del Dueño"
                     error={errors.owner_name?.message}
                   >
-                    <input
+                    <Input
                       {...register("owner_name")}
                       placeholder="Nombre completo"
-                      className={inputCls}
                     />
                   </Field>
                 </div>
@@ -257,35 +255,31 @@ const Settings = () => {
                 <SectionTitle icon={Phone} title="Contacto" />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label="Teléfono fijo" error={errors.phone?.message}>
-                    <input
+                    <Input
                       {...register("phone")}
                       placeholder="Ej: 011-4523-1234"
-                      className={inputCls}
                     />
                   </Field>
                   <Field
                     label="Celular / WhatsApp"
                     error={errors.mobile?.message}
                   >
-                    <input
+                    <Input
                       {...register("mobile")}
                       placeholder="Ej: 11-5678-9012"
-                      className={inputCls}
                     />
                   </Field>
                   <Field label="Email" error={errors.email?.message}>
-                    <input
+                    <Input
                       {...register("email")}
                       type="email"
                       placeholder="Ej: lubricentro@gmail.com"
-                      className={inputCls}
                     />
                   </Field>
                   <Field label="Instagram" error={errors.instagram?.message}>
-                    <input
+                    <Input
                       {...register("instagram")}
                       placeholder="Ej: killamet.dolores (sin @)"
-                      className={inputCls}
                     />
                   </Field>
                 </div>
@@ -296,29 +290,26 @@ const Settings = () => {
                 <SectionTitle icon={MapPin} title="Ubicación" />
                 <div className="space-y-4">
                   <Field label="Dirección" error={errors.address?.message}>
-                    <input
+                    <Input
                       {...register("address")}
                       placeholder="Ej: Av. Corrientes 1234, CABA"
-                      className={inputCls}
                     />
                   </Field>
                   <div className="grid grid-cols-2 gap-4">
                     <Field label="Latitud" error={errors.latitude?.message}>
-                      <input
+                      <Input
                         {...register("latitude")}
                         type="number"
                         step="any"
                         placeholder="-34.603722"
-                        className={inputCls}
                       />
                     </Field>
                     <Field label="Longitud" error={errors.longitude?.message}>
-                      <input
+                      <Input
                         {...register("longitude")}
                         type="number"
                         step="any"
                         placeholder="-58.381592"
-                        className={inputCls}
                       />
                     </Field>
                   </div>
@@ -376,7 +367,8 @@ const Settings = () => {
                                 setDayTime(key, "from", value)
                               }
                               error={!!dayErrors?.from}
-                              className="w-[124px] h-[31px] px-2 py-1 bg-surface-container border border-outline-variant text-on-surface rounded text-sm focus:outline-none focus:border-primary"
+                              size="sm"
+                              className="w-[124px]"
                             />
                             <span className="text-secondary text-sm">a</span>
                             <TimeInput
@@ -384,7 +376,8 @@ const Settings = () => {
                               value={day.to}
                               onChange={(value) => setDayTime(key, "to", value)}
                               error={!!dayErrors?.to}
-                              className="w-[124px] h-[31px] px-2 py-1 bg-surface-container border border-outline-variant text-on-surface rounded text-sm focus:outline-none focus:border-primary"
+                              size="sm"
+                              className="w-[124px]"
                             />
                             {dayError && (
                               <p className="text-xs text-error">{dayError}</p>

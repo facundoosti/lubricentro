@@ -16,7 +16,7 @@ const renderCustomer = (customer) => (
 
 const searchIcon = (
   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-    <Search className="h-5 w-5 text-secondary" />
+    <Search className="size-4 text-secondary" />
   </div>
 );
 
@@ -27,7 +27,10 @@ const searchIcon = (
  * @param {Function} props.onChange - recibe el ID ('' al limpiar)
  * @param {Function} props.onSelect - recibe el cliente completo (null al limpiar)
  * @param {string} props.placeholder
- * @param {string} props.error - mensaje de error
+ * @param {string|boolean} props.error - mensaje de error (se muestra debajo) o `true` (solo marca el campo).
+ *   Dentro de `@ui/Field` el mensaje va en Field (`<Field error={...}>`): Field le pasa `error={true}`.
+ * @param {string} props.id - id del input (lo inyecta Field para asociar el label)
+ * @param {string} props['aria-describedby'] - id del mensaje de error/ayuda (lo inyecta Field)
  * @param {boolean} props.disabled
  * @param {Object} props.initialCustomer - cliente completo para prellenar (edición) sin pedirlo por ID
  * @param {Function} props.onCreateNew - si se pasa, ofrece "+ Crear cliente" con el texto buscado
@@ -41,6 +44,8 @@ const CustomerSearchInput = ({
   disabled = false,
   initialCustomer = null,
   onCreateNew = null,
+  id,
+  'aria-describedby': ariaDescribedBy,
 }) => {
   const [inputValue, setInputValue] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -112,13 +117,14 @@ const CustomerSearchInput = ({
     : null;
 
   const isDisabled = disabled || isLoadingInitialCustomer;
-  let borderClass = 'border-outline-variant';
-  if (error) borderClass = 'border-error';
-  else if (selectedCustomer) borderClass = 'border-tertiary';
+  // El borde de error lo da aria-invalid (inputVariants); verde solo con un cliente elegido y sin error.
+  const borderClass = !error && selectedCustomer && 'border-tertiary';
 
   return (
     <div>
       <Autocomplete
+        id={id}
+        aria-describedby={ariaDescribedBy}
         value={inputValue}
         onValueChange={handleInputChange}
         onSearch={setSearchTerm}
@@ -139,13 +145,16 @@ const CustomerSearchInput = ({
         placeholder={isLoadingInitialCustomer ? 'Cargando cliente...' : placeholder}
         disabled={isDisabled}
         error={!!error}
-        inputClassName={cn('h-11 pl-10', inputValue ? 'pr-16' : 'pr-10', borderClass)}
+        inputClassName={cn('pl-9', inputValue ? 'pr-16' : 'pr-10', borderClass)}
         contentClassName="max-h-60"
         itemClassName="px-4 py-2"
       />
-      {error && <p className="mt-1 text-sm text-error">{error}</p>}
+      {typeof error === 'string' && error && <p className="mt-1 text-sm text-error">{error}</p>}
     </div>
   );
 };
+
+// Field le inyecta id, error y aria-describedby.
+CustomerSearchInput.isFieldControl = true;
 
 export default CustomerSearchInput;

@@ -182,3 +182,15 @@ describe('DateInput', () => {
     expect(onBlur).toHaveBeenCalled();
   });
 });
+
+describe('DateInput — className', () => {
+  it('un className con padding no pisa el pr-10 que deja lugar al botón del calendario', () => {
+    render(<DateInput aria-label="Fecha" value="" onChange={() => {}} className="px-6 pr-4" />);
+    const input = screen.getByRole('textbox', { name: 'Fecha' });
+    // cn (tailwind-merge) conserva px-6 y agrega pr-10 después: el padding derecho queda en pr-10.
+    expect(input).toHaveClass('px-6', 'pr-10');
+    const classes = input.className.split(' ');
+    expect(classes.indexOf('pr-10')).toBeGreaterThan(classes.indexOf('px-6'));
+    expect(classes).not.toContain('pr-4');
+  });
+});

@@ -4,6 +4,9 @@ import { useForm, Controller } from 'react-hook-form';
 import { format } from 'date-fns';
 import PhotosUpload from '@ui/PhotosUpload';
 import DateInput from '@ui/DateInput';
+import Field from '@ui/Field';
+import Input from '@ui/Input';
+import Textarea from '@ui/Textarea';
 import { validInput } from '@/lib/maskedInput';
 import { ArrowLeft, Car, User, Search, X, ImageIcon, FileText } from 'lucide-react';
 import ItemsEditor from '@components/features/items/ItemsEditor';
@@ -263,12 +266,6 @@ const ServiceRecordFormPage = () => {
     }
   };
 
-  const fieldClass = (hasError) =>
-    `w-full px-3 py-2 bg-surface-variant border rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary placeholder:text-secondary ${
-      hasError ? 'border-error' : 'border-outline-variant'
-    }`;
-  const inputClass = fieldClass(false);
-
   const isLoadingInitial = (appointmentId && loadingAppointment) || (isEditing && loadingExisting);
 
   if (isLoadingInitial) {
@@ -349,16 +346,14 @@ const ServiceRecordFormPage = () => {
             /* Modo creación standalone: buscadores */
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Buscador de cliente */}
-              <div ref={customerRef}>
-                <label className="block text-sm font-medium text-on-surface mb-1">
-                  Cliente <span className="text-error">*</span>
-                </label>
-                <div className="relative">
+              <Field id="customer-search" label="Cliente" required error={errors.customer_id?.message}>
+                <div className="relative" ref={customerRef}>
                   <div className="relative flex items-center">
-                    <Search className="absolute left-3 w-4 h-4 text-secondary pointer-events-none" />
-                    <input
+                    <Input
+                      id="customer-search"
+                      startIcon={Search}
+                      containerClassName="w-full"
                       autoComplete="off"
-                      type="text"
                       value={customerSearch}
                       onChange={(e) => {
                         setCustomerSearch(e.target.value);
@@ -367,8 +362,8 @@ const ServiceRecordFormPage = () => {
                       }}
                       onFocus={() => setShowCustomerDropdown(true)}
                       placeholder="Buscar cliente..."
-                      className={`${fieldClass(!!errors.customer_id)} pl-9 pr-8`}
-                      aria-invalid={!!errors.customer_id}
+                      className="pr-8"
+                      error={!!errors.customer_id}
                       readOnly={!!selectedCustomer}
                     />
                     {selectedCustomer && (
@@ -408,22 +403,17 @@ const ServiceRecordFormPage = () => {
                   )}
                 </div>
                 <input type="hidden" {...register('customer_id', { required: 'El cliente es obligatorio' })} />
-                {errors.customer_id && (
-                  <p className="text-error text-xs mt-1">{errors.customer_id.message}</p>
-                )}
-              </div>
+              </Field>
 
               {/* Buscador de vehículo */}
-              <div ref={vehicleRef}>
-                <label className="block text-sm font-medium text-on-surface mb-1">
-                  Vehículo <span className="text-error">*</span>
-                </label>
-                <div className="relative">
+              <Field id="vehicle-search" label="Vehículo" required error={errors.vehicle_id?.message}>
+                <div className="relative" ref={vehicleRef}>
                   <div className="relative flex items-center">
-                    <Search className="absolute left-3 w-4 h-4 text-secondary pointer-events-none" />
-                    <input
+                    <Input
+                      id="vehicle-search"
+                      startIcon={Search}
+                      containerClassName="w-full"
                       autoComplete="off"
-                      type="text"
                       value={vehicleSearch}
                       onChange={(e) => {
                         setVehicleSearch(e.target.value);
@@ -433,8 +423,8 @@ const ServiceRecordFormPage = () => {
                       onFocus={() => { if (selectedCustomer) setShowVehicleDropdown(true); }}
                       placeholder={selectedCustomer ? 'Buscar vehículo...' : 'Primero seleccioná un cliente'}
                       disabled={!selectedCustomer}
-                      className={`${fieldClass(!!errors.vehicle_id)} pl-9 pr-8 disabled:opacity-50 disabled:cursor-not-allowed`}
-                      aria-invalid={!!errors.vehicle_id}
+                      className="pr-8"
+                      error={!!errors.vehicle_id}
                       readOnly={!!selectedVehicle}
                     />
                     {selectedVehicle && (
@@ -480,10 +470,7 @@ const ServiceRecordFormPage = () => {
                   )}
                 </div>
                 <input type="hidden" {...register('vehicle_id', { required: 'El vehículo es obligatorio' })} />
-                {errors.vehicle_id && (
-                  <p className="text-error text-xs mt-1">{errors.vehicle_id.message}</p>
-                )}
-              </div>
+              </Field>
             </div>
           )}
 
@@ -491,10 +478,7 @@ const ServiceRecordFormPage = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Fecha de atención */}
-            <div>
-              <label id="service-date-label" className="block text-sm font-medium text-on-surface mb-1">
-                Fecha de atención <span className="text-error">*</span>
-              </label>
+            <Field id="service-date" label="Fecha de atención" required error={errors.service_date?.message}>
               <Controller
                 name="service_date"
                 control={control}
@@ -506,41 +490,28 @@ const ServiceRecordFormPage = () => {
                     value={field.value}
                     onChange={field.onChange}
                     onBlur={field.onBlur}
+                    id="service-date"
                     aria-labelledby="service-date-label"
                     error={!!errors.service_date}
-                    className={inputClass}
                   />
                 )}
               />
-              {errors.service_date && (
-                <p className="text-error text-xs mt-1">{errors.service_date.message}</p>
-              )}
-            </div>
+            </Field>
 
             {/* Kilometraje */}
-            <div>
-              <label className="block text-sm font-medium text-on-surface mb-1">
-                Kilometraje
-              </label>
-              <input
+            <Field label="Kilometraje" error={errors.mileage?.message}>
+              <Input
                 type="number"
                 min="1"
                 placeholder="Ej: 85000"
                 {...register('mileage', {
                   min: { value: 1, message: 'El kilometraje debe ser mayor a 0' },
                 })}
-                className={inputClass}
               />
-              {errors.mileage && (
-                <p className="text-error text-xs mt-1">{errors.mileage.message}</p>
-              )}
-            </div>
+            </Field>
 
             {/* Próximo servicio */}
-            <div>
-              <label id="next-service-date-label" className="block text-sm font-medium text-on-surface mb-1">
-                Próximo servicio
-              </label>
+            <Field id="next-service-date" label="Próximo servicio" error={errors.next_service_date?.message}>
               <Controller
                 name="next_service_date"
                 control={control}
@@ -552,30 +523,23 @@ const ServiceRecordFormPage = () => {
                     value={field.value}
                     onChange={field.onChange}
                     onBlur={field.onBlur}
+                    id="next-service-date"
                     aria-labelledby="next-service-date-label"
                     error={!!errors.next_service_date}
-                    className={inputClass}
                   />
                 )}
               />
-              {errors.next_service_date && (
-                <p className="text-error text-xs mt-1">{errors.next_service_date.message}</p>
-              )}
-            </div>
+            </Field>
           </div>
 
           {/* Notas */}
-          <div>
-            <label className="block text-sm font-medium text-on-surface mb-1">
-              Notas
-            </label>
-            <textarea
+          <Field label="Notas">
+            <Textarea
               rows={3}
               placeholder="Observaciones, trabajos realizados..."
               {...register('notes')}
-              className={`${inputClass} resize-none`}
             />
-          </div>
+          </Field>
         </div>
 
         <ItemsEditor

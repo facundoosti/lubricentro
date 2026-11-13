@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useId } from 'react';
 import { useProducts } from '@services/productsService';
 import { useServices } from '@services/servicesService';
 import { Search, X } from 'lucide-react';
+import Input from '@ui/Input';
 import { DEFAULT_IVA_RATE, formatIvaRate, priceWithIva, toIvaRate } from '@utils/iva';
 import { formatCurrency } from '@utils/money';
 import { DEFAULT_PRODUCT_MARGIN } from '@utils/budgetMath';
@@ -166,13 +167,11 @@ const ItemSearchInput = ({ value, onSelect, onChange, inputRef }) => {
   return (
     <div ref={wrapperRef} className="relative">
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-          <Search className="h-3.5 w-3.5 text-secondary" />
-        </div>
-        <input
+        <Input
+          size="sm"
+          startIcon={Search}
           autoComplete="off"
           ref={inputRef}
-          type="text"
           role="combobox"
           aria-label="Producto o servicio"
           aria-expanded={showList}
@@ -184,7 +183,7 @@ const ItemSearchInput = ({ value, onSelect, onChange, inputRef }) => {
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder="Buscar producto o servicio..."
-          className="w-full pl-7 pr-6 py-1.5 bg-surface-variant border border-outline-variant rounded text-on-surface text-sm focus:outline-none focus:border-primary placeholder:text-secondary"
+          className="pr-6"
         />
         {inputValue && (
           <button

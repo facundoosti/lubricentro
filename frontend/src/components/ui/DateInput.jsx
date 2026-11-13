@@ -2,6 +2,7 @@ import { lazy, Suspense, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { inputVariants } from '@ui/inputVariants';
 import { formatDateDigits, parseDisplayDate, isoToDisplay, isoToDate, INVALID_INPUT } from '@/lib/maskedInput';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/primitives/popover';
 import { useDialogPortalContainer } from '@ui/dialogContext';
@@ -29,7 +30,8 @@ const inRange = (iso, min, max) => (!min || iso >= min) && (!max || iso <= max);
  * @param {(iso: string) => void} onChange - recibe 'yyyy-MM-dd', '' o INVALID_INPUT
  * @param {string} [min] / [max] - 'yyyy-MM-dd'
  * @param {boolean} [error] - borde en rojo (error del formulario)
- * @param {string} [className] - clases del input (las del campo que reemplaza)
+ * @param {'default'|'sm'} [size] - tamaño de la caja (`inputVariants`)
+ * @param {string} [className] - clases extra del input, combinadas con `cn` sobre `inputVariants`
  * @param {string} [containerClassName] - clases del contenedor (ancho)
  */
 const DateInput = ({
@@ -40,11 +42,13 @@ const DateInput = ({
   name,
   'aria-labelledby': ariaLabelledBy,
   'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
   error = false,
   disabled = false,
   min,
   max,
   placeholder = 'dd/mm/aaaa',
+  size = 'default',
   className,
   containerClassName,
   ref,
@@ -122,13 +126,14 @@ const DateInput = ({
         name={name}
         aria-labelledby={ariaLabelledBy}
         aria-label={ariaLabel}
+        aria-describedby={ariaDescribedBy}
         aria-invalid={error || invalid || undefined}
         placeholder={placeholder}
         disabled={disabled}
         value={text}
         onChange={handleChange}
         onBlur={handleBlur}
-        className={cn(className, 'pr-10', (error || invalid) && 'border-error')}
+        className={cn(inputVariants({ size }), className, 'pr-10', (error || invalid) && 'border-error')}
       />
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger
@@ -159,5 +164,8 @@ const DateInput = ({
     </div>
   );
 };
+
+// Field le inyecta id, error y aria-describedby.
+DateInput.isFieldControl = true;
 
 export default DateInput;

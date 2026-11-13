@@ -96,9 +96,9 @@ describe('ServiceRecordFormPage — validación de cliente y vehículo', () => {
     const customer = screen.getByPlaceholderText('Buscar cliente...');
     const vehicle = screen.getByPlaceholderText('Primero seleccioná un cliente');
     [customer, vehicle].forEach((el) => {
+      // El borde rojo sale de aria-invalid:border-error (inputVariants)
       expect(el).toHaveAttribute('aria-invalid', 'true');
-      expect(el.className).toMatch(/\bborder-error\b/);
-      expect(el.className).not.toMatch(/\bborder-outline-variant\b/);
+      expect(el).toHaveClass('aria-invalid:border-error');
     });
   });
 });

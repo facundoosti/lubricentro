@@ -13,7 +13,7 @@ const sources = import.meta.glob(['/src/**/*.jsx', '!/src/**/__tests__/**'], {
 
 const searchInputsWithoutAutocompleteOff = () =>
   Object.entries(sources).flatMap(([file, code]) =>
-    (code.match(/<input\b[\s\S]*?\/>/g) || [])
+    (code.match(/<[iI]nput\b[\s\S]*?\/>/g) || [])
       .filter((tag) => /placeholder=[\s\S]*Buscar/.test(tag) || /value=\{\w*[sS]earch/.test(tag) || (/Search[^/]*\.jsx$/.test(file) && /placeholder=/.test(tag)))
       .filter((tag) => !/autoComplete="off"/.test(tag))
       .map((tag) => `${file}: ${tag.match(/placeholder=[^\n]*/)[0]}`),

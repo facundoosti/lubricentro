@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import ProductPriceCell from '@components/features/products/ProductPriceCell';
 import ImageLightbox from '@ui/ImageLightbox';
+import Input from '@ui/Input';
 
 const buildCategoryOptions = (categories) => {
   const byParent = {};
@@ -162,14 +163,13 @@ const ProductsTable = ({
       <div className="flex flex-col sm:flex-row gap-3">
         {/* Search */}
         <div className="relative flex-1 min-w-0">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary" />
-          <input
+          <Input
+            startIcon={Search}
             autoComplete="off"
-            type="text"
             placeholder="Buscar por nombre..."
             value={localSearch}
             onChange={handleSearchChange}
-            className="w-full pl-9 pr-8 py-2 text-sm bg-surface-variant border border-outline-variant rounded-lg text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="pr-8"
           />
           {localSearch && (
             <button onClick={handleClearSearch} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface">

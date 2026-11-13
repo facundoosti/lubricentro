@@ -2,6 +2,7 @@
 // No se importa desde features/ ni pages/: usar el wrapper @ui/Autocomplete.
 import { Autocomplete as AutocompletePrimitive } from "@base-ui/react/autocomplete"
 import { cn } from "@/lib/utils"
+import { inputVariants } from "@ui/inputVariants"
 import { useDialogPortalContainer } from "@ui/dialogContext"
 
 const Autocomplete = AutocompletePrimitive.Root
@@ -11,15 +12,13 @@ const AutocompleteClear = AutocompletePrimitive.Clear
 // menos el input y el Trigger; Clear queda oculto pero con tabIndex -1 (no enfocable) y clickeable.
 const AutocompleteInputGroup = AutocompletePrimitive.InputGroup
 
-function AutocompleteInput({ className, ...props }) {
+// Caja = la de los campos de texto (inputVariants), con el mismo foco y error.
+function AutocompleteInput({ className, size = "default", ...props }) {
   return (
     <AutocompletePrimitive.Input
       data-slot="autocomplete-input"
       autoComplete="off"
-      className={cn(
-        "w-full rounded-lg border border-outline-variant bg-surface-variant text-sm text-on-surface placeholder:text-secondary focus:border-transparent focus:ring-2 focus:ring-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
-        className
-      )}
+      className={cn(inputVariants({ size }), className)}
       {...props}
     />
   )

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { inputVariants } from '@ui/inputVariants';
 import { formatTimeDigits, parseDisplayTime, INVALID_INPUT } from '@/lib/maskedInput';
 
 /**
@@ -10,7 +11,8 @@ import { formatTimeDigits, parseDisplayTime, INVALID_INPUT } from '@/lib/maskedI
  * @param {string} value - 'HH:mm', '' o INVALID_INPUT
  * @param {(time: string) => void} onChange - recibe 'HH:mm', '' o INVALID_INPUT
  * @param {boolean} [error]
- * @param {string} [className] - clases del input
+ * @param {'default'|'sm'} [size] - tamaño de la caja (`inputVariants`)
+ * @param {string} [className] - clases extra del input, combinadas con `cn` sobre `inputVariants`
  */
 const TimeInput = ({
   value,
@@ -20,9 +22,11 @@ const TimeInput = ({
   name,
   'aria-labelledby': ariaLabelledBy,
   'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
   error = false,
   disabled = false,
   placeholder = 'hh:mm',
+  size = 'default',
   className,
   ref,
 }) => {
@@ -66,15 +70,19 @@ const TimeInput = ({
       name={name}
       aria-labelledby={ariaLabelledBy}
       aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
       aria-invalid={error || invalid || undefined}
       placeholder={placeholder}
       disabled={disabled}
       value={text}
       onChange={handleChange}
       onBlur={handleBlur}
-      className={cn(className, (error || invalid) && 'border-error')}
+      className={cn(inputVariants({ size }), className, (error || invalid) && 'border-error')}
     />
   );
 };
+
+// Field le inyecta id, error y aria-describedby.
+TimeInput.isFieldControl = true;
 
 export default TimeInput;

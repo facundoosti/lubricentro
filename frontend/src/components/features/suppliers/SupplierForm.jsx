@@ -1,4 +1,7 @@
 import { useForm } from 'react-hook-form';
+import Field from '@ui/Field';
+import Input from '@ui/Input';
+import Textarea from '@ui/Textarea';
 
 const SupplierForm = ({ supplier = null, onSubmit, formId = 'supplier-form' }) => {
   const {
@@ -22,69 +25,43 @@ const SupplierForm = ({ supplier = null, onSubmit, formId = 'supplier-form' }) =
     reset();
   };
 
-  const inputClass = (hasError) =>
-    `w-full px-3 py-2 bg-surface-variant border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface placeholder:text-secondary ${
-      hasError ? 'border-error' : 'border-outline-variant'
-    }`;
-
   return (
     <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Nombre */}
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-            Nombre *
-          </label>
-          <input
-            type="text"
+        <Field label="Nombre" required error={errors.name?.message} className="md:col-span-2">
+          <Input
             {...register('name', {
               required: 'El nombre es requerido',
               maxLength: { value: 150, message: 'Máximo 150 caracteres' },
             })}
-            className={inputClass(errors.name)}
             placeholder="Ej: Distribuidora Norte SA"
           />
-          {errors.name && <p className="mt-1 text-sm text-error">{errors.name.message}</p>}
-        </div>
+        </Field>
 
         {/* CUIT */}
-        <div>
-          <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-            CUIT
-          </label>
-          <input
-            type="text"
+        <Field label="CUIT" error={errors.cuit?.message}>
+          <Input
             {...register('cuit', {
               maxLength: { value: 20, message: 'Máximo 20 caracteres' },
             })}
-            className={inputClass(errors.cuit)}
             placeholder="Ej: 30-12345678-9"
           />
-          {errors.cuit && <p className="mt-1 text-sm text-error">{errors.cuit.message}</p>}
-        </div>
+        </Field>
 
         {/* Teléfono */}
-        <div>
-          <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-            Teléfono
-          </label>
-          <input
-            type="text"
+        <Field label="Teléfono" error={errors.phone?.message}>
+          <Input
             {...register('phone', {
               maxLength: { value: 30, message: 'Máximo 30 caracteres' },
             })}
-            className={inputClass(errors.phone)}
             placeholder="Ej: +54 11 1234-5678"
           />
-          {errors.phone && <p className="mt-1 text-sm text-error">{errors.phone.message}</p>}
-        </div>
+        </Field>
 
         {/* Email */}
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-            Email
-          </label>
-          <input
+        <Field label="Email" error={errors.email?.message} className="md:col-span-2">
+          <Input
             type="email"
             {...register('email', {
               maxLength: { value: 100, message: 'Máximo 100 caracteres' },
@@ -93,40 +70,28 @@ const SupplierForm = ({ supplier = null, onSubmit, formId = 'supplier-form' }) =
                 message: 'Email inválido',
               },
             })}
-            className={inputClass(errors.email)}
             placeholder="Ej: ventas@proveedor.com"
           />
-          {errors.email && <p className="mt-1 text-sm text-error">{errors.email.message}</p>}
-        </div>
+        </Field>
 
         {/* Dirección */}
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-            Dirección
-          </label>
-          <input
-            type="text"
+        <Field label="Dirección" error={errors.address?.message} className="md:col-span-2">
+          <Input
             {...register('address', {
               maxLength: { value: 200, message: 'Máximo 200 caracteres' },
             })}
-            className={inputClass(errors.address)}
             placeholder="Ej: Av. Corrientes 1234, CABA"
           />
-          {errors.address && <p className="mt-1 text-sm text-error">{errors.address.message}</p>}
-        </div>
+        </Field>
 
         {/* Notas */}
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-on-surface-variant mb-1.5">
-            Notas
-          </label>
-          <textarea
+        <Field label="Notas" className="md:col-span-2">
+          <Textarea
             rows={3}
             {...register('notes')}
-            className={inputClass(false)}
             placeholder="Observaciones adicionales..."
           />
-        </div>
+        </Field>
       </div>
     </form>
   );

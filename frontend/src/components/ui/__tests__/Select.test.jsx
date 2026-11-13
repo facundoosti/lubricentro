@@ -164,3 +164,15 @@ describe('Select — scroll con la lista abierta', () => {
     expect(container.querySelector('svg')).toBeNull();
   });
 });
+
+describe('Select — aria-describedby', () => {
+  it('reenvía aria-describedby al trigger', () => {
+    render(
+      <>
+        <Select aria-label="IVA" aria-describedby="iva-message" options={HOURS} value="" onChange={() => {}} />
+        <p id="iva-message">Elegí una alícuota</p>
+      </>,
+    );
+    expect(screen.getByRole('combobox', { name: 'IVA' })).toHaveAttribute('aria-describedby', 'iva-message');
+  });
+});

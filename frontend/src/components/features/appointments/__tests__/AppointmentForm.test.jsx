@@ -38,6 +38,20 @@ describe('AppointmentForm — errores de validación', () => {
     await waitFor(() => expect(customer).toHaveAttribute('aria-invalid', 'true'));
     expect(customer.className).toMatch(/\bborder-error\b/);
   });
+
+  it('el error de "Cliente" se muestra una sola vez y queda referenciado por el buscador', async () => {
+    submitEmpty();
+    const [message] = await screen.findAllByText('Cliente es requerido');
+    expect(screen.getAllByText('Cliente es requerido')).toHaveLength(1);
+    expect(screen.getByLabelText(/^Cliente/)).toHaveAttribute('aria-describedby', message.id);
+  });
+});
+
+describe('AppointmentForm — Cliente', () => {
+  it('el label "Cliente" queda asociado al input del buscador', () => {
+    renderWithProviders(<AppointmentForm onSubmit={vi.fn()} />);
+    expect(screen.getByLabelText(/^Cliente/)).toBe(screen.getByPlaceholderText('Buscar cliente por nombre o correo...'));
+  });
 });
 
 describe('AppointmentForm — Vehículo', () => {

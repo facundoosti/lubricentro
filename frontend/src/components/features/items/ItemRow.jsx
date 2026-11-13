@@ -2,12 +2,10 @@ import { useWatch } from 'react-hook-form';
 import { Trash2 } from 'lucide-react';
 import ItemSearchInput from '@components/features/items/ItemSearchInput';
 import IvaRateSelect from '@components/features/items/IvaRateSelect';
+import Input from '@ui/Input';
 import { ivaRateToOption } from '@utils/iva';
 import { lineGrossTotal } from '@utils/budgetMath';
 import { formatCurrency } from '@utils/money';
-
-const inputClass =
-  'w-full px-2 py-1.5 bg-surface-variant border border-outline-variant rounded text-on-surface text-sm focus:outline-none focus:border-primary';
 
 // Etiqueta visible solo en mobile (en md+ la da el encabezado de la tabla).
 const MobileLabel = ({ htmlFor, children }) => (
@@ -91,7 +89,7 @@ const ItemRow = ({ name, index, control, register, setValue, errors, onRemove, o
 
       <div className="md:order-1">
         <MobileLabel htmlFor={ids.qty}>Cantidad</MobileLabel>
-        <input
+        <Input
           id={ids.qty}
           type="number"
           min="0.01"
@@ -99,15 +97,16 @@ const ItemRow = ({ name, index, control, register, setValue, errors, onRemove, o
           inputMode="decimal"
           aria-label={`Cantidad línea ${index + 1}`}
           onKeyDown={handleKeyDown}
-          aria-invalid={!!errors?.quantity}
+          size="sm"
+          error={!!errors?.quantity}
           {...register(`${prefix}.quantity`, { validate: validateQuantity(name, index) })}
-          className={`${inputClass} text-center ${errors?.quantity ? 'border-error' : ''}`}
+          className="text-center"
         />
       </div>
 
       <div className="md:order-3">
         <MobileLabel htmlFor={ids.price}>Precio unit. (sin IVA)</MobileLabel>
-        <input
+        <Input
           id={ids.price}
           type="number"
           min="0"
@@ -115,15 +114,16 @@ const ItemRow = ({ name, index, control, register, setValue, errors, onRemove, o
           inputMode="decimal"
           aria-label={`Precio unitario línea ${index + 1}`}
           onKeyDown={handleKeyDown}
-          aria-invalid={!!errors?.unit_price}
+          size="sm"
+          error={!!errors?.unit_price}
           {...register(`${prefix}.unit_price`, { validate: validateAmount(name, index, 'Precio inválido') })}
-          className={`${inputClass} text-right ${errors?.unit_price ? 'border-error' : ''}`}
+          className="text-right"
         />
       </div>
 
       <div className="md:order-4">
         <MobileLabel htmlFor={ids.margin}>% Ganancia</MobileLabel>
-        <input
+        <Input
           id={ids.margin}
           type="number"
           min="0"
@@ -132,9 +132,10 @@ const ItemRow = ({ name, index, control, register, setValue, errors, onRemove, o
           inputMode="decimal"
           aria-label={`% Ganancia línea ${index + 1}`}
           onKeyDown={handleKeyDown}
-          aria-invalid={!!errors?.margin_percentage}
+          size="sm"
+          error={!!errors?.margin_percentage}
           {...register(`${prefix}.margin_percentage`, { validate: validateMargin(name, index) })}
-          className={`${inputClass} text-right ${errors?.margin_percentage ? 'border-error' : ''}`}
+          className="text-right"
         />
       </div>
 

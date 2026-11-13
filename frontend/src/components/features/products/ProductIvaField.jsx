@@ -1,5 +1,6 @@
 import { Controller } from 'react-hook-form';
 import Select from '@ui/Select';
+import Field from '@ui/Field';
 import { PRODUCT_IVA_OPTIONS, priceWithIva } from '@utils/iva';
 import { formatCurrency } from '@utils/money';
 
@@ -8,10 +9,7 @@ const ProductIvaField = ({ control, unitPrice, ivaRate, className }) => {
   const hasPrice = unitPrice !== '' && !Number.isNaN(parseFloat(unitPrice));
 
   return (
-    <div>
-      <label id="iva_rate-label" htmlFor="iva_rate" className="block text-sm font-medium text-on-surface mb-1.5">
-        IVA
-      </label>
+    <Field id="iva_rate" label="IVA">
       <Controller
         name="iva_rate"
         control={control}
@@ -27,11 +25,11 @@ const ProductIvaField = ({ control, unitPrice, ivaRate, className }) => {
         )}
       />
       {hasPrice && (
-        <p className="mt-1 text-xs text-on-surface-variant" data-testid="price-with-iva">
+        <p className="text-xs text-on-surface-variant" data-testid="price-with-iva">
           Con IVA: <span className="font-medium text-on-surface">{formatCurrency(priceWithIva(unitPrice, ivaRate))}</span>
         </p>
       )}
-    </div>
+    </Field>
   );
 };
 

@@ -4,8 +4,9 @@ import { Link } from 'react-router-dom';
 import { AlertTriangle, ChevronDown } from 'lucide-react';
 import ImageUpload from '@ui/ImageUpload';
 import Select from '@ui/Select';
+import Field from '@ui/Field';
+import Input from '@ui/Input';
 import { useCustomersByPhone } from '@services/customersService';
-import { inputClass, labelClass } from '@utils/formStyles';
 
 const EMPTY_CUSTOMER = { name: '', phone: '', email: '', address: '', cuit: '', invoice_type: '' };
 
@@ -65,95 +66,73 @@ const CustomerForm = ({ onSubmit, initialData = null, formId = 'customer-form' }
   return (
     <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" noValidate>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div>
-          <label htmlFor="name" className={labelClass}>Nombre completo *</label>
-          <input
+        <Field label="Nombre completo" required error={errors.name?.message}>
+          <Input
             {...register('name', {
               required: 'El nombre es requerido',
               minLength: { value: 2, message: 'El nombre debe tener al menos 2 caracteres' },
             })}
-            type="text"
             id="name"
             autoComplete="off"
-            className={inputClass(!!errors.name)}
             placeholder="Ej: Juan Pérez"
           />
-          {errors.name && <p className="mt-1 text-xs text-error">{errors.name.message}</p>}
-        </div>
+        </Field>
 
-        <div>
-          <label htmlFor="phone" className={labelClass}>Teléfono *</label>
-          <input
+        <Field label="Teléfono" required error={errors.phone?.message}>
+          <Input
             {...phoneField}
             onBlur={(e) => { phoneField.onBlur(e); setPhoneToCheck(e.target.value.trim()); }}
             type="tel"
             id="phone"
             autoComplete="off"
-            className={inputClass(!!errors.phone)}
             placeholder="Ej: 11 5555-1234"
           />
-          {errors.phone && <p className="mt-1 text-xs text-error">{errors.phone.message}</p>}
           {!errors.phone && duplicate && <DuplicatePhoneWarning customer={duplicate} />}
-        </div>
+        </Field>
 
-        <div>
-          <label htmlFor="email" className={labelClass}>Email</label>
-          <input
+        <Field label="Email" error={errors.email?.message}>
+          <Input
             {...register('email', {
               pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: 'Ingresá un email válido' },
             })}
             type="email"
             id="email"
-            className={inputClass(!!errors.email)}
             placeholder="Opcional"
           />
-          {errors.email && <p className="mt-1 text-xs text-error">{errors.email.message}</p>}
-        </div>
+        </Field>
 
-        <div>
-          <label htmlFor="address" className={labelClass}>Dirección</label>
-          <input
-            {...register('address')}
-            type="text"
-            id="address"
-            className={inputClass(false)}
-            placeholder="Opcional"
-          />
-        </div>
+        <Field label="Dirección">
+          <Input {...register('address')} id="address" placeholder="Opcional" />
+        </Field>
 
-        <div>
-          <label htmlFor="cuit" className={labelClass}>CUIT</label>
-          <input
+        <Field label="CUIT" error={errors.cuit?.message}>
+          <Input
             {...register('cuit', {
               setValueAs: (v) => (v ?? '').trim(),
               validate: (v) => !v || CUIT_PATTERN.test(v) || 'Ingresá 11 dígitos (ej: 20-28456123-4)',
             })}
-            type="text"
             id="cuit"
             inputMode="numeric"
             autoComplete="off"
-            className={inputClass(!!errors.cuit)}
             placeholder="Opcional"
           />
-          {errors.cuit && <p className="mt-1 text-xs text-error">{errors.cuit.message}</p>}
-        </div>
+        </Field>
 
-        <div>
-          <label id="invoice_type-label" className={labelClass}>Tipo de factura</label>
+        <Field id="invoice_type" label="Tipo de factura">
           <Controller
             name="invoice_type"
             control={control}
             render={({ field }) => (
               <Select
+                id="invoice_type"
                 aria-labelledby="invoice_type-label"
                 options={INVOICE_TYPE_OPTIONS}
                 value={field.value || NO_INVOICE_TYPE}
                 onChange={(v) => field.onChange(v === NO_INVOICE_TYPE ? '' : v)}
-                className={`${inputClass(false)} h-[41px] bg-transparent text-base`}
               />
             )}
           />
-        </div>
+        </Field>
       </div>
 
       <details className="group rounded-lg border border-outline-variant">

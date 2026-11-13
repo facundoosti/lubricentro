@@ -25,6 +25,7 @@ import {
  * @param {string} [id]
  * @param {string} [aria-labelledby]
  * @param {string} [aria-label] - nombre accesible sin etiqueta visible
+ * @param {string} [aria-describedby] - id del mensaje de error/ayuda (lo pasa Field)
  * @param {boolean} [showIcon=true] - flecha del trigger (false en el badge de estado del presupuesto)
  * @param {string} [className] - clases extra del trigger
  * @param {string} [valueClassName] - clases del texto elegido (ej. `text-inherit` para heredar el color del trigger)
@@ -41,6 +42,7 @@ const Select = ({
   id,
   'aria-labelledby': ariaLabelledBy,
   'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
   showIcon = true,
   className,
   contentClassName,
@@ -64,6 +66,7 @@ const Select = ({
         id={id}
         aria-labelledby={ariaLabelledBy}
         aria-label={ariaLabel}
+        aria-describedby={ariaDescribedBy}
         showIcon={showIcon}
         aria-invalid={error || undefined}
         className={cn(error && 'border-error hover:border-error data-popup-open:border-error', className)}
@@ -82,5 +85,8 @@ const Select = ({
     </SelectRoot>
   );
 };
+
+// Field le inyecta id, error y aria-describedby.
+Select.isFieldControl = true;
 
 export default Select;

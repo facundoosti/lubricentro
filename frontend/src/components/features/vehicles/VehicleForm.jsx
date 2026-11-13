@@ -6,10 +6,11 @@ import CustomerModal from '@components/features/customers/CustomerModal';
 import PlateStatus from '@components/features/vehicles/PlateStatus';
 import ImageUpload from '@ui/ImageUpload';
 import Select from '@ui/Select';
+import Field from '@ui/Field';
+import Input from '@ui/Input';
 import { useVehiclePlate } from '@hooks/useVehiclePlate';
 import { useCreateCustomer } from '@services/customersService';
 import { showCustomerSuccess, showCustomerError, parseApiError } from '@services/notificationService';
-import { inputClass, labelClass } from '@utils/formStyles';
 
 export const MIN_VEHICLE_YEAR = 1950;
 const AUTOFILL_FIELDS = ['brand', 'model', 'year'];
@@ -143,13 +144,12 @@ const VehicleForm = ({
     const year = String(currentYear - i);
     return { value: year, label: year };
   });
-  const autoFieldClass = (field) => `${inputClass(!!errors[field])} transition-opacity ${isLookingUp ? 'opacity-50' : ''}`;
-  const autoLabel = (field, text) => (
-    <label id={`${field}-label`} htmlFor={field} className={labelClass}>
-      {text}
+  const autoFieldClass = `transition-opacity ${isLookingUp ? 'opacity-50' : ''}`;
+  const autoLabelAddon = (field) => (
+    <>
       {autoFilled[field] && !isLookingUp && <AutoFilledBadge />}
       {isLookingUp && <Loader2 className="w-3 h-3 animate-spin text-primary" />}
-    </label>
+    </>
   );
 
   return (
@@ -157,15 +157,14 @@ const VehicleForm = ({
       <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" noValidate>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Patente */}
-          <div className="md:col-span-2">
-            <label htmlFor="license_plate" className={labelClass}>Patente *</label>
+          <Field id="license_plate" label="Patente" required error={errors.license_plate?.message} className="md:col-span-2">
             <div className="relative">
-              <input
-                type="text"
+              <Input
                 id="license_plate"
                 {...plateReg}
                 onChange={handlePlateChange}
-                className={`${inputClass(!!errors.license_plate || !!conflict)} font-mono uppercase pr-11`}
+                error={!!errors.license_plate || !!conflict}
+                className="font-mono uppercase pr-11"
                 placeholder="Ej: ABC123, AB 123 CD"
                 autoComplete="off"
               />
@@ -180,50 +179,39 @@ const VehicleForm = ({
                 {isLookingUp ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               </button>
             </div>
-            {errors.license_plate ? (
-              <p className="mt-1 text-sm text-error">{errors.license_plate.message}</p>
-            ) : (
-              <PlateStatus conflict={conflict} lookupStatus={lookupStatus} />
-            )}
-          </div>
+            {!errors.license_plate && <PlateStatus conflict={conflict} lookupStatus={lookupStatus} />}
+          </Field>
 
           {/* Marca */}
-          <div>
-            {autoLabel('brand', 'Marca *')}
-            <input
-              type="text"
+          <Field id="brand" label="Marca" required error={errors.brand?.message} labelAddon={autoLabelAddon('brand')}>
+            <Input
               id="brand"
               {...fieldRegister('brand', {
                 required: 'La marca es requerida',
                 minLength: { value: 2, message: 'La marca debe tener al menos 2 caracteres' },
                 maxLength: { value: 50, message: 'La marca no puede exceder 50 caracteres' },
               })}
-              className={autoFieldClass('brand')}
+              className={autoFieldClass}
               placeholder="Ej: Toyota, Ford, Honda..."
             />
-            {errors.brand && <p className="mt-1 text-sm text-error">{errors.brand.message}</p>}
-          </div>
+          </Field>
 
           {/* Modelo */}
-          <div>
-            {autoLabel('model', 'Modelo *')}
-            <input
-              type="text"
+          <Field id="model" label="Modelo" required error={errors.model?.message} labelAddon={autoLabelAddon('model')}>
+            <Input
               id="model"
               {...fieldRegister('model', {
                 required: 'El modelo es requerido',
                 minLength: { value: 2, message: 'El modelo debe tener al menos 2 caracteres' },
                 maxLength: { value: 50, message: 'El modelo no puede exceder 50 caracteres' },
               })}
-              className={autoFieldClass('model')}
+              className={autoFieldClass}
               placeholder="Ej: Corolla, Focus, Civic..."
             />
-            {errors.model && <p className="mt-1 text-sm text-error">{errors.model.message}</p>}
-          </div>
+          </Field>
 
           {/* Año */}
-          <div>
-            {autoLabel('year', 'Año *')}
+          <Field id="year" label="Año" required error={errors.year?.message} labelAddon={autoLabelAddon('year')}>
             <Controller
               name="year"
               control={control}
@@ -247,26 +235,23 @@ const VehicleForm = ({
                   }}
                   placeholder="Seleccionar año"
                   error={!!errors.year}
-                  className={autoFieldClass('year')}
+                  className={autoFieldClass}
                 />
               )}
             />
-            {errors.year && <p className="mt-1 text-sm text-error">{errors.year.message}</p>}
-          </div>
+          </Field>
 
           {/* Cliente */}
-          <div className="md:col-span-2">
-            <label htmlFor="customer_id" className={labelClass}>Cliente *</label>
+          <Field id="customer_id" label="Cliente" required className="md:col-span-2" error={errors.customer_id?.message}>
             <CustomerSearchInput
               value={selectedCustomerId}
               onSelect={handleCustomerSelect}
-              error={errors.customer_id?.message}
               disabled={isLoading || !!customerId}
               initialCustomer={createdCustomer || vehicle?.customer || initialCustomer}
               onCreateNew={customerId ? null : setNewCustomerName}
             />
             <input type="hidden" {...register('customer_id', { required: 'El cliente es requerido' })} />
-          </div>
+          </Field>
         </div>
 
         <ImageUpload label="Foto del Vehículo" currentUrl={vehicle?.image_url} onChange={setImageFile} />

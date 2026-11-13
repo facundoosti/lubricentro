@@ -81,6 +81,23 @@ export default [
           selector: "JSXOpeningElement[name.name='input'] > JSXAttribute[name.name='type'][value.value='checkbox']",
           message: 'No uses <input type="checkbox">: usá @ui/Checkbox (con indeterminate).',
         },
+        {
+          selector: "JSXOpeningElement[name.name='textarea']",
+          message: 'No uses <textarea> nativo: usá @ui/Textarea (con @ui/Field para el label).',
+        },
+        {
+          selector: "JSXOpeningElement[name.name='input']:not(:has(JSXAttribute[name.name='type']))",
+          message: 'No uses <input> nativo: usá @ui/Input (con @ui/Field para el label).',
+        },
+        {
+          selector: "JSXOpeningElement[name.name='input']:has(JSXAttribute[name.name='type'][value.value=/^(text|number|email|password|search|tel|url)$/])",
+          message: 'No uses <input> de texto nativo: usá @ui/Input (con @ui/Field para el label).',
+        },
+        {
+          // type={expr}: no se puede saber si es de texto, así que también se rechaza.
+          selector: "JSXOpeningElement[name.name='input'] > JSXAttribute[name.name='type'][value.type='JSXExpressionContainer']",
+          message: 'No uses <input type={...}> nativo: usá @ui/Input (acepta type) con @ui/Field para el label.',
+        },
       ],
     },
   },

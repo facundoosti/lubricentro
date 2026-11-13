@@ -34,6 +34,8 @@ const ACTION_ITEM = { __action: true };
  * @param {string} [emptyText] - sin resultados (después de buscar)
  * @param {string} [idleText] - sin texto buscado (p. ej. "Escribe para buscar")
  * @param {React.ReactNode} [leading] - ícono a la izquierda del input (posicionado por el consumidor)
+ * @param {'default'|'sm'} [size] - tamaño de la caja (`inputVariants`)
+ * @param {string} [inputClassName] - clases extra del input, combinadas con `cn` sobre `inputVariants`
  * @param {boolean} [showTrigger] - botón ▾ para abrir/cerrar la lista
  */
 const Autocomplete = ({
@@ -59,6 +61,7 @@ const Autocomplete = ({
   disabled = false,
   placeholder,
   leading,
+  size = 'default',
   inputClassName,
   contentClassName,
   itemClassName,
@@ -126,6 +129,7 @@ const Autocomplete = ({
           <AutocompleteInput
             {...inputProps}
             placeholder={placeholder}
+            size={size}
             aria-invalid={error || inputProps['aria-invalid'] || undefined}
             className={cn(error && 'border-error', inputClassName)}
           />
@@ -183,5 +187,8 @@ const Autocomplete = ({
     </div>
   );
 };
+
+// Field le inyecta id, error y aria-describedby.
+Autocomplete.isFieldControl = true;
 
 export default Autocomplete;

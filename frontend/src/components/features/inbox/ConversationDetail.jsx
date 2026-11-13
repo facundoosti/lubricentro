@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useMessages, useSendMessage, useUpdateConversationStatus } from '@services/inboxService';
 import { showError } from '@services/notificationService';
+import Textarea from '@ui/Textarea';
 
 const STATUS_BADGE = {
   bot: 'bg-tertiary/10 text-tertiary border-tertiary/20',
@@ -205,14 +206,15 @@ export function ConversationDetail({ conversation }) {
       <footer className="p-4 border-t border-outline-variant bg-surface-container-lowest flex-shrink-0">
         <div className="relative flex items-center gap-3">
           <div className="flex-1 relative">
-            <textarea
+            {/* Alto fijo de una línea (h-12) para alinear los íconos de adjuntar/emoji */}
+            <Textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={canSend ? 'Respondé como agente...' : 'Conversación archivada'}
               disabled={!canSend}
               rows={1}
-              className="w-full bg-surface-container border border-outline-variant focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary rounded-xl py-3 px-4 pr-20 text-sm text-on-surface resize-none h-12 disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-secondary"
+              className="h-12 py-3 pr-20"
             />
             <div className="absolute right-3 top-2.5 flex items-center gap-2">
               <button className="text-secondary hover:text-on-surface-variant" disabled={!canSend}>

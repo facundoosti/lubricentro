@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@stores/useAuthStore";
 import { showAuthError } from "@services/notificationService";
 import Button from "@ui/Button";
+import Field from "@ui/Field";
+import Input from "@ui/Input";
 import { Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
@@ -52,37 +54,22 @@ const Login = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-surface-container border border-outline-variant py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-on-surface"
-              >
-                Email
-              </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 bg-surface-variant border border-outline-variant rounded-md text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary sm:text-sm"
-                  placeholder="admin@lubricentro.com"
-                />
-              </div>
-            </div>
+            <Field label="Email">
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@lubricentro.com"
+              />
+            </Field>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-on-surface"
-              >
-                Contraseña
-              </label>
-              <div className="mt-1 relative">
-                <input
+            <Field id="password" label="Contraseña">
+              <div className="relative">
+                <Input
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
@@ -90,7 +77,7 @@ const Login = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 pr-10 bg-surface-variant border border-outline-variant rounded-md text-on-surface placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary sm:text-sm"
+                  className="pr-10"
                   placeholder="••••••••"
                 />
                 <button
@@ -105,7 +92,7 @@ const Login = () => {
                   )}
                 </button>
               </div>
-            </div>
+            </Field>
 
             <Button
               type="submit"

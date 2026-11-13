@@ -13,6 +13,7 @@ import ConfirmDialog from "@ui/ConfirmDialog";
 import BudgetActions from "@components/features/budgets/BudgetActions";
 import BudgetStatusSelect from "@components/features/budgets/BudgetStatusSelect";
 import BudgetStatusFilter from "@components/features/budgets/BudgetStatusFilter";
+import Input from "@ui/Input";
 
 const formatCurrency = (value) => {
   if (!value && value !== 0) return "—";
@@ -90,17 +91,14 @@ const Budgets = () => {
 
       {/* Toolbar */}
       <div id="tour-budgets-toolbar" className="flex flex-col sm:flex-row gap-3 justify-between">
-        <div className="relative max-w-sm w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary" />
-          <input
-            autoComplete="off"
-            type="text"
-            placeholder="Buscar por cliente o vehículo..."
-            value={searchTerm}
-            onChange={handleSearch}
-            className="w-full pl-9 pr-4 py-2 bg-surface-container border border-outline-variant rounded-lg text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:border-primary"
-          />
-        </div>
+        <Input
+          startIcon={Search}
+          containerClassName="max-w-sm w-full"
+          autoComplete="off"
+          placeholder="Buscar por cliente o vehículo..."
+          value={searchTerm}
+          onChange={handleSearch}
+        />
         <button
           id="tour-budgets-new-btn"
           onClick={() => navigate("/budgets/new")}

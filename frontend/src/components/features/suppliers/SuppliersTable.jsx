@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHeader, TableRow } from '@ui/Table';
 import Button from '@ui/Button';
 import Pagination from '@ui/Pagination';
 import { Search, Plus, Edit, Trash2, Truck, Package } from 'lucide-react';
+import Input from '@ui/Input';
 
 const SuppliersTable = ({
   suppliers = [],
@@ -27,17 +28,13 @@ const SuppliersTable = ({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex-1 max-w-md">
           <form onSubmit={handleSearch} className="relative">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-secondary" />
-              <input
-                autoComplete="off"
-                type="text"
-                placeholder="Buscar proveedor..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
+            <Input
+              startIcon={Search}
+              autoComplete="off"
+              placeholder="Buscar proveedor..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </form>
         </div>
 

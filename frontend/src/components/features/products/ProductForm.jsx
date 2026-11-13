@@ -3,6 +3,9 @@ import { useForm, Controller } from 'react-hook-form';
 import ImageUpload from '@ui/ImageUpload';
 import Combobox from '@ui/Combobox';
 import Select from '@ui/Select';
+import Field from '@ui/Field';
+import Input from '@ui/Input';
+import Textarea from '@ui/Textarea';
 import { useSuppliers } from '@services/suppliersService';
 import { useCategories } from '@services/categoriesService';
 import { ivaRateToOption, DEFAULT_IVA_RATE } from '@utils/iva';
@@ -85,14 +88,6 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
     }
   };
 
-  const inputClass = (hasError) =>
-    `w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-      hasError ? 'border-error' : 'border-outline-variant'
-    }`;
-
-  // Mismo aspecto que los <select> nativos que reemplazan (fondo transparente, texto 16px, 41px de alto)
-  const selectClass = (hasError) => `${inputClass(hasError)} h-[41px] bg-transparent text-base`;
-
   const supplierOptions = [
     { value: NO_SUPPLIER, label: 'Sin proveedor' },
     ...suppliers.map((s) => ({ value: String(s.id), label: s.name })),
@@ -114,66 +109,49 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
   return (
     <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       {/* Nombre */}
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-on-surface mb-1.5">
-          Nombre del Producto *
-        </label>
-        <input
-          type="text"
+      <Field label="Nombre del Producto" required error={errors.name?.message}>
+        <Input
           id="name"
           {...register('name', {
             required: 'El nombre es requerido',
             maxLength: { value: 500, message: 'El nombre no puede exceder 500 caracteres' },
           })}
-          className={inputClass(errors.name)}
           placeholder="Ej: Aceite de Motor 5W-30"
         />
-        {errors.name && <p className="mt-1 text-sm text-error">{errors.name.message}</p>}
-      </div>
+      </Field>
 
       {/* SKU + Marca */}
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="sku" className="block text-sm font-medium text-on-surface mb-1.5">
-            SKU
-            <span className="ml-1.5 text-xs text-on-surface-variant font-normal">(auto si vacío)</span>
-          </label>
-          <input
-            type="text"
+        <Field
+          label="SKU"
+          error={errors.sku?.message}
+          labelAddon={<span className="text-xs text-on-surface-variant font-normal">(auto si vacío)</span>}
+        >
+          <Input
             id="sku"
             {...register('sku', {
               maxLength: { value: 50, message: 'El SKU no puede exceder 50 caracteres' },
             })}
-            className={`${inputClass(errors.sku)} font-mono uppercase`}
+            className="font-mono uppercase"
             placeholder="PRD-ABC123"
             style={{ textTransform: 'uppercase' }}
           />
-          {errors.sku && <p className="mt-1 text-sm text-error">{errors.sku.message}</p>}
-        </div>
+        </Field>
 
-        <div>
-          <label htmlFor="brand" className="block text-sm font-medium text-on-surface mb-1.5">
-            Marca
-          </label>
-          <input
-            type="text"
+        <Field label="Marca" error={errors.brand?.message}>
+          <Input
             id="brand"
             {...register('brand', {
               maxLength: { value: 100, message: 'La marca no puede exceder 100 caracteres' },
             })}
-            className={inputClass(errors.brand)}
             placeholder="Ej: Castrol, Bosch"
           />
-          {errors.brand && <p className="mt-1 text-sm text-error">{errors.brand.message}</p>}
-        </div>
+        </Field>
       </div>
 
       {/* Proveedor + Categoría */}
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label id="supplier_id-label" htmlFor="supplier_id" className="block text-sm font-medium text-on-surface mb-1.5">
-            Proveedor
-          </label>
+        <Field id="supplier_id" label="Proveedor">
           <Controller
             name="supplier_id"
             control={control}
@@ -184,16 +162,12 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
                 options={supplierOptions}
                 value={field.value ? String(field.value) : NO_SUPPLIER}
                 onChange={(v) => field.onChange(v === NO_SUPPLIER ? '' : v)}
-                className={selectClass(false)}
               />
             )}
           />
-        </div>
+        </Field>
 
-        <div>
-          <label id="product-category-label" className="block text-sm font-medium text-on-surface mb-1.5">
-            Categoría
-          </label>
+        <Field id="product-category" label="Categoría">
           <Controller
             name="category_id"
             control={control}
@@ -209,35 +183,27 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
               />
             )}
           />
-        </div>
+        </Field>
       </div>
 
       {/* Descripción */}
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-on-surface mb-1.5">
-          Descripción
-        </label>
-        <textarea
+      <Field label="Descripción" error={errors.description?.message}>
+        <Textarea
           id="description"
           rows={2}
           {...register('description', {
             maxLength: { value: 1000, message: 'La descripción no puede exceder 1000 caracteres' },
           })}
-          className={inputClass(errors.description)}
           placeholder="Descripción opcional del producto..."
         />
-        {errors.description && <p className="mt-1 text-sm text-error">{errors.description.message}</p>}
-      </div>
+      </Field>
 
       {/* Precio + Unidad + Stock */}
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="unit_price" className="block text-sm font-medium text-on-surface mb-1.5">
-            Precio sin IVA (ARS) *
-          </label>
+        <Field id="unit_price" label="Precio sin IVA (ARS)" required error={errors.unit_price?.message}>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">$</span>
-            <input
+            <Input
               type="number"
               id="unit_price"
               step="0.01"
@@ -247,17 +213,14 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
                 min: { value: 0, message: 'El precio debe ser mayor o igual a 0' },
                 validate: (v) => (!isNaN(parseFloat(v)) && parseFloat(v) >= 0) || 'Precio inválido',
               })}
-              className={`${inputClass(errors.unit_price)} pl-8`}
+              error={!!errors.unit_price}
+              className="pl-8"
               placeholder="0.00"
             />
           </div>
-          {errors.unit_price && <p className="mt-1 text-sm text-error">{errors.unit_price.message}</p>}
-        </div>
+        </Field>
 
-        <div>
-          <label id="unit-label" htmlFor="unit" className="block text-sm font-medium text-on-surface mb-1.5">
-            Unidad
-          </label>
+        <Field id="unit" label="Unidad" error={errors.unit?.message}>
           <Controller
             name="unit"
             control={control}
@@ -271,21 +234,16 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
                 onChange={(v) => field.onChange(v === NO_UNIT ? '' : v)}
                 placeholder="Seleccionar unidad"
                 error={!!errors.unit}
-                className={selectClass(errors.unit)}
               />
             )}
           />
-          {errors.unit && <p className="mt-1 text-sm text-error">{errors.unit.message}</p>}
-        </div>
+        </Field>
       </div>
 
       {/* Stock */}
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="stock" className="block text-sm font-medium text-on-surface mb-1.5">
-            Stock
-          </label>
-          <input
+        <Field label="Stock" error={errors.stock?.message}>
+          <Input
             type="number"
             id="stock"
             min="0"
@@ -294,17 +252,14 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
               min: { value: 0, message: 'El stock no puede ser negativo' },
               validate: (v) => Number.isInteger(Number(v)) || 'El stock debe ser un número entero',
             })}
-            className={inputClass(errors.stock)}
             placeholder="0"
           />
-          {errors.stock && <p className="mt-1 text-sm text-error">{errors.stock.message}</p>}
-        </div>
+        </Field>
 
         <ProductIvaField
           control={control}
           unitPrice={watch('unit_price')}
           ivaRate={watch('iva_rate')}
-          className={selectClass(false)}
         />
       </div>
 

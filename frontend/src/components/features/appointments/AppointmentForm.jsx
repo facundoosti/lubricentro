@@ -3,14 +3,10 @@ import { useVehicles } from '@services/vehiclesService';
 import Select from '@ui/Select';
 import DateInput from '@ui/DateInput';
 import { isInvalidInput, validInput } from '@/lib/maskedInput';
-import TextArea from '@ui/TextArea';
+import Field from '@ui/Field';
+import Textarea from '@ui/Textarea';
 import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
 import { useEffect, useState, useMemo } from 'react';
-
-const fieldClass = (hasError) =>
-  `h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-on-surface shadow-theme-xs placeholder:text-secondary focus:border-primary focus:outline-hidden focus:ring-3 focus:ring-primary/10 ${
-    hasError ? 'border-error' : 'border-outline-variant'
-  }`;
 
 // Horarios en punto de 8 AM a 8 PM. value 'HH:00' (lo que se envía), label con AM/PM
 const formatHour = (time) => {
@@ -187,29 +183,25 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
       className="space-y-6"
     >
       {/* Cliente */}
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-on-surface">
-          Cliente *
-        </label>
+      <Field id="appointment-customer" label="Cliente" required error={customerError}>
         <CustomerSearchInput
           value={selectedCustomerId}
           onChange={handleCustomerChange}
           placeholder="Buscar cliente por nombre o correo..."
-          error={customerError}
           initialCustomer={initialData?.customer || null}
         />
-      </div>
+      </Field>
 
       {/* Vehículo */}
-      <div>
-        <label id="appointment-vehicle-label" className="mb-1.5 block text-sm font-medium text-on-surface">
-          Vehículo *
-          {vehiclesLoading && selectedCustomerId && (
-            <span className="ml-2 text-xs text-on-surface-variant">
-              (Cargando...)
-            </span>
-          )}
-        </label>
+      <Field
+        id="appointment-vehicle"
+        label="Vehículo"
+        required
+        error={errors.vehicle_id?.message}
+        labelAddon={vehiclesLoading && selectedCustomerId && (
+          <span className="text-xs font-normal text-on-surface-variant">(Cargando...)</span>
+        )}
+      >
         <Controller
           name="vehicle_id"
           control={control}
@@ -221,28 +213,21 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
               onChange={field.onChange}
               placeholder={vehiclePlaceholder}
               disabled={vehiclesLoading || !selectedCustomerId}
+              id="appointment-vehicle"
               aria-labelledby="appointment-vehicle-label"
               error={!!errors.vehicle_id}
               // Deshabilitado como el <select> nativo que reemplaza: transparente y con el texto pleno
-              className="h-11 px-4 disabled:bg-transparent disabled:opacity-100"
+              className="disabled:bg-transparent disabled:opacity-100"
               valueClassName={vehiclesLoading || !selectedCustomerId ? 'data-placeholder:text-on-surface' : undefined}
             />
           )}
         />
-        {errors.vehicle_id && (
-          <p className="mt-1 text-sm text-error">
-            {errors.vehicle_id.message}
-          </p>
-        )}
-      </div>
+      </Field>
 
       {/* Fecha y Hora */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Fecha */}
-        <div>
-          <label id="appointment-date-label" className="mb-1.5 block text-sm font-medium text-on-surface">
-            Fecha *
-          </label>
+        <Field id="appointment-date" label="Fecha" required error={errors.scheduled_date?.message}>
           <Controller
             name="scheduled_date"
             control={control}
@@ -265,24 +250,16 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
                   field.onBlur();
                   if (isInvalidInput(field.value)) trigger('scheduled_date');
                 }}
+                id="appointment-date"
                 aria-labelledby="appointment-date-label"
                 error={!!errors.scheduled_date}
-                className={fieldClass(!!errors.scheduled_date)}
               />
             )}
           />
-          {errors.scheduled_date && (
-            <p className="mt-1 text-sm text-error">
-              {errors.scheduled_date.message}
-            </p>
-          )}
-        </div>
+        </Field>
 
         {/* Hora */}
-        <div>
-          <label id="appointment-time-label" className="mb-1.5 block text-sm font-medium text-on-surface">
-            Hora *
-          </label>
+        <Field id="appointment-time" label="Hora" required error={errors.scheduled_time?.message}>
           <Controller
             name="scheduled_time"
             control={control}
@@ -293,25 +270,17 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
                 value={field.value}
                 onChange={field.onChange}
                 placeholder="Seleccionar hora"
+                id="appointment-time"
                 aria-labelledby="appointment-time-label"
                 error={!!errors.scheduled_time}
-                className="h-11 px-4"
               />
             )}
           />
-          {errors.scheduled_time && (
-            <p className="mt-1 text-sm text-error">
-              {errors.scheduled_time.message}
-            </p>
-          )}
-        </div>
+        </Field>
       </div>
 
       {/* Estado */}
-      <div>
-        <label id="appointment-status-label" className="mb-1.5 block text-sm font-medium text-on-surface">
-          Estado
-        </label>
+      <Field id="appointment-status" label="Estado">
         <Controller
           name="status"
           control={control}
@@ -320,24 +289,21 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
               options={statusOptions}
               value={field.value}
               onChange={field.onChange}
+              id="appointment-status"
               aria-labelledby="appointment-status-label"
-              className="h-11 px-4"
             />
           )}
         />
-      </div>
+      </Field>
 
       {/* Notas */}
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-on-surface">
-          Notas
-        </label>
-        <TextArea
+      <Field label="Notas">
+        <Textarea
           {...register('notes')}
           placeholder="Observaciones adicionales..."
           rows={3}
         />
-      </div>
+      </Field>
 
     </form>
   );

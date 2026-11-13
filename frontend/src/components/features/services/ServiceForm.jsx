@@ -1,5 +1,8 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import Field from '@ui/Field';
+import Input from '@ui/Input';
+import Textarea from '@ui/Textarea';
 
 const ServiceForm = ({
   service = null,
@@ -37,12 +40,8 @@ const ServiceForm = ({
   return (
     <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-6">
       {/* Nombre */}
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-on-surface mb-2">
-          Nombre del Servicio *
-        </label>
-        <input
-          type="text"
+      <Field label="Nombre del Servicio" required error={errors.name?.message}>
+        <Input
           id="name"
           {...register('name', {
             required: 'El nombre es requerido',
@@ -51,28 +50,17 @@ const ServiceForm = ({
               message: 'El nombre no puede exceder 100 caracteres'
             }
           })}
-          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-            errors.name ? 'border-error' : 'border-outline-variant'
-          }`}
           placeholder="Ej: Cambio de Aceite, Alineación, Frenos..."
         />
-        {errors.name && (
-          <p className="mt-1 text-sm text-error">
-            {errors.name.message}
-          </p>
-        )}
-      </div>
+      </Field>
 
       {/* Precio Base */}
-      <div>
-        <label htmlFor="base_price" className="block text-sm font-medium text-on-surface mb-2">
-          Precio Base (ARS) *
-        </label>
+      <Field id="base_price" label="Precio Base (ARS)" required error={errors.base_price?.message}>
         <div className="relative">
           <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant">
             $
           </span>
-          <input
+          <Input
             type="number"
             id="base_price"
             step="0.01"
@@ -88,25 +76,16 @@ const ServiceForm = ({
                 return !isNaN(price) && price > 0 || 'Precio inválido';
               }
             })}
-            className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-              errors.base_price ? 'border-error' : 'border-outline-variant'
-            }`}
+            error={!!errors.base_price}
+            className="pl-8"
             placeholder="0.00"
           />
         </div>
-        {errors.base_price && (
-          <p className="mt-1 text-sm text-error">
-            {errors.base_price.message}
-          </p>
-        )}
-      </div>
+      </Field>
 
       {/* Descripción: ancho completo */}
-      <div className="md:col-span-2">
-        <label htmlFor="description" className="block text-sm font-medium text-on-surface mb-2">
-          Descripción
-        </label>
-        <textarea
+      <Field label="Descripción" error={errors.description?.message} className="md:col-span-2">
+        <Textarea
           id="description"
           rows={3}
           {...register('description', {
@@ -115,17 +94,9 @@ const ServiceForm = ({
               message: 'La descripción no puede exceder 1000 caracteres'
             }
           })}
-          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-            errors.description ? 'border-error' : 'border-outline-variant'
-          }`}
           placeholder="Descripción detallada del servicio..."
         />
-        {errors.description && (
-          <p className="mt-1 text-sm text-error">
-            {errors.description.message}
-          </p>
-        )}
-      </div>
+      </Field>
     </form>
   );
 };
