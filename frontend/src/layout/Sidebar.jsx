@@ -18,7 +18,14 @@ import { useSidebarStore } from "@stores/useSidebarStore";
 import { useAuthStore } from "@stores/useAuthStore";
 import SidebarCollapseToggle from "@layout/SidebarCollapseToggle";
 
-const NavItem = ({ name, icon, path, subItems, menuType, index, tourId }) => {
+// Etiqueta de sección en prueba: naranja sólido para contrastar con el violeta de la marca.
+const BetaBadge = () => (
+  <span className="rounded-full bg-warning-500 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wide text-on-warning">
+    Beta
+  </span>
+);
+
+const NavItem = ({ name, icon, path, subItems, menuType, index, tourId, beta }) => {
   const { isExpanded, isMobileOpen, isHovered, openSubmenu, toggleSubmenu } =
     useSidebarStore();
   const location = useLocation();
@@ -132,6 +139,7 @@ const NavItem = ({ name, icon, path, subItems, menuType, index, tourId }) => {
             {icon}
           </span>
           {isVisible && <span className="flex-1">{name}</span>}
+          {isVisible && beta && <BetaBadge />}
         </Link>
       )}
     </li>
@@ -205,12 +213,14 @@ const Sidebar = () => {
       icon: <MessageSquare className="w-5 h-5" />,
       path: "/inbox",
       tourId: "tour-nav-inbox",
+      beta: true,
     },
     {
       name: "Recordatorios",
       icon: <BellRing className="w-5 h-5" />,
       path: "/reminders",
       tourId: "tour-nav-recordatorios",
+      beta: true,
     },
   ];
 

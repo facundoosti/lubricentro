@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent, within } from '@testing-library/react';
 import { renderWithProviders } from '@/test/utils';
 import { useSidebarStore } from '@stores/useSidebarStore';
 import Sidebar from '@layout/Sidebar';
@@ -36,5 +36,21 @@ describe('Sidebar', () => {
     ['Clientes', 'Operaciones', 'Catálogo', 'Cerrar sesión'].forEach((name) => {
       expect(screen.getByRole('button', { name })).toHaveAttribute('title', name);
     });
+  });
+
+  it('Inbox y Recordatorios muestran el badge "Beta"; el resto no', () => {
+    renderWithProviders(<Sidebar />, { route: '/dashboard' });
+    ['Inbox', 'Recordatorios'].forEach((name) => {
+      const link = screen.getByRole('link', { name: new RegExp(name) });
+      expect(within(link).getByText('Beta')).toBeInTheDocument();
+    });
+    expect(screen.getAllByText('Beta')).toHaveLength(2);
+  });
+
+  it('colapsado: no muestra el badge "Beta" y el link conserva su nombre', () => {
+    useSidebarStore.setState({ isExpanded: false });
+    renderWithProviders(<Sidebar />, { route: '/dashboard' });
+    expect(screen.queryByText('Beta')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Inbox' })).toHaveAttribute('title', 'Inbox');
   });
 });
