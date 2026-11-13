@@ -34,7 +34,7 @@ const Badge = ({
       primary: "bg-primary-container text-white",
       success: "bg-tertiary text-white",
       error: "bg-error text-white",
-      warning: "bg-warning-500 text-white",
+      warning: "bg-warning-500 text-on-warning",
       info: "bg-sky-500 text-white",
       light: "bg-outline text-white",
       dark: "bg-surface-container-highest text-on-surface",

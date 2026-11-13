@@ -16,7 +16,7 @@ import {
 
 const VARIANT_STYLES = {
   danger: { icon: 'text-error', button: 'error' },
-  warning: { icon: 'text-yellow-500', button: 'warning' },
+  warning: { icon: 'text-warning-500', button: 'warning' },
   default: { icon: 'text-on-surface-variant', button: 'primary' },
 };
 

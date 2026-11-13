@@ -1,16 +1,14 @@
 import { useCallback, useContext, useRef, useState } from 'react';
-import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DialogLevelContext, DialogPortalContainer } from '@ui/dialogContext';
 import { useReturnFocus } from '@hooks/useReturnFocus';
+import DialogFormLayout from '@ui/DialogFormLayout';
+import DialogFreeLayout from '@ui/DialogFreeLayout';
 import {
   Dialog as DialogRoot,
-  DialogClose,
-  DialogDescription,
   DialogOverlay,
   DialogPopup,
   DialogPortal,
-  DialogTitle,
   DialogViewport,
 } from '@/components/ui/primitives/dialog';
 
@@ -30,84 +28,6 @@ const STACKED_SIZE_CLASS = 'max-w-xl';
 // un click "en el fondo".
 const isToastEvent = (event) => event?.target instanceof Element && Boolean(event.target.closest('[data-sileo-viewport]'));
 
-const SubmitButton = ({ formId, isLoading, submitDisabled, submitLabel }) => (
-  <button
-    type="submit"
-    form={formId}
-    disabled={isLoading || submitDisabled}
-    className="px-5 py-2 bg-primary-container text-on-primary font-bold rounded-lg hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-  >
-    {isLoading ? (
-      <>
-        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-on-primary" />
-        Guardando...
-      </>
-    ) : submitLabel}
-  </button>
-);
-
-const FormLayout = ({ title, subtitle, icon: Icon, formId, submitLabel, isLoading, submitDisabled, onClose, children }) => (
-  <>
-    <div className="shrink-0 px-6 py-4 border-b border-outline-variant flex items-center justify-between bg-surface-container-high/30">
-      <div className="flex items-center gap-3">
-        {Icon && (
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Icon className="w-5 h-5 text-primary" />
-          </div>
-        )}
-        <div>
-          <DialogTitle>{title}</DialogTitle>
-          {subtitle && <DialogDescription className="text-on-surface-variant">{subtitle}</DialogDescription>}
-        </div>
-      </div>
-      <DialogClose
-        aria-label="Cerrar"
-        className="p-2 text-secondary hover:text-on-surface hover:bg-surface-container-high rounded-full transition-all"
-      >
-        <X className="w-5 h-5" />
-      </DialogClose>
-    </div>
-
-    <div className="flex-1 min-h-0 overflow-y-auto p-6">{children}</div>
-
-    <div className="shrink-0 px-6 py-4 border-t border-outline-variant bg-surface-container-high/30 flex justify-end gap-3">
-      <button
-        type="button"
-        onClick={onClose}
-        disabled={isLoading}
-        className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-bold rounded-lg hover:bg-surface-variant transition-all disabled:opacity-50"
-      >
-        Cancelar
-      </button>
-      <SubmitButton formId={formId} isLoading={isLoading} submitDisabled={submitDisabled} submitLabel={submitLabel} />
-    </div>
-  </>
-);
-
-const FreeLayout = ({ title, showCloseButton, bare, children }) => {
-  if (bare) return children;
-  return (
-    <>
-      {showCloseButton && (
-        <DialogClose
-          aria-label="Cerrar"
-          className="absolute right-6 top-6 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-surface-container-high text-secondary transition-colors hover:bg-surface-container-highest hover:text-on-surface"
-        >
-          <X className="w-5 h-5" />
-        </DialogClose>
-      )}
-      <div className="p-6">
-        {title && (
-          <div className="mb-6">
-            <DialogTitle className="font-semibold tracking-normal">{title}</DialogTitle>
-          </div>
-        )}
-        {children}
-      </div>
-    </>
-  );
-};
-
 /**
  * Diálogo único de la app (formularios, informativos, acciones masivas, importación, visor de imágenes),
  * sobre Dialog de Base UI: pila, Escape del de arriba, trampa y retorno de foco, fondo no interactuable
@@ -124,7 +44,8 @@ const FreeLayout = ({ title, showCloseButton, bare, children }) => {
  * @param {boolean} [closeOnBackdrop] - default false en formularios, true en libre
  * @param {boolean} [closeOnEscape=true] - false durante una operación que no se puede cortar
  * @param {boolean} [showCloseButton=true] - ✕ del modo libre
- * @param {(openType: string) => HTMLElement|boolean|null} | {current: HTMLElement} [initialFocus]
+ * @param {boolean | {current: HTMLElement|null} | ((openType: string) => HTMLElement|boolean|null|void)} [initialFocus] -
+ *   a dónde va el foco al abrir (API de Base UI). Default: el panel, salvo que un campo ya lo tenga (autoFocus)
  */
 const Dialog = ({
   isOpen,
@@ -232,7 +153,7 @@ const Dialog = ({
             <DialogLevelContext.Provider value={level + 1}>
               <DialogPortalContainer.Provider value={popupNode}>
                 {isForm ? (
-                  <FormLayout
+                  <DialogFormLayout
                     title={title}
                     subtitle={subtitle}
                     icon={icon}
@@ -243,11 +164,11 @@ const Dialog = ({
                     onClose={onClose}
                   >
                     {children}
-                  </FormLayout>
+                  </DialogFormLayout>
                 ) : (
-                  <FreeLayout title={title} showCloseButton={showCloseButton} bare={bare}>
+                  <DialogFreeLayout title={title} showCloseButton={showCloseButton} bare={bare}>
                     {children}
-                  </FreeLayout>
+                  </DialogFreeLayout>
                 )}
               </DialogPortalContainer.Provider>
             </DialogLevelContext.Provider>

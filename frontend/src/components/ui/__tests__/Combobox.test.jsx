@@ -60,6 +60,17 @@ describe('Combobox — simple', () => {
     expect(child.style.paddingLeft).toBe('26px');
   });
 
+  it('en las hijas la guía va antes del indicador (las casillas quedan alineadas como antes)', async () => {
+    const user = userEvent.setup();
+    render(<Controlled />);
+    await openList(user);
+    const child = screen.getByRole('option', { name: 'Filtros de aire' });
+    expect(child.firstElementChild).toHaveAttribute('data-slot', 'combobox-item-guide');
+    expect(child.children[1]).toHaveAttribute('data-slot', 'combobox-item-indicator');
+    const root = screen.getByRole('option', { name: 'Aceites' });
+    expect(root.querySelector('[data-slot="combobox-item-guide"]')).toBeNull();
+  });
+
   it('"Limpiar" (clearable) llama onChange(null)', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
@@ -111,10 +122,28 @@ describe('Combobox — búsqueda remota', () => {
       render(<Controlled onSearch={onSearch} />);
       await openList(user);
       await user.type(screen.getByRole('combobox', { name: 'Buscar' }), 'Filt');
+      await act(async () => { vi.advanceTimersByTime(400); });
+      expect(onSearch).toHaveBeenLastCalledWith('Filt');
       await user.click(screen.getByRole('option', { name: 'Filtros' }));
       await act(async () => { vi.advanceTimersByTime(1000); });
       expect(onSearch).toHaveBeenLastCalledWith('');
       expect(onSearch).not.toHaveBeenCalledWith('Filtros');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('abrir y cerrar sin escribir no llama onSearch (no hubo búsqueda que limpiar)', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      const onSearch = vi.fn();
+      render(<Controlled onSearch={onSearch} />);
+      await openList(user);
+      await user.keyboard('{Escape}');
+      await act(async () => { vi.advanceTimersByTime(1000); });
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+      expect(onSearch).not.toHaveBeenCalled();
     } finally {
       vi.useRealTimers();
     }
@@ -186,6 +215,18 @@ describe('Combobox — múltiple', () => {
     await openList(user);
     await user.click(screen.getByRole('button', { name: 'Limpiar selección' }));
     expect(onChange).toHaveBeenLastCalledWith([]);
+  });
+});
+
+describe('Combobox — múltiple clearable', () => {
+  it('el botón "Limpiar" llama onChange([]) y desaparece', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<Controlled multiple clearable initial={['Shell', 'YPF']} options={BRANDS} onChange={onChange} />);
+    await user.click(screen.getByRole('button', { name: 'Limpiar' }));
+    expect(onChange).toHaveBeenLastCalledWith([]);
+    expect(screen.queryByRole('button', { name: 'Limpiar' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Quitar/ })).not.toBeInTheDocument();
   });
 });
 

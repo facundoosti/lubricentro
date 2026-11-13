@@ -98,7 +98,7 @@ describe('ConfirmDialog', () => {
 
   it.each([
     ['danger', 'bg-error', 'text-error'],
-    ['warning', 'bg-warning-500', 'text-yellow-500'],
+    ['warning', 'bg-warning-500', 'text-warning-500'],
     ['default', 'bg-primary-container', 'text-on-surface-variant'],
   ])('variante %s: estilo del botón confirmar y del ícono', (variant, buttonClass, iconClass) => {
     render(<ConfirmDialog {...defaultProps} variant={variant} confirmText="Dale" />);

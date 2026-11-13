@@ -86,4 +86,11 @@ describe('Button', () => {
     render(<Button size={size}>Botón</Button>)
     expect(screen.getByRole('button')).toBeInTheDocument()
   })
+
+  it('warning usa el token on-warning para el texto (no blanco fijo)', () => {
+    render(<Button variant="warning">Atención</Button>)
+    const btn = screen.getByRole('button', { name: 'Atención' })
+    expect(btn).toHaveClass('bg-warning-500', 'text-on-warning')
+    expect(btn).not.toHaveClass('text-white')
+  })
 })

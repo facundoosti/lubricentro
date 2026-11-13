@@ -1,7 +1,11 @@
-import { screen, fireEvent, within } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { screen, fireEvent, within, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { renderWithProviders } from '@/test/utils';
 import ProductsTable from '@components/features/products/ProductsTable';
+import { useSuppliers } from '@services/suppliersService';
+import { useCategories } from '@services/categoriesService';
+import { useProductBrands } from '@services/productsService';
 
 vi.mock('@services/suppliersService', () => ({ useSuppliers: vi.fn(() => ({ data: null, isLoading: false })) }));
 vi.mock('@services/categoriesService', () => ({ useCategories: vi.fn(() => ({ data: null, isLoading: false })) }));
@@ -101,5 +105,43 @@ describe('ProductsTable — nombres largos', () => {
     const name = 'Filtro de aire pesado WAP-203 - JOHN DEERE 9900 Algodonera JD 540 - JD 540A JD 440c - JD 540B JD 450E - CATERPILLAR 950 - KOMATSU WA200 - NEW HOLLAND W130 - Equivalencias MANN C 23 610 - BALDWIN PA 1890';
     renderTable({ products: [{ ...products[0], name }] });
     expect(screen.getByTitle(name)).toHaveTextContent(name);
+  });
+});
+
+describe('ProductsTable — filtros múltiples (marcas, proveedores, categorías)', () => {
+  afterEach(() => {
+    [useProductBrands, useSuppliers, useCategories].forEach((hook) => hook.mockReturnValue({ data: null, isLoading: false }));
+  });
+
+  const filterTrigger = (placeholder) => screen.getByText(placeholder).closest('[role="combobox"]');
+
+  it.each([
+    ['Marcas...', 'Shell', { brand: ['Shell'] }],
+    ['Proveedores...', 'Distribuidora Sur', { supplier_id: ['7'] }],
+    ['Categorías...', 'Filtros de aire', { category_id: ['4'] }],
+  ])('elegir en "%s" la opción "%s" llama onFilterChange con %o', async (placeholder, option, expected) => {
+    useProductBrands.mockReturnValue({ data: { data: { brands: ['Shell', 'YPF'] } }, isLoading: false });
+    useSuppliers.mockReturnValue({ data: { data: { suppliers: [{ id: 7, name: 'Distribuidora Sur' }] } }, isLoading: false });
+    useCategories.mockReturnValue({
+      data: { data: { categories: [{ id: 3, name: 'Filtros', parent_id: null }, { id: 4, name: 'Filtros de aire', parent_id: 3 }] } },
+      isLoading: false,
+    });
+    const user = userEvent.setup();
+    const onFilterChange = vi.fn();
+    renderTable({ onFilterChange });
+
+    await user.click(filterTrigger(placeholder));
+    const list = await screen.findByRole('listbox');
+    await user.click(within(list).getByRole('option', { name: option }));
+    expect(onFilterChange).toHaveBeenLastCalledWith(expected);
+  });
+
+  it('con valores elegidos los muestra como chips y quitar uno llama onFilterChange sin él', async () => {
+    useProductBrands.mockReturnValue({ data: { data: { brands: ['Shell', 'YPF'] } }, isLoading: false });
+    const user = userEvent.setup();
+    const onFilterChange = vi.fn();
+    renderTable({ onFilterChange, brands: ['Shell', 'YPF'] });
+    await user.click(screen.getAllByRole('button', { name: 'Quitar Shell' })[0]);
+    await waitFor(() => expect(onFilterChange).toHaveBeenCalledWith({ brand: ['YPF'] }));
   });
 });

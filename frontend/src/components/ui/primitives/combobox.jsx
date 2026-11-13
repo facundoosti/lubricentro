@@ -76,6 +76,7 @@ function ComboboxList({ className, ...props }) {
 function ComboboxItemIndicator({ multiple }) {
   return (
     <span
+      data-slot="combobox-item-indicator"
       className={cn(
         "flex size-4 shrink-0 items-center justify-center border-2 border-outline bg-surface-container-high transition-colors in-data-selected:border-primary-container in-data-selected:bg-primary-container",
         multiple ? "rounded" : "rounded-full"
@@ -88,7 +89,8 @@ function ComboboxItemIndicator({ multiple }) {
   )
 }
 
-function ComboboxItem({ className, children, multiple = false, ...props }) {
+// `leading`: contenido antes del indicador (la guía de las subcategorías), para que la casilla quede indentada.
+function ComboboxItem({ className, children, multiple = false, leading, ...props }) {
   return (
     <ComboboxPrimitive.Item
       data-slot="combobox-item"
@@ -98,6 +100,7 @@ function ComboboxItem({ className, children, multiple = false, ...props }) {
       )}
       {...props}
     >
+      {leading}
       <ComboboxItemIndicator multiple={multiple} />
       {children}
     </ComboboxPrimitive.Item>

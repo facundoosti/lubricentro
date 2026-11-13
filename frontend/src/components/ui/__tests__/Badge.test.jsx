@@ -56,4 +56,11 @@ describe('Badge', () => {
       expect(screen.getByText('Badge')).toBeInTheDocument()
     }
   )
+
+  it('solid warning usa el token on-warning para el texto (no blanco fijo)', () => {
+    render(<Badge variant="solid" color="warning">Pendiente</Badge>)
+    const badge = screen.getByText('Pendiente')
+    expect(badge).toHaveClass('bg-warning-500', 'text-on-warning')
+    expect(badge).not.toHaveClass('text-white')
+  })
 })

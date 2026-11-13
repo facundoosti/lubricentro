@@ -21,7 +21,7 @@ const sameValue = (a, b) => String(a?.value) === String(b?.value);
  * Lista de selección con buscador (Combobox de Base UI), simple o múltiple.
  *
  * - Sin `onSearch` filtra las opciones localmente; con `onSearch` lo llama (debounce 300ms) con el texto
- *   y no filtra (filtra el backend). Al cerrar la lista vuelve a llamarlo con ''.
+ *   y no filtra (filtra el backend). Al cerrar la lista vuelve a llamarlo con '' (solo si había una búsqueda aplicada).
  * - `multiple`: la selección se ve como chips (hasta 2; después "N seleccionados"), cada uno con su ✕.
  * - `clearable`: botón "Limpiar" → `onChange(null)` (simple) o `onChange([])` (múltiple).
  * - Dentro de un Dialog: la lista va por encima, acepta clicks y Escape cierra solo la lista.
@@ -52,6 +52,8 @@ const Combobox = ({
   const isClearable = clearable ?? !multiple;
   const debounceRef = useRef(null);
   const onSearchRef = useRef(onSearch);
+  // Último texto enviado a onSearch: evita llamadas repetidas y el '' al cerrar si no hubo búsqueda.
+  const sentQueryRef = useRef('');
   // Etiquetas ya vistas: con búsqueda remota el valor elegido puede no estar en las opciones actuales
   const labelsRef = useRef(new Map());
 
@@ -83,12 +85,18 @@ const Combobox = ({
   const handleInputValueChange = (q) => {
     if (!onSearchRef.current) return;
     clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => onSearchRef.current?.(q), SEARCH_DEBOUNCE_MS);
+    debounceRef.current = setTimeout(() => {
+      if (q === sentQueryRef.current) return;
+      sentQueryRef.current = q;
+      onSearchRef.current?.(q);
+    }, SEARCH_DEBOUNCE_MS);
   };
 
   const handleOpenChange = (open) => {
     if (open || !onSearchRef.current) return;
     clearTimeout(debounceRef.current);
+    if (sentQueryRef.current === '') return;
+    sentQueryRef.current = '';
     onSearchRef.current('');
   };
 
@@ -181,8 +189,10 @@ const Combobox = ({
                       title={opt.label}
                       style={{ paddingLeft: `${12 + depth * 14}px` }}
                       className={cn(depth === 0 ? 'text-on-surface' : 'text-on-surface-variant')}
+                      leading={depth > 0 && (
+                        <span data-slot="combobox-item-guide" className="h-3 w-px shrink-0 self-center bg-outline-variant" />
+                      )}
                     >
-                      {depth > 0 && <span className="h-3 w-px shrink-0 self-center bg-outline-variant" />}
                       <span className={cn('min-w-0 flex-1 truncate', depth === 0 && 'font-medium')}>{opt.label}</span>
                     </ComboboxItem>
                   );
