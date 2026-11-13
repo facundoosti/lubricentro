@@ -22,7 +22,7 @@ El formulario de planes de cuotas (Configuración) usaba los placeholders como �
 - Cada `InputField` recibe `label` + `id` (con `useId`, porque pueden convivir dos formularios: edición y alta).
 - Placeholders de ejemplo: `Ej: VISA`, `Ej: 3`, `Ej: 10`, `Auto`. Orden vacío ya usa la siguiente posición libre (`toPlanPayload`).
 - Columnas `1fr / 96 / 112 / 96 px`. Se sacan las clases que no se mergeaban (`inputCls`).
-- No se tocó `InputField`, que es compartido.
+- (Parte 1) No se tocó `InputField`; en la Parte 2 se eliminó.
 
 ## Verificación
 - `npx vitest run src/components/features/settings/`: 10/10 tests, incluido el nuevo test de labels y placeholders.
@@ -30,6 +30,19 @@ El formulario de planes de cuotas (Configuración) usaba los placeholders como �
 - `react-reviewer`: sin bloqueantes.
 - QA (`tools/qa-runner`, 1440×900, dark y light): 2/2 OK.
 
+## Parte 2: mismo estilo que el resto de Configuración
+- Síntoma: los inputs de planes se veían distintos de los de al lado. Tenían 44px de alto vs 38px, fondo transparente, `px-4`, sombra, y el label en blanco con negrita.
+- Causa: usaban `@ui/InputField`, un componente viejo de plantilla que solo usaba este formulario.
+- Reproducido con TC-03, que compara los estilos computados contra "Nombre del Lubricentro": falló en height, background, padding, shadow y color del label.
+- Fix:
+  - `Field` + `inputCls` pasan de `pages/Settings.jsx` a `components/features/settings/SettingsField.jsx`, con un `htmlFor` opcional.
+  - Los usan Configuración y el formulario de planes.
+  - `ui/InputField.jsx` se borra porque queda sin referencias.
+- Verificación:
+  - `vitest` de `settings/` + `pages/`: 109/109.
+  - ESLint: OK.
+  - QA: 4/4 (TC-02 y TC-03, en dark y light).
+
 ## Seguimiento
-- `InputField` concatena `className` sin `cn()`/twMerge: los overrides que entran en conflicto (`h-*`, `px-*`) no aplican de forma confiable. Revisar el impacto antes de cambiarlo.
-- El label "Nombre del plan" ocupa casi todo el ancho de su columna (~135px). Si se agranda la fuente, se puede acortar a "Nombre".
+- La app tiene unas 6 variantes de clase de input copiadas a mano: `utils/formStyles.js`, `ProductForm`, `SupplierForm`, `ServiceRecordFormPage`, `ItemRow` y `SettingsField`. Unificarlas en un `@ui/Input` + `@ui/Field` va por OpenSpec.
+- Los labels de los campos de Configuración (fuera de planes) siguen sin `htmlFor`. Ahora se puede pasar.

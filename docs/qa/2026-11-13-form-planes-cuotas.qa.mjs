@@ -35,5 +35,25 @@ export default {
         return { pass, reason: reasons.join('; ') || undefined, facts };
       },
     },
+    {
+      id: 'TC-03',
+      path: '/settings',
+      steps: async (page) => {
+        await page.getByRole('button', { name: /Agregar plan/ }).click();
+      },
+      // Los inputs del plan deben verse igual que los de "Datos del lubricentro" (misma página).
+      check: async (page) => {
+        const props = ['height', 'backgroundColor', 'paddingLeft', 'borderRadius', 'fontSize', 'boxShadow'];
+        const read = (loc) => loc.evaluate((el, ps) => Object.fromEntries(ps.map((p) => [p, getComputedStyle(el)[p]])), props);
+        const ref = await read(page.getByPlaceholder('Ej: Lubricentro El Rápido'));
+        const plan = await read(page.getByRole('form', { name: 'Crear plan' }).getByPlaceholder('Ej: VISA'));
+        const labelColor = (loc) => loc.evaluate((el) => getComputedStyle(el).color);
+        const refLabel = await labelColor(page.locator('label', { hasText: 'Nombre del Lubricentro' }));
+        const planLabel = await labelColor(page.getByRole('form', { name: 'Crear plan' }).locator('label', { hasText: 'Nombre del plan' }));
+        const diff = props.filter((p) => ref[p] !== plan[p]);
+        if (refLabel !== planLabel) diff.push('labelColor');
+        return { pass: diff.length === 0, reason: diff.length ? `difiere: ${diff.join(', ')}` : undefined, facts: { ref, plan, refLabel, planLabel } };
+      },
+    },
   ],
 };

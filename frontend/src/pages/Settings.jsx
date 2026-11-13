@@ -21,6 +21,7 @@ import PageError from "@ui/PageError";
 import TimeInput from "@ui/TimeInput";
 import Switch from "@ui/Switch";
 import InstallmentPlansSection from "@components/features/settings/InstallmentPlansSection";
+import { Field, inputCls } from "@components/features/settings/SettingsField";
 
 const DAYS = [
   { key: "lunes", label: "Lunes" },
@@ -87,17 +88,6 @@ const SectionTitle = ({ icon: Icon, title }) => (
     </h2>
   </div>
 );
-
-const Field = ({ label, error, children }) => (
-  <div className="space-y-1">
-    <label className="block text-sm text-secondary">{label}</label>
-    {children}
-    {error && <p className="text-xs text-error">{error}</p>}
-  </div>
-);
-
-const inputCls =
-  "w-full px-3 py-2 bg-surface-container border border-outline-variant text-on-surface placeholder:text-secondary rounded-lg text-sm focus:outline-none focus:border-primary transition-colors";
 
 const Settings = () => {
   const { data, isLoading, error } = useSetting();
