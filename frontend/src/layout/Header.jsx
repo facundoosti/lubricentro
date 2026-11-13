@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSidebarStore } from "@stores/useSidebarStore";
 import { useAuthStore } from "@stores/useAuthStore";
-import { showAuthSuccess } from "@services/notificationService";
 import {
   LogOut,
   User,
@@ -28,7 +27,6 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
-    showAuthSuccess("LOGOUT_SUCCESS");
     navigate("/login");
   };
 
