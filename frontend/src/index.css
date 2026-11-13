@@ -233,9 +233,30 @@
 [data-sileo-viewport] {
   z-index: 9999 !important;
 }
-/* El toast es siempre oscuro (fill fijo en App.jsx): la descripción no debe heredar el texto del tema */
+/* Colores del design system (cambian solos con el tema).
+   Sileo pinta el fondo como SVG (`fill`): se pisa por CSS con el token de popover. */
+[data-sileo-viewport] {
+  --sileo-state-success: var(--color-success-500);
+  --sileo-state-error: var(--color-error);
+  --sileo-state-warning: var(--color-warning-500);
+  --sileo-state-info: var(--color-primary);
+  --sileo-state-action: var(--color-primary);
+  --sileo-state-loading: var(--color-secondary);
+}
+[data-sileo-pill],
+[data-sileo-body] {
+  fill: var(--color-surface-container-highest) !important;
+}
+[data-sileo-svg] {
+  filter: drop-shadow(0 4px 8px rgb(0 0 0 / 0.15));
+}
+/* El estado lo marca el ícono; el título va en texto del tema (contraste AA) y sin Capitalizar Cada Palabra */
+[data-sileo-title][data-state] {
+  color: var(--color-on-surface);
+  text-transform: none;
+}
 [data-sileo-description] {
-  color: rgb(255 255 255 / 0.65);
+  color: var(--color-on-surface-variant);
 }
 
 /* ── FullCalendar (vía sus variables CSS) ────────────────────────── */

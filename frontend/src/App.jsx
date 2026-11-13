@@ -31,10 +31,10 @@ function App() {
     <>
       <Toaster
         position="top-right"
-        offset={{ top: 16, right: 16 }}
+        // Debajo del header fijo (h-16 = 64px); Sileo suma ~12px propios → 16px de aire: no tapa el perfil de usuario
+        offset={{ top: 68, right: 16 }}
         options={{
           duration: 4000,
-          fill: "#121215",
           roundness: 10,
         }}
       />
