@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@stores/useAuthStore";
-import { showAuthSuccess, showAuthError } from "@services/notificationService";
+import { showAuthError } from "@services/notificationService";
 import Button from "@ui/Button";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -19,7 +19,6 @@ const Login = () => {
     setLoading(true);
     try {
       await login(email, password);
-      showAuthSuccess("LOGIN_SUCCESS");
       navigate("/dashboard");
     } catch (error) {
       showAuthError(
