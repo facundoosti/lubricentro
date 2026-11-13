@@ -25,5 +25,5 @@ Al cerrar sesión aparecía un toast de éxito que no aportaba nada, igual que p
 - `npx eslint src/layout/Header.jsx src/layout/__tests__/Header.test.jsx` → ok.
 
 ## Seguimiento
-- `showAuthSuccess` y `MESSAGES.AUTH.LOGIN_SUCCESS`/`LOGOUT_SUCCESS` quedaron sin uso en la app (solo los usa el test de `notificationService`). Se dejaron para no ampliar el alcance.
+- ✅ Resuelto: se borraron `showAuthSuccess` y `MESSAGES.AUTH.LOGIN_SUCCESS`/`LOGOUT_SUCCESS`, que ya no se usaban; también sus tests y mocks. Antes se confirmó con grep que nadie más los usaba. Con la suite completa: 537/537 tests ok, `eslint .` ok y build ok.
 - Review: el test podría verificar que no se llama ningún helper de `notificationService`, no solo los de éxito. Es opcional.

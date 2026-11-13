@@ -75,8 +75,6 @@ const MESSAGES = {
     ERROR_UPDATE: "Error al actualizar la configuración",
   },
   AUTH: {
-    LOGIN_SUCCESS: "Inicio de sesión exitoso",
-    LOGOUT_SUCCESS: "Sesión cerrada exitosamente",
     LOGIN_ERROR: "Error en el inicio de sesión",
     TOKEN_EXPIRED: "Sesión expirada, por favor inicia sesión nuevamente",
   },
@@ -149,6 +147,5 @@ export const showSettingSuccess = (action) =>
 export const showSettingError = (action, detail) =>
   showError(MESSAGES.SETTING[action], detail);
 
-export const showAuthSuccess = (action) => showSuccess(MESSAGES.AUTH[action]);
 export const showAuthError = (action, detail) =>
   showError(MESSAGES.AUTH[action], detail);

@@ -29,7 +29,6 @@ import {
   showBudgetError,
   showServiceRecordSuccess,
   showServiceRecordError,
-  showAuthSuccess,
   showAuthError,
 } from '@services/notificationService'
 
@@ -189,11 +188,6 @@ describe('entity helpers — ServiceRecords', () => {
 })
 
 describe('entity helpers — Auth', () => {
-  it('showAuthSuccess LOGIN_SUCCESS calls sileo.success', () => {
-    showAuthSuccess('LOGIN_SUCCESS')
-    expect(sileo.success).toHaveBeenCalledWith({ title: 'Inicio de sesión exitoso' })
-  })
-
   it('showAuthError LOGIN_ERROR calls sileo.error', () => {
     showAuthError('LOGIN_ERROR')
     expect(sileo.error).toHaveBeenCalledWith({ title: 'Error en el inicio de sesión' })

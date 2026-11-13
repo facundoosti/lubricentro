@@ -6,7 +6,7 @@ import Header from '@layout/Header';
 const { logout, navigate, notifications } = vi.hoisted(() => ({
   logout: vi.fn(),
   navigate: vi.fn(),
-  notifications: { showAuthSuccess: vi.fn(), showSuccess: vi.fn() },
+  notifications: { showSuccess: vi.fn() },
 }));
 
 vi.mock('@stores/useAuthStore', () => ({
@@ -35,7 +35,6 @@ describe('Header — cerrar sesión', () => {
 
     expect(logout).toHaveBeenCalled();
     expect(navigate).toHaveBeenCalledWith('/login');
-    expect(notifications.showAuthSuccess).not.toHaveBeenCalled();
     expect(notifications.showSuccess).not.toHaveBeenCalled();
   });
 });

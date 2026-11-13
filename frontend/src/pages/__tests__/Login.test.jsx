@@ -6,7 +6,7 @@ import Login from '@pages/Login';
 const { login, navigate, notifications } = vi.hoisted(() => ({
   login: vi.fn(),
   navigate: vi.fn(),
-  notifications: { showAuthSuccess: vi.fn(), showAuthError: vi.fn() },
+  notifications: { showAuthError: vi.fn() },
 }));
 
 vi.mock('@stores/useAuthStore', () => ({ useAuthStore: () => ({ login }) }));
@@ -30,7 +30,6 @@ describe('Login', () => {
     renderWithProviders(<Login />);
     submit();
     await waitFor(() => expect(navigate).toHaveBeenCalledWith('/dashboard'));
-    expect(notifications.showAuthSuccess).not.toHaveBeenCalled();
   });
 
   it('si el login falla muestra el error', async () => {
