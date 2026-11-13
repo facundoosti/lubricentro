@@ -1,4 +1,4 @@
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderWithProviders } from '@/test/utils';
@@ -75,6 +75,21 @@ describe('InstallmentPlansSection', () => {
     fireEvent.change(screen.getByLabelText('Recargo %'), { target: { value: '20' } });
     fireEvent.click(screen.getByRole('button', { name: 'Crear plan' }));
     await waitFor(() => expect(m.create).toHaveBeenCalledWith({ name: 'VISA', installments: 6, surcharge_percentage: 20, position: 2 }));
+  });
+
+  it('el formulario muestra un label visible por campo y placeholders de ejemplo', () => {
+    renderWithProviders(<InstallmentPlansSection />);
+    fireEvent.click(screen.getByRole('button', { name: /Agregar plan/ }));
+    const form = screen.getByRole('form', { name: 'Crear plan' });
+    ['Nombre del plan', 'Cuotas', 'Recargo %', 'Orden'].forEach((label) => {
+      const text = within(form).getByText(label);
+      expect(text.tagName).toBe('LABEL');
+      expect(within(form).getByLabelText(label)).toBeInTheDocument();
+    });
+    expect(within(form).getByLabelText('Nombre del plan')).toHaveAttribute('placeholder', 'Ej: VISA');
+    expect(within(form).getByLabelText('Cuotas')).toHaveAttribute('placeholder', 'Ej: 3');
+    expect(within(form).getByLabelText('Recargo %')).toHaveAttribute('placeholder', 'Ej: 10');
+    expect(within(form).getByLabelText('Orden')).toHaveAttribute('placeholder', 'Auto');
   });
 
   it('no deja crear un plan de 1 cuota', () => {
