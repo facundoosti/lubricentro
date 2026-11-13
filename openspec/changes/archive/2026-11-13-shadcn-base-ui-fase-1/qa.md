@@ -45,6 +45,7 @@ Base `1d26bd3` + diff sin commitear · 2026-11-13 · capturas en `tmp/qa/shadcn-
 - ✅ **TC-18** · mcp · la trampa de foco cicla dentro del diálogo, Escape devuelve el foco a "Nuevo Vehículo" y en el apilado el foco nunca va al de abajo.
 - ✅ **TC-19** · mcp · se elige un cliente existente con click y queda seleccionado. La lista está dentro del diálogo, por encima (`elementFromPoint`), y no queda recortada.
 - ⚠️ **TC-17** · mcp · pass parcial: el toast queda arriba (`elementFromPoint`), recibe el click y el diálogo sigue abierto. El click fue sintético (el toast se descarta solo antes de que llegue el click real) y no se verificó el cierre por el botón del toast. Aceptado por el usuario.
+  - ✅ Re-test 2026-11-13 (`cc12954`): hover, click y swipe con mouse real, el toast se descarta y el diálogo sigue abierto (también con uno que cierra con el fondo). Sileo no tiene botón de cerrar → se usa swipe. Ver `docs/qa/2026-11-13-toast-con-dialogo.md`.
 
 ## Hallazgos
 

@@ -57,8 +57,8 @@ Con al menos un diálogo abierto, el contenido de la app y los diálogos que no 
 
 #### Scenario: Toast usable con diálogo abierto
 - **GIVEN** un diálogo abierto y un toast visible
-- **WHEN** el usuario hace click en el botón de cerrar del toast
-- **THEN** el toast se cierra y el diálogo sigue abierto
+- **WHEN** el usuario pasa el mouse sobre el toast, hace click en él o lo descarta arrastrándolo (el toast no tiene botón de cerrar)
+- **THEN** el toast queda por encima del diálogo, el hover pausa su cierre automático, al arrastrarlo se descarta, y el diálogo sigue abierto en todos los casos
 
 ### Requirement: Retorno de foco y scroll lock
 Al abrir un diálogo el foco SHALL ir dentro del diálogo; al cerrarlo SHALL volver al elemento que lo tenía antes. El scroll del body SHALL bloquearse mientras haya algún diálogo abierto y restaurarse al cerrar el último.
