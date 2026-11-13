@@ -1,4 +1,4 @@
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { renderWithProviders } from '@/test/utils';
@@ -118,5 +118,13 @@ describe('Settings — contacto', () => {
   it('muestra la sección de planes de cuotas', async () => {
     renderWithProviders(<Settings />);
     expect(await screen.findByRole('heading', { name: 'Planes de cuotas' })).toBeInTheDocument();
+  });
+
+  it('horarios y planes de cuotas van en la columna lateral', async () => {
+    renderWithProviders(<Settings />);
+    const aside = await screen.findByRole('complementary', { name: 'Horarios y planes de cuotas' });
+    expect(within(aside).getByRole('switch', { name: 'Lunes' })).toBeInTheDocument();
+    expect(within(aside).getByRole('heading', { name: 'Planes de cuotas' })).toBeInTheDocument();
+    expect(within(aside).queryByPlaceholderText('Ej: Lubricentro El Rápido')).toBeNull();
   });
 });

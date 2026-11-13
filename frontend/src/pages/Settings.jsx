@@ -2,9 +2,20 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { Settings as SettingsIcon, Save, MapPin, Clock, Phone, User, FileText } from "lucide-react";
+import {
+  Settings as SettingsIcon,
+  Save,
+  MapPin,
+  Clock,
+  Phone,
+  User,
+  FileText,
+} from "lucide-react";
 import { useSetting, useUpdateSetting } from "@services/settingsService";
-import { showSettingSuccess, showSettingError } from "@services/notificationService";
+import {
+  showSettingSuccess,
+  showSettingError,
+} from "@services/notificationService";
 import PageHeader from "@ui/PageHeader";
 import PageError from "@ui/PageError";
 import TimeInput from "@ui/TimeInput";
@@ -30,13 +41,21 @@ const DEFAULT_OPENING_HOURS = DAYS.reduce((acc, { key }) => {
 const HOUR_MESSAGE = "Completá desde y hasta con una hora válida (hh:mm)";
 const timeField = yup.string().when("open", {
   is: true,
-  then: (s) => s.required(HOUR_MESSAGE).matches(/^([01]\d|2[0-3]):[0-5]\d$/, HOUR_MESSAGE),
+  then: (s) =>
+    s.required(HOUR_MESSAGE).matches(/^([01]\d|2[0-3]):[0-5]\d$/, HOUR_MESSAGE),
 });
-const daySchema = yup.object({ open: yup.boolean(), from: timeField, to: timeField });
+const daySchema = yup.object({
+  open: yup.boolean(),
+  from: timeField,
+  to: timeField,
+});
 
 const schema = yup.object({
   opening_hours: yup.object(
-    DAYS.reduce((acc, { key }) => ({ ...acc, [key]: daySchema.default(undefined) }), {}),
+    DAYS.reduce(
+      (acc, { key }) => ({ ...acc, [key]: daySchema.default(undefined) }),
+      {},
+    ),
   ),
   lubricentro_name: yup.string().max(150),
   phone: yup.string().max(30),
@@ -124,25 +143,38 @@ const Settings = () => {
         owner_name: s.owner_name || "",
         email: s.email || "",
         instagram: s.instagram || "",
-        opening_hours: s.opening_hours && Object.keys(s.opening_hours).length > 0
-          ? s.opening_hours
-          : DEFAULT_OPENING_HOURS,
+        opening_hours:
+          s.opening_hours && Object.keys(s.opening_hours).length > 0
+            ? s.opening_hours
+            : DEFAULT_OPENING_HOURS,
       });
     }
   }, [data, reset]);
 
   const toggleDay = (dayKey) => {
-    const current = openingHours[dayKey] || { open: false, from: "09:00", to: "18:00" };
+    const current = openingHours[dayKey] || {
+      open: false,
+      from: "09:00",
+      to: "18:00",
+    };
     setValue(
       `opening_hours.${dayKey}`,
       { ...current, open: !current.open },
-      { shouldDirty: true }
+      { shouldDirty: true },
     );
   };
 
   const setDayTime = (dayKey, field, value) => {
-    const current = openingHours[dayKey] || { open: true, from: "09:00", to: "18:00" };
-    setValue(`opening_hours.${dayKey}`, { ...current, [field]: value }, { shouldDirty: true });
+    const current = openingHours[dayKey] || {
+      open: true,
+      from: "09:00",
+      to: "18:00",
+    };
+    setValue(
+      `opening_hours.${dayKey}`,
+      { ...current, [field]: value },
+      { shouldDirty: true },
+    );
   };
 
   const onSubmit = async (values) => {
@@ -150,7 +182,10 @@ const Settings = () => {
       await updateMutation.mutateAsync(values);
       showSettingSuccess("UPDATED");
     } catch (err) {
-      showSettingError("ERROR_UPDATE", err.response?.data?.message || err.message);
+      showSettingError(
+        "ERROR_UPDATE",
+        err.response?.data?.message || err.message,
+      );
     }
   };
 
@@ -164,7 +199,7 @@ const Settings = () => {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
       <PageHeader
         title="Configuración"
         description="Datos del lubricentro, horarios de atención y planes de cuotas"
@@ -173,186 +208,213 @@ const Settings = () => {
       {isLoading ? (
         <div className="space-y-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-10 bg-surface-container rounded-lg animate-pulse" />
+            <div
+              key={i}
+              className="h-10 bg-surface-container rounded-lg animate-pulse"
+            />
           ))}
         </div>
       ) : (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
-          {/* Datos del Lubricentro */}
-          <div className="bg-surface-container border border-outline-variant rounded-lg p-5">
-            <SectionTitle icon={SettingsIcon} title="Datos del Lubricentro" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="sm:col-span-2">
-                <Field label="Nombre del Lubricentro" error={errors.lubricentro_name?.message}>
-                  <input
-                    {...register("lubricentro_name")}
-                    placeholder="Ej: Lubricentro El Rápido"
-                    className={inputCls}
-                  />
-                </Field>
-              </div>
-              <Field label="CUIT / CUIL" error={errors.cuit?.message}>
-                <input
-                  {...register("cuit")}
-                  placeholder="20-12345678-9"
-                  className={inputCls}
-                />
-              </Field>
-              <Field label="Nombre del Dueño" error={errors.owner_name?.message}>
-                <input
-                  {...register("owner_name")}
-                  placeholder="Nombre completo"
-                  className={inputCls}
-                />
-              </Field>
-            </div>
-          </div>
-
-          {/* Contacto */}
-          <div className="bg-surface-container border border-outline-variant rounded-lg p-5">
-            <SectionTitle icon={Phone} title="Contacto" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Teléfono fijo" error={errors.phone?.message}>
-                <input
-                  {...register("phone")}
-                  placeholder="Ej: 011-4523-1234"
-                  className={inputCls}
-                />
-              </Field>
-              <Field label="Celular / WhatsApp" error={errors.mobile?.message}>
-                <input
-                  {...register("mobile")}
-                  placeholder="Ej: 11-5678-9012"
-                  className={inputCls}
-                />
-              </Field>
-              <Field label="Email" error={errors.email?.message}>
-                <input
-                  {...register("email")}
-                  type="email"
-                  placeholder="Ej: lubricentro@gmail.com"
-                  className={inputCls}
-                />
-              </Field>
-              <Field label="Instagram" error={errors.instagram?.message}>
-                <input
-                  {...register("instagram")}
-                  placeholder="Ej: killamet.dolores (sin @)"
-                  className={inputCls}
-                />
-              </Field>
-            </div>
-          </div>
-
-          {/* Dirección */}
-          <div className="bg-surface-container border border-outline-variant rounded-lg p-5">
-            <SectionTitle icon={MapPin} title="Ubicación" />
-            <div className="space-y-4">
-              <Field label="Dirección" error={errors.address?.message}>
-                <input
-                  {...register("address")}
-                  placeholder="Ej: Av. Corrientes 1234, CABA"
-                  className={inputCls}
-                />
-              </Field>
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Latitud" error={errors.latitude?.message}>
-                  <input
-                    {...register("latitude")}
-                    type="number"
-                    step="any"
-                    placeholder="-34.603722"
-                    className={inputCls}
-                  />
-                </Field>
-                <Field label="Longitud" error={errors.longitude?.message}>
-                  <input
-                    {...register("longitude")}
-                    type="number"
-                    step="any"
-                    placeholder="-58.381592"
-                    className={inputCls}
-                  />
-                </Field>
-              </div>
-              <p className="text-xs text-secondary">
-                Podés obtener las coordenadas desde Google Maps haciendo clic derecho sobre la ubicación.
-              </p>
-            </div>
-          </div>
-
-          {/* Horarios */}
-          <div className="bg-surface-container border border-outline-variant rounded-lg p-5">
-            <SectionTitle icon={Clock} title="Días y Horario de Atención" />
-            <div className="space-y-2">
-              {DAYS.map(({ key, label }) => {
-                const day = openingHours[key] || { open: false, from: "09:00", to: "18:00" };
-                const dayErrors = errors.opening_hours?.[key];
-                const dayError = dayErrors?.from?.message || dayErrors?.to?.message;
-                return (
-                  <div
-                    key={key}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-colors ${
-                      day.open
-                        ? "border-primary/40 bg-primary-container/10"
-                        : "border-outline-variant bg-surface-container-high"
-                    }`}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <form
+            id="settings-form"
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-6"
+            noValidate
+          >
+            {/* Datos del Lubricentro */}
+            <div className="bg-surface-container border border-outline-variant rounded-lg p-5">
+              <SectionTitle icon={SettingsIcon} title="Datos del Lubricentro" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <Field
+                    label="Nombre del Lubricentro"
+                    error={errors.lubricentro_name?.message}
                   >
-                    <Switch
-                      aria-label={label}
-                      checked={!!day.open}
-                      onCheckedChange={() => toggleDay(key)}
+                    <input
+                      {...register("lubricentro_name")}
+                      placeholder="Ej: Lubricentro El Rápido"
+                      className={inputCls}
                     />
-                    <span
-                      className={`w-24 text-sm font-medium ${
-                        day.open ? "text-on-surface" : "text-secondary"
+                  </Field>
+                </div>
+                <Field label="CUIT / CUIL" error={errors.cuit?.message}>
+                  <input
+                    {...register("cuit")}
+                    placeholder="20-12345678-9"
+                    className={inputCls}
+                  />
+                </Field>
+                <Field
+                  label="Nombre del Dueño"
+                  error={errors.owner_name?.message}
+                >
+                  <input
+                    {...register("owner_name")}
+                    placeholder="Nombre completo"
+                    className={inputCls}
+                  />
+                </Field>
+              </div>
+            </div>
+
+            {/* Contacto */}
+            <div className="bg-surface-container border border-outline-variant rounded-lg p-5">
+              <SectionTitle icon={Phone} title="Contacto" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Field label="Teléfono fijo" error={errors.phone?.message}>
+                  <input
+                    {...register("phone")}
+                    placeholder="Ej: 011-4523-1234"
+                    className={inputCls}
+                  />
+                </Field>
+                <Field
+                  label="Celular / WhatsApp"
+                  error={errors.mobile?.message}
+                >
+                  <input
+                    {...register("mobile")}
+                    placeholder="Ej: 11-5678-9012"
+                    className={inputCls}
+                  />
+                </Field>
+                <Field label="Email" error={errors.email?.message}>
+                  <input
+                    {...register("email")}
+                    type="email"
+                    placeholder="Ej: lubricentro@gmail.com"
+                    className={inputCls}
+                  />
+                </Field>
+                <Field label="Instagram" error={errors.instagram?.message}>
+                  <input
+                    {...register("instagram")}
+                    placeholder="Ej: killamet.dolores (sin @)"
+                    className={inputCls}
+                  />
+                </Field>
+              </div>
+            </div>
+
+            {/* Dirección */}
+            <div className="bg-surface-container border border-outline-variant rounded-lg p-5">
+              <SectionTitle icon={MapPin} title="Ubicación" />
+              <div className="space-y-4">
+                <Field label="Dirección" error={errors.address?.message}>
+                  <input
+                    {...register("address")}
+                    placeholder="Ej: Av. Corrientes 1234, CABA"
+                    className={inputCls}
+                  />
+                </Field>
+                <div className="grid grid-cols-2 gap-4">
+                  <Field label="Latitud" error={errors.latitude?.message}>
+                    <input
+                      {...register("latitude")}
+                      type="number"
+                      step="any"
+                      placeholder="-34.603722"
+                      className={inputCls}
+                    />
+                  </Field>
+                  <Field label="Longitud" error={errors.longitude?.message}>
+                    <input
+                      {...register("longitude")}
+                      type="number"
+                      step="any"
+                      placeholder="-58.381592"
+                      className={inputCls}
+                    />
+                  </Field>
+                </div>
+                <p className="text-xs text-secondary">
+                  Podés obtener las coordenadas desde Google Maps haciendo clic
+                  derecho sobre la ubicación.
+                </p>
+              </div>
+            </div>
+
+            {/* Submit */}
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={updateMutation.isPending || !isDirty}
+                className="flex items-center gap-2 px-5 py-2 bg-primary-container text-on-primary rounded-lg font-semibold text-sm hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Save className="w-4 h-4" />
+                {updateMutation.isPending ? "Guardando..." : "Guardar cambios"}
+              </button>
+            </div>
+          </form>
+          <aside aria-label="Horarios y planes de cuotas" className="space-y-6">
+            {/* Horarios */}
+            <div className="bg-surface-container border border-outline-variant rounded-lg p-5">
+              <SectionTitle icon={Clock} title="Días y Horario de Atención" />
+              <div className="space-y-2">
+                {DAYS.map(({ key, label }) => {
+                  const day = openingHours[key] || {
+                    open: false,
+                    from: "09:00",
+                    to: "18:00",
+                  };
+                  const dayErrors = errors.opening_hours?.[key];
+                  const dayError =
+                    dayErrors?.from?.message || dayErrors?.to?.message;
+                  return (
+                    <div
+                      key={key}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-colors ${
+                        day.open
+                          ? "border-primary/40 bg-primary-container/10"
+                          : "border-outline-variant bg-surface-container-high"
                       }`}
                     >
-                      {label}
-                    </span>
-                    {day.open ? (
-                      <div className="flex items-center gap-2 flex-1 flex-wrap">
-                        <TimeInput
-                          aria-label={`${label} desde`}
-                          value={day.from}
-                          onChange={(value) => setDayTime(key, "from", value)}
-                          error={!!dayErrors?.from}
-                          className="w-[124px] h-[31px] px-2 py-1 bg-surface-container border border-outline-variant text-on-surface rounded text-sm focus:outline-none focus:border-primary"
-                        />
-                        <span className="text-secondary text-sm">a</span>
-                        <TimeInput
-                          aria-label={`${label} hasta`}
-                          value={day.to}
-                          onChange={(value) => setDayTime(key, "to", value)}
-                          error={!!dayErrors?.to}
-                          className="w-[124px] h-[31px] px-2 py-1 bg-surface-container border border-outline-variant text-on-surface rounded text-sm focus:outline-none focus:border-primary"
-                        />
-                        {dayError && <p className="text-xs text-error">{dayError}</p>}
-                      </div>
-                    ) : (
-                      <span className="text-secondary text-sm">Cerrado</span>
-                    )}
-                  </div>
-                );
-              })}
+                      <Switch
+                        aria-label={label}
+                        checked={!!day.open}
+                        onCheckedChange={() => toggleDay(key)}
+                      />
+                      <span
+                        className={`w-24 text-sm font-medium ${
+                          day.open ? "text-on-surface" : "text-secondary"
+                        }`}
+                      >
+                        {label}
+                      </span>
+                      {day.open ? (
+                        <div className="flex items-center gap-2 flex-1 flex-wrap">
+                          <TimeInput
+                            aria-label={`${label} desde`}
+                            value={day.from}
+                            onChange={(value) => setDayTime(key, "from", value)}
+                            error={!!dayErrors?.from}
+                            className="w-[124px] h-[31px] px-2 py-1 bg-surface-container border border-outline-variant text-on-surface rounded text-sm focus:outline-none focus:border-primary"
+                          />
+                          <span className="text-secondary text-sm">a</span>
+                          <TimeInput
+                            aria-label={`${label} hasta`}
+                            value={day.to}
+                            onChange={(value) => setDayTime(key, "to", value)}
+                            error={!!dayErrors?.to}
+                            className="w-[124px] h-[31px] px-2 py-1 bg-surface-container border border-outline-variant text-on-surface rounded text-sm focus:outline-none focus:border-primary"
+                          />
+                          {dayError && (
+                            <p className="text-xs text-error">{dayError}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-secondary text-sm">Cerrado</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-
-          {/* Submit */}
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={updateMutation.isPending || !isDirty}
-              className="flex items-center gap-2 px-5 py-2 bg-primary-container text-on-primary rounded-lg font-semibold text-sm hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Save className="w-4 h-4" />
-              {updateMutation.isPending ? "Guardando..." : "Guardar cambios"}
-            </button>
-          </div>
-        </form>
+            <InstallmentPlansSection />
+          </aside>
+        </div>
       )}
-
-      {!isLoading && <InstallmentPlansSection />}
     </div>
   );
 };
