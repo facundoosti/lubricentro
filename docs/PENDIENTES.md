@@ -20,7 +20,6 @@ Backlog de mejoras detectadas y diferidas. Al tomar uno, movelo a un change de O
 
 Rediseño del talonario implementado en el change `presupuesto-hoja-rediseno` (2026-11-13): estilo nuevo, SKU, cuotas, datos fiscales del cliente, email e Instagram.
 
-- [ ] Confirmar con el dueño el color de marca naranja `#F04E23` (talonario nuevo; el viejo era rojo `#cc2200`). Se cambia en `frontend/src/components/features/budgets/printTheme.js`.
 - [ ] El PDF se genera como imagen (html2canvas): texto no seleccionable, pesa más y se corta si supera una A4. Generarlo como texto.
 
 ## Frontend — post shadcn/Base UI fase 2
