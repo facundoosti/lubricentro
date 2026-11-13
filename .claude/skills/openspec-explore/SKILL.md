@@ -39,6 +39,7 @@ Depending on what the user brings, you might:
 - Find analogies
 
 **Investigate the codebase**
+- Use codegraph first (MCP `codegraph_context` / `codegraph_explore` / `codegraph_trace` / `codegraph_impact`, or CLI `codegraph context|query|callers|impact`); grep only for exact literal strings
 - Map existing architecture relevant to the discussion
 - Find integration points
 - Identify patterns already in use

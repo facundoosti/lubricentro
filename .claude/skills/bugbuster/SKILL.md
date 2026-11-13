@@ -32,7 +32,7 @@ Con la evidencia, una de cuatro:
 
 ## 4. Código
 
-`codegraph context "<síntoma>"` → `codegraph trace` del flujo sospechoso. Enumerá escenarios (el más probable primero) y qué evidencia apoya o descarta cada uno.
+`codegraph context "<síntoma>"` → recorré el flujo sospechoso: con MCP, `codegraph_trace` (de → hasta) en una llamada; por CLI no existe `trace`, usá `codegraph callers <símbolo>` / `codegraph callees <símbolo>` salto a salto. Enumerá escenarios (el más probable primero) y qué evidencia apoya o descarta cada uno.
 
 Si quedan varias hipótesis igual de viables: pedile al usuario **máximo 3** verificaciones concretas (reproducir pasos en la UI, revisar un registro, probar con otro rol) y anotá pedido + resultado.
 

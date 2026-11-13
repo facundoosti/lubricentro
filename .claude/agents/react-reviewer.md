@@ -19,4 +19,6 @@ Chequeá:
 6. **Tamaño**: componentes < 300 líneas.
 7. **Tests**: componentes/hooks nuevos tienen test con `renderWithProviders`.
 
+Usá `codegraph callers <símbolo>` / `codegraph impact <símbolo>` (vía Bash) para medir el alcance de cambios en componentes, hooks o utils compartidos, y `codegraph query "<nombre>"` para ubicar símbolos; grep solo para strings literales.
+
 Formato de salida: lista priorizada (🔴 bloqueante, 🟡 mejorar, 🟢 ok) con `archivo:línea`, el problema y la corrección sugerida. Si no hay hallazgos, decilo explícitamente.

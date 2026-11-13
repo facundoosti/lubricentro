@@ -55,7 +55,8 @@ Lanzá un `Agent` (`general-purpose`) con un paquete autocontenido:
 Objetivo: implementar el change de OpenSpec <change> siguiendo .claude/skills/openspec-apply-change/SKILL.md
 Leé antes: CLAUDE.md, backend/CLAUDE.md y/o frontend/CLAUDE.md según el change, openspec/changes/<change>/*
 Reglas: tests + lint antes de marcar cada task; no commitear; no pushear; no tocar nada fuera del change.
-Devolvé: tasks marcadas, archivos tocados, comandos de test/lint corridos con su resultado, migraciones nuevas, dudas.
+Búsqueda: usá codegraph (MCP `codegraph_*` o CLI `codegraph context|query|callers|impact`) para ubicar código y `codegraph impact <símbolo>` antes de tocar uno compartido. Para ubicar un archivo o componente por nombre, `codegraph query "<Nombre>"`, nunca `grep -rl` ni `find`. Grep solo para strings literales.
+Devolvé: tasks marcadas, archivos tocados, comandos de test/lint corridos con su resultado, migraciones nuevas, símbolos compartidos tocados (con su impact), dudas.
 ```
 
 **Verificá** al volver: `git diff --stat`, `tasks.md`, y corré los tests afectados (`bundle exec rspec <specs>` / `npx vitest run <tests>`). Si algo no coincide con lo declarado, decilo y no avances.
@@ -73,7 +74,7 @@ Agrupá los hallazgos por severidad (bloqueante / sugerencia / nit) y preguntá 
 
 ## Etapa 3b — Una ronda de fixes (sub-agente nuevo)
 
-Si se eligió corregir algo: `Agent` (`general-purpose`) **nuevo** con la lista exacta de hallazgos (`archivo:línea` + qué cambiar). Mismas reglas que apply. Al volver, **vos** verificás el diff de los fixes y corrés los tests. Sin segunda review completa.
+Si se eligió corregir algo: `Agent` (`general-purpose`) **nuevo** con la lista exacta de hallazgos (`archivo:línea` + qué cambiar). Mismas reglas que apply (incluida la de búsqueda con codegraph). Al volver, **vos** verificás el diff de los fixes y corrés los tests. Sin segunda review completa.
 
 ## Etapa 4 — QA visual (si hay impacto visual)
 

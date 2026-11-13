@@ -68,6 +68,11 @@ Implement tasks from an OpenSpec change.
 
    For each pending task:
    - Show which task is being worked on
+   - **Locate code with codegraph, not grep** (MCP `codegraph_*` tools if available, else CLI via Bash):
+     - Find symbols/files: `codegraph_context` / `codegraph context "<task>"`, `codegraph_search` / `codegraph query "<name>"`
+     - **To locate a file or component by name, use `codegraph query "<Name>"` (or `codegraph_search`) — never `grep -rl` / `find`**. Also for "who imports X": `codegraph callers <X>`, not `grep -rl X src`
+     - Before changing a shared symbol (method, hook, component, serializer): `codegraph_impact` / `codegraph impact <symbol>` and review the callers it lists
+     - Fall back to `grep` only for exact literal strings (i18n keys, CSS classes, route paths)
    - Make the code changes required
    - Keep changes minimal and focused
    - Mark task complete in the tasks file: `- [ ]` → `- [x]`

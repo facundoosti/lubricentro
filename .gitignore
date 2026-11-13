@@ -116,6 +116,7 @@ docs/notes.md
 backend/.agents/skills
 skills-lock.json
 .claude/projects/
+.claude/logs/
 .claude/settings.local.json
 CLAUDE.local.md
 

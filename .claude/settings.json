@@ -78,6 +78,12 @@
         "hooks": [
           { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard-bash.sh", "timeout": 10 }
         ]
+      },
+      {
+        "matcher": "Grep|Glob|Bash|mcp__codegraph__.*",
+        "hooks": [
+          { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/log-search.sh", "timeout": 5 }
+        ]
       }
     ],
     "PostToolUse": [
