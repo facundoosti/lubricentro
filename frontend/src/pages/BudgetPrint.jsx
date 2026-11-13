@@ -9,7 +9,7 @@ import BudgetPrintTotals from "@components/features/budgets/BudgetPrintTotals";
 const formatDate = (iso) => {
   if (!iso) return { day: "", month: "", year: "" };
   const [y, m, d] = iso.split("-");
-  return { day: d, month: m, year: y };
+  return { day: d, month: m, year: y.slice(-2) };
 };
 
 const PrintSheet = ({ budget, setting }) => {
@@ -45,9 +45,8 @@ const PrintSheet = ({ budget, setting }) => {
         }}
       >
         <div>
-          <div>
-            <strong>NOMBRE:</strong>{" "}
-            {budget.customer?.name || budget.vehicle_description || ""}
+          <div data-testid="print-customer-name">
+            <strong>NOMBRE:</strong> {budget.customer?.name || ""}
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
@@ -123,6 +122,7 @@ const PrintSheet = ({ budget, setting }) => {
         >
           <span>DÍA</span>
           <span
+            data-testid="print-day"
             style={{
               background: "#fff",
               color: "#cc2200",
@@ -137,6 +137,7 @@ const PrintSheet = ({ budget, setting }) => {
           </span>
           <span>MES</span>
           <span
+            data-testid="print-month"
             style={{
               background: "#fff",
               color: "#cc2200",
@@ -151,13 +152,14 @@ const PrintSheet = ({ budget, setting }) => {
           </span>
           <span>AÑO</span>
           <span
+            data-testid="print-year"
             style={{
               background: "#fff",
               color: "#cc2200",
               fontWeight: "bold",
               padding: "1px 6px",
               borderRadius: "2px",
-              minWidth: "36px",
+              minWidth: "22px",
               textAlign: "center",
             }}
           >

@@ -18,7 +18,7 @@ const BudgetPrintItems = ({ items = [] }) => {
       <thead>
         <tr style={{ backgroundColor: '#cc2200', color: '#fff' }}>
           <th style={{ ...head, textAlign: 'center', width: '40px' }}>CANT</th>
-          <th style={{ ...head, textAlign: 'left' }}>DESCRIPCIÓN</th>
+          <th style={{ ...head, textAlign: 'left' }}>ARTÍCULO</th>
           <th style={{ ...head, textAlign: 'right', width: '80px' }}>P. UNIT.</th>
           <th style={{ ...head, textAlign: 'right', width: '90px' }}>IMPORTE</th>
         </tr>

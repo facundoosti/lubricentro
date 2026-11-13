@@ -57,7 +57,7 @@ describe('BudgetPrint', () => {
   it('muestra precio unitario e importe finales, sin columna IVA, y el IVA por alícuota sin base', () => {
     renderPrint(mixed);
     const headers = screen.getAllByRole('columnheader').map((th) => th.textContent);
-    expect(headers).toEqual(['CANT', 'DESCRIPCIÓN', 'P. UNIT.', 'IMPORTE']);
+    expect(headers).toEqual(['CANT', 'ARTÍCULO', 'P. UNIT.', 'IMPORTE']);
 
     const neumatico = screen.getByText('Neumático').closest('tr');
     expect(within(neumatico).getAllByText('$4.420')).toHaveLength(2);
@@ -146,6 +146,31 @@ describe('BudgetPrint', () => {
     expect(within(screen.getByText('Service').closest('tr')).getByText('$25.000')).toBeInTheDocument();
     expect(screen.getByTestId('print-total-list')).toHaveTextContent('$50.000');
     expect(screen.getByTestId('print-total-card')).toHaveTextContent('$55.000');
+  });
+
+  it('muestra el año de la fecha con dos dígitos', () => {
+    renderPrint({ ...legacy, date: '2026-11-13' });
+    expect(screen.getByTestId('print-day')).toHaveTextContent(/^13$/);
+    expect(screen.getByTestId('print-month')).toHaveTextContent(/^11$/);
+    expect(screen.getByTestId('print-year')).toHaveTextContent(/^26$/);
+  });
+
+  it('deja día, mes y año vacíos si el presupuesto no tiene fecha', () => {
+    renderPrint({ ...legacy, date: null });
+    expect(screen.getByTestId('print-day')).toBeEmptyDOMElement();
+    expect(screen.getByTestId('print-month')).toBeEmptyDOMElement();
+    expect(screen.getByTestId('print-year')).toBeEmptyDOMElement();
+  });
+
+  it('muestra el nombre del cliente en NOMBRE', () => {
+    renderPrint({ ...legacy, customer: { name: 'Juan Pérez', phone: '11' } });
+    expect(screen.getByTestId('print-customer-name')).toHaveTextContent(/^NOMBRE: Juan Pérez$/);
+  });
+
+  it('deja NOMBRE vacío sin cliente y mantiene la descripción en el renglón Vehículo', () => {
+    renderPrint({ ...legacy, customer: null, vehicle_description: 'Gol Trend' });
+    expect(screen.getByTestId('print-customer-name')).toHaveTextContent(/^NOMBRE:$/);
+    expect(screen.getByText('Vehículo:').parentElement).toHaveTextContent('Vehículo: Gol Trend');
   });
 
   it('avisa si no existe', () => {
