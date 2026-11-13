@@ -13,8 +13,25 @@ import { ChevronDown, Search, X } from 'lucide-react';
  *   onChange    — callback(value)
  *   placeholder — texto cuando no hay selección
  *   disabled    — boolean
+ *   searchable  — muestra el buscador (default true; false para listas cortas)
+ *   clearable   — muestra la X para limpiar (default true; false si el campo no admite vacío)
+ *   className   — clases extra para el trigger
+ *   error       — boolean, marca el borde en rojo
+ *   id / aria-labelledby — para asociar el trigger con su <label>
  */
-const SearchableSelect = ({ options = [], value, onChange, placeholder = 'Seleccionar...', disabled = false }) => {
+const SearchableSelect = ({
+  options = [],
+  value,
+  onChange,
+  placeholder = 'Seleccionar...',
+  disabled = false,
+  searchable = true,
+  clearable = true,
+  className = '',
+  error = false,
+  id,
+  'aria-labelledby': ariaLabelledBy,
+}) => {
   const [search, setSearch] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownStyle, setDropdownStyle] = useState({});
@@ -60,7 +77,11 @@ const SearchableSelect = ({ options = [], value, onChange, placeholder = 'Selecc
         setIsOpen(false);
       }
     };
-    const handleScroll = () => setIsOpen(false);
+    // Solo el scroll de la página cierra; el de la propia lista no
+    const handleScroll = (e) => {
+      if (dropdownRef.current?.contains(e.target)) return;
+      setIsOpen(false);
+    };
 
     document.addEventListener('mousedown', handleOutside);
     window.addEventListener('scroll', handleScroll, true);
@@ -70,9 +91,17 @@ const SearchableSelect = ({ options = [], value, onChange, placeholder = 'Selecc
     };
   }, [isOpen]);
 
+  // Al abrir: foco en el buscador, o (sin buscador) en la opción elegida / la primera
   useEffect(() => {
-    if (isOpen) inputRef.current?.focus();
-  }, [isOpen]);
+    if (!isOpen) return;
+    if (searchable) {
+      inputRef.current?.focus();
+      return;
+    }
+    const opts = dropdownRef.current?.querySelectorAll('[role="option"]') || [];
+    const current = Array.from(opts).find((el) => el.getAttribute('aria-selected') === 'true');
+    (current || opts[0])?.focus();
+  }, [isOpen, searchable]);
 
   const handleSelect = (opt) => {
     onChange(opt.value);
@@ -87,14 +116,35 @@ const SearchableSelect = ({ options = [], value, onChange, placeholder = 'Selecc
 
   // Escape con la lista abierta cierra solo la lista (el diálogo contenedor lo ignora)
   const handleKeyDown = (e) => {
-    if (e.key === 'Escape' && isOpen) {
+    if (!isOpen) return;
+    if (e.key === 'Escape') {
       e.preventDefault();
       setIsOpen(false);
+      triggerRef.current?.focus();
+      return;
+    }
+    // Tab con la lista abierta: se cierra y el foco sigue desde el trigger
+    if (e.key === 'Tab') {
+      setIsOpen(false);
+      triggerRef.current?.focus();
+      return;
+    }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      const opts = Array.from(dropdownRef.current?.querySelectorAll('[role="option"]') || []);
+      if (opts.length === 0) return;
+      e.preventDefault();
+      const idx = opts.indexOf(document.activeElement);
+      const next = e.key === 'ArrowDown'
+        ? (idx + 1) % opts.length
+        : (idx <= 0 ? opts.length - 1 : idx - 1);
+      opts[next].focus();
     }
   };
 
   const baseClass =
-    'w-full flex items-center gap-2 px-3 py-2 bg-surface-variant border border-outline-variant rounded-lg text-sm transition-colors focus:outline-none focus:border-primary';
+    `w-full flex items-center gap-2 px-3 py-2 bg-surface-variant border rounded-lg text-sm transition-colors focus:outline-none focus:border-primary ${
+      error ? 'border-error' : 'border-outline-variant'
+    }`;
 
   return (
     <>
@@ -102,16 +152,20 @@ const SearchableSelect = ({ options = [], value, onChange, placeholder = 'Selecc
       <button
         ref={triggerRef}
         type="button"
+        id={id}
+        aria-labelledby={ariaLabelledBy}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
         onClick={handleOpen}
         onKeyDown={handleKeyDown}
         disabled={disabled}
-        className={`${baseClass} justify-between ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-outline cursor-pointer'} ${isOpen ? 'border-primary' : ''}`}
+        className={`${baseClass} justify-between ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-outline cursor-pointer'} ${isOpen && !error ? 'border-primary' : ''} ${className}`}
       >
         <span className={selected ? 'text-on-surface truncate' : 'text-secondary'}>
           {selected ? selected.label : placeholder}
         </span>
         <span className="flex items-center gap-1 shrink-0">
-          {selected && (
+          {selected && clearable && (
             <span
               role="button"
               tabIndex={-1}
@@ -134,32 +188,36 @@ const SearchableSelect = ({ options = [], value, onChange, placeholder = 'Selecc
           className="bg-surface-container border border-outline-variant rounded-lg shadow-xl overflow-hidden"
         >
           {/* Search input */}
-          <div className="flex items-center gap-2 px-3 py-2 border-b border-outline-variant">
-            <Search className="w-3.5 h-3.5 text-secondary shrink-0" />
-            <input
-              autoComplete="off"
-              ref={inputRef}
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar..."
-              className="flex-1 bg-transparent text-sm text-on-surface placeholder:text-secondary focus:outline-none"
-            />
-          </div>
+          {searchable && (
+            <div className="flex items-center gap-2 px-3 py-2 border-b border-outline-variant">
+              <Search className="w-3.5 h-3.5 text-secondary shrink-0" />
+              <input
+                autoComplete="off"
+                ref={inputRef}
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar..."
+                className="flex-1 bg-transparent text-sm text-on-surface placeholder:text-secondary focus:outline-none"
+              />
+            </div>
+          )}
 
           {/* Options */}
-          <ul className="max-h-52 overflow-y-auto">
+          <ul role="listbox" aria-labelledby={ariaLabelledBy} className="max-h-52 overflow-y-auto">
             {filtered.length === 0 ? (
               <li className="px-3 py-2 text-sm text-secondary">Sin resultados</li>
             ) : (
               filtered.map((opt) => (
-                <li key={opt.value}>
+                <li key={opt.value} role="presentation">
                   <button
                     type="button"
+                    role="option"
+                    aria-selected={String(opt.value) === String(value)}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => handleSelect(opt)}
                     title={opt.label}
-                    className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-surface-container-high ${
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-surface-container-high focus:bg-surface-container-high focus:outline-none ${
                       String(opt.value) === String(value) ? 'text-primary font-medium' : 'text-on-surface'
                     }`}
                   >

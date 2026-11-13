@@ -37,3 +37,21 @@ describe('SearchableSelect — opciones largas', () => {
     expect(screen.getByTitle(label)).toHaveTextContent(label);
   });
 });
+
+describe('SearchableSelect — scroll', () => {
+  const OPTS = Array.from({ length: 20 }, (_, i) => ({ value: String(i), label: `Opción ${i}` }));
+
+  it('no se cierra al scrollear la propia lista', () => {
+    renderWithProviders(<SearchableSelect options={OPTS} onChange={vi.fn()} placeholder="Hora" searchable={false} />);
+    fireEvent.click(screen.getByRole('button', { name: /Hora/ }));
+    fireEvent.scroll(screen.getByRole('listbox'));
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+  });
+
+  it('se cierra al scrollear la página', () => {
+    renderWithProviders(<SearchableSelect options={OPTS} onChange={vi.fn()} placeholder="Hora" searchable={false} />);
+    fireEvent.click(screen.getByRole('button', { name: /Hora/ }));
+    fireEvent.scroll(document);
+    expect(screen.queryByRole('listbox')).toBeNull();
+  });
+});

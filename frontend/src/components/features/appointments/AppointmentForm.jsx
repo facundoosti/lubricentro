@@ -1,6 +1,6 @@
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { useVehicles } from '@services/vehiclesService';
-import InputField from '@ui/InputField';
+import SearchableSelect from '@ui/SearchableSelect';
 import TextArea from '@ui/TextArea';
 import CustomerSearchInput from '@components/features/customers/CustomerSearchInput';
 import { useEffect, useState, useMemo } from 'react';
@@ -10,32 +10,48 @@ const fieldClass = (hasError) =>
     hasError ? 'border-error' : 'border-outline-variant'
   }`;
 
+// Horarios en punto de 8 AM a 8 PM. value 'HH:00' (lo que se envía), label con AM/PM
+const formatHour = (time) => {
+  const [hh, mm] = time.split(':').map(Number);
+  const suffix = hh < 12 ? 'AM' : 'PM';
+  const h12 = hh % 12 || 12;
+  return mm ? `${h12}:${String(mm).padStart(2, '0')} ${suffix}` : `${h12} ${suffix}`;
+};
+const HOUR_OPTIONS = Array.from({ length: 13 }, (_, i) => {
+  const value = `${String(i + 8).padStart(2, '0')}:00`;
+  return { value, label: formatHour(value) };
+});
+
+// Abre el calendario nativo al hacer click en cualquier parte del campo
+const openPicker = (e) => {
+  try {
+    e.currentTarget.showPicker?.();
+  } catch {
+    // showPicker puede lanzar si el navegador no lo permite; el input sigue funcionando
+  }
+};
+
 const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' }) => {
-  // Función para obtener la fecha y hora actual
+  // Fecha actual (la hora arranca vacía: se elige siempre)
   const getCurrentDateTime = () => {
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    
-    return {
-      date: `${year}-${month}-${day}`,
-      time: `${hours}:${minutes}`
-    };
+
+    return { date: `${year}-${month}-${day}` };
   };
 
   const currentDateTime = useMemo(() => getCurrentDateTime(), []);
 
   const [submitted, setSubmitted] = useState(false);
 
-  const { register, handleSubmit, formState: { errors }, watch, setValue, trigger, reset } = useForm({
+  const { register, handleSubmit, control, formState: { errors }, watch, setValue, trigger, reset } = useForm({
     defaultValues: {
       customer_id: '',
       vehicle_id: '',
       scheduled_date: currentDateTime.date,
-      scheduled_time: currentDateTime.time,
+      scheduled_time: '',
       status: 'scheduled',
       notes: ''
     },
@@ -65,19 +81,17 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
     return [];
   }, [selectedCustomerId, vehiclesData]);
 
+  // Turnos viejos con minutos (p. ej. 10:30): se agrega su horario para poder mostrarlo
+  const selectedTime = watch('scheduled_time');
+  const hourOptions = selectedTime && !HOUR_OPTIONS.some((o) => o.value === selectedTime)
+    ? [...HOUR_OPTIONS, { value: selectedTime, label: formatHour(selectedTime) }].sort((a, b) => a.value.localeCompare(b.value))
+    : HOUR_OPTIONS;
+
   const statusOptions = [
     { value: 'scheduled', label: 'Agendado' },
     { value: 'confirmed', label: 'Confirmado' },
     { value: 'completed', label: 'Completado' },
     { value: 'cancelled', label: 'Cancelado' }
-  ];
-
-  // Horarios comunes para un lubricentro (8:00 AM a 6:00 PM)
-  const timeSlots = [
-    '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
-    '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
-    '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
-    '17:00', '17:30', '18:00'
   ];
 
   const handleFormSubmit = (data) => {
@@ -104,7 +118,7 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
   useEffect(() => {
     if (initialData) {
       let scheduled_date = currentDateTime.date;
-      let scheduled_time = currentDateTime.time;
+      let scheduled_time = '';
 
       if (initialData.scheduled_at) {
         const date = new Date(initialData.scheduled_at);
@@ -125,12 +139,12 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
         customer_id: '',
         vehicle_id: '',
         scheduled_date: currentDateTime.date,
-        scheduled_time: currentDateTime.time,
+        scheduled_time: '',
         status: 'scheduled',
         notes: '',
       });
     }
-  }, [initialData, currentDateTime.date, currentDateTime.time, reset]);
+  }, [initialData, currentDateTime.date, reset]);
 
   // When editing, set vehicle_id once vehicles finish loading
   useEffect(() => {
@@ -230,7 +244,8 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
           <input
             type="date"
             {...register('scheduled_date', { required: 'Fecha es requerida' })}
-            className={fieldClass(!!errors.scheduled_date)}
+            onClick={openPicker}
+            className={`${fieldClass(!!errors.scheduled_date)} cursor-pointer`}
             aria-invalid={!!errors.scheduled_date}
           />
           {errors.scheduled_date && (
@@ -242,21 +257,27 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
 
         {/* Hora */}
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-on-surface">
+          <label id="appointment-time-label" className="mb-1.5 block text-sm font-medium text-on-surface">
             Hora *
           </label>
-          <select
-            {...register('scheduled_time', { required: 'Hora es requerida' })}
-            className={fieldClass(!!errors.scheduled_time)}
-            aria-invalid={!!errors.scheduled_time}
-          >
-            <option value="">Seleccionar hora</option>
-            {timeSlots.map((time) => (
-              <option key={time} value={time}>
-                {time}
-              </option>
-            ))}
-          </select>
+          <Controller
+            name="scheduled_time"
+            control={control}
+            rules={{ required: 'Hora es requerida' }}
+            render={({ field }) => (
+              <SearchableSelect
+                options={hourOptions}
+                value={field.value}
+                onChange={field.onChange}
+                placeholder="Seleccionar hora"
+                searchable={false}
+                clearable={false}
+                aria-labelledby="appointment-time-label"
+                error={!!errors.scheduled_time}
+                className="h-11 px-4"
+              />
+            )}
+          />
           {errors.scheduled_time && (
             <p className="mt-1 text-sm text-error">
               {errors.scheduled_time.message}
@@ -267,19 +288,24 @@ const AppointmentForm = ({ onSubmit, initialData, formId = 'appointment-form' })
 
       {/* Estado */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-on-surface">
+        <label id="appointment-status-label" className="mb-1.5 block text-sm font-medium text-on-surface">
           Estado
         </label>
-        <select
-          {...register('status')}
-          className={fieldClass(false)}
-        >
-          {statusOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <Controller
+          name="status"
+          control={control}
+          render={({ field }) => (
+            <SearchableSelect
+              options={statusOptions}
+              value={field.value}
+              onChange={field.onChange}
+              searchable={false}
+              clearable={false}
+              aria-labelledby="appointment-status-label"
+              className="h-11 px-4"
+            />
+          )}
+        />
       </div>
 
       {/* Notas */}
