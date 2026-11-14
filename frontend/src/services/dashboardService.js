@@ -3,7 +3,7 @@ import { api } from '@services/api';
 import { appointmentKeys } from '@services/appointmentsService';
 
 // Query keys para el dashboard
-export const dashboardKeys = {
+const dashboardKeys = {
   all: ['dashboard'],
   stats: () => [...dashboardKeys.all, 'stats'],
 };
@@ -45,22 +45,3 @@ export const formatCurrency = (amount) => {
     maximumFractionDigits: 0,
   }).format(amount);
 };
-
-// Función para formatear porcentajes
-export const formatPercentage = (value) => {
-  return `${value >= 0 ? '+' : ''}${value}%`;
-};
-
-// Función para obtener el color del badge según el cambio
-export const getChangeColor = (change) => {
-  if (change >= 0) return 'success';
-  if (change < -10) return 'error';
-  return 'warning';
-};
-
-// Función para obtener el estado del objetivo
-export const getGoalStatus = (percentage) => {
-  if (percentage >= 100) return 'success';
-  if (percentage >= 70) return 'warning';
-  return 'error';
-}; 

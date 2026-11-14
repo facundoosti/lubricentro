@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@services/api';
 
-export const settingKeys = {
+const settingKeys = {
   all: ['setting'],
   detail: () => [...settingKeys.all, 'detail'],
 };

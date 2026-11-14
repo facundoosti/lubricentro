@@ -3,15 +3,12 @@ import { api } from '@services/api';
 import { budgetKeys } from '@services/budgetsService';
 
 // Query keys
-export const serviceRecordKeys = {
+const serviceRecordKeys = {
   all: ['serviceRecords'],
   lists: () => [...serviceRecordKeys.all, 'list'],
   list: (filters) => [...serviceRecordKeys.lists(), { filters }],
   details: () => [...serviceRecordKeys.all, 'detail'],
   detail: (id) => [...serviceRecordKeys.details(), id],
-  statistics: () => [...serviceRecordKeys.all, 'statistics'],
-  overdue: () => [...serviceRecordKeys.all, 'overdue'],
-  upcoming: () => [...serviceRecordKeys.all, 'upcoming'],
 };
 
 // Queries
@@ -43,36 +40,6 @@ export const useServiceRecord = (id) => {
       return response.data;
     },
     enabled: !!id,
-  });
-};
-
-export const useServiceRecordStatistics = () => {
-  return useQuery({
-    queryKey: serviceRecordKeys.statistics(),
-    queryFn: async () => {
-      const response = await api.get('/service_records/statistics');
-      return response.data;
-    },
-  });
-};
-
-export const useOverdueServiceRecords = () => {
-  return useQuery({
-    queryKey: serviceRecordKeys.overdue(),
-    queryFn: async () => {
-      const response = await api.get('/service_records/overdue');
-      return response.data;
-    },
-  });
-};
-
-export const useUpcomingServiceRecords = () => {
-  return useQuery({
-    queryKey: serviceRecordKeys.upcoming(),
-    queryFn: async () => {
-      const response = await api.get('/service_records/upcoming');
-      return response.data;
-    },
   });
 };
 
@@ -113,7 +80,6 @@ export const useCreateServiceRecord = () => {
     },
     onSuccess: (response, variables) => {
       queryClient.invalidateQueries({ queryKey: serviceRecordKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: serviceRecordKeys.statistics() });
       // Crear la atención desde un presupuesto lo marca como aprobado en el backend.
       if (response?.data?.budget_id ?? variables?.budget_id) {
         queryClient.invalidateQueries({ queryKey: budgetKeys.lists() });
@@ -141,7 +107,6 @@ export const useUpdateServiceRecord = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: serviceRecordKeys.lists() });
       queryClient.invalidateQueries({ queryKey: serviceRecordKeys.detail(variables.id) });
-      queryClient.invalidateQueries({ queryKey: serviceRecordKeys.statistics() });
     },
     onError: (error) => {
       throw error;
@@ -159,11 +124,10 @@ export const useDeleteServiceRecord = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: serviceRecordKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: serviceRecordKeys.statistics() });
     },
     onError: (error) => {
       console.error('Error:', error);
       throw error;
     },
   });
-}; 
+};

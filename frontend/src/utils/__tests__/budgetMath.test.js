@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   DEFAULT_PRODUCT_MARGIN,
-  computeBudgetTotals,
   computeItemsTotals,
   lineGrossTotal,
   lineNetTotal,
@@ -9,9 +8,9 @@ import {
   unitFinalPrice,
 } from '@utils/budgetMath';
 
-describe('computeBudgetTotals', () => {
+describe('computeItemsTotals', () => {
   it('calcula un presupuesto mixto igual que el backend', () => {
-    const totals = computeBudgetTotals(
+    const totals = computeItemsTotals(
       [
         { quantity: 2, unit_price: 10000, iva_rate: '21' },
         { quantity: 1, unit_price: '4000', iva_rate: '10.5' },
@@ -35,13 +34,13 @@ describe('computeBudgetTotals', () => {
   });
 
   it('aplica el recargo sobre el total con IVA', () => {
-    const totals = computeBudgetTotals([{ quantity: 1, unit_price: 100, iva_rate: 21 }], 10);
+    const totals = computeItemsTotals([{ quantity: 1, unit_price: 100, iva_rate: 21 }], 10);
     expect(totals.totalList).toBe(121);
     expect(totals.totalCard).toBe(133.1);
   });
 
   it('redondea el IVA por alícuota y no por línea', () => {
-    const totals = computeBudgetTotals([
+    const totals = computeItemsTotals([
       { quantity: 1, unit_price: 0.05, iva_rate: 21 },
       { quantity: 1, unit_price: 0.05, iva_rate: 21 },
     ]);
@@ -49,14 +48,14 @@ describe('computeBudgetTotals', () => {
   });
 
   it('trata los ítems sin alícuota como precio final', () => {
-    const totals = computeBudgetTotals([{ quantity: 2, unit_price: 25000, iva_rate: null }], 10);
+    const totals = computeItemsTotals([{ quantity: 2, unit_price: 25000, iva_rate: null }], 10);
     expect(totals).toMatchObject({ totalList: 50000, totalIva: 0, subtotalNet: 0, totalCard: 55000 });
     expect(totals.ivaBreakdown).toEqual([]);
   });
 
   it('tolera ítems vacíos', () => {
-    expect(computeBudgetTotals([{ quantity: '', unit_price: '' }]).totalList).toBe(0);
-    expect(computeBudgetTotals().totalCard).toBe(0);
+    expect(computeItemsTotals([{ quantity: '', unit_price: '' }]).totalList).toBe(0);
+    expect(computeItemsTotals().totalCard).toBe(0);
   });
 });
 
@@ -71,7 +70,7 @@ describe('lineGrossTotal', () => {
 
 describe('computeItemsTotals', () => {
   it('es la misma fórmula que la del presupuesto', () => {
-    expect(computeItemsTotals).toBe(computeBudgetTotals);
+    expect(computeItemsTotals).toBe(computeItemsTotals);
   });
 
   it('calcula una atención mixta sin recargo', () => {

@@ -1,6 +1,6 @@
 import api from '@services/api';
 
-export const authAPI = {
+const authAPI = {
   // Login con email y password
   login: async (email, password) => {
     try {

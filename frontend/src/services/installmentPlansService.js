@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@services/api';
 
-export const installmentPlanKeys = {
+const installmentPlanKeys = {
   all: ['installment_plans'],
   list: () => [...installmentPlanKeys.all, 'list'],
 };

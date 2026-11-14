@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@services/api';
 
-export const reminderKeys = {
+const reminderKeys = {
   all: ['serviceReminders'],
   lists: () => [...reminderKeys.all, 'list'],
   list: (filters) => [...reminderKeys.lists(), { filters }],

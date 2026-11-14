@@ -4,7 +4,7 @@ import { useImportStatus } from '@services/productsService';
 
 const FINAL_TYPES = ['complete', 'failed'];
 
-export const STATUS_UNKNOWN_MESSAGE =
+const STATUS_UNKNOWN_MESSAGE =
   'No pudimos confirmar el estado de la importación. Revisá el listado de productos.';
 
 /**

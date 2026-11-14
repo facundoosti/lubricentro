@@ -12,7 +12,7 @@ import { useVehiclePlate } from '@hooks/useVehiclePlate';
 import { useCreateCustomer } from '@services/customersService';
 import { showCustomerSuccess, showCustomerError, parseApiError } from '@services/notificationService';
 
-export const MIN_VEHICLE_YEAR = 1950;
+const MIN_VEHICLE_YEAR = 1950;
 const AUTOFILL_FIELDS = ['brand', 'model', 'year'];
 
 const lookupValues = (data) => ({

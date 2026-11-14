@@ -69,18 +69,6 @@ export const useProductBrands = (search = "") => {
   });
 };
 
-export const useProduct = (id) => {
-  return useQuery({
-    queryKey: productKeys.detail(id),
-    queryFn: async () => {
-      const response = await api.get(`/products/${id}`);
-      return response.data;
-    },
-    enabled: !!id,
-    staleTime: 10 * 60 * 1000, // 10 minutos
-  });
-};
-
 // Helper: build FormData for multipart uploads
 const toFormData = (namespace, data) => {
   const fd = new FormData();
@@ -186,7 +174,7 @@ export const useImportProducts = () => {
   });
 };
 
-export const IMPORT_STATUS_POLL_MS = 2500;
+const IMPORT_STATUS_POLL_MS = 2500;
 
 // Estado de una importación (respaldo de Action Cable): se consulta
 // periódicamente mientras la importación está en curso.
@@ -257,95 +245,3 @@ export const useBulkIvaUpdate = () => {
     },
   });
 };
-
-// Funciones helper para el servicio
-export const productsService = {
-  // Obtener todos los products con filtros
-  getAll: async (filters = {}) => {
-    const params = new URLSearchParams();
-    
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        params.append(key, value.toString());
-      }
-    });
-
-    const response = await api.get(`/products?${params}`);
-    return response.data;
-  },
-
-  // Obtener un product por ID
-  getById: async (id) => {
-    const response = await api.get(`/products/${id}`);
-    return response.data;
-  },
-
-  // Crear un nuevo product
-  create: async (productData) => {
-    const response = await api.post('/products', { product: productData });
-    return response.data;
-  },
-
-  // Actualizar un product
-  update: async (id, productData) => {
-    const response = await api.put(`/products/${id}`, { product: productData });
-    return response.data;
-  },
-
-  // Eliminar un product
-  delete: async (id) => {
-    const response = await api.delete(`/products/${id}`);
-    return response.data;
-  },
-
-  // Buscar products
-  search: async (query) => {
-    const response = await api.get('/products', { 
-      params: { search: query } 
-    });
-    return response.data;
-  },
-
-  // Obtener products por rango de precio
-  getByPriceRange: async (minPrice, maxPrice) => {
-    const response = await api.get('/products', { 
-      params: { min_price: minPrice, max_price: maxPrice } 
-    });
-    return response.data;
-  },
-};
-
-// Tipos de datos para TypeScript (si se usa en el futuro)
-export const productTypes = {
-  Product: {
-    id: 'number',
-    name: 'string',
-    description: 'string | null',
-    unit_price: 'string',
-    unit: 'string | null',
-    created_at: 'string',
-    updated_at: 'string',
-  },
-  
-  ProductFilters: {
-    page: 'number',
-    per_page: 'number',
-    search: 'string',
-    min_price: 'number',
-    max_price: 'number',
-  },
-  
-  ProductCreateData: {
-    name: 'string',
-    description: 'string | null',
-    unit_price: 'number',
-    unit: 'string | null',
-  },
-  
-  ProductUpdateData: {
-    name: 'string | null',
-    description: 'string | null',
-    unit_price: 'number | null',
-    unit: 'string | null',
-  },
-}; 

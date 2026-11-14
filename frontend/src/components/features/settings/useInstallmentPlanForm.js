@@ -4,7 +4,7 @@ import { useState } from 'react';
 export const EMPTY_PLAN = { name: '', installments: '', surcharge_percentage: '0', position: '' };
 
 // Mismas reglas que el backend: nombre obligatorio, más de 1 cuota, recargo ≥ 0.
-export const validatePlan = (v) => {
+const validatePlan = (v) => {
   if (!v.name.trim()) return 'Ingresá el nombre del plan';
   const n = Number(v.installments);
   if (!Number.isInteger(n) || n < 2) return 'Las cuotas deben ser 2 o más';

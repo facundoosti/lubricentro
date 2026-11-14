@@ -5,8 +5,8 @@ import { usePlateLookup, useVehiclesByPlate } from '@services/vehiclesService';
 const PLATE_OLD = /^[A-Z]{3}\s?[0-9]{3}$/;
 const PLATE_NEW = /^[A-Z]{2}\s?[0-9]{3}\s?[A-Z]{2}$/;
 
-export const normalizePlate = (plate) => String(plate || '').trim().toUpperCase();
-export const isValidArgentinePlate = (plate) => PLATE_OLD.test(plate) || PLATE_NEW.test(plate);
+const normalizePlate = (plate) => String(plate || '').trim().toUpperCase();
+const isValidArgentinePlate = (plate) => PLATE_OLD.test(plate) || PLATE_NEW.test(plate);
 
 const OWNER_DEBOUNCE_MS = 400;
 const LOOKUP_DEBOUNCE_MS = 600;

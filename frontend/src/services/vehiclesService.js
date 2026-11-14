@@ -172,7 +172,7 @@ export const useDeleteVehicle = () => {
 };
 
 // Lookup de vehículo por patente via clasific.ar
-export const lookupVehicleByPlate = async (plate) => {
+const lookupVehicleByPlate = async (plate) => {
   const response = await api.get(`/vehicles/lookup?plate=${encodeURIComponent(plate)}`);
   return response.data;
 };
@@ -209,97 +209,3 @@ export const useVehiclesByPlate = (plate) =>
     enabled: !!plate,
     staleTime: 30 * 1000,
   });
-
-// Funciones helper para el servicio
-export const vehiclesService = {
-  // Obtener todos los vehicles con filtros
-  getAll: async (filters = {}) => {
-    const params = new URLSearchParams();
-    
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        params.append(key, value.toString());
-      }
-    });
-
-    const response = await api.get(`/vehicles?${params}`);
-    return response.data;
-  },
-
-  // Obtener un vehicle por ID
-  getById: async (id) => {
-    const response = await api.get(`/vehicles/${id}`);
-    return response.data;
-  },
-
-  // Crear un nuevo vehicle
-  create: async (vehicleData) => {
-    const response = await api.post('/vehicles', { vehicle: vehicleData });
-    return response.data;
-  },
-
-  // Actualizar un vehicle
-  update: async (id, vehicleData) => {
-    const response = await api.put(`/vehicles/${id}`, { vehicle: vehicleData });
-    return response.data;
-  },
-
-  // Eliminar un vehicle
-  delete: async (id) => {
-    const response = await api.delete(`/vehicles/${id}`);
-    return response.data;
-  },
-
-  // Buscar vehicles
-  search: async (query) => {
-    const response = await api.get('/vehicles', { 
-      params: { search: query } 
-    });
-    return response.data;
-  },
-
-  // Obtener vehicles por cliente
-  getByCustomer: async (customerId) => {
-    const response = await api.get(`/customers/${customerId}/vehicles`);
-    return response.data;
-  },
-};
-
-// Tipos de datos para TypeScript (si se usa en el futuro)
-export const vehicleTypes = {
-  Vehicle: {
-    id: 'number',
-    brand: 'string',
-    model: 'string',
-    license_plate: 'string',
-    year: 'string',
-    customer_id: 'number',
-    customer_name: 'string',
-    created_at: 'string',
-    updated_at: 'string',
-  },
-  
-  VehicleFilters: {
-    page: 'number',
-    per_page: 'number',
-    search: 'string',
-    customer_id: 'number',
-    brand: 'string',
-  },
-  
-  VehicleCreateData: {
-    brand: 'string',
-    model: 'string',
-    license_plate: 'string',
-    year: 'string',
-    customer_id: 'number',
-  },
-  
-  VehicleUpdateData: {
-    brand: 'string | null',
-    model: 'string | null',
-    license_plate: 'string | null',
-    year: 'string | null',
-    customer_id: 'number | null',
-  },
-}; 

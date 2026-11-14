@@ -47,34 +47,6 @@ const appointmentsApi = {
     const response = await api.delete(`/appointments/${id}`);
     return response.data;
   },
-
-  // Get upcoming appointments
-  getUpcomingAppointments: async (params = {}) => {
-    console.log("API call getUpcomingAppointments with:", params);
-    const response = await api.get('/appointments/upcoming', { params });
-    return response.data;
-  },
-
-  // Confirm appointment
-  confirmAppointment: async (id) => {
-    console.log("API call confirmAppointment with:", id);
-    const response = await api.patch(`/appointments/${id}/confirm`);
-    return response.data;
-  },
-
-  // Complete appointment
-  completeAppointment: async (id) => {
-    console.log("API call completeAppointment with:", id);
-    const response = await api.patch(`/appointments/${id}/complete`);
-    return response.data;
-  },
-
-  // Cancel appointment
-  cancelAppointment: async (id) => {
-    console.log("API call cancelAppointment with:", id);
-    const response = await api.patch(`/appointments/${id}/cancel`);
-    return response.data;
-  },
 };
 
 // React Query hooks
@@ -113,14 +85,6 @@ export const useAppointment = (id) => {
     queryFn: () => appointmentsApi.getAppointment(id),
     enabled: !!id,
     staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-};
-
-export const useUpcomingAppointments = (filters = {}) => {
-  return useQuery({
-    queryKey: appointmentKeys.upcoming(),
-    queryFn: () => appointmentsApi.getUpcomingAppointments(filters),
-    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 };
 
@@ -175,57 +139,3 @@ export const useDeleteAppointment = () => {
     },
   });
 };
-
-export const useConfirmAppointment = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: appointmentsApi.confirmAppointment,
-    onSuccess: (data) => {
-      console.log("Appointment confirmed successfully:", data);
-      // Invalidar todas las queries de appointments para asegurar que se actualice el calendario
-      queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
-      queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: appointmentKeys.upcoming() });
-    },
-    onError: (error) => {
-      console.error('Error confirming appointment:', error);
-      throw error;
-    },
-  });
-};
-
-export const useCompleteAppointment = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: appointmentsApi.completeAppointment,
-    onSuccess: (data) => {
-      console.log("Appointment completed successfully:", data);
-      // Invalidar todas las queries de appointments para asegurar que se actualice el calendario
-      queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
-      queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: appointmentKeys.upcoming() });
-    },
-    onError: (error) => {
-      console.error('Error completing appointment:', error);
-      throw error;
-    },
-  });
-};
-
-export const useCancelAppointment = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: appointmentsApi.cancelAppointment,
-    onSuccess: (data) => {
-      console.log("Appointment cancelled successfully:", data);
-      // Invalidar todas las queries de appointments para asegurar que se actualice el calendario
-      queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
-      queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: appointmentKeys.upcoming() });
-    },
-    onError: (error) => {
-      console.error('Error cancelling appointment:', error);
-      throw error;
-    },
-  });
-}; 

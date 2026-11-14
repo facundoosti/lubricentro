@@ -1,7 +1,5 @@
 import { emptyItem, toFormItems, toItemsAttributes } from '@utils/items';
 
-export { emptyItem };
-
 export const BUDGET_STATUSES = [
   { value: 'draft', label: 'Borrador' },
   { value: 'sent', label: 'Enviado' },
@@ -13,7 +11,7 @@ export const formatVehicle = (v) =>
   [v.brand, v.model, v.year, v.license_plate ? `(${v.license_plate})` : ''].filter(Boolean).join(' ');
 
 // Fecha local (no UTC): a la noche en Argentina toISOString ya da el día siguiente.
-export const today = () => new Date().toLocaleDateString('en-CA');
+const today = () => new Date().toLocaleDateString('en-CA');
 
 export const defaultValues = () => ({
   date: today(),

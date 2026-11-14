@@ -38,63 +38,6 @@ api.interceptors.response.use(
   }
 );
 
-export const customersAPI = {
-  getAll: (params = {}) => api.get('/customers', { params }),
-  getById: (id) => api.get(`/customers/${id}`),
-  create: (data) => api.post('/customers', data),
-  update: (id, data) => api.put(`/customers/${id}`, data),
-  delete: (id) => api.delete(`/customers/${id}`),
-  search: (query) => api.get('/customers', { params: { search: query } }),
-};
-
-export const vehiclesAPI = {
-  getAll: (params = {}) => api.get('/vehicles', { params }),
-  getById: (id) => api.get(`/vehicles/${id}`),
-  create: (data) => api.post('/vehicles', data),
-  update: (id, data) => api.put(`/vehicles/${id}`, data),
-  delete: (id) => api.delete(`/vehicles/${id}`),
-  getByCustomer: (customerId) => api.get(`/customers/${customerId}/vehicles`),
-};
-
-export const servicesAPI = {
-  getAll: (params = {}) => api.get('/services', { params }),
-  getById: (id) => api.get(`/services/${id}`),
-  create: (data) => api.post('/services', data),
-  update: (id, data) => api.put(`/services/${id}`, data),
-  delete: (id) => api.delete(`/services/${id}`),
-};
-
-export const productsAPI = {
-  getAll: (params = {}) => api.get('/products', { params }),
-  getById: (id) => api.get(`/products/${id}`),
-  create: (data) => api.post('/products', data),
-  update: (id, data) => api.put(`/products/${id}`, data),
-  delete: (id) => api.delete(`/products/${id}`),
-};
-
-export const appointmentsAPI = {
-  getAll: (params = {}) => api.get('/appointments', { params }),
-  getById: (id) => api.get(`/appointments/${id}`),
-  create: (data) => api.post('/appointments', data),
-  update: (id, data) => api.put(`/appointments/${id}`, data),
-  delete: (id) => api.delete(`/appointments/${id}`),
-  upcoming: () => api.get('/appointments/upcoming'),
-  confirm: (id) => api.patch(`/appointments/${id}/confirm`),
-  complete: (id) => api.patch(`/appointments/${id}/complete`),
-  cancel: (id) => api.patch(`/appointments/${id}/cancel`),
-};
-
-export const serviceRecordsAPI = {
-  getAll: (params = {}) => api.get('/service_records', { params }),
-  getById: (id) => api.get(`/service_records/${id}`),
-  create: (data) => api.post('/service_records', data),
-  update: (id, data) => api.put(`/service_records/${id}`, data),
-  delete: (id) => api.delete(`/service_records/${id}`),
-  overdue: () => api.get('/service_records/overdue'),
-  upcoming: () => api.get('/service_records/upcoming'),
-  statistics: () => api.get('/service_records/statistics'),
-};
-
 export const conversationsAPI = {
   getAll: (params = {}) => api.get('/conversations', { params }),
   getById: (id) => api.get(`/conversations/${id}`),

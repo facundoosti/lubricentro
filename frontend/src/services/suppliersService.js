@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@services/api';
 
-export const supplierKeys = {
+const supplierKeys = {
   all: ['suppliers'],
   lists: () => [...supplierKeys.all, 'list'],
   list: (filters) => [...supplierKeys.lists(), filters],
@@ -21,18 +21,6 @@ export const useSuppliers = (filters = {}) => {
       return response.data;
     },
     staleTime: 5 * 60 * 1000,
-  });
-};
-
-export const useSupplier = (id) => {
-  return useQuery({
-    queryKey: supplierKeys.detail(id),
-    queryFn: async () => {
-      const response = await api.get(`/suppliers/${id}`);
-      return response.data;
-    },
-    enabled: !!id,
-    staleTime: 10 * 60 * 1000,
   });
 };
 

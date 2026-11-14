@@ -1,7 +1,5 @@
 import { round2 } from '@utils/money';
 
-// Alícuotas que acepta el backend (products.iva_rate y budget_items.iva_rate).
-export const IVA_RATES = [21, 10.5];
 export const DEFAULT_IVA_RATE = 21;
 
 export const PRODUCT_IVA_OPTIONS = [

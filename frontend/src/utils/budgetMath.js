@@ -71,8 +71,6 @@ export const computeItemsTotals = (items = [], surchargePercentage = 0) => {
   };
 };
 
-export const computeBudgetTotals = computeItemsTotals;
-
 export const lineNetTotal = (item) => fromCents(lineNetCents(item));
 
 // Neto + ganancia + IVA de un importe en centavos (fórmula sumada, cada parte redondeada).
