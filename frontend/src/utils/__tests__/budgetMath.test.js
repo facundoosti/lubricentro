@@ -92,15 +92,37 @@ describe('computeItemsTotals', () => {
   });
 });
 
-describe('ganancia por línea (fórmula sumada)', () => {
-  it('suma IVA y ganancia sobre el neto: 1 × $1.000, 21%, 30%, recargo 10%', () => {
+describe('ganancia por línea (fórmula compuesta)', () => {
+  it('aplica la ganancia sobre neto + IVA: 1 × $1.000, 21%, 30%, recargo 10%', () => {
     const items = [{ quantity: 1, unit_price: 1000, iva_rate: '21', margin_percentage: '30' }];
     const totals = computeItemsTotals(items, 10);
 
-    expect(lineGrossTotal(items[0])).toBe(1510);
-    expect(unitFinalPrice(items[0])).toBe(1510);
-    expect(totals).toMatchObject({ subtotalNet: 1000, totalIva: 210, marginTotal: 300, totalList: 1510, totalCard: 1661 });
+    expect(lineGrossTotal(items[0])).toBe(1573);
+    expect(unitFinalPrice(items[0])).toBe(1573);
+    expect(totals).toMatchObject({ subtotalNet: 1000, totalIva: 210, marginTotal: 363, totalList: 1573, totalCard: 1730.3 });
     expect(totals.ivaBreakdown).toEqual([{ rate: 21, base: 1000, amount: 210 }]);
+  });
+
+  it('1 × $1.000, 21%, 50% → IVA $210, ganancia $605, final $1.815', () => {
+    const items = [{ quantity: 1, unit_price: 1000, iva_rate: '21', margin_percentage: '50' }];
+    const totals = computeItemsTotals(items);
+
+    expect(lineGrossTotal(items[0])).toBe(1815);
+    expect(totals).toMatchObject({ totalIva: 210, marginTotal: 605, totalList: 1815 });
+  });
+
+  it('redondea el IVA de la línea antes de aplicar la ganancia (igual que Line#line_margin)', () => {
+    // neto 10,01; IVA round(2,1021) = 2,10; ganancia round(12,11 × 33,33%) = round(4,036263) = 4,04
+    const item = { quantity: 1, unit_price: 10.01, iva_rate: '21', margin_percentage: '33.33' };
+    expect(computeItemsTotals([item]).marginTotal).toBe(4.04);
+    expect(lineGrossTotal(item)).toBe(16.15);
+  });
+
+  it('precio unitario final compuesto: unitario × (1 + IVA%) × (1 + ganancia%), por partes redondeadas', () => {
+    const item = { quantity: 3, unit_price: 10.01, iva_rate: '21', margin_percentage: '33.33' };
+    expect(unitFinalPrice(item)).toBe(16.15);
+    // Línea: neto 30,03; IVA 6,31; ganancia round(36,34 × 33,33%) = round(12,112122) = 12,11
+    expect(lineGrossTotal(item)).toBe(48.45);
   });
 
   it('suma la ganancia en líneas sin IVA', () => {
@@ -155,6 +177,42 @@ describe('redondeo en centavos (half-up, igual que BigDecimal)', () => {
   });
 
   it('expone la ganancia por defecto de un producto', () => {
-    expect(DEFAULT_PRODUCT_MARGIN).toBe(30);
+    expect(DEFAULT_PRODUCT_MARGIN).toBe(50);
+  });
+});
+
+// Casos de borde espejados en backend/spec/models/concerns/itemized_totals_spec.rb (mismos inputs y resultados).
+describe('casos de borde (espejo de itemized_totals_spec.rb)', () => {
+  it('con alícuota 21% y ganancia 0, la ganancia de la línea es 0', () => {
+    const item = { quantity: 1, unit_price: 1000, iva_rate: '21', margin_percentage: 0 };
+    expect(computeItemsTotals([item]).marginTotal).toBe(0);
+    expect(lineGrossTotal(item)).toBe(1210);
+  });
+
+  it('toma margin_percentage nulo como 0 aunque haya alícuota', () => {
+    const item = { quantity: 1, unit_price: 1000, iva_rate: '21', margin_percentage: null };
+    expect(computeItemsTotals([item]).marginTotal).toBe(0);
+    expect(lineGrossTotal(item)).toBe(1210);
+  });
+
+  it('con cantidad fraccionaria redondea el neto antes del IVA y la ganancia half-up', () => {
+    // 1,5 × 333,33 = 499,995 → neto 500,00; IVA 105,00; ganancia 605 × 12,5% = 75,625 → 75,63
+    const item = { quantity: 1.5, unit_price: 333.33, iva_rate: '21', margin_percentage: 12.5 };
+    const totals = computeItemsTotals([item]);
+    expect(lineNetTotal(item)).toBe(500);
+    expect(totals).toMatchObject({ subtotalNet: 500, totalIva: 105, marginTotal: 75.63, totalList: 680.63 });
+    expect(lineGrossTotal(item)).toBe(680.63);
+  });
+
+  it('la suma de importes de línea puede diferir en 1 centavo del total (IVA por alícuota)', () => {
+    // Trade-off aceptado (design): por línea IVA round(2,1042) = 2,10 → 12,12 c/u → 24,24;
+    // por alícuota round(20,04 × 21%) = 4,21 → 24,25
+    const items = [
+      { quantity: 1, unit_price: 10.02, iva_rate: '21' },
+      { quantity: 1, unit_price: 10.02, iva_rate: '21' },
+    ];
+    const lineSum = items.reduce((sum, item) => sum + lineGrossTotal(item), 0);
+    expect(lineSum).toBe(24.24);
+    expect(computeItemsTotals(items).totalList).toBe(24.25);
   });
 });

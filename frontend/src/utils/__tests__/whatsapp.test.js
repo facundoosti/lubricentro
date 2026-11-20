@@ -40,17 +40,17 @@ describe('buildBudgetMessage', () => {
         date: '2026-11-11',
         subtotal_net: '1000.0',
         total_iva: '210.0',
-        margin_total: '300.0',
-        total_list: '1510.0',
-        total_card: '1661.0',
+        margin_total: '363.0',
+        total_list: '1573.0',
+        total_card: '1730.3',
         items: [{ id: 1, quantity: '1.0', description: 'Filtro', unit_price: '1000.0', iva_rate: '21.0', margin_percentage: '30.0' }],
       },
       customerName: 'Juan',
     });
-    expect(text).toContain('Total efectivo / débito: $1.510');
-    expect(text).toContain('Total tarjeta de crédito: $1.661');
+    expect(text).toContain('Total efectivo / débito: $1.573');
+    expect(text).toContain('Total tarjeta de crédito: $1.730,30');
     expect(text).not.toMatch(/ganancia/i);
-    expect(text).not.toContain('$300');
+    expect(text).not.toContain('$363');
     expect(text).not.toContain('30%');
   });
 });

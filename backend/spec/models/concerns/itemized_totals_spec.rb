@@ -73,10 +73,49 @@ RSpec.describe ItemizedTotals do
         end
       end
 
-      it 'calcula la ganancia de la línea sobre el neto, redondeada a 2 decimales' do
+      it 'calcula la ganancia de una línea sin IVA sobre el neto, redondeada a 2 decimales' do
         expect(build(:service_record_item, quantity: 2, unit_price: 500, margin_percentage: 20).line_margin).to eq(200)
         expect(build(:service_record_item, quantity: 1, unit_price: 10.01, margin_percentage: 33.33).line_margin)
           .to eq(BigDecimal('3.34'))
+      end
+
+      it 'calcula la ganancia compuesta sobre el neto + IVA de la línea' do
+        item = build(:service_record_item, quantity: 1, unit_price: 1000, iva_rate: 21, margin_percentage: 50)
+        expect(item.line_iva).to eq(210)
+        expect(item.line_margin).to eq(605)
+        expect(build(:service_record_item, quantity: 1, unit_price: 1000, iva_rate: 21, margin_percentage: 30).line_margin)
+          .to eq(363)
+      end
+
+      it 'redondea el IVA de la línea antes de calcular la ganancia' do
+        # neto 10.01; IVA round(2.1021) = 2.10; ganancia round(12.11 × 0.3333) = round(4.036263) = 4.04
+        item = build(:service_record_item, quantity: 1, unit_price: 10.01, iva_rate: 21, margin_percentage: 33.33)
+        expect(item.line_iva).to eq(BigDecimal('2.10'))
+        expect(item.line_margin).to eq(BigDecimal('4.04'))
+      end
+
+      it 'IVA de la línea es 0 sin alícuota' do
+        expect(build(:service_record_item, quantity: 2, unit_price: 500, iva_rate: nil).line_iva).to eq(0)
+      end
+
+      # Casos de borde espejados en frontend/src/utils/__tests__/budgetMath.test.js
+      it 'con alícuota 21% y ganancia 0, la ganancia de la línea es 0' do
+        expect(build(:service_record_item, quantity: 1, unit_price: 1000, iva_rate: 21, margin_percentage: 0).line_margin)
+          .to eq(0)
+      end
+
+      it 'toma margin_percentage nil en memoria como 0 aunque haya alícuota' do
+        item = build(:service_record_item, quantity: 1, unit_price: 1000, iva_rate: 21, margin_percentage: nil)
+        expect(item.margin_percentage).to be_nil
+        expect(item.line_margin).to eq(0)
+      end
+
+      it 'con cantidad fraccionaria redondea el neto antes del IVA y la ganancia half-up' do
+        # 1,5 × 333,33 = 499,995 → neto 500,00; IVA 105,00; ganancia 605 × 12,5% = 75,625 → 75,63
+        item = build(:service_record_item, quantity: 1.5, unit_price: 333.33, iva_rate: 21, margin_percentage: 12.5)
+        expect(item.line_net).to eq(BigDecimal('500'))
+        expect(item.line_iva).to eq(BigDecimal('105'))
+        expect(item.line_margin).to eq(BigDecimal('75.63'))
       end
 
       it 'no cambia el total guardado de la línea (sigue siendo el neto)' do
@@ -121,12 +160,24 @@ RSpec.describe ItemizedTotals do
       expect(record.margin_total).to eq(0)
     end
 
-    it 'suma la ganancia de todos los ítems (con y sin IVA) al total' do
-      record.items.first.margin_percentage = 10   # 20.000 al 21% → 2.000
+    it 'suma la ganancia compuesta de todos los ítems (con y sin IVA) al total' do
+      record.items.first.margin_percentage = 10   # (20.000 + 4.200 de IVA) al 10% → 2.420
       record.items.last.margin_percentage = 12.5  # 15.000 sin IVA → 1.875
-      expect(record.margin_total).to eq(3_875)
+      expect(record.margin_total).to eq(4_295)
       expect(record.items_iva_total).to eq(4_770)
-      expect(record.items_grand_total).to eq(48_645)
+      expect(record.items_grand_total).to eq(49_065)
+    end
+
+    # Trade-off aceptado (design): el IVA de los totales se redondea por alícuota y el de la línea
+    # por línea, así que la suma de importes de línea puede diferir en 1 centavo del total.
+    # Espejado en frontend/src/utils/__tests__/budgetMath.test.js
+    it 'la suma de importes de línea puede diferir en 1 centavo del total (IVA por alícuota)' do
+      record = build(:service_record)
+      2.times { record.items.build(description: 'Ítem', quantity: 1, unit_price: 10.02, iva_rate: 21) }
+      # por línea: IVA round(2,1042) = 2,10 → 12,12 c/u → 24,24; por alícuota: round(20,04 × 21%) = 4,21 → 24,25
+      line_sum = record.items.sum { |i| i.line_net + i.line_iva + i.line_margin }
+      expect(line_sum).to eq(BigDecimal('24.24'))
+      expect(record.items_grand_total).to eq(BigDecimal('24.25'))
     end
 
     it 'ignora los ítems marcados para borrar' do

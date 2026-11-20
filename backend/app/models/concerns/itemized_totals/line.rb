@@ -1,5 +1,6 @@
 # Línea de ítem (BudgetItem, ServiceRecordItem): importe neto, alícuota, % de ganancia y total.
-# iva_rate nil = sin IVA (precio final). La ganancia se suma al IVA sobre el neto (ver ItemizedTotals).
+# iva_rate nil = sin IVA (precio final). Ganancia compuesta: se aplica sobre neto + IVA de la línea
+# (ver ItemizedTotals).
 module ItemizedTotals
   module Line
     extend ActiveSupport::Concern
@@ -27,9 +28,17 @@ module ItemizedTotals
       ((quantity || 0) * (unit_price || 0)).round(2)
     end
 
-    # Ganancia de la línea, sobre el neto
+    # IVA de la línea (0 sin alícuota). Solo es la base de la ganancia: los totales redondean
+    # el IVA por alícuota (ItemizedTotals#iva_breakdown).
+    def line_iva
+      return 0.to_d unless iva_rate
+
+      (line_net * iva_rate / 100).round(2)
+    end
+
+    # Ganancia de la línea, sobre el neto con IVA
     def line_margin
-      (line_net * (margin_percentage || 0) / 100).round(2)
+      ((line_net + line_iva) * (margin_percentage || 0) / 100).round(2)
     end
 
     private

@@ -127,13 +127,13 @@ describe('ItemSearchInput', () => {
   })
 
   describe('selección', () => {
-    it('un producto devuelve su precio neto, alícuota, ganancia por defecto (30%), stock y product_id', () => {
+    it('un producto devuelve su precio neto, alícuota, ganancia por defecto (50%), stock y product_id', () => {
       withResults()
       const onSelect = vi.fn()
       renderWithProviders(<ItemSearchInput value="" onSelect={onSelect} />)
       typeAndWait('neu')
       fireEvent.mouseDown(screen.getByRole('option', { name: /Neumático 175/ }))
-      expect(onSelect).toHaveBeenCalledWith({ description: 'Neumático 175', unit_price: 4000, iva_rate: 10.5, margin_percentage: 30, stock: 0, product_id: 2, service_id: null, product_code: null })
+      expect(onSelect).toHaveBeenCalledWith({ description: 'Neumático 175', unit_price: 4000, iva_rate: 10.5, margin_percentage: 50, stock: 0, product_id: 2, service_id: null, product_code: null })
     })
 
     it('un servicio queda sin IVA, sin ganancia y con su service_id', () => {

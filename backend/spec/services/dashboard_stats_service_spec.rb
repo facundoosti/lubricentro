@@ -226,18 +226,19 @@ RSpec.describe DashboardStatsService do
   end
 
   describe 'ingresos por servicio y por producto' do
-    it 'incluyen la ganancia de cada línea' do
+    it 'incluyen la ganancia compuesta de cada línea, sin contar el IVA' do
       customer = create(:customer)
       sr = create(:service_record, customer: customer, vehicle: create(:vehicle, customer: customer))
       service = create(:service, name: 'Alineación')
       product = create(:product, name: 'Filtro')
       create(:service_record_item, service_record: sr, service: service, quantity: 2, unit_price: 500, margin_percentage: 20)
       create(:service_record_item, service_record: sr, product: product, quantity: 1, unit_price: 1_000, iva_rate: 21,
-                                   margin_percentage: 30)
+                                   margin_percentage: 50)
 
       trends = described_class.calculate_trends
       expect(trends[:revenue_by_service_type]).to eq([ { name: 'Alineación', revenue: 1_200 } ])
-      expect(trends[:revenue_by_product_type]).to eq([ { name: 'Filtro', revenue: 1_300 } ])
+      # neto 1000 + ganancia (1000 + 210 de IVA) × 50% = 605 → 1605
+      expect(trends[:revenue_by_product_type]).to eq([ { name: 'Filtro', revenue: 1_605 } ])
     end
 
     it 'redondean neto y ganancia a 2 decimales como el modelo' do
@@ -250,6 +251,32 @@ RSpec.describe DashboardStatsService do
       # neto ROUND(49.995) = 50.00; ganancia ROUND(5.00) = 5.00 → 55.00 (sin redondeo daría 54.9945)
       expect(revenue).to eq(item.line_net + item.line_margin)
       expect(revenue).to eq(BigDecimal('55'))
+    end
+
+    context 'con casos de borde de IVA y ganancia' do
+      let(:customer) { create(:customer) }
+      let(:sr) { create(:service_record, customer: customer, vehicle: create(:vehicle, customer: customer)) }
+      let(:revenues) { described_class.calculate_trends[:revenue_by_product_type].to_h { |r| [ r[:name], r[:revenue] ] } }
+
+      it 'sin alícuota y ganancia 50% suma neto × 1,5' do
+        create(:service_record_item, service_record: sr, product: create(:product, name: 'Sin IVA'),
+                                     quantity: 2, unit_price: 500, iva_rate: nil, margin_percentage: 50)
+        expect(revenues['Sin IVA']).to eq(1_500)
+      end
+
+      it 'con IVA 21% y ganancia 0 suma solo el neto' do
+        create(:service_record_item, service_record: sr, product: create(:product, name: 'Sin ganancia'),
+                                     quantity: 1, unit_price: 1_000, iva_rate: 21, margin_percentage: 0)
+        expect(revenues['Sin ganancia']).to eq(1_000)
+      end
+
+      it 'da el mismo ingreso en SQL que line_net + line_margin en Ruby' do
+        item = create(:service_record_item, service_record: sr, product: create(:product, name: 'Paridad'),
+                                            quantity: 1, unit_price: 10.01, iva_rate: 21, margin_percentage: 33.33)
+        # neto 10,01; IVA round(2,1021) = 2,10; ganancia round(12,11 × 33,33%) = 4,04 → 14,05
+        expect(revenues['Paridad']).to eq(BigDecimal('14.05'))
+        expect(revenues['Paridad']).to eq(item.line_net + item.line_margin)
+      end
     end
   end
 

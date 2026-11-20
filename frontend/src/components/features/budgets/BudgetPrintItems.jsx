@@ -9,8 +9,9 @@ const head = { backgroundColor: BRAND, color: '#fff', padding: '5px 8px' };
 const clamp2 = { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', overflowWrap: 'break-word' };
 const code = { color: GRAY.muted, fontSize: '9px', fontFamily: 'monospace', marginRight: '6px' };
 
-// Tabla de ítems de la hoja impresa: solo el importe final de la línea (neto × (1 + IVA% + ganancia%)) y,
-// si el ítem salió del catálogo, su código. Sin precio unitario, alícuota, neto ni ganancia.
+// Tabla de ítems de la hoja impresa: solo el importe final de la línea (neto + IVA + ganancia sobre el neto
+// con IVA; IVA y ganancia se redondean por separado a centavos, ver lineGrossTotal) y, si el ítem salió del
+// catálogo, su código. Sin precio unitario, alícuota, neto ni ganancia.
 const BudgetPrintItems = ({ items = [] }) => {
   const padded = [...items, ...Array.from({ length: Math.max(0, MIN_ROWS - items.length) }, () => null)];
   const blank = (item) => ({ color: item ? '#000' : 'transparent' });

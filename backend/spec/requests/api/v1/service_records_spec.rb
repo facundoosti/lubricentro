@@ -267,7 +267,7 @@ RSpec.describe "Api::V1::ServiceRecords", type: :request do
       expect(response).to have_http_status(:created)
       data = JSON.parse(response.body)["data"]
       expect(data["items"].map { |i| i["margin_percentage"] }).to eq([ "30.0", "20.0" ])
-      expect(data).to include("total_amount" => "2710.0", "margin_total" => "500.0", "total_iva" => "210.0")
+      expect(data).to include("total_amount" => "2773.0", "margin_total" => "563.0", "total_iva" => "210.0")
     end
 
     it "responde 422 con una ganancia negativa" do
@@ -316,7 +316,7 @@ RSpec.describe "Api::V1::ServiceRecords", type: :request do
       expect(response).to have_http_status(:created)
       data = JSON.parse(response.body)["data"]
       expect(data["items"].first["margin_percentage"]).to eq("30.0")
-      expect(data).to include("total_amount" => "1510.0", "margin_total" => "300.0")
+      expect(data).to include("total_amount" => "1573.0", "margin_total" => "363.0")
     end
 
     context "con un ítem al % anterior" do

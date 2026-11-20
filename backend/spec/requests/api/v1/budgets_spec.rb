@@ -186,8 +186,8 @@ RSpec.describe "Api::V1::Budgets", type: :request do
         expect(response).to have_http_status(:created)
         data = json_response[:data]
         expect(data[:items].first[:margin_percentage]).to eq("30.0")
-        expect(data).to include(subtotal_net: "1000.0", total_iva: "210.0", margin_total: "300.0",
-                                total_list: "1510.0", total_card: "1661.0")
+        expect(data).to include(subtotal_net: "1000.0", total_iva: "210.0", margin_total: "363.0",
+                                total_list: "1573.0", total_card: "1730.3")
       end
 
       it "usa 0 si no se envía" do
@@ -293,7 +293,7 @@ RSpec.describe "Api::V1::Budgets", type: :request do
           headers: auth_headers(user)
         expect(response).to have_http_status(:ok)
         expect(item.reload).to have_attributes(iva_rate: 15, margin_percentage: 10)
-        expect(json_response[:data]).to include(total_iva: "300.0", margin_total: "200.0", total_list: "2500.0")
+        expect(json_response[:data]).to include(total_iva: "300.0", margin_total: "230.0", total_list: "2530.0")
       end
 
       it "responde 422 si se cambia a otro % fuera de la lista" do

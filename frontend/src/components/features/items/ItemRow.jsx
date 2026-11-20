@@ -2,6 +2,7 @@ import { useWatch } from 'react-hook-form';
 import { Trash2 } from 'lucide-react';
 import ItemSearchInput from '@components/features/items/ItemSearchInput';
 import IvaRateSelect from '@components/features/items/IvaRateSelect';
+import { ITEMS_GRID_COLS } from '@components/features/items/itemsGrid';
 import Input from '@ui/Input';
 import { ivaRateToOption } from '@utils/iva';
 import { lineGrossTotal } from '@utils/budgetMath';
@@ -34,8 +35,10 @@ const isValidMargin = (value) => {
 const validateMargin = (name, index) => (value, values) =>
   !isDescribed(values, name, index) || isValidMargin(value) || '% Ganancia inválido (0 a 999,99)';
 
-// Una línea de "Productos y Servicios": cantidad, descripción, precio neto, % ganancia, alícuota e
-// importe final (neto × (1 + IVA% + ganancia%)). En mobile es una tarjeta; desde md, una fila de grilla.
+// Una línea de "Productos y Servicios": cantidad, descripción, precio neto, alícuota, % ganancia e
+// importe final (neto + IVA + ganancia sobre el neto con IVA; IVA y ganancia se redondean por separado
+// a centavos, ver lineGrossTotal).
+// En mobile es una tarjeta; desde md, una fila de grilla.
 const ItemRow = ({ name, index, control, register, setValue, errors, onRemove, onPriceEnter, descriptionRef }) => {
   const prefix = `${name}.${index}`;
   const item = useWatch({ control, name: prefix }) || {};
@@ -59,7 +62,7 @@ const ItemRow = ({ name, index, control, register, setValue, errors, onRemove, o
   return (
     <div
       data-testid="item-row"
-      className="relative grid grid-cols-2 gap-3 p-3 rounded-lg border border-outline-variant bg-surface-container-high md:grid-cols-[4.5rem_minmax(0,1fr)_8rem_5.5rem_6.5rem_7rem_2.25rem] md:items-center md:gap-2 md:p-0 md:py-2 md:border-0 md:rounded-none md:bg-transparent"
+      className={`relative grid grid-cols-2 gap-3 p-3 rounded-lg border border-outline-variant bg-surface-container-high ${ITEMS_GRID_COLS} md:items-center md:gap-2 md:p-0 md:py-2 md:border-0 md:rounded-none md:bg-transparent`}
     >
       <div className="col-span-2 pr-8 md:col-span-1 md:order-2 md:pr-0">
         <span className="block text-xs text-secondary mb-1 md:sr-only">Producto / servicio</span>
@@ -122,6 +125,16 @@ const ItemRow = ({ name, index, control, register, setValue, errors, onRemove, o
       </div>
 
       <div className="md:order-4">
+        <MobileLabel htmlFor={ids.iva}>IVA</MobileLabel>
+        <IvaRateSelect
+          id={ids.iva}
+          aria-label={`% IVA línea ${index + 1}`}
+          value={item.iva_rate}
+          onChange={(value) => set('iva_rate', value)}
+        />
+      </div>
+
+      <div className="md:order-5">
         <MobileLabel htmlFor={ids.margin}>% Ganancia</MobileLabel>
         <Input
           id={ids.margin}
@@ -136,16 +149,6 @@ const ItemRow = ({ name, index, control, register, setValue, errors, onRemove, o
           error={!!errors?.margin_percentage}
           {...register(`${prefix}.margin_percentage`, { validate: validateMargin(name, index) })}
           className="text-right"
-        />
-      </div>
-
-      <div className="md:order-5">
-        <MobileLabel htmlFor={ids.iva}>IVA</MobileLabel>
-        <IvaRateSelect
-          id={ids.iva}
-          aria-label={`% IVA línea ${index + 1}`}
-          value={item.iva_rate}
-          onChange={(value) => set('iva_rate', value)}
         />
       </div>
 

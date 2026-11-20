@@ -1,7 +1,7 @@
 import { toIvaRate } from '@utils/iva';
 
 // % de ganancia por defecto al elegir un producto del catálogo (servicio y texto libre: 0).
-export const DEFAULT_PRODUCT_MARGIN = 30;
+export const DEFAULT_PRODUCT_MARGIN = 50;
 
 // % de ganancia de la línea: vacío/nulo/inválido = 0.
 export const toMarginPercentage = (value) => {
@@ -27,13 +27,24 @@ const lineNetCents = (item) => divRound(toHundredths(item?.quantity) * toHundred
 
 const marginBp = (item) => toHundredths(toMarginPercentage(item?.margin_percentage));
 
-// Ganancia de la línea en centavos: round(neto × ganancia% / 100, 2) (Line#line_margin).
-const lineMarginCents = (item) => percentOfCents(lineNetCents(item), marginBp(item));
+// IVA de un importe en centavos: round(importe × IVA% / 100, 2); 0 sin alícuota (Line#line_iva).
+const ivaOfCents = (cents, item) => percentOfCents(cents, toHundredths(toIvaRate(item?.iva_rate) ?? 0));
+
+// Neto + IVA + ganancia compuesta de un importe en centavos: la ganancia se aplica sobre
+// importe + IVA (Line#line_margin), cada parte redondeada a centavos.
+const finalParts = (netCents, item) => {
+  const iva = ivaOfCents(netCents, item);
+  const margin = percentOfCents(netCents + iva, marginBp(item));
+  return { iva, margin, total: netCents + iva + margin };
+};
+
+// Ganancia de la línea en centavos: round((neto + IVA de la línea) × ganancia% / 100, 2).
+const lineMarginCents = (item) => finalParts(lineNetCents(item), item).margin;
 
 // Vista previa de los totales de una lista de ítems (presupuesto o atención). Replica
 // Budget#compute_totals del backend (fuente de verdad): IVA redondeado por alícuota (sobre
-// el neto sin ganancia), ganancia redondeada por línea; el recargo de tarjeta se aplica
-// sobre el total efectivo/débito.
+// el neto sin ganancia), ganancia compuesta redondeada por línea (sobre neto + IVA de la
+// línea); el recargo de tarjeta se aplica sobre el total efectivo/débito.
 export const computeItemsTotals = (items = [], surchargePercentage = 0) => {
   const groups = new Map();
   let exemptCents = 0;
@@ -73,15 +84,9 @@ export const computeItemsTotals = (items = [], surchargePercentage = 0) => {
 
 export const lineNetTotal = (item) => fromCents(lineNetCents(item));
 
-// Neto + ganancia + IVA de un importe en centavos (fórmula sumada, cada parte redondeada).
-const finalCents = (netCents, item) => {
-  const rate = toIvaRate(item?.iva_rate) ?? 0;
-  return netCents + percentOfCents(netCents, marginBp(item)) + percentOfCents(netCents, toHundredths(rate));
-};
+// Importe final de la línea: neto + IVA + ganancia sobre (neto + IVA), cada parte redondeada
+// a centavos. Sin alícuota = precio final (solo se suma la ganancia).
+export const lineGrossTotal = (item) => fromCents(finalParts(lineNetCents(item), item).total);
 
-// Importe final de la línea: neto + ganancia + IVA (cada uno redondeado a centavos).
-// Sin alícuota = precio final (solo se suma la ganancia).
-export const lineGrossTotal = (item) => fromCents(finalCents(lineNetCents(item), item));
-
-// Precio unitario final (impresión): unitario + ganancia + IVA, en centavos.
-export const unitFinalPrice = (item) => fromCents(finalCents(toHundredths(item?.unit_price), item));
+// Precio unitario final (impresión): unitario × (1 + IVA%) × (1 + ganancia%), en centavos.
+export const unitFinalPrice = (item) => fromCents(finalParts(toHundredths(item?.unit_price), item).total);

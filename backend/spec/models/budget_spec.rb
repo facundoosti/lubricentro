@@ -201,11 +201,18 @@ RSpec.describe Budget, type: :model do
       expect(budget.reload).to have_attributes(subtotal_net: 2_000, total_iva: 300, total_list: 2_300)
     end
 
-    it 'suma la ganancia al total (1 × 1000, 21%, 30%, recargo 10%)' do
+    it 'suma la ganancia compuesta al total (1 × 1000, 21%, 30%, recargo 10%)' do
       budget = build_budget(10, [ { quantity: 1, unit_price: 1_000, iva_rate: 21, margin_percentage: 30 } ])
-      expect(budget.reload).to have_attributes(subtotal_net: 1_000, total_iva: 210, total_list: 1_510, total_card: 1_661)
-      expect(budget.margin_total).to eq(300)
+      expect(budget.reload).to have_attributes(subtotal_net: 1_000, total_iva: 210, total_list: 1_573,
+                                               total_card: BigDecimal('1730.3'))
+      expect(budget.margin_total).to eq(363)
       expect(budget.iva_breakdown).to eq([ { rate: 21, base: 1_000, amount: 210 } ])
+    end
+
+    it 'calcula la ganancia sobre el precio con IVA (1 × 1000, 21%, 50% → 1815)' do
+      budget = build_budget(0, [ { quantity: 1, unit_price: 1_000, iva_rate: 21, margin_percentage: 50 } ])
+      expect(budget.reload).to have_attributes(total_iva: 210, total_list: 1_815)
+      expect(budget.margin_total).to eq(605)
     end
 
     it 'suma la ganancia de los ítems sin IVA' do

@@ -184,11 +184,11 @@ describe('ServiceRecordFormPage — Productos y Servicios', () => {
     expect(screen.getByTestId('total-list')).toHaveTextContent('$12.100');
   });
 
-  it('una línea 1 × $1.000 al 21% con ganancia 30% da Total $1.510', async () => {
+  it('una línea 1 × $1.000 al 21% con ganancia 30% da Total $1.573', async () => {
     renderPage('/service-records/new');
     await fillItem(0, { description: 'Aceite 5W30', price: '1000', iva: '21', margin: '30' });
-    expect(screen.getByTestId('line-total')).toHaveTextContent('$1.510');
-    expect(screen.getByTestId('total-list')).toHaveTextContent('$1.510');
+    expect(screen.getByTestId('line-total')).toHaveTextContent('$1.573');
+    expect(screen.getByTestId('total-list')).toHaveTextContent('$1.573');
   });
 
   it('envía items_attributes sin total_amount ni budget_id', async () => {
@@ -218,14 +218,14 @@ describe('ServiceRecordFormPage — Productos y Servicios', () => {
     expect(within(rows()[0]).getByLabelText(/% Ganancia/)).toHaveValue(30);
     expect(within(rows()[1]).getByRole('combobox', { name: /% IVA/ })).toHaveTextContent('10,5%');
     expect(within(rows()[2]).getByRole('combobox', { name: /% IVA/ })).toHaveTextContent('Sin IVA');
-    // 43.620 sin ganancia + 30% de $20.000 = $49.620
-    expect(screen.getByTestId('total-list')).toHaveTextContent('$49.620');
+    // 43.620 sin ganancia + 30% de ($20.000 + $4.200 de IVA) = $50.880
+    expect(screen.getByTestId('total-list')).toHaveTextContent('$50.880');
     expect(screen.getByDisplayValue('Fiat Uno — ABC123')).toBeInTheDocument();
     expect(screen.getByText('Desde presupuesto #7')).toBeInTheDocument();
 
     // Editar después de copiar recalcula el total
     await fillItem(2, { quantity: '2' });
-    expect(screen.getByTestId('total-list')).toHaveTextContent('$64.620');
+    expect(screen.getByTestId('total-list')).toHaveTextContent('$65.880');
 
     fireEvent.click(screen.getByRole('button', { name: 'Registrar atención' }));
     await waitFor(() => expect(mocks.create).toHaveBeenCalled());

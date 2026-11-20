@@ -95,24 +95,24 @@ describe('BudgetPrint', () => {
       subtotal_net: '1000.0',
       total_iva: '210.0',
       exempt_total: '0.0',
-      margin_total: '300.0',
-      total_list: '1510.0',
-      total_card: '1661.0',
+      margin_total: '363.0',
+      total_list: '1573.0',
+      total_card: '1730.3',
       iva_breakdown: [{ rate: '21.0', base: '1000.0', amount: '210.0' }],
       items: [
         { id: 1, quantity: '1.0', description: 'Filtro', unit_price: '1000.0', iva_rate: '21.0', margin_percentage: '30.0', total: '1000.0' },
       ],
     });
     const row = screen.getByText('Filtro').closest('tr');
-    expect(within(row).getAllByText('$1.510')).toHaveLength(1);
+    expect(within(row).getAllByText('$1.573')).toHaveLength(1);
     expect(screen.getByText('IVA 21%')).toBeInTheDocument();
     expect(screen.getByTestId('print-iva-21')).toHaveTextContent('$210');
-    expect(screen.getByTestId('print-total-list')).toHaveTextContent('$1.510');
-    expect(screen.getByTestId('print-total-card')).toHaveTextContent('$1.661');
+    expect(screen.getByTestId('print-total-list')).toHaveTextContent('$1.573');
+    expect(screen.getByTestId('print-total-card')).toHaveTextContent('$1.730,30');
 
     const text = document.body.textContent;
     expect(text).not.toMatch(/Ganancia/i);
-    expect(text).not.toContain('$300');
+    expect(text).not.toContain('$363');
     expect(text).not.toContain('30%');
     expect(text).not.toMatch(/Subtotal/);
     expect(text).not.toMatch(/Sin IVA/);

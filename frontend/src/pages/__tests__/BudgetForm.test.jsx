@@ -110,12 +110,12 @@ describe('BudgetForm — nuevo', () => {
     renderForm();
     fireEvent.change(screen.getByLabelText(/Recargo tarjeta/), { target: { value: '10' } });
     await fillItem(0, { description: 'Mano de obra', quantity: '1', price: '1000', iva: '21', margin: '30' });
-    expect(screen.getByTestId('line-total')).toHaveTextContent('$1.510');
-    expect(screen.getByTestId('total-list')).toHaveTextContent('$1.510');
-    expect(screen.getByTestId('total-card')).toHaveTextContent('$1.661');
+    expect(screen.getByTestId('line-total')).toHaveTextContent('$1.573');
+    expect(screen.getByTestId('total-list')).toHaveTextContent('$1.573');
+    expect(screen.getByTestId('total-card')).toHaveTextContent('$1.730,30');
 
     fireEvent.click(screen.getByRole('button', { name: /Desglose/ }));
-    expect(screen.getByTestId('margin-total')).toHaveTextContent('$300');
+    expect(screen.getByTestId('margin-total')).toHaveTextContent('$363');
     expect(screen.getByTestId('iva-21')).toHaveTextContent('$210');
   });
 
@@ -344,7 +344,8 @@ describe('BudgetForm — edición', () => {
     const row = items()[2];
     expect(within(row).getByRole('combobox', { name: '% IVA línea 3' })).toHaveTextContent('15% (anterior)');
     expect(within(row).getByLabelText('% Ganancia línea 3')).toHaveValue(30);
-    expect(within(row).getByTestId('line-total')).toHaveTextContent('$145');
+    // 100 + 15% IVA (15) + 30% de ganancia sobre 115 (34,50)
+    expect(within(row).getByTestId('line-total')).toHaveTextContent('$149,50');
   });
 
   it('ofrece WhatsApp con el teléfono del cliente', () => {

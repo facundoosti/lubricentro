@@ -45,14 +45,14 @@ describe('ItemsTotalsBar', () => {
     renderWithProviders(
       <Harness items={[{ description: 'Filtro', quantity: 1, unit_price: 1000, iva_rate: '21', margin_percentage: '30' }]} />,
     );
-    expect(screen.getByTestId('total-list')).toHaveTextContent('$1.510');
-    expect(screen.getByTestId('total-card')).toHaveTextContent('$1.661');
+    expect(screen.getByTestId('total-list')).toHaveTextContent('$1.573');
+    expect(screen.getByTestId('total-card')).toHaveTextContent('$1.730,30');
 
     fireEvent.click(screen.getByRole('button', { name: /Desglose/ }));
     const labels = [...document.querySelectorAll('#items-breakdown > div > span:first-child')].map((el) => el.textContent);
     expect(labels).toEqual(['Subtotal neto', 'Ganancia', 'IVA 21% s/ $1.000', 'Recargo tarjeta (10%)']);
     expect(screen.getByTestId('subtotal-net')).toHaveTextContent('$1.000');
-    expect(screen.getByTestId('margin-total')).toHaveTextContent('$300');
+    expect(screen.getByTestId('margin-total')).toHaveTextContent('$363');
     expect(screen.getByTestId('iva-21')).toHaveTextContent('$210');
   });
 

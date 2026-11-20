@@ -2,14 +2,15 @@ import { useEffect, useRef } from 'react';
 import { useFieldArray } from 'react-hook-form';
 import { Plus } from 'lucide-react';
 import ItemRow from '@components/features/items/ItemRow';
+import { ITEMS_GRID_COLS } from '@components/features/items/itemsGrid';
 import { emptyItem } from '@utils/items';
 
 const HEADERS = [
   { label: 'Cant.', className: 'text-center' },
   { label: 'Producto / servicio' },
   { label: 'Precio unit. s/IVA', className: 'text-right' },
-  { label: '% Ganancia', className: 'text-right' },
   { label: 'IVA' },
+  { label: '% Ganancia', className: 'text-right' },
   { label: 'Importe final', className: 'text-right' },
   { label: '' },
 ];
@@ -92,7 +93,7 @@ const ItemsEditor = ({
 
       <div
         aria-hidden="true"
-        className="hidden md:grid md:grid-cols-[4.5rem_minmax(0,1fr)_8rem_5.5rem_6.5rem_7rem_2.25rem] md:gap-2 pb-2 border-b border-outline-variant text-xs font-medium text-secondary"
+        className={`hidden md:grid ${ITEMS_GRID_COLS} md:gap-2 pb-2 border-b border-outline-variant text-xs font-medium text-secondary`}
       >
         {HEADERS.map((h, i) => (
           <span key={i} className={h.className}>{h.label}</span>
@@ -118,7 +119,7 @@ const ItemsEditor = ({
 
       <p className="text-xs text-secondary">
         Tip: Enter en el precio de la última línea agrega otra. Los productos traen su IVA; los servicios van sin IVA.
-        El importe final suma el IVA y la ganancia sobre el precio sin IVA.
+        La ganancia se calcula sobre el precio con IVA.
       </p>
     </section>
   );

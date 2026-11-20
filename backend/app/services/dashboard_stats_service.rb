@@ -1,8 +1,11 @@
 class DashboardStatsService
   # Ingreso de la línea con la ganancia (sin IVA), redondeado como ItemizedTotals::Line:
-  # neto = ROUND(cantidad × precio, 2); ganancia = ROUND(neto × ganancia % / 100, 2)
+  # neto = ROUND(cantidad × precio, 2); iva = ROUND(neto × IVA % / 100, 2) (0 sin alícuota);
+  # ganancia = ROUND((neto + iva) × ganancia % / 100, 2). El IVA no es ingreso.
   ITEM_NET_SQL = "ROUND(service_record_items.quantity * service_record_items.unit_price, 2)".freeze
-  ITEM_REVENUE_SQL = "#{ITEM_NET_SQL} + ROUND(#{ITEM_NET_SQL} * service_record_items.margin_percentage / 100, 2)".freeze
+  ITEM_IVA_SQL = "ROUND(#{ITEM_NET_SQL} * COALESCE(service_record_items.iva_rate, 0) / 100, 2)".freeze
+  ITEM_REVENUE_SQL = "#{ITEM_NET_SQL} + " \
+                     "ROUND((#{ITEM_NET_SQL} + #{ITEM_IVA_SQL}) * service_record_items.margin_percentage / 100, 2)".freeze
 
   def self.calculate_main_metrics
     current_month = Date.current.beginning_of_month

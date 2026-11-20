@@ -65,11 +65,11 @@ RSpec.describe ServiceRecord, type: :model do
       expect(record.margin_total).to eq(200)
     end
 
-    it 'suma la ganancia sobre el neto con IVA (1 × 1000, 21%, 30% → 1510)' do
+    it 'calcula la ganancia sobre el neto con IVA (1 × 1000, 21%, 30% → 1573)' do
       record = build_record([ { quantity: 1, unit_price: 1_000, iva_rate: 21, margin_percentage: 30 } ])
       record.save!
-      expect(record.reload.total_amount).to eq(1_510)
-      expect(record).to have_attributes(total_iva: 210, margin_total: 300)
+      expect(record.reload.total_amount).to eq(1_573)
+      expect(record).to have_attributes(total_iva: 210, margin_total: 363)
     end
 
     it 'recalcula el total si solo cambia la ganancia de un ítem' do
