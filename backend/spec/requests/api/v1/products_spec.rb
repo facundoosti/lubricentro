@@ -189,6 +189,18 @@ RSpec.describe "Api::V1::Products", type: :request do
       expect(ids).to include(product_mobil.id)
     end
 
+    it "busca por código con search" do
+      coded = create(:product, name: "Filtro de aire", sku: "FA-7781")
+      get api_v1_products_url, params: { search: "fa-778" }, headers: auth_headers(user)
+      expect(json_response[:data][:products].map { |p| p[:id] }).to eq([ coded.id ])
+    end
+
+    it "search con un tipo inesperado responde 200 sin resultados" do
+      get api_v1_products_url, params: { search: [ "x" ] }, headers: auth_headers(user)
+      expect(response).to have_http_status(:ok)
+      expect(json_response[:data][:products]).to be_empty
+    end
+
     it "returns 404 for non-existent product" do
       get api_v1_product_url(id: 999999), headers: auth_headers(user)
       expect(response).to have_http_status(:not_found)
@@ -351,6 +363,15 @@ RSpec.describe "Api::V1::Products", type: :request do
       expect(response).to have_http_status(:ok)
       preview = json_response[:data][:previews].first
       expect(preview[:new_price].to_f).to eq(preview[:current_price].to_f + 500)
+    end
+
+    it "filtra por código con search" do
+      coded = create(:product, name: "Pastillas de freno", sku: "PF-5520")
+      post bulk_price_preview_api_v1_products_url,
+           params: { search: "pf-552", adjustment_type: "percentage", adjustment_value: "5" },
+           headers: auth_headers(user)
+
+      expect(json_response[:data][:previews].map { |p| p[:id] }).to eq([ coded.id ])
     end
 
     it "filters by product_ids" do

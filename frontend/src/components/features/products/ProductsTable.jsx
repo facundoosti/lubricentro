@@ -150,7 +150,7 @@ const ProductsTable = ({
           <Input
             startIcon={Search}
             autoComplete="off"
-            placeholder="Buscar por nombre..."
+            placeholder="Buscar por nombre o código..."
             value={localSearch}
             onChange={handleSearchChange}
             className="pr-8"

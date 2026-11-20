@@ -57,6 +57,12 @@ class Product < ApplicationRecord
 
   # Scopes
   scope :by_name, ->(name) { where("name ILIKE ?", "%#{name}%") }
+  # Búsqueda de los buscadores de productos: fragmento del nombre o del código (sku), sin
+  # distinguir mayúsculas; los comodines de LIKE del término se escapan.
+  scope :search, ->(term) {
+    pattern = "%#{sanitize_sql_like(term.to_s.strip)}%"
+    where("products.name ILIKE :q OR products.sku ILIKE :q", q: pattern)
+  }
   scope :by_brand, ->(brand) {
     brands = Array(brand).flat_map { |b| b.to_s.split(",") }.map(&:strip).reject(&:blank?)
     next all if brands.empty?

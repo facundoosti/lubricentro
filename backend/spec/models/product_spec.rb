@@ -104,6 +104,23 @@ RSpec.describe Product, type: :model do
       expect(Product.by_name('filter')).to include(filter)
     end
 
+    describe '.search' do
+      let!(:coded) { create(:product, name: 'Aceite 10W40', sku: 'ACX-9931') }
+
+      it 'encuentra por nombre' do
+        expect(Product.search('10w40')).to contain_exactly(coded)
+      end
+
+      it 'encuentra por código, sin distinguir mayúsculas y por fragmento' do
+        expect(Product.search('acx-99')).to contain_exactly(coded)
+      end
+
+      it 'escapa los comodines de LIKE' do
+        expect(Product.search('%')).to be_empty
+        expect(Product.search('AC_')).to be_empty
+      end
+    end
+
     it 'finds products by price range' do
       expect(Product.by_price_range(7000, 8000)).to include(oil)
       expect(Product.by_price_range(2000, 4000)).to include(filter)

@@ -53,12 +53,12 @@ const BulkPriceFilters = ({ filters, onChange, options }) => {
           onChange={set('supplierIds')}
           source={options.supplier}
         />
-        <Field label="Nombre contiene">
+        <Field label="Nombre o código contiene">
           <ProductSearchInput
             value={filters.search}
             onChange={(text) => onChange({ ...filters, search: text })}
             onSelect={(product) => product && onChange({ ...filters, search: product.name })}
-            placeholder="Ej: aceite, filtro..."
+            placeholder="Ej: aceite, filtro, PRD-…"
           />
         </Field>
       </div>

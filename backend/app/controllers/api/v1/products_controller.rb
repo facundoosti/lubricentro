@@ -3,7 +3,7 @@ class Api::V1::ProductsController < ApplicationController
 
   def index
     @products = Product.includes(:image_attachment, :supplier, :category)
-    @products = @products.by_name(params[:search]) if params[:search].present?
+    @products = @products.search(params[:search]) if params[:search].present?
     @products = @products.by_supplier(params[:supplier_id]) if params[:supplier_id].present?
     @products = @products.by_brand(params[:brand]) if params[:brand].present?
     @products = @products.by_category(params[:category_id]) if params[:category_id].present?
@@ -207,7 +207,7 @@ class Api::V1::ProductsController < ApplicationController
       scope = scope.where(id: params[:product_ids])
     else
       scope = scope.by_supplier(params[:supplier_id]) if params[:supplier_id].present?
-      scope = scope.by_name(params[:search]) if params[:search].present?
+      scope = scope.search(params[:search]) if params[:search].present?
       scope = scope.by_brand(params[:brand]) if params[:brand].present?
       scope = scope.by_category(params[:category_id]) if params[:category_id].present?
       scope = scope.by_active(params[:active]) if params[:active].present?

@@ -32,7 +32,7 @@ const searchIcon = (
  * @param {Function} onSelect    - Callback con el producto seleccionado (null al limpiar)
  * @param {string}   placeholder
  */
-const ProductSearchInput = ({ value = '', onChange, onSelect, placeholder = 'Buscar producto...' }) => {
+const ProductSearchInput = ({ value = '', onChange, onSelect, placeholder = 'Buscar producto por nombre o código...' }) => {
   const [inputValue, setInputValue] = useState(value);
   const [search, setSearch] = useState('');
 

@@ -120,17 +120,17 @@ const ProductForm = ({ product = null, onSubmit, formId = 'product-form' }) => {
         />
       </Field>
 
-      {/* SKU + Marca */}
+      {/* Código + Marca */}
       <div className="grid grid-cols-2 gap-4">
         <Field
-          label="SKU"
+          label="Código"
           error={errors.sku?.message}
           labelAddon={<span className="text-xs text-on-surface-variant font-normal">(auto si vacío)</span>}
         >
           <Input
             id="sku"
             {...register('sku', {
-              maxLength: { value: 50, message: 'El SKU no puede exceder 50 caracteres' },
+              maxLength: { value: 50, message: 'El código no puede exceder 50 caracteres' },
             })}
             className="font-mono uppercase"
             placeholder="PRD-ABC123"

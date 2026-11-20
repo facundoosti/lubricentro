@@ -18,7 +18,7 @@ const mockProducts = (products, { loading = false } = {}) => {
   }));
 };
 
-const input = () => screen.getByPlaceholderText('Buscar producto...');
+const input = () => screen.getByPlaceholderText('Buscar producto por nombre o código...');
 
 describe('ProductSearchInput', () => {
   beforeEach(() => {

@@ -192,3 +192,18 @@ describe('ProductForm — Proveedor y Unidad (Select)', () => {
     }
   });
 });
+
+describe('ProductForm — código', () => {
+  it('rotula el campo como "Código" (no "SKU")', () => {
+    renderWithProviders(<ProductForm onSubmit={vi.fn()} />);
+    expect(screen.getByLabelText(/^Código/)).toHaveAttribute('id', 'sku');
+    expect(screen.queryByText('SKU')).not.toBeInTheDocument();
+  });
+
+  it('el error de largo menciona el código', async () => {
+    renderWithProviders(<ProductForm onSubmit={vi.fn()} />);
+    fireEvent.change(screen.getByLabelText(/^Código/), { target: { value: 'X'.repeat(51) } });
+    submitForm();
+    expect(await screen.findByText('El código no puede exceder 50 caracteres')).toBeInTheDocument();
+  });
+});

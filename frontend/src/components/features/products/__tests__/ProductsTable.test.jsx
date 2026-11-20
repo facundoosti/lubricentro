@@ -225,3 +225,10 @@ describe('ProductsTable — selección (Checkbox con indeterminado)', () => {
     expect(header()).toHaveAttribute('aria-disabled', 'true');
   });
 });
+
+describe('ProductsTable — buscador', () => {
+  it('indica que busca por nombre o código', () => {
+    renderTable();
+    expect(screen.getByPlaceholderText('Buscar por nombre o código...')).toBeInTheDocument();
+  });
+});
